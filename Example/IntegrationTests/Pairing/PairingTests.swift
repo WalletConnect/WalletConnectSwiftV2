@@ -8,6 +8,7 @@ import WalletConnectNetworking
 import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
+@testable import WalletConnectSync
 
 final class PairingTests: XCTestCase {
 
@@ -21,7 +22,7 @@ final class PairingTests: XCTestCase {
 
     private var publishers = [AnyCancellable]()
 
-    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
+    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, SyncClient, KeychainStorageProtocol, KeyValueStorage) {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
@@ -29,7 +30,7 @@ final class PairingTests: XCTestCase {
         let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
 
-        let relayClient = RelayClient(
+        let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
@@ -48,27 +49,30 @@ final class PairingTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient)
 
+        let syncClient = SyncClientFactory.create(networkInteractor: networkingClient, bip44: DefaultBIP44Provider(), keychain: keychain)
+
         let clientId = try! networkingClient.getClientId()
         networkingLogger.debug("My client id is: \(clientId)")
         
-        return (pairingClient, networkingClient, keychain, keyValueStorage)
+        return (pairingClient, networkingClient, syncClient, keychain, keyValueStorage)
     }
 
     func makeDappClients() {
         let prefix = "🤖 Dapp: "
-        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         appPairingClient = pairingClient
         appPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
-                                                      logger: pushLogger,
-                                                      keyValueStorage: keyValueStorage,
-                                                      keychainStorage: keychain,
-                                                      networkInteractor: networkingInteractor)
+                                                     logger: pushLogger,
+                                                     keyValueStorage: keyValueStorage,
+                                                     keychainStorage: keychain,
+                                                     networkInteractor: networkingInteractor,
+                                                     syncClient: syncClient)
     }
 
     func makeWalletClients() {
         let prefix = "🐶 Wallet: "
-        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let echoClient = EchoClientFactory.create(projectId: "",
@@ -83,12 +87,13 @@ final class PairingTests: XCTestCase {
                                                           groupKeychainStorage: KeychainStorageMock(),
                                                           networkInteractor: networkingInteractor,
                                                           pairingRegisterer: pairingClient,
-                                                          echoClient: echoClient)
+                                                          echoClient: echoClient,
+                                                          syncClient: syncClient)
     }
 
     func makeWalletPairingClient() {
         let prefix = "🐶 Wallet: "
-        let (pairingClient, _, _, _) = makeClientDependencies(prefix: prefix)
+        let (pairingClient, _, _, _, _) = makeClientDependencies(prefix: prefix)
         walletPairingClient = pairingClient
     }
 

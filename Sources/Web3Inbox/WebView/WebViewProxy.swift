@@ -13,6 +13,7 @@ actor WebViewProxy {
         self.webView = webView
         self.scriptFormatter = scriptFormatter
         self.logger = logger
+
     }
 
     @MainActor

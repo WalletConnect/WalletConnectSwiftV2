@@ -1,5 +1,5 @@
 import UIKit
-import Web3Modal
+import WalletConnectModal
 import WalletConnectPairing
 
 final class ImportRouter {
@@ -12,8 +12,8 @@ final class ImportRouter {
         self.app = app
     }
     
-    func presentWeb3Modal() {
-        Web3ModalSheetController().present(from: viewController)
+    func presentWalletConnectModal() {
+        WalletConnectModal.present(from: viewController)
     }
 
     func presentChat(importAccount: ImportAccount) {

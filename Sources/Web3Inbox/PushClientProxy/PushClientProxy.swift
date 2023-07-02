@@ -16,6 +16,8 @@ final class PushClientProxy {
         guard let event = PushWebViewEvent(rawValue: request.method)
         else { throw Errors.unregisteredMethod }
 
+        // TODO: Handle register event
+
         switch event {
         case .approve:
             let params = try parse(ApproveRequest.self, params: request.params)

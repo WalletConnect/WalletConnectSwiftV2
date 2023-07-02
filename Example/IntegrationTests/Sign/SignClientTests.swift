@@ -14,15 +14,15 @@ final class SignClientTests: XCTestCase {
     static private func makeClientDelegate(name: String) -> ClientDelegate {
         let logger = ConsoleLogger(suffix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(
+        let keyValueStorage = RuntimeKeyValueStorage()
+        let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
-            keyValueStorage: RuntimeKeyValueStorage(),
+            keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketConnectionType: .automatic,
             logger: logger
         )
-        let keyValueStorage = RuntimeKeyValueStorage()
 
         let networkingClient = NetworkingClientFactory.create(
             relayClient: relayClient,

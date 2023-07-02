@@ -7,6 +7,7 @@ class PushSubscribeRequester {
         case didDocDoesNotContainKeyAgreement
         case noVerificationMethodForKey
         case unsupportedCurve
+        case signatureRejected
     }
 
     private let keyserverURL: URL

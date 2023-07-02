@@ -47,12 +47,12 @@ public final class RelayClient {
     init(
         dispatcher: Dispatching,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage,
+        rpcHistory: RPCHistory,
         clientIdStorage: ClientIdStoring
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
-        self.rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: keyValueStorage)
+        self.rpcHistory = rpcHistory
         self.clientIdStorage = clientIdStorage
         setUpBindings()
     }

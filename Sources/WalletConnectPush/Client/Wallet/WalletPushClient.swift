@@ -1,8 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectNetworking
-import WalletConnectPairing
-import WalletConnectEcho
 
 
 public class WalletPushClient {
@@ -10,28 +7,28 @@ public class WalletPushClient {
     private var publishers = Set<AnyCancellable>()
 
     /// publishes new subscriptions
-    public var subscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
-        return pushSubscribeResponseSubscriber.subscriptionPublisher
+    public var newSubscriptionPublisher: AnyPublisher<PushSubscription, Never> {
+        return pushStorage.newSubscriptionPublisher
     }
 
-    public var subscriptionPublisherSubject = PassthroughSubject<Result<PushSubscription, Error>, Never>()
+    public var subscriptionErrorPublisher: AnyPublisher<Error, Never> {
+        return pushSubscribeResponseSubscriber.subscriptionErrorPublisher
+    }
+
+    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
+        return pushStorage.deleteSubscriptionPublisher
+    }
 
     public var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
-        return pushSubscriptionsObserver.subscriptionsPublisher
+        return pushStorage.subscriptionsPublisher
     }
-
-    private let pushSubscriptionsObserver: PushSubscriptionsObserver
-
-    private let requestPublisherSubject = PassthroughSubject<PushRequest, Never>()
 
     public var requestPublisher: AnyPublisher<PushRequest, Never> {
-        requestPublisherSubject.eraseToAnyPublisher()
+        notifyProposeSubscriber.requestPublisher
     }
 
-    private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
-
     public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
-        pushMessagePublisherSubject.eraseToAnyPublisher()
+        pushMessageSubscriber.pushMessagePublisher
     }
 
     public var updateSubscriptionPublisher: AnyPublisher<Result<PushSubscription, Error>, Never> {
@@ -43,48 +40,57 @@ public class WalletPushClient {
 
     public let logger: ConsoleLogging
 
-    private let pairingRegisterer: PairingRegisterer
     private let echoClient: EchoClient
+    private let pushStorage: PushStorage
+    private let pushSyncService: PushSyncService
     private let pushMessageSubscriber: PushMessageSubscriber
-    private let subscriptionsProvider: SubscriptionsProvider
     private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
+    private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
+    private let notifyProposeSubscriber: NotifyProposeSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          echoClient: EchoClient,
-         pairingRegisterer: PairingRegisterer,
          pushMessageSubscriber: PushMessageSubscriber,
-         subscriptionsProvider: SubscriptionsProvider,
+         pushStorage: PushStorage,
+         pushSyncService: PushSyncService,
          pushMessagesDatabase: PushMessagesDatabase,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          resubscribeService: PushResubscribeService,
-         pushSubscriptionsObserver: PushSubscriptionsObserver,
          pushSubscribeRequester: PushSubscribeRequester,
          pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber,
+         deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
-         notifyProposeResponder: NotifyProposeResponder
+         notifyProposeResponder: NotifyProposeResponder,
+         notifyProposeSubscriber: NotifyProposeSubscriber
     ) {
         self.logger = logger
-        self.pairingRegisterer = pairingRegisterer
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
-        self.subscriptionsProvider = subscriptionsProvider
+        self.pushStorage = pushStorage
+        self.pushSyncService = pushSyncService
         self.pushMessagesDatabase = pushMessagesDatabase
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.resubscribeService = resubscribeService
-        self.pushSubscriptionsObserver = pushSubscriptionsObserver
         self.pushSubscribeRequester = pushSubscribeRequester
         self.pushSubscribeResponseSubscriber = pushSubscribeResponseSubscriber
+        self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
-        setupSubscriptions()
+        self.notifyProposeSubscriber = notifyProposeSubscriber
+    }
+
+    public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
+        try await pushSyncService.registerIfNeeded(account: account, onSign: onSign)
+        try await pushStorage.initialize(account: account)
+        try await pushStorage.setupSubscriptions(account: account)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
@@ -104,7 +110,7 @@ public class WalletPushClient {
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
-        subscriptionsProvider.getActiveSubscriptions()
+        return pushStorage.getSubscriptions()
     }
 
     public func getMessageHistory(topic: String) -> [PushMessageRecord] {
@@ -121,20 +127,6 @@ public class WalletPushClient {
 
     public func register(deviceToken: Data) async throws {
         try await echoClient.register(deviceToken: deviceToken)
-    }
-}
-
-private extension WalletPushClient {
-
-    func setupSubscriptions() {
-        pairingRegisterer.register(method: NotifyProposeProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyProposeParams>) in
-                requestPublisherSubject.send((id: payload.id, account: payload.request.account, metadata: payload.request.metadata))
-        }.store(in: &publishers)
-
-        pushMessageSubscriber.onPushMessage = { [unowned self] pushMessageRecord in
-            pushMessagePublisherSubject.send(pushMessageRecord)
-        }
     }
 }
 

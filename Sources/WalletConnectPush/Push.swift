@@ -1,14 +1,12 @@
 import Foundation
-import WalletConnectNetworking
-import WalletConnectPairing
-import WalletConnectEcho
 
 public class Push {
 
     public static var dapp: DappPushClient = {
         return DappPushClientFactory.create(
             metadata: Pair.metadata,
-            networkInteractor: Networking.interactor
+            networkInteractor: Networking.interactor,
+            syncClient: Sync.instance
         )
     }()
 
@@ -20,7 +18,8 @@ public class Push {
         return WalletPushClientFactory.create(
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
-            echoClient: Echo.instance
+            echoClient: Echo.instance,
+            syncClient: Sync.instance
         )
     }()
 

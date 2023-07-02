@@ -24,7 +24,7 @@ final class HistoryTests: XCTestCase {
     }
 
     private func makeRelayClient(prefix: String, keychain: KeychainStorageProtocol) -> RelayClient {
-        return RelayClient(
+        return RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),

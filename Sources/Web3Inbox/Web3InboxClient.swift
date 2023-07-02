@@ -6,6 +6,7 @@ public final class Web3InboxClient {
     private let webView: WKWebView
     private var account: Account
     private let logger: ConsoleLogging
+    private let pushClient: WalletPushClient
 
     private let chatClientProxy: ChatClientProxy
     private let chatClientSubscriber: ChatClientRequestSubscriber
@@ -15,6 +16,8 @@ public final class Web3InboxClient {
 
     private let chatWebviewProxy: WebViewProxy
     private let pushWebviewProxy: WebViewProxy
+
+    private let webViewRefreshHandler: WebViewRefreshHandler
 
     private let chatWebviewSubscriber: WebViewRequestSubscriber
     private let pushWebviewSubscriber: WebViewRequestSubscriber
@@ -30,7 +33,9 @@ init(
         chatWebviewSubscriber: WebViewRequestSubscriber,
         pushWebviewSubscriber: WebViewRequestSubscriber,
         pushClientProxy: PushClientProxy,
-        pushClientSubscriber: PushClientRequestSubscriber
+        pushClientSubscriber: PushClientRequestSubscriber,
+        pushClient: WalletPushClient,
+        webViewRefreshHandler: WebViewRefreshHandler
     ) {
         self.webView = webView
         self.account = account
@@ -43,7 +48,8 @@ init(
         self.pushWebviewSubscriber = pushWebviewSubscriber
         self.pushClientProxy = pushClientProxy
         self.pushClientSubscriber = pushClientSubscriber
-
+        self.pushClient = pushClient
+        self.webViewRefreshHandler = webViewRefreshHandler
         setupSubscriptions()
     }
 
@@ -57,6 +63,10 @@ init(
     ) async throws {
         chatClientProxy.onSign = onSign
         try await authorize(account: account)
+    }
+
+    public func register(deviceToken: Data) async throws {
+        try await pushClient.register(deviceToken: deviceToken)
     }
 }
 

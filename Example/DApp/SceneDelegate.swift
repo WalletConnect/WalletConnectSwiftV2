@@ -2,7 +2,7 @@ import UIKit
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
-import Web3Modal
+import WalletConnectModal
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             icons: ["https://avatars.githubusercontent.com/u/37784886"]
         )
         
-        Web3Modal.configure(projectId: InputConfig.projectId, metadata: metadata)
+        WalletConnectModal.configure(projectId: InputConfig.projectId, metadata: metadata)
 
         setupWindow(scene: scene)
     }
