@@ -4,7 +4,6 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
-        
     var approveCalled = false
     var rejectCalled = false
     var updateCalled = false
@@ -41,7 +40,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     var sessionsPublisher: AnyPublisher<[WalletConnectSign.Session], Never> {
-        return Result.Publisher([WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())])
+        return Result.Publisher([WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, requiredNamespaces: [:], namespaces: [:], sessionProperties: nil, expiryDate: Date())])
             .eraseToAnyPublisher()
     }
     
@@ -51,7 +50,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     var sessionSettlePublisher: AnyPublisher<WalletConnectSign.Session, Never> {
-        return Result.Publisher(Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date()))
+        return Result.Publisher(Session(topic: "", pairingTopic: "", peer: metadata, requiredNamespaces: [:], namespaces: [:], sessionProperties: nil, expiryDate: Date()))
             .eraseToAnyPublisher()
     }
     
@@ -80,7 +79,7 @@ final class SignClientMock: SignClientProtocol {
             .eraseToAnyPublisher()
     }
     
-    func approve(proposalId: String, namespaces: [String : WalletConnectSign.SessionNamespace]) async throws {
+    func approve(proposalId: String, namespaces: [String : WalletConnectSign.SessionNamespace], sessionProperties: [String : String]? = nil) async throws {
         approveCalled = true
     }
     
@@ -113,7 +112,7 @@ final class SignClientMock: SignClientProtocol {
     }
     
     func getSessions() -> [WalletConnectSign.Session] {
-        return [WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, namespaces: [:], expiryDate: Date())]
+        return [WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, requiredNamespaces: [:], namespaces: [:], sessionProperties: nil, expiryDate: Date())]
     }
     
     func getPendingRequests(topic: String?) -> [WalletConnectSign.Request] {
