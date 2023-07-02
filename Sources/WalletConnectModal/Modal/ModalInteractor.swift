@@ -12,7 +12,7 @@ protocol ModalSheetInteractor {
 
 final class DefaultModalSheetInteractor: ModalSheetInteractor {
     lazy var sessionSettlePublisher: AnyPublisher<Session, Never> = WalletConnectModal.instance.sessionSettlePublisher
-    lazy var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> =
+    lazy var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> = WalletConnectModal.instance.sessionRejectionPublisher
     
     func getListings() async throws -> [Listing] {
         

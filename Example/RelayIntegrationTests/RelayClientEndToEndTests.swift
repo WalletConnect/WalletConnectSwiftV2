@@ -57,7 +57,6 @@ final class RelayClientEndToEndTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            socketFactory: DefaultSocketFactory(),
             socketConnectionType: .manual,
             logger: logger
         )

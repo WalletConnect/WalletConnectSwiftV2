@@ -7,7 +7,6 @@ public struct RelayClientFactory {
     public static func create(
         relayHost: String,
         projectId: String,
-        socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType
     ) -> RelayClient {
 
@@ -22,7 +21,6 @@ public struct RelayClientFactory {
             projectId: projectId,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
-            socketFactory: socketFactory,
             socketConnectionType: socketConnectionType,
             logger: logger
         )
@@ -34,7 +32,6 @@ public struct RelayClientFactory {
         projectId: String,
         keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
-        socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
         logger: ConsoleLogging
     ) -> RelayClient {
@@ -50,8 +47,9 @@ public struct RelayClientFactory {
             projectId: projectId,
             socketAuthenticator: socketAuthenticator
         )
+        let webSocketClientFactory = WebSocketClientFactory()
         let dispatcher = Dispatcher(
-            socketFactory: socketFactory,
+            socketFactory: webSocketClientFactory,
             relayUrlFactory: relayUrlFactory,
             socketConnectionType: socketConnectionType,
             logger: logger
