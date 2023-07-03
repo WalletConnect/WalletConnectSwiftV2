@@ -110,6 +110,41 @@ struct ConnectionDetailsView: View {
                         .padding(.top, 30)
                     }
                     
+                    if let sessionProperties = presenter.session.sessionProperties {
+                        VStack(alignment: .leading) {
+                            Text("sessionProperties")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(.whiteBackground)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 5)
+                                .background(Color.grey70)
+                                .cornerRadius(28, corners: .allCorners)
+                                .padding(.leading, 15)
+                                .padding(.top, 9)
+                            
+                            VStack(spacing: 0) {
+                                TagsView(items: sessionProperties.map { "\($0): \($1)" }) {
+                                    Text($0)
+                                        .foregroundColor(.cyanBackround)
+                                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(Color.cyanBackround.opacity(0.2))
+                                        .cornerRadius(10, corners: .allCorners)
+                                }
+                                .padding(10)
+                            }
+                            .background(Color.whiteBackground)
+                            .cornerRadius(20, corners: .allCorners)
+                            .padding(.horizontal, 5)
+                            .padding(.bottom, 5)
+                        }
+                        .background(Color("grey95"))
+                        .cornerRadius(25, corners: .allCorners)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 30)
+                    }
+                    
                     Button {
                         presenter.onDelete()
                     } label: {

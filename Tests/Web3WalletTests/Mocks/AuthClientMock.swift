@@ -22,6 +22,7 @@ final class AuthClientMock: AuthClientProtocol {
         
         return AuthRequest(
             id: .left(""),
+            topic: "",
             payload: AuthPayload(requestParams: requestParams, iat: "")
         )
     }

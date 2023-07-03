@@ -28,7 +28,7 @@ final class ModalSheetInteractorMock: ModalSheetInteractor {
     }
     
     var sessionSettlePublisher: AnyPublisher<Session, Never> {
-        Result.Publisher(Session(topic: "", pairingTopic: "", peer: .stub(), namespaces: [:], expiryDate: Date()))
+        Result.Publisher(Session(topic: "", pairingTopic: "", peer: .stub(), requiredNamespaces: [:], namespaces: [:], sessionProperties: nil, expiryDate: Date()))
             .eraseToAnyPublisher()
     }
     
