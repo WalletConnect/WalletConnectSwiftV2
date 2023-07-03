@@ -12,7 +12,7 @@ struct AsyncImage<Content>: View where Content: View {
             
             var request = URLRequest(url: url)
             request.setValue(ExplorerAPI.userAgent, forHTTPHeaderField: "User-Agent")
-            request.setValue(Web3Modal.config.metadata.name, forHTTPHeaderField: "Referer")
+            request.setValue(WalletConnectModal.config.metadata.name, forHTTPHeaderField: "Referer")
             
             URLSession.shared.dataTaskPublisher(for: request)
                 .map(\.data)

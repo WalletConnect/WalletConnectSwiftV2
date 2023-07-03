@@ -1,4 +1,3 @@
-
 import Foundation
 
 class NotifyUpdateRequester {
@@ -10,25 +9,25 @@ class NotifyUpdateRequester {
     private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
-    private let subscriptionsStore: CodableStore<PushSubscription>
+    private let pushStorage: PushStorage
 
     init(keyserverURL: URL,
          identityClient: IdentityClient,
          networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
-         subscriptionsStore: CodableStore<PushSubscription>
+         pushStorage: PushStorage
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.subscriptionsStore = subscriptionsStore
+        self.pushStorage = pushStorage
     }
 
     func update(topic: String, scope: Set<String>) async throws {
-
         logger.debug("NotifyUpdateRequester: updating subscription for topic: \(topic)")
-        guard let subscription = try subscriptionsStore.get(key: topic) else { throw Errors.noSubscriptionForGivenTopic }
+
+        guard let subscription = pushStorage.getSubscription(topic: topic) else { throw Errors.noSubscriptionForGivenTopic }
 
         let request = try createJWTRequest(subscriptionAccount: subscription.account, dappUrl: subscription.metadata.url, scope: scope)
 

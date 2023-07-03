@@ -1,6 +1,5 @@
 import Foundation
 import Combine
-import WalletConnectUtils
 
 public class DappPushClient {
     public var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {
@@ -8,26 +7,26 @@ public class DappPushClient {
     }
 
     public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deletePushSubscriptionSubscriber.deleteSubscriptionPublisher
+        return pushStorage.deleteSubscriptionPublisher
     }
 
     public let logger: ConsoleLogging
 
     private let notifyProposer: NotifyProposer
-    private let subscriptionsProvider: SubscriptionsProvider
+    private let pushStorage: PushStorage
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let resubscribeService: PushResubscribeService
     private let notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         subscriptionsProvider: SubscriptionsProvider,
+         pushStorage: PushStorage,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
          notifyProposer: NotifyProposer,
          notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber) {
         self.logger = logger
-        self.subscriptionsProvider = subscriptionsProvider
+        self.pushStorage = pushStorage
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.notifyProposer = notifyProposer
@@ -39,6 +38,6 @@ public class DappPushClient {
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
-        subscriptionsProvider.getActiveSubscriptions()
+        pushStorage.getSubscriptions()
     }
 }

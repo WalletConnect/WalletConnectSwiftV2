@@ -15,7 +15,8 @@ final class RelayClientTests: XCTestCase {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
         let clientIdStorage = ClientIdStorageMock()
-        sut = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
+        let rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: RuntimeKeyValueStorage())
+        sut = RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage)
     }
 
     override func tearDown() {
