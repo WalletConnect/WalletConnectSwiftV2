@@ -1,7 +1,5 @@
 import Foundation
 
-import WalletConnectKMS
-
 public class PushDecryptionService {
     enum Errors: Error {
         case malformedPushMessage

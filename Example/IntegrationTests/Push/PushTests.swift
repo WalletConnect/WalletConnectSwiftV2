@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 import WalletConnectUtils
+import Web3
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
@@ -8,6 +9,7 @@ import WalletConnectNetworking
 import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
+@testable import WalletConnectSync
 import WalletConnectIdentity
 import WalletConnectSigner
 
@@ -21,10 +23,19 @@ final class PushTests: XCTestCase {
 
     var pairingStorage: PairingStorage!
 
+    let pk = try! EthereumPrivateKey()
+
+    var privateKey: Data {
+        return Data(pk.rawPrivateKey)
+    }
+
+    var account: Account {
+        return Account("eip155:1:" + pk.address.hex(eip55: true))!
+    }
 
     private var publishers = [AnyCancellable]()
 
-    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
+    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, SyncClient, KeychainStorageProtocol, KeyValueStorage) {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
@@ -32,10 +43,10 @@ final class PushTests: XCTestCase {
         let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
 
-        let relayClient = RelayClient(
+        let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
-            keyValueStorage: RuntimeKeyValueStorage(),
+            keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
             logger: relayLogger)
@@ -52,26 +63,29 @@ final class PushTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient)
 
+        let syncClient = SyncClientFactory.create(networkInteractor: networkingClient, bip44: DefaultBIP44Provider(), keychain: keychain)
+
         let clientId = try! networkingClient.getClientId()
         networkingLogger.debug("My client id is: \(clientId)")
-        return (pairingClient, networkingClient, keychain, keyValueStorage)
+        return (pairingClient, networkingClient, syncClient, keychain, keyValueStorage)
     }
 
     func makeDappClients() {
         let prefix = "🦄 Dapp: "
-        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         dappPairingClient = pairingClient
         dappPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: []),
                                                       logger: pushLogger,
                                                       keyValueStorage: keyValueStorage,
                                                       keychainStorage: keychain,
-                                                      networkInteractor: networkingInteractor)
+                                                      networkInteractor: networkingInteractor,
+                                                      syncClient: syncClient)
     }
 
     func makeWalletClients() {
         let prefix = "🦋 Wallet: "
-        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let echoClient = EchoClientFactory.create(projectId: "",
@@ -86,7 +100,8 @@ final class PushTests: XCTestCase {
                                                           groupKeychainStorage: KeychainStorageMock(),
                                                           networkInteractor: networkingInteractor,
                                                           pairingRegisterer: pairingClient,
-                                                          echoClient: echoClient)
+                                                          echoClient: echoClient,
+                                                          syncClient: syncClient)
     }
 
     override func setUp() {
@@ -99,7 +114,8 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await walletPushClient.enableSync(account: account, onSign: sign)
+        try! await dappPushClient.propose(account: account, topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
@@ -121,7 +137,7 @@ final class PushTests: XCTestCase {
 
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await dappPushClient.propose(account: account, topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
             Task(priority: .high) { try! await walletPushClient.reject(id: id) }
@@ -141,7 +157,8 @@ final class PushTests: XCTestCase {
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
-        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        try! await walletPushClient.enableSync(account: account, onSign: sign)
+        try! await walletPushClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletPushClient.subscriptionsPublisher
             .first()
             .sink { [unowned self] subscriptions in
@@ -152,12 +169,12 @@ final class PushTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-
     func testDeletePushSubscription() async {
         let expectation = expectation(description: "expects to delete push subscription")
         let uri = try! await dappPairingClient.create()
         try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await walletPushClient.enableSync(account: account, onSign: sign)
+        try! await dappPushClient.propose(account: account, topic: uri.topic)
         var subscriptionTopic: String!
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
@@ -185,7 +202,8 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects to create and update push subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
         let updateScope: Set<String> = ["alerts"]
-        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        try! await walletPushClient.enableSync(account: account, onSign: sign)
+        try! await walletPushClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletPushClient.subscriptionsPublisher
             .first()
             .sink { [unowned self] subscriptions in
@@ -212,7 +230,8 @@ final class PushTests: XCTestCase {
         let pushMessage = PushMessage.stub()
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
-        try! await walletPushClient.subscribe(metadata: metadata, account: Account.stub(), onSign: sign)
+        try! await walletPushClient.enableSync(account: account, onSign: sign)
+        try! await walletPushClient.subscribe(metadata: metadata, account: account, onSign: sign)
         var subscription: PushSubscription!
         walletPushClient.subscriptionsPublisher
             .first()
@@ -239,7 +258,6 @@ final class PushTests: XCTestCase {
 
 private extension PushTests {
     func sign(_ message: String) -> SigningResult {
-        let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
         return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
     }

@@ -265,11 +265,8 @@ public enum AutoNamespaces {
                 guard !sessionMethods.isEmpty else {
                     return
                 }
-                
+
                 let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
-                guard !sessionEvents.isEmpty else {
-                    return
-                }
 
                 let sessionNamespace = SessionNamespace(
                     chains: sessionChains,
@@ -305,9 +302,6 @@ public enum AutoNamespaces {
                     }
                     
                     let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
-                    guard !sessionEvents.isEmpty else {
-                        return
-                    }
                     
                     let sessionNamespace = SessionNamespace(
                         chains: Set([Blockchain(namespace: network, reference: chain)!]),

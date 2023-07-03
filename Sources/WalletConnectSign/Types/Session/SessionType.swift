@@ -16,6 +16,7 @@ internal enum SessionType {
         let relay: RelayProtocolOptions
         let controller: Participant
         let namespaces: [String: SessionNamespace]
+        let sessionProperties: [String: String]?
         let expiry: Int64
     }
 
