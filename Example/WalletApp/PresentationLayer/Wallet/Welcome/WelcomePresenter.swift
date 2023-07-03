@@ -21,26 +21,35 @@ final class WelcomePresenter: ObservableObject {
         let pasteboard = UIPasteboard.general
         let clientId = try? Networking.interactor.getClientId()
         pasteboard.string = clientId
-        interactor.saveAccount(ImportAccount.new())
-        router.presentWallet()
+
+        importAccount(ImportAccount.new())
     }
 
     func onImport() {
         guard let account = ImportAccount(input: input)
         else { return input = .empty }
-        interactor.saveAccount(account)
-        router.presentWallet()
+
+        importAccount(account)
     }
 }
 
 // MARK: Private functions
-extension WelcomePresenter {
-    private func setupInitialState() {
 
+private extension WelcomePresenter {
+
+    func setupInitialState() {
+
+    }
+
+    func importAccount(_ importAccount: ImportAccount) {
+        interactor.save(importAccount: importAccount)
+
+        router.presentWallet(importAccount: importAccount)
     }
 }
 
 // MARK: - SceneViewModel
+
 extension WelcomePresenter: SceneViewModel {
 
 }

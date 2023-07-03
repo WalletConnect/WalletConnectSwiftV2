@@ -6,7 +6,7 @@ final class WelcomeInteractor {
         self.accountStorage = accountStorage
     }
 
-    func saveAccount(_ account: ImportAccount) {
-        accountStorage.importAccount = account
+    func save(importAccount: ImportAccount) {
+        accountStorage.importAccount = importAccount
     }
 }

@@ -9,8 +9,8 @@ final class WelcomeRouter {
         self.app = app
     }
     
-    func presentWallet() {
-        MainModule.create(app: app)
+    func presentWallet(importAccount: ImportAccount) {
+        MainModule.create(app: app, importAccount: importAccount)
             .present()
     }
 }

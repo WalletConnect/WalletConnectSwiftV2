@@ -1,5 +1,7 @@
 import Foundation
+import WalletConnectIdentity
 import Web3
+import WalletConnectSigner
 import WalletConnectSign
 
 enum ImportAccount: Codable {
@@ -89,6 +91,13 @@ enum ImportAccount: Codable {
         case .web3Modal:
             fatalError("Private key not available")
         }
+    }
+
+    func onSign(message: String) -> SigningResult {
+        let privateKey = Data(hex: privateKey)
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+        let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        return .signed(signature)
     }
 
     static func new() -> ImportAccount {

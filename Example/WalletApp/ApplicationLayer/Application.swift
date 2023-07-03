@@ -5,6 +5,9 @@ final class Application {
     var uri: String?
     var requestSent = false
 
-    let pushRegisterer = PushRegisterer()
-    let accountStorage = AccountStorage(defaults: .standard)
+    lazy var pushRegisterer = PushRegisterer()
+    lazy var accountStorage = AccountStorage(defaults: .standard)
+
+    lazy var messageSigner = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+    lazy var configurationService = ConfigurationService()
 }

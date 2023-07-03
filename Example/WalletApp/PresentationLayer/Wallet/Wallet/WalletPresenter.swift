@@ -10,6 +10,7 @@ final class WalletPresenter: ObservableObject {
     
     private let interactor: WalletInteractor
     private let router: WalletRouter
+    private let importAccount: ImportAccount
     
     private let app: Application
     
@@ -24,7 +25,8 @@ final class WalletPresenter: ObservableObject {
     init(
         interactor: WalletInteractor,
         router: WalletRouter,
-        app: Application
+        app: Application,
+        importAccount: ImportAccount
     ) {
         defer {
             setupInitialState()
@@ -32,6 +34,7 @@ final class WalletPresenter: ObservableObject {
         self.interactor = interactor
         self.router = router
         self.app = app
+        self.importAccount = importAccount
     }
     
     func onAppear() {
@@ -87,24 +90,24 @@ extension WalletPresenter {
     private func setupInitialState() {
         interactor.sessionProposalPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] session in
-                self?.showPairingLoading = false
-                self?.router.present(proposal: session.proposal, context: session.context)
+            .sink { [unowned self] session in
+                showPairingLoading = false
+                router.present(request: result.request, importAccount: importAccount, context: result.context)
             }
             .store(in: &disposeBag)
         
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] request, context in
-                self?.showPairingLoading = false
-                self?.router.present(sessionRequest: request, sessionContext: context)
+            .sink { [unowned self] request, context in
+                showPairingLoading = false
+                router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
             }.store(in: &disposeBag)
         
         interactor.requestPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                self?.showPairingLoading = false
-                self?.router.present(request: result.request, context: result.context)
+            .sink { [unowned self] result in
+                showPairingLoading = false
+                router.present(request: result.request, importAccount: importAccount, context: result.context)
             }
             .store(in: &disposeBag)
 

@@ -12,8 +12,8 @@ final class MainRouter {
         self.app = app
     }
 
-    func walletViewController() -> UIViewController {
-        return WalletModule.create(app: app)
+    func walletViewController(importAccount: ImportAccount) -> UIViewController {
+        return WalletModule.create(app: app, importAccount: importAccount)
             .wrapToNavigationController()
     }
 

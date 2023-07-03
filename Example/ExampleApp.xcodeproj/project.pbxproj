@@ -62,7 +62,6 @@
 		84D2A66628A4F51E0088AE09 /* AuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2A66528A4F51E0088AE09 /* AuthTests.swift */; };
 		84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DB38F22983CDAE00BFEE37 /* PushRegisterer.swift */; };
 		84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 84DDB4EC28ABB663003D66ED /* WalletConnectAuth */; };
-		84E0582229D6DA9B00E359B1 /* EthKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E0582129D6DA9B00E359B1 /* EthKeyStore.swift */; };
 		84E6B84A29787A8000428BAF /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B84929787A8000428BAF /* NotificationService.swift */; };
 		84E6B84E29787A8000428BAF /* PNDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84E6B85429787AAE00428BAF /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 84E6B85329787AAE00428BAF /* WalletConnectPush */; };
@@ -82,6 +81,7 @@
 		A51606F92A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
 		A51606FA2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
 		A51606FB2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
+		A51811982A52E21A00A52B15 /* ConfigurationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51811972A52E21A00A52B15 /* ConfigurationService.swift */; };
 		A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98429683FB60035247E /* Web3InboxViewController.swift */; };
 		A518A98829683FB60035247E /* Web3InboxModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98529683FB60035247E /* Web3InboxModule.swift */; };
 		A518A98929683FB60035247E /* Web3InboxRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98629683FB60035247E /* Web3InboxRouter.swift */; };
@@ -413,7 +413,6 @@
 		84DB38F029828A7C00BFEE37 /* WalletApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletApp.entitlements; sourceTree = "<group>"; };
 		84DB38F129828A7F00BFEE37 /* PNDecryptionService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionService.entitlements; sourceTree = "<group>"; };
 		84DB38F22983CDAE00BFEE37 /* PushRegisterer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegisterer.swift; sourceTree = "<group>"; };
-		84E0582129D6DA9B00E359B1 /* EthKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthKeyStore.swift; sourceTree = "<group>"; };
 		84E6B84729787A8000428BAF /* PNDecryptionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PNDecryptionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		84E6B84929787A8000428BAF /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		84E6B84B29787A8000428BAF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -429,6 +428,7 @@
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultBIP44Provider.swift; sourceTree = "<group>"; };
+		A51811972A52E21A00A52B15 /* ConfigurationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationService.swift; sourceTree = "<group>"; };
 		A518A98429683FB60035247E /* Web3InboxViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxViewController.swift; sourceTree = "<group>"; };
 		A518A98529683FB60035247E /* Web3InboxModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxModule.swift; sourceTree = "<group>"; };
 		A518A98629683FB60035247E /* Web3InboxRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxRouter.swift; sourceTree = "<group>"; };
@@ -1639,7 +1639,7 @@
 				C56EE27F293F5757004840D1 /* AppDelegate.swift */,
 				C56EE281293F5757004840D1 /* SceneDelegate.swift */,
 				84DB38F22983CDAE00BFEE37 /* PushRegisterer.swift */,
-				84E0582129D6DA9B00E359B1 /* EthKeyStore.swift */,
+				A51811972A52E21A00A52B15 /* ConfigurationService.swift */,
 			);
 			path = ApplicationLayer;
 			sourceTree = "<group>";
@@ -2330,6 +2330,7 @@
 				84B8154E2991099000FAD54E /* BuildConfiguration.swift in Sources */,
 				C56EE289293F5757004840D1 /* Application.swift in Sources */,
 				C56EE273293F56D7004840D1 /* UIColor.swift in Sources */,
+				A51811982A52E21A00A52B15 /* ConfigurationService.swift in Sources */,
 				C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */,
 				84B815562991217900FAD54E /* PushMessagesRouter.swift in Sources */,
 				C56EE246293F566D004840D1 /* ScanRouter.swift in Sources */,
@@ -2355,7 +2356,6 @@
 				C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */,
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
 				A57879732A4F248200F8D10B /* AccountStorage.swift in Sources */,
-				84E0582229D6DA9B00E359B1 /* EthKeyStore.swift in Sources */,
 				C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,
 				847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */,
