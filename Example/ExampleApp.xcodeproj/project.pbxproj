@@ -82,6 +82,11 @@
 		A51606FA2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
 		A51606FB2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
 		A51811982A52E21A00A52B15 /* ConfigurationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51811972A52E21A00A52B15 /* ConfigurationService.swift */; };
+		A518119F2A52E83100A52B15 /* SettingsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518119A2A52E83100A52B15 /* SettingsModule.swift */; };
+		A51811A02A52E83100A52B15 /* SettingsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518119B2A52E83100A52B15 /* SettingsPresenter.swift */; };
+		A51811A12A52E83100A52B15 /* SettingsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518119C2A52E83100A52B15 /* SettingsRouter.swift */; };
+		A51811A22A52E83100A52B15 /* SettingsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518119D2A52E83100A52B15 /* SettingsInteractor.swift */; };
+		A51811A32A52E83100A52B15 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518119E2A52E83100A52B15 /* SettingsView.swift */; };
 		A518A98729683FB60035247E /* Web3InboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98429683FB60035247E /* Web3InboxViewController.swift */; };
 		A518A98829683FB60035247E /* Web3InboxModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98529683FB60035247E /* Web3InboxModule.swift */; };
 		A518A98929683FB60035247E /* Web3InboxRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A518A98629683FB60035247E /* Web3InboxRouter.swift */; };
@@ -429,6 +434,11 @@
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultBIP44Provider.swift; sourceTree = "<group>"; };
 		A51811972A52E21A00A52B15 /* ConfigurationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationService.swift; sourceTree = "<group>"; };
+		A518119A2A52E83100A52B15 /* SettingsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModule.swift; sourceTree = "<group>"; };
+		A518119B2A52E83100A52B15 /* SettingsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPresenter.swift; sourceTree = "<group>"; };
+		A518119C2A52E83100A52B15 /* SettingsRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRouter.swift; sourceTree = "<group>"; };
+		A518119D2A52E83100A52B15 /* SettingsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsInteractor.swift; sourceTree = "<group>"; };
+		A518119E2A52E83100A52B15 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A518A98429683FB60035247E /* Web3InboxViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxViewController.swift; sourceTree = "<group>"; };
 		A518A98529683FB60035247E /* Web3InboxModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxModule.swift; sourceTree = "<group>"; };
 		A518A98629683FB60035247E /* Web3InboxRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Web3InboxRouter.swift; sourceTree = "<group>"; };
@@ -968,6 +978,18 @@
 				A50F3945288005B200064555 /* Types.swift */,
 			);
 			path = Types;
+			sourceTree = "<group>";
+		};
+		A51811992A52E82100A52B15 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A518119A2A52E83100A52B15 /* SettingsModule.swift */,
+				A518119B2A52E83100A52B15 /* SettingsPresenter.swift */,
+				A518119C2A52E83100A52B15 /* SettingsRouter.swift */,
+				A518119D2A52E83100A52B15 /* SettingsInteractor.swift */,
+				A518119E2A52E83100A52B15 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		A5321C292A25035A006CADC3 /* History */ = {
@@ -1521,6 +1543,7 @@
 		C56EE229293F5668004840D1 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
+				A51811992A52E82100A52B15 /* Settings */,
 				84536D6C29EEAE0D008EA8DB /* Web3Inbox */,
 				847BD1DB2989493F00076C90 /* Main */,
 				C55D3477295DD4AA0004314A /* Welcome */,
@@ -2262,6 +2285,7 @@
 				84E6B8582981624F00428BAF /* PushRequestModule.swift in Sources */,
 				C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */,
 				84E6B85B298162EF00428BAF /* PushRequestPresenter.swift in Sources */,
+				A51811A02A52E83100A52B15 /* SettingsPresenter.swift in Sources */,
 				847BD1DA2989492500076C90 /* MainRouter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
 				C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */,
@@ -2295,6 +2319,7 @@
 				C56EE24D293F566D004840D1 /* WalletRouter.swift in Sources */,
 				C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */,
 				C55D348A295DD8CA0004314A /* PasteUriPresenter.swift in Sources */,
+				A51811A22A52E83100A52B15 /* SettingsInteractor.swift in Sources */,
 				C56EE28E293F5757004840D1 /* ApplicationConfigurator.swift in Sources */,
 				84B8155B2992A18D00FAD54E /* PushMessageViewModel.swift in Sources */,
 				C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */,
@@ -2306,6 +2331,7 @@
 				C55D3493295DFA750004314A /* WelcomeModule.swift in Sources */,
 				A74D32BA2A1E25AD00CB8536 /* QueryParameters.swift in Sources */,
 				C56EE270293F56D7004840D1 /* String.swift in Sources */,
+				A51811A12A52E83100A52B15 /* SettingsRouter.swift in Sources */,
 				C56EE279293F56D7004840D1 /* Color.swift in Sources */,
 				847BD1E6298A806800076C90 /* NotificationsRouter.swift in Sources */,
 				84E6B8612981630C00428BAF /* PushRequestView.swift in Sources */,
@@ -2348,6 +2374,7 @@
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
 				84E6B85D298162F700428BAF /* PushRequestRouter.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
+				A518119F2A52E83100A52B15 /* SettingsModule.swift in Sources */,
 				C55D348D295DD8CA0004314A /* PasteUriView.swift in Sources */,
 				C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */,
 				C56EE249293F566D004840D1 /* ScanInteractor.swift in Sources */,
@@ -2355,6 +2382,7 @@
 				C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */,
 				C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */,
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
+				A51811A32A52E83100A52B15 /* SettingsView.swift in Sources */,
 				A57879732A4F248200F8D10B /* AccountStorage.swift in Sources */,
 				C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,

@@ -16,7 +16,8 @@ final class MainPresenter {
     var viewControllers: [UIViewController] {
         return [
             router.walletViewController(importAccount: importAccount),
-            router.web3InboxViewController()
+            router.web3InboxViewController(),
+            router.settingsViewController()
         ]
     }
 

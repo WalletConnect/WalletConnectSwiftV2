@@ -27,6 +27,11 @@ final class MainRouter {
             .wrapToNavigationController()
     }
 
+    func settingsViewController() -> UIViewController {
+        return SettingsModule.create(app: app)
+            .wrapToNavigationController()
+    }
+
     func present(pushRequest: PushRequest) {
 //        PushRequestModule.create(app: app, pushRequest: pushRequest)
 //            .presentFullScreen(from: viewController, transparentBackground: true)
