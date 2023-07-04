@@ -10,12 +10,17 @@ struct WalletList: View {
     
     @State var numberOfColumns = 4
     
+    @State var availableSize: CGSize = .zero
+    
     var body: some View {
         content()
             .readSize { size in
-                if numberOfColumns == 4 {
-                    numberOfColumns = Int(round(size.width / 140))
+                if availableSize == size {
+                    return
                 }
+                
+                numberOfColumns = Int(round(size.width / 100))
+                availableSize = size
                 
                 return
             }
