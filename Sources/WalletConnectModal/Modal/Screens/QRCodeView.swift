@@ -2,35 +2,37 @@ import QRCode
 import SwiftUI
 
 struct QRCodeView: View {
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
     
     @State var uri: String
-    
-    @State var index: Int = 0
     
     var body: some View {
         
         #if canImport(UIKit)
         
         let size: CGSize = .init(
-            width: UIScreen.main.bounds.width - 40,
+            width: UIScreen.main.bounds.width - 20,
             height: UIScreen.main.bounds.height * 0.4
         )
         
         #elseif canImport(AppKit)
         
         let size: CGSize = .init(
-            width: 300,
-            height: NSScreen.main!.frame.height * 0.4
+            width: NSScreen.main!.frame.width,
+            height: NSScreen.main!.frame.height * 0.3
         )
         
         #endif
         
-        render(
-            content: uri,
-            size: size
-        )
-        .colorScheme(.dark)
+        let height: CGFloat = min(size.width, size.height)
+        
+        VStack(alignment: .center) {
+            render(
+                content: uri,
+                size: .init(width: height, height: height)
+            )
+            .colorScheme(.light)
+            .frame(width: height, height: height)
+        }
     }
             
     private func render(content: String, size: CGSize) -> Image {
@@ -69,19 +71,11 @@ typealias Screen = UIScreen
 
 extension QRCodeView {
     var foreground1: UIColor {
-        UIColor(AssetColor.foreground1).resolvedColor(
-            with: UITraitCollection(
-                userInterfaceStyle: colorScheme == .dark ? .dark : .light
-            )
-        )
+        UIColor(AssetColor.foreground1)
     }
     
     var background1: UIColor {
-        UIColor(AssetColor.background1).resolvedColor(
-            with: UITraitCollection(
-                userInterfaceStyle: colorScheme == .dark ? .dark : .light
-            )
-        )
+        UIColor(AssetColor.background1)
     }
 }
 
@@ -92,20 +86,10 @@ typealias Screen = NSScreen
 extension QRCodeView {
     var foreground1: NSColor {
         NSColor(AssetColor.foreground1)
-//            .resolvedColor(
-//            with: NSTraitCollection(
-//                userInterfaceStyle: colorScheme == .dark ? .dark : .light
-//            )
-//        )
     }
     
     var background1: NSColor {
         NSColor(AssetColor.background1)
-//            .resolvedColor(
-//            with: NSTraitCollection(
-//                userInterfaceStyle: colorScheme == .dark ? .dark : .light
-//            )
-//        )
     }
 }
 
