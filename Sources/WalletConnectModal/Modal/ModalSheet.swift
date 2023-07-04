@@ -24,11 +24,15 @@ public struct ModalSheet: View {
             }
         }
         .background(
-            VStack(spacing: 0) {
-                Color.accent
-                    .frame(height: 90)
-                    .cornerRadius(8, corners: [[.topLeft, .topRight]])
-                Color.background1
+            ZStack {
+                Color.thickOverlay.colorScheme(.light)
+                
+                VStack(spacing: 0) {
+                    Color.accent
+                        .frame(height: 90)
+                        .cornerRadius(8, corners: [[.topLeft, .topRight]])
+                    Color.background1
+                }
             }
         )
         .toastView(toast: $viewModel.toast)
@@ -127,13 +131,17 @@ public struct ModalSheet: View {
              .viewAll:
             welcome()
         case .help:
-            WhatIsWalletView(navigateTo: viewModel.navigateTo(_:))
+            WhatIsWalletView(
+                navigateTo: viewModel.navigateTo(_:),
+                navigateToExternalLink: viewModel.navigateToExternalLink(_:)
+            )
         case .qr:
             qrCode()
         case .getWallet:
             GetAWalletView(
                 wallets: Array(viewModel.wallets.prefix(6)),
-                onTap: viewModel.onGetWalletTap(_:)
+                onWalletTap: viewModel.onGetWalletTap(_:),
+                navigateToExternalLink: viewModel.navigateToExternalLink(_:)
             )
         }
     }
@@ -154,9 +162,7 @@ extension ModalSheet {
     
     private func closeButton() -> some View {
         Button {
-            withAnimation {
-                viewModel.isShown.wrappedValue = false
-            }
+            viewModel.onCloseButton()
         } label: {
             Image(.close)
                 .padding(8)
