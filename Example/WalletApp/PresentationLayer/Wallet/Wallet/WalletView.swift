@@ -3,7 +3,7 @@ import Web3Wallet
 
 struct WalletView: View {
     @EnvironmentObject var presenter: WalletPresenter
-
+    
     var body: some View {
         ZStack {
             Color.grey100
@@ -25,20 +25,47 @@ struct WalletView: View {
                     }
                     
                     VStack {
-                        if !presenter.sessions.isEmpty {
-                            List {
-                                ForEach(presenter.sessions, id: \.topic) { session in
-                                    connectionView(session: session)
-                                        .listRowSeparator(.hidden)
-                                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
-                                }
-                                .onDelete { indexSet in
-                                    Task(priority: .high) {
-                                        await presenter.removeSession(at: indexSet)
+                        ZStack {
+                            if !presenter.sessions.isEmpty {
+                                List {
+                                    ForEach(presenter.sessions, id: \.topic) { session in
+                                        connectionView(session: session)
+                                            .listRowSeparator(.hidden)
+                                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                                    }
+                                    .onDelete { indexSet in
+                                        Task(priority: .high) {
+                                            await presenter.removeSession(at: indexSet)
+                                        }
                                     }
                                 }
+                                .listStyle(PlainListStyle())
                             }
-                            .listStyle(PlainListStyle())
+                            
+                            if presenter.showPairingLoading {
+                                VStack {
+                                    Spacer()
+                                    
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 20).fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    .blue100,
+                                                    .blue200
+                                                ]),
+                                                startPoint: .top, endPoint: .bottom)
+                                        )
+                                        .blink()
+                                        
+                                        Text("WalletConnect is pairing...")
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                                            .padding(.vertical, 10)
+                                            .padding(.horizontal, 15)
+                                    }
+                                    .fixedSize(horizontal: true, vertical: true)
+                                }
+                            }
                         }
                         
                         Spacer()
@@ -124,3 +151,23 @@ struct WalletView_Previews: PreviewProvider {
     }
 }
 #endif
+
+struct BlinkAnimation: ViewModifier {
+    @State private var opacity: CGFloat = 0.2
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(opacity)
+            .animation(
+                .easeInOut(duration: 1).repeatForever(),
+                value: opacity
+            )
+            .onAppear(perform: { opacity = 0.5 })
+    }
+}
+
+extension View {
+    func blink() -> some View {
+        modifier(BlinkAnimation())
+    }
+}

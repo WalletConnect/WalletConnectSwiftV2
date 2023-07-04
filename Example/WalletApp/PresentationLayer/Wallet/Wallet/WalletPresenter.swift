@@ -15,6 +15,7 @@ final class WalletPresenter: ObservableObject {
     
     @Published var sessions = [Session]()
     
+    @Published var showPairingLoading = false
     @Published var showError = false
     @Published var errorMessage = "Error"
     
@@ -73,18 +74,28 @@ final class WalletPresenter: ObservableObject {
 // MARK: - Private functions
 extension WalletPresenter {
     private func setupInitialState() {
-        interactor.requestPublisher
+        interactor.sessionProposalPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                self?.router.present(request: result.request, context: result.context)
+            .sink { [weak self] session in
+                self?.showPairingLoading = false
+                self?.router.present(proposal: session.proposal, context: session.context)
             }
             .store(in: &disposeBag)
         
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] request, context in
+                self?.showPairingLoading = false
                 self?.router.present(sessionRequest: request, sessionContext: context)
             }.store(in: &disposeBag)
+        
+        interactor.requestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                self?.showPairingLoading = false
+                self?.router.present(request: result.request, context: result.context)
+            }
+            .store(in: &disposeBag)
 
         interactor.sessionsPublisher
             .receive(on: DispatchQueue.main)
@@ -97,17 +108,23 @@ extension WalletPresenter {
         
         pairFromDapp()
     }
-
     
     private func pair(uri: WalletConnectURI) {
-        Task(priority: .high) { [unowned self] in
+        Task.detached(priority: .high) { @MainActor [unowned self] in
             do {
+                self.showPairingLoading = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    if self.showPairingLoading {
+                        self.errorMessage = "WalletConnect - Pairing timeout error"
+                        self.showError.toggle()
+                    }
+                    self.showPairingLoading = false
+                }
                 try await self.interactor.pair(uri: uri)
             } catch {
-                Task.detached { @MainActor in
-                    self.errorMessage = error.localizedDescription
-                    self.showError.toggle()
-                }
+                self.showPairingLoading = false
+                self.errorMessage = error.localizedDescription
+                self.showError.toggle()
             }
         }
     }
