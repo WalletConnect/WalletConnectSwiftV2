@@ -9,4 +9,8 @@ final class SettingsRouter {
     init(app: Application) {
         self.app = app
     }
+
+    func presentWelcome() {
+        WelcomeModule.create(app: app).present()
+    }
 }

@@ -37,6 +37,12 @@ final class SettingsPresenter: ObservableObject {
         guard let deviceToken = UserDefaults.standard.string(forKey: "deviceToken") else { return .empty }
         return deviceToken
     }
+
+    func logoutPressed() {
+        accountStorage.importAccount = nil
+        UserDefaults.standard.set(nil, forKey: "deviceToken")
+        router.presentWelcome()
+    }
 }
 
 // MARK: SceneViewModel

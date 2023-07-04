@@ -41,6 +41,7 @@ struct WelcomeView: View {
             .padding([.horizontal, .vertical], 20)
             .padding(.top, 20)
         }
+        .ignoresSafeArea(.keyboard)
         .alert("Import account", isPresented: $importAlert) {
             TextField("Private key", text: $presenter.input)
                 .textInputAutocapitalization(.never)

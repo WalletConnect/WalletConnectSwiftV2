@@ -17,6 +17,16 @@ struct SettingsView: View {
                 row(title: "Client ID", subtitle: viewModel.clientId)
                 row(title: "Device Token", subtitle: viewModel.deviceToken)
             }
+
+            Section {
+                Button {
+                    viewModel.logoutPressed()
+                } label: {
+                    Text("Log out")
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                }
+            }
         }
         .listStyle(.insetGrouped)
         .alert("Value copied to clipboard", isPresented: $copyAlert) {
