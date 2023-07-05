@@ -4,7 +4,7 @@ protocol NotifyUpdateRequesting {
     func update(topic: String, scope: Set<String>) async throws
 }
 
-class NotifyUpdateRequester {
+class NotifyUpdateRequester: NotifyUpdateRequesting {
     enum Errors: Error {
         case noSubscriptionForGivenTopic
     }

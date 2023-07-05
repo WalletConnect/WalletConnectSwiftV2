@@ -52,6 +52,7 @@ public class WalletPushClient {
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
     private let notifyProposeSubscriber: NotifyProposeSubscriber
+    private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -68,7 +69,8 @@ public class WalletPushClient {
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyProposeResponder: NotifyProposeResponder,
-         notifyProposeSubscriber: NotifyProposeSubscriber
+         notifyProposeSubscriber: NotifyProposeSubscriber,
+         subscriptionsAutoUpdater: SubscriptionsAutoUpdater
     ) {
         self.logger = logger
         self.echoClient = echoClient
@@ -85,6 +87,7 @@ public class WalletPushClient {
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
         self.notifyProposeSubscriber = notifyProposeSubscriber
+        self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
     }
 
     public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
