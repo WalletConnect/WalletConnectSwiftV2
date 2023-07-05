@@ -2,20 +2,20 @@
 import Foundation
 
 class SubscriptionsAutoUpdater {
-    private let notifyUpdateRequester: NotifyUpdateRequester
+    private let notifyUpdateRequester: NotifyUpdateRequesting
     private let logger: ConsoleLogging
-    private let pushStorage: PushStorage
+    private let pushStorage: PushStoring
 
-
-    init(notifyUpdateRequester: NotifyUpdateRequester,
+    init(notifyUpdateRequester: NotifyUpdateRequesting,
          logger: ConsoleLogging,
-         pushStorage: PushStorage) {
+         pushStorage: PushStoring) {
         self.notifyUpdateRequester = notifyUpdateRequester
         self.logger = logger
         self.pushStorage = pushStorage
+        updateSubscriptionsIfNeeded()
     }
 
-    func updateSubscriptionsIfNeeded() {
+    private func updateSubscriptionsIfNeeded() {
         for subscription in pushStorage.getSubscriptions() {
             if shouldUpdate(subscription: subscription) {
                 let scope = Set(subscription.scope.filter{ $0.value.enabled == true }.keys)
@@ -43,5 +43,4 @@ class SubscriptionsAutoUpdater {
             return false
         }
     }
-
 }
