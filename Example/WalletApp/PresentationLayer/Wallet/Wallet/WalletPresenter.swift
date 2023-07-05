@@ -74,6 +74,12 @@ final class WalletPresenter: ObservableObject {
             self.router.dismiss()
         }
     }
+    
+    func removeSession(at indexSet: IndexSet) async {
+        if let index = indexSet.first {
+            try? await interactor.disconnectSession(session: sessions[index])
+        }
+    }
 }
 
 // MARK: - Private functions
@@ -135,12 +141,6 @@ extension WalletPresenter {
             return
         }
         pair(uri: walletConnectUri)
-    }
-    
-    private func removeSession(at indexSet: IndexSet) async {
-        if let index = indexSet.first {
-            try? await interactor.disconnectSession(session: sessions[index])
-        }
     }
     
     private func removePairingIndicator() {
