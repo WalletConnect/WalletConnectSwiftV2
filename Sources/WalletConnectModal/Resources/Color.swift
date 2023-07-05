@@ -33,6 +33,7 @@ extension Color {
     static let accent = Color(.accent)
 }
 
+#if canImport(UIKit)
 extension UIColor {
  
     convenience init(_ asset: AssetColor) {
@@ -42,16 +43,38 @@ extension UIColor {
 
 extension AssetColor {
     
-    var swituiColor: Color {
-        Color(self)
-    }
-    
     var uiColor: UIColor {
         UIColor(self)
     }
 }
 
-@available(iOS 15.0, *)
+#elseif canImport(AppKit)
+
+
+extension NSColor {
+ 
+    convenience init(_ asset: AssetColor) {
+        self.init(named: asset.rawValue)!
+    }
+}
+
+extension AssetColor {
+    
+    var uiColor: NSColor {
+        NSColor(self)
+    }
+}
+
+#endif
+
+extension AssetColor {
+    
+    var swituiColor: Color {
+        Color(self)
+    }
+}
+
+@available(iOS 15.0, tvOS 14.0, *)
 struct Color_Previews: PreviewProvider {
     static var allColors: [AssetColor] {
         [

@@ -1,7 +1,5 @@
 import SwiftUI
 
-@available(iOS 14.0, *)
-
 struct ModalContainerView: View {
     
     @Environment(\.presentationMode) var presentationMode
@@ -12,10 +10,14 @@ struct ModalContainerView: View {
         VStack(spacing: -10) {
             Color.thickOverlay
                 .colorScheme(.light)
-                .onTapGesture {
-                    withAnimation {
-                        showModal = false
-                    }
+                .transform {
+                    #if os(iOS)
+                        $0.onTapGesture {
+                            withAnimation {
+                                showModal = false
+                            }
+                        }
+                    #endif
                 }
             
             if showModal {
