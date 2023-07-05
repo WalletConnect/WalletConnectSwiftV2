@@ -1,6 +1,4 @@
-
 import SwiftUI
-import UIKit
 
 enum Asset: String {
     
@@ -38,10 +36,6 @@ extension Asset {
     var image: Image {
         Image(self)
     }
-    
-    var uiImage: UIImage {
-        UIImage(self)
-    }
 }
 
 extension Image {
@@ -51,9 +45,44 @@ extension Image {
     }
 }
 
+#if canImport(UIKit)
+import UIKit
+
+extension Asset {
+
+    var uiImage: UIImage {
+        UIImage(self)
+    }
+    
+    var cgImage: CGImage {
+        uiImage.cgImage!
+    }
+}
+
 extension UIImage {
     
     convenience init(_ asset: Asset) {
         self.init(named: asset.rawValue, in: .module, compatibleWith: .current)!
     }
 }
+#elseif canImport(AppKit)
+
+extension Asset {
+
+    var nsImage: NSImage {
+        NSImage(self)
+    }
+    
+    var cgImage: CGImage {
+        nsImage.cgImage!
+    }
+}
+
+extension NSImage {
+    
+    convenience init(_ asset: Asset) {
+        self.init(named: asset.rawValue)!
+    }
+}
+
+#endif

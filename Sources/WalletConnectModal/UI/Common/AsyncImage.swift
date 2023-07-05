@@ -50,11 +50,15 @@ struct AsyncImage<Content>: View where Content: View {
             }
         }
     }
-
+    
     private var image: Image? {
         imageLoader.data
             .flatMap {
+                #if canImport(UIKit)
                 UIImage(data: $0)
+                #elseif canImport(AppKit)
+                NSImage(data: $0)
+                #endif
             }
             .flatMap(Image.init)
     }

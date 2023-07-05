@@ -1,9 +1,12 @@
-import UIKit
+import Foundation
 
 struct UIApplicationWrapper {
     let openURL: (URL, ((Bool) -> Void)?) -> Void
     let canOpenURL: (URL) -> Bool
 }
+
+#if canImport(UIKit)
+import UIKit
 
 extension UIApplicationWrapper {
     static let live = Self(
@@ -15,3 +18,19 @@ extension UIApplicationWrapper {
         }
     )
 }
+
+#elseif canImport(AppKit)
+
+import AppKit
+
+extension UIApplicationWrapper {
+    static let live = Self(
+        openURL: { url, completion in
+            NSWorkspace.shared.open(url)
+        },
+        canOpenURL: { url in
+            return true
+        }
+    )
+}
+#endif
