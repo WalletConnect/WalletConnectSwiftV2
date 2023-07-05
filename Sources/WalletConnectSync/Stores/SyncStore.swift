@@ -87,6 +87,16 @@ public final class SyncStore<Object: DatabaseObject> {
         let record = try indexStore.getRecord(topic: result.key)
         try await delete(id: id, for: record.account)
     }
+
+    public func getStoreTopic(account: Account) throws -> String {
+        let record = try indexStore.getRecord(account: account, name: name)
+        return record.topic
+    }
+
+    public func setInStore(objects: [Object], for account: Account) throws {
+        let record = try indexStore.getRecord(account: account, name: name)
+        objectStore.set(elements: objects, for: record.topic)
+    }
 }
 
 private extension SyncStore {

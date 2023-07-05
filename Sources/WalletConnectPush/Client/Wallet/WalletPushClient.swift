@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-
 public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
@@ -91,9 +90,9 @@ public class WalletPushClient {
     }
 
     public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
+        try await pushStorage.setupSubscriptions(account: account)
         try await pushSyncService.registerIfNeeded(account: account, onSign: onSign)
         try await pushStorage.initialize(account: account)
-        try await pushStorage.setupSubscriptions(account: account)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {

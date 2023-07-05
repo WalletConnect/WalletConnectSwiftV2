@@ -3,14 +3,29 @@ import Foundation
 final class PushSyncService {
 
     private let syncClient: SyncClient
+    private let historyClient: HistoryClient
     private let logger: ConsoleLogging
+    private let subscriptionsStore: SyncStore<PushSubscription>
+    private let networkingInteractor: NetworkingInteractor
+    private let kms: KeyManagementServiceProtocol
 
-    init(syncClient: SyncClient, logger: ConsoleLogging) {
+    init(
+        syncClient: SyncClient,
+        logger: ConsoleLogging,
+        historyClient: HistoryClient,
+        subscriptionsStore: SyncStore<PushSubscription>,
+        networkingInteractor: NetworkingInteractor,
+        kms: KeyManagementServiceProtocol
+    ) {
         self.syncClient = syncClient
         self.logger = logger
+        self.historyClient = historyClient
+        self.subscriptionsStore = subscriptionsStore
+        self.networkingInteractor = networkingInteractor
+        self.kms = kms
     }
 
-    func registerIfNeeded(account: Account, onSign: @escaping SigningCallback) async throws {
+    func registerSyncIfNeeded(account: Account, onSign: @escaping SigningCallback) async throws {
         guard !syncClient.isRegistered(account: account) else { return }
 
         let result = await onSign(syncClient.getMessage(account: account))
@@ -22,5 +37,64 @@ final class PushSyncService {
         case .rejected:
             throw PushError.registerSignatureRejected
         }
+    }
+
+    func fetchHistoryIfNeeded(account: Account) async throws {
+        guard isColdStart(account: account) else { return }
+
+        try await historyClient.register(tags: [
+            "5000", // sync_set
+            "5002", // sync_delete
+            "4002"  // push_message
+        ])
+
+        let syncTopic = try subscriptionsStore.getStoreTopic(account: account)
+
+        let updates: [StoreSetDelete] = try await historyClient.getMessages(
+            topic: syncTopic,
+            count: 200,
+            direction: .backward
+        )
+
+        let inserts: [PushSubscription] = updates.compactMap { update in
+            guard let value = update.value else { return nil }
+            return try? JSONDecoder().decode(PushSubscription.self, from: Data(value.utf8))
+        }
+
+        let deletions: [String] = updates.compactMap { update in
+            guard update.value == nil else { return nil }
+            return update.key
+        }
+
+        let subscriptions = inserts.filter { !deletions.contains( $0.databaseId ) }
+
+        try subscriptionsStore.setInStore(objects: subscriptions, for: account)
+
+        for subscription in subscriptions {
+            let symmetricKey = try SymmetricKey(hex: subscription.symKey)
+            try kms.setSymmetricKey(symmetricKey, for: subscription.topic)
+            try await networkingInteractor.subscribe(topic: subscription.topic)
+
+            let messages: [PushMessage] = try await historyClient.getMessages(
+                topic: subscription.topic,
+                count: 200,
+                direction: .backward
+            )
+
+
+        }
+    }
+}
+
+private extension PushSyncService {
+
+    struct StoreSetDelete: Codable, Equatable {
+        let key: String
+        let value: String?
+    }
+
+    func isColdStart(account: Account) -> Bool {
+        // TODO: Add cold start logic
+        return true
     }
 }
