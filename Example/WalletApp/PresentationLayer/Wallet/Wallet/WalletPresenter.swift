@@ -11,7 +11,7 @@ final class WalletPresenter: ObservableObject {
     private let interactor: WalletInteractor
     private let router: WalletRouter
     
-    private let uri: String?
+    private let app: Application
     
     @Published var sessions = [Session]()
     
@@ -24,14 +24,19 @@ final class WalletPresenter: ObservableObject {
     init(
         interactor: WalletInteractor,
         router: WalletRouter,
-        uri: String?
+        app: Application
     ) {
         defer {
             setupInitialState()
         }
         self.interactor = interactor
         self.router = router
-        self.uri = uri
+        self.app = app
+    }
+    
+    func onAppear() {
+        showPairingLoading = app.requestSent
+        removePairingIndicator()
     }
     
     func onConnection(session: Session) {
@@ -113,13 +118,7 @@ extension WalletPresenter {
         Task.detached(priority: .high) { @MainActor [unowned self] in
             do {
                 self.showPairingLoading = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    if self.showPairingLoading {
-                        self.errorMessage = "WalletConnect - Pairing timeout error"
-                        self.showError.toggle()
-                    }
-                    self.showPairingLoading = false
-                }
+                self.removePairingIndicator()
                 try await self.interactor.pair(uri: uri)
             } catch {
                 self.showPairingLoading = false
@@ -130,7 +129,7 @@ extension WalletPresenter {
     }
     
     private func pairFromDapp() {
-        guard let uri = uri,
+        guard let uri = app.uri,
               let walletConnectUri = WalletConnectURI(string: uri)
         else {
             return
@@ -138,9 +137,19 @@ extension WalletPresenter {
         pair(uri: walletConnectUri)
     }
     
-    func removeSession(at indexSet: IndexSet) async {
+    private func removeSession(at indexSet: IndexSet) async {
         if let index = indexSet.first {
             try? await interactor.disconnectSession(session: sessions[index])
+        }
+    }
+    
+    private func removePairingIndicator() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            if self.showPairingLoading {
+                self.errorMessage = "WalletConnect - Pairing timeout error"
+                self.showError.toggle()
+            }
+            self.showPairingLoading = false
         }
     }
 }

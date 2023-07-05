@@ -100,6 +100,9 @@ struct WalletView: View {
         .alert(presenter.errorMessage, isPresented: $presenter.showError) {
             Button("OK", role: .cancel) {}
         }
+        .onAppear {
+            presenter.onAppear()
+        }
     }
     
     private func connectionView(session: Session) -> some View {
@@ -151,23 +154,3 @@ struct WalletView_Previews: PreviewProvider {
     }
 }
 #endif
-
-struct BlinkAnimation: ViewModifier {
-    @State private var opacity: CGFloat = 0.2
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(opacity)
-            .animation(
-                .easeInOut(duration: 1).repeatForever(),
-                value: opacity
-            )
-            .onAppear(perform: { opacity = 0.5 })
-    }
-}
-
-extension View {
-    func blink() -> some View {
-        modifier(BlinkAnimation())
-    }
-}
