@@ -17,7 +17,7 @@ private class DispatcherKeychainStorageMock: KeychainStorageProtocol {
 class WebSocketMock: WebSocketConnecting {
     var request: URLRequest = URLRequest(url: URL(string: "wss://relay.walletconnect.com")!)
 
-    var onText: ((String) -> Void)?
+    var receive: ((String) -> Void)?
     var onConnect: (() -> Void)?
     var onDisconnect: ((Error?) -> Void)?
     var sendCallCount: Int = 0
@@ -33,7 +33,7 @@ class WebSocketMock: WebSocketConnecting {
         onDisconnect?(nil)
     }
 
-    func write(string: String, completion: (() -> Void)?) {
+    func send(message: String, completion: (() -> Void)?) {
         sendCallCount+=1
     }
 }
@@ -101,7 +101,7 @@ final class DispatcherTests: XCTestCase {
             XCTAssertNotNil(message)
             expectation.fulfill()
         }
-        webSocket.onText?("message")
+        webSocket.receive?("message")
         waitForExpectations(timeout: 0.001)
     }
 

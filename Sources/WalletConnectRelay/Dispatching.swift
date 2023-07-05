@@ -52,12 +52,12 @@ final class Dispatcher: NSObject, Dispatching {
         setUpSocketConnectionObserving()
     }
 
-    func send(_ string: String, completion: @escaping (Error?) -> Void) {
+    func send(_ message: String, completion: @escaping (Error?) -> Void) {
         guard socket.isConnected else {
             completion(NetworkError.webSocketNotConnected)
             return
         }
-        socket.write(string: string) {
+        socket.send(message: message) {
             completion(nil)
         }
     }
@@ -106,7 +106,7 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     private func setUpWebSocketSession() {
-        socket.onText = { [unowned self] in
+        socket.receive = { [unowned self] in
             self.onMessage?($0)
         }
     }

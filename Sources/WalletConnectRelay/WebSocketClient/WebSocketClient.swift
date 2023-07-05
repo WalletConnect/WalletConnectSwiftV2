@@ -15,7 +15,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
     private var url: URL
     private let logger: ConsoleLogging
     
-    init(url url: URL, logger: ConsoleLogging) {
+    init(url: URL, logger: ConsoleLogging) {
         self.url = url
         self.logger = logger
         self.isConnected = false
@@ -37,7 +37,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
     var isConnected: Bool
     var onConnect: (() -> Void)?
     var onDisconnect: ((Error?) -> Void)?
-    var onText: ((String) -> Void)?
+    var receive: ((String) -> Void)?
     var request: URLRequest {
         didSet {
             if let url = request.url {
@@ -62,8 +62,8 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
         socket?.cancel()
     }
     
-    func write(string: String, completion: (() -> Void)?) {
-        let message = URLSessionWebSocketTask.Message.string(string)
+    func send(message: String, completion: (() -> Void)?) {
+        let message = URLSessionWebSocketTask.Message.string(message)
         socket?.send(message) { _ in
             completion?()
         }
@@ -99,11 +99,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
                 switch message {
                 case .string(let messageString):
                     self.logger.debug("[WebSocketClient]: Received message:  \(messageString)")
-                    self.onText?(messageString)
+                    self.receive?(messageString)
                             
                 case .data(let data):
                     self.logger.debug("[WebSocketClient]: Received data: \(data.description)")
-                    self.onText?(data.description)
+                    self.receive?(data.description)
                             
                 default:
                     self.logger.debug("[WebSocketClient]: Received unknown data")
