@@ -17,7 +17,7 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let historyService: HistoryService
-    private let verifyClient: VerifyClient
+    private let verifyClient: VerifyClientProtocol
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -25,7 +25,7 @@ final class SessionEngine {
     init(
         networkingInteractor: NetworkInteracting,
         historyService: HistoryService,
-        verifyClient: VerifyClient,
+        verifyClient: VerifyClientProtocol,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging

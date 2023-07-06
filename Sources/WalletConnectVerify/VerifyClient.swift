@@ -1,7 +1,12 @@
 import DeviceCheck
 import Foundation
 
-public actor VerifyClient {
+public protocol VerifyClientProtocol {
+    func verifyOrigin(assertionId: String) async throws -> String
+    func createVerifyContext(origin: String?, domain: String) -> VerifyContext
+}
+
+public actor VerifyClient: VerifyClientProtocol {
     enum Errors: Error {
         case attestationNotSupported
     }
@@ -32,7 +37,7 @@ public actor VerifyClient {
         return try await originVerifier.verifyOrigin(assertionId: assertionId)
     }
     
-    public func createVerifyContext(origin: String?, domain: String) -> VerifyContext {
+    nonisolated public func createVerifyContext(origin: String?, domain: String) -> VerifyContext {
         return VerifyContext(
             origin: origin,
             validation: (origin == domain) ? .valid : (origin == nil ? .unknown : .invalid),
@@ -44,3 +49,19 @@ public actor VerifyClient {
         try await assertionRegistrer.registerAssertion()
     }
 }
+
+#if DEBUG
+
+public struct VerifyClientMock: VerifyClientProtocol {
+    public init() {}
+    
+    public func verifyOrigin(assertionId: String) async throws -> String {
+        return "domain.com"
+    }
+    
+    public func createVerifyContext(origin: String?, domain: String) -> VerifyContext {
+        return VerifyContext(origin: "domain.com", validation: .valid, verifyUrl: "verify.walletconnect.com")
+    }
+}
+
+#endif

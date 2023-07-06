@@ -18,7 +18,7 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
-    private let verifyClient: VerifyClient
+    private let verifyClient: VerifyClientProtocol
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
@@ -38,7 +38,7 @@ final class ApproveEngine {
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
-        verifyClient: VerifyClient
+        verifyClient: VerifyClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore

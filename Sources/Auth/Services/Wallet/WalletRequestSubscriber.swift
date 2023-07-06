@@ -8,7 +8,7 @@ class WalletRequestSubscriber {
     private var publishers = [AnyCancellable]()
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
-    private let verifyClient: VerifyClient
+    private let verifyClient: VerifyClientProtocol
     var onRequest: (((request: AuthRequest, context: VerifyContext?)) -> Void)?
     
     init(
@@ -17,7 +17,7 @@ class WalletRequestSubscriber {
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
-        verifyClient: VerifyClient
+        verifyClient: VerifyClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
