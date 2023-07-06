@@ -17,7 +17,7 @@ public actor VerifyClient {
         originVerifier: OriginVerifier,
         assertionRegistrer: AssertionRegistrer,
         appAttestationRegistrer: AppAttestationRegistrer
-    ) throws {
+    ) {
         self.verifyHost = verifyHost
         self.originVerifier = originVerifier
         self.assertionRegistrer = assertionRegistrer

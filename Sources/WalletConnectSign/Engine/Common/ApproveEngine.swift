@@ -18,7 +18,7 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
-    private let verifyClient: VerifyClient?
+    private let verifyClient: VerifyClient
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
@@ -38,7 +38,7 @@ final class ApproveEngine {
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
-        verifyClient: VerifyClient?
+        verifyClient: VerifyClient
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -293,18 +293,19 @@ private extension ApproveEngine {
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
-        guard let verifyClient else {
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
-            return
-        }
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
-            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
-            let verifyContext = await verifyClient.createVerifyContext(
-                origin: origin,
-                domain: payload.request.proposer.metadata.url
-            )
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            do {
+                let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let verifyContext = await verifyClient.createVerifyContext(
+                    origin: origin,
+                    domain: payload.request.proposer.metadata.url
+                )
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            } catch {
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+                return
+            }
         }
     }
 
