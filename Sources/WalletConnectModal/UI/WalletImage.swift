@@ -22,11 +22,6 @@ struct WalletImage: View {
         } placeholder: {
             Color.foreground3
         }
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(.gray.opacity(0.4), lineWidth: 1)
-        )
     }
     
     private func imageURL(for wallet: Listing?) -> URL? {

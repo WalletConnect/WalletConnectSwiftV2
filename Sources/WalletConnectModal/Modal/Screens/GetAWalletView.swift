@@ -57,7 +57,7 @@ struct GetAWalletView: View {
                 }) {
                     HStack {
                         Text("Explore Wallets")
-                        Image("external_link", bundle: .module)
+                        Image(.external_link)
                     }
                 }
                 .buttonStyle(W3MButtonStyle())
@@ -79,6 +79,6 @@ struct GetAWalletView_Previews: PreviewProvider {
             onWalletTap: { _ in },
             navigateToExternalLink: { _ in }
         )
-        .environment(\.projectId, Secrets.load()?.projectID ?? "")
+        .environment(\.projectId, Secrets.load().projectID)
     }
 }

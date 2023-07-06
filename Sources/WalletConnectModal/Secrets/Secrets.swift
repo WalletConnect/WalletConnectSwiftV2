@@ -7,7 +7,7 @@ struct Secrets: Decodable {
         case projectID = "PROJECT_ID"
     }
 
-    static func load() -> Self? {
+    static func load() -> Self {
         let secretsFileUrl = Bundle.module.url(forResource: "secrets", withExtension: "json")
 
         do {
