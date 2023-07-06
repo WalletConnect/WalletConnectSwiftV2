@@ -55,18 +55,24 @@ struct WalletList: View {
                     ForEach(numberOfColumns..<(2 * numberOfColumns - 1)) { index in
                         gridItem(for: index)
                     }
-                    
-                    viewAllItem()
-                        .transform {
-                            #if os(iOS)
-                                $0.onTapGesture {
-                                    withAnimation {
-                                        navigateTo(.viewAll)
+                        
+                    if wallets.count > numberOfColumns * 2 {
+                        viewAllItem()
+                            .transform {
+                                #if os(iOS)
+                                    $0.onTapGesture {
+                                        withAnimation {
+                                            navigateTo(.viewAll)
+                                        }
                                     }
-                                }
-                            #endif
-                        }
+                                #endif
+                            }
+                    }
                 }
+            }
+            
+            if wallets.isEmpty {
+                ActivityIndicator(isAnimating: .constant(true))
             }
         }
     }
@@ -152,37 +158,36 @@ struct WalletList: View {
     
     @ViewBuilder
     func gridItem(for index: Int) -> some View {
-        let wallet: Listing? = wallets[safe: index]
-        
-        VStack {
-            WalletImage(wallet: wallet)
-                .frame(width: 60, height: 60)
-            
-            Text(wallet?.name ?? "WalletName")
-                .font(.system(size: 12))
-                .foregroundColor(.foreground1)
-                .padding(.horizontal, 12)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.4)
-            
-            Text("RECENT")
-                .opacity(0)
-                .font(.system(size: 10))
-                .foregroundColor(.foreground3)
-                .padding(.horizontal, 12)
-        }
-        .redacted(reason: wallet == nil ? .placeholder : [])
-        .frame(maxWidth: 80, maxHeight: 96)
-        .transform {
-            #if os(iOS)
-                $0.onTapGesture {
-                    guard let wallet else { return }
-                    
-                    withAnimation {
-                        navigateTo(.walletDetail(wallet))
+        if let wallet = wallets[safe: index] {
+            VStack {
+                WalletImage(wallet: wallet)
+                    .frame(width: 60, height: 60)
+                
+                Text(wallet.name)
+                    .font(.system(size: 12))
+                    .foregroundColor(.foreground1)
+                    .padding(.horizontal, 12)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.4)
+                
+                Text("RECENT")
+                    .opacity(0)
+                    .font(.system(size: 10))
+                    .foregroundColor(.foreground3)
+                    .padding(.horizontal, 12)
+            }
+            .frame(maxWidth: 80, maxHeight: 96)
+            .transform {
+                #if os(iOS)
+                    $0.onTapGesture {
+                        withAnimation {
+                            navigateTo(.walletDetail(wallet))
+                        }
                     }
-                }
-            #endif
+                #endif
+            }
+        } else {
+            EmptyView()
         }
     }
     
