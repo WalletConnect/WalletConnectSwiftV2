@@ -43,7 +43,7 @@ struct WalletList: View {
     
     private func initialList() -> some View {
         ZStack {
-            Spacer().frame(height: 200)
+            Spacer().frame(maxWidth: .infinity, maxHeight: 100)
             
             VStack {
                 HStack {
