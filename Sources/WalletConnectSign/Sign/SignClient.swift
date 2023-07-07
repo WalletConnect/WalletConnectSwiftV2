@@ -239,8 +239,8 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - proposalId: Session Proposal id
     ///   - namespaces: namespaces for given session, needs to contain at least required namespaces proposed by dApp.
-    public func approve(proposalId: String, namespaces: [String: SessionNamespace]) async throws {
-        try await approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces)
+    public func approve(proposalId: String, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
+        try await approveEngine.approveProposal(proposerPubKey: proposalId, validating: namespaces, sessionProperties: sessionProperties)
     }
 
     /// For the wallet to reject a session proposal.

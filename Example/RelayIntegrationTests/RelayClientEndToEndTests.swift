@@ -30,11 +30,11 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     private var publishers = Set<AnyCancellable>()
 
-    func makeRelayClient() -> RelayClient {
+    func makeRelayClient(prefix: String) -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
-        let socketAuthenticator = SocketAuthenticator(
+        let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
-            relayHost: InputConfig.relayHost
+            url: InputConfig.relayUrl
         )
         let urlFactory = RelayUrlFactory(
             relayHost: InputConfig.relayHost,
@@ -43,18 +43,32 @@ final class RelayClientEndToEndTests: XCTestCase {
         )
         let socket = WebSocket(url: urlFactory.create())
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
-        let logger = ConsoleLogger()
+        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
             socketConnectionType: .manual,
             logger: logger
         )
-        return RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
+        let keychain = KeychainStorageMock()
+        let keyValueStorage = RuntimeKeyValueStorage()
+        let relayClient = RelayClientFactory.create(
+            relayHost: InputConfig.relayHost,
+            projectId: InputConfig.projectId,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            socketFactory: DefaultSocketFactory(),
+            socketConnectionType: .manual,
+            logger: logger
+        )
+        let clientId = try! relayClient.getClientId()
+        logger.debug("My client id is: \(clientId)")
+
+        return relayClient
     }
 
     func testSubscribe() {
-        let relayClient = makeRelayClient()
+        let relayClient = makeRelayClient(prefix: "")
 
         try! relayClient.connect()
         let subscribeExpectation = expectation(description: "subscribe call succeeds")
@@ -70,8 +84,8 @@ final class RelayClientEndToEndTests: XCTestCase {
     }
 
     func testEndToEndPayload() {
-        let relayA = makeRelayClient()
-        let relayB = makeRelayClient()
+        let relayA = makeRelayClient(prefix: "⚽️ A ")
+        let relayB = makeRelayClient(prefix: "🏀 B ")
 
         try! relayA.connect()
         try! relayB.connect()
@@ -97,18 +111,23 @@ final class RelayClientEndToEndTests: XCTestCase {
 
         relayB.messagePublisher.sink { topic, payload, _ in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
+            Task(priority: .high) {
+                sleep(1)
+                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
+            }
             expectationB.fulfill()
         }.store(in: &publishers)
 
-        relayA.socketConnectionStatusPublisher.sink {  _ in
+        relayA.socketConnectionStatusPublisher.sink {  status in
+            guard status == .connected else {return}
             Task(priority: .high) {
-                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
                 try await relayA.subscribe(topic: randomTopic)
+                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
             }
         }.store(in: &publishers)
-        relayB.socketConnectionStatusPublisher.sink {  _ in
+        relayB.socketConnectionStatusPublisher.sink {  status in
+            guard status == .connected else {return}
             Task(priority: .high) {
-                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
                 try await relayB.subscribe(topic: randomTopic)
             }
         }.store(in: &publishers)

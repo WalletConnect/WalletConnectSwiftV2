@@ -47,7 +47,7 @@ public struct AgreementPublicKey: GenericPasswordConvertible, Equatable {
     }
 
     public var hexRepresentation: String {
-        key.rawRepresentation.toHexString()
+        rawRepresentation.toHexString()
     }
 
     public var did: String {
@@ -78,6 +78,11 @@ public struct AgreementPrivateKey: GenericPasswordConvertible, Equatable {
 
     public init() {
         self.key = Curve25519.KeyAgreement.PrivateKey()
+    }
+
+    public init(hex: String) throws {
+        let data = Data(hex: hex)
+        try self.init(rawRepresentation: data)
     }
 
     public init<D>(rawRepresentation: D) throws where D: ContiguousBytes {

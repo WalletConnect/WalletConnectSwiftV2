@@ -1,18 +1,24 @@
 import Foundation
 
 public enum PushError: Codable, Equatable, Error {
-    case rejected
+    case userRejeted
+    case userHasExistingSubscription
     case methodUnsupported
+    case registerSignatureRejected
 }
 
 extension PushError: Reason {
 
     init?(code: Int) {
         switch code {
-        case Self.rejected.code:
-            self = .rejected
+        case Self.userRejeted.code:
+            self = .userRejeted
+        case Self.userHasExistingSubscription.code:
+            self = .userHasExistingSubscription
         case Self.methodUnsupported.code:
             self = .methodUnsupported
+        case Self.registerSignatureRejected.code:
+            self = .registerSignatureRejected
         default:
             return nil
         }
@@ -21,17 +27,25 @@ extension PushError: Reason {
         switch self {
         case .methodUnsupported:
             return 10001
-        case .rejected:
-            return 15000
+        case .userRejeted:
+            return 5000
+        case .userHasExistingSubscription:
+            return 6001
+        case .registerSignatureRejected:
+            return 1501
         }
     }
 
     public var message: String {
         switch self {
-        case .rejected:
-            return "Push request rejected"
         case .methodUnsupported:
             return "Method Unsupported"
+        case .userRejeted:
+            return "Push request rejected"
+        case .userHasExistingSubscription:
+            return "User Has Existing Subscription"
+        case .registerSignatureRejected:
+            return "Register signature rejected"
         }
     }
 

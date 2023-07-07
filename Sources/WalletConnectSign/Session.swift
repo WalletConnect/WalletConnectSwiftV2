@@ -7,7 +7,9 @@ public struct Session {
     public let topic: String
     public let pairingTopic: String
     public let peer: AppMetadata
+    public let requiredNamespaces: [String: ProposalNamespace]
     public let namespaces: [String: SessionNamespace]
+    public let sessionProperties: [String: String]?
     public let expiryDate: Date
     public static var defaultTimeToLive: Int64 {
         WCSession.defaultTimeToLive
@@ -57,6 +59,12 @@ extension Session {
         
         internal func internalRepresentation() -> SessionType.EventParams.Event {
             SessionType.EventParams.Event(name: name, data: data)
+        }
+    }
+
+    public var accounts: [Account] {
+        return namespaces.values.reduce(into: []) { result, namespace in
+            result = result + Array(namespace.accounts)
         }
     }
 }

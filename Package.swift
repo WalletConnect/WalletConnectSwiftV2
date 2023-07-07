@@ -5,9 +5,9 @@ import PackageDescription
 let package = Package(
     name: "WalletConnect",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15),
-        .tvOS(.v13)
+        .iOS(.v14),
+        .macOS(.v11),
+        .tvOS(.v14)
     ],
     products: [
         .library(
@@ -38,18 +38,24 @@ let package = Package(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
         .library(
+            name: "WalletConnectSync",
+            targets: ["WalletConnectSync"]),
+        .library(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
+        .library(
+            name: "WalletConnectHistory",
+            targets: ["WalletConnectHistory"]),
         .library(
             name: "Web3Inbox",
             targets: ["Web3Inbox"]),
         .library(
-            name: "Web3Modal",
-            targets: ["Web3Modal"]),
+            name: "WalletConnectModal",
+            targets: ["WalletConnectModal"]),
 
     ],
     dependencies: [
-        .package(url: "https://github.com/WalletConnect/QRCode", branch: "wc-main")
+        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
     ],
     targets: [
         .target(
@@ -58,7 +64,7 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
-            dependencies: ["WalletConnectIdentity", "WalletConnectSigner"],
+            dependencies: ["WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
             path: "Sources/Chat"),
         .target(
             name: "Auth",
@@ -70,7 +76,7 @@ let package = Package(
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectNetworking", "WalletConnectIdentity", "WalletConnectSigner"],
+            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync"],
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectEcho",
@@ -88,6 +94,9 @@ let package = Package(
         .target(
             name: "WalletConnectPairing",
             dependencies: ["WalletConnectNetworking"]),
+        .target(
+            name: "WalletConnectHistory",
+            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "Web3Inbox",
             dependencies: ["WalletConnectChat", "WalletConnectPush"]),
@@ -110,8 +119,11 @@ let package = Package(
             name: "Commons",
             dependencies: []),
         .target(
+            name: "HTTPClient",
+            dependencies: []),
+        .target(
             name: "WalletConnectNetworking",
-            dependencies: ["WalletConnectRelay"]),
+            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
             dependencies: []),
@@ -119,8 +131,11 @@ let package = Package(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
-            name: "Web3Modal",
+            name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"]),
+        .target(
+            name: "WalletConnectSync",
+            dependencies: ["WalletConnectSigner"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
@@ -133,6 +148,9 @@ let package = Package(
         .testTarget(
             name: "ChatTests",
             dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "NotifyTests",
+            dependencies: ["WalletConnectPush", "TestingUtils"]),
         .testTarget(
             name: "AuthTests",
             dependencies: ["Auth", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
@@ -157,7 +175,10 @@ let package = Package(
             dependencies: ["JSONRPC", "TestingUtils"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["Commons", "TestingUtils"])
+            dependencies: ["Commons", "TestingUtils"]),
+        .testTarget(
+            name: "WalletConnectModalTests",
+            dependencies: ["WalletConnectModal", "TestingUtils"])
     ],
     swiftLanguageVersions: [.v5]
 )

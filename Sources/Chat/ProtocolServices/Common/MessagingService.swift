@@ -82,6 +82,8 @@ private extension MessagingService {
                 guard let (message, messageClaims) = try? MessagePayload.decodeAndVerify(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
+                // TODO: Compare message hash
+
                 Task(priority: .high) {
 
                     let authorAccount = try await identityClient.resolveIdentity(iss: messageClaims.iss)

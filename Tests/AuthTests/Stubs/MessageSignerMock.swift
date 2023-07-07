@@ -15,6 +15,9 @@ extension MessageVerifier {
     }
 
     struct Crypto: CryptoProvider {
+        func derive(entropy: Data, path: [WalletConnectSigner.DerivationPath]) -> Data {
+            return Data()
+        }
 
         func keccak256(_ data: Data) -> Data {
             return Data()

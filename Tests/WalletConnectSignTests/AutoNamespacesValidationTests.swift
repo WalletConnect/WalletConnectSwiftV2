@@ -799,4 +799,204 @@ final class AutoNamespacesValidationTests: XCTestCase {
             )
         )
     }
+    
+    func testAutoNamespacesSameChainEmptyOptinalEvents() {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        let requiredNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged", "accountsChanged"])
+        ]
+        let optionalNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+                events: []
+            )
+        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        let sessionNamespaces = try! AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [Blockchain("eip155:1")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+            events: ["chainChanged", "accountsChanged"],
+            accounts: accounts
+        )
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+                ]),
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign", "personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged", "accountsChanged"]
+            )
+        ]
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testAutoNamespacesSameChainEmptyRequiredEvents() {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        let requiredNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: []
+            )
+        ]
+        let optionalNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+                events: ["chainChanged", "accountsChanged"]
+            )
+        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        let sessionNamespaces = try! AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [Blockchain("eip155:1")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+            events: ["chainChanged", "accountsChanged"],
+            accounts: accounts
+        )
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+                ]),
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign", "personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged", "accountsChanged"]
+            )
+        ]
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testAutoNamespacesSameChainEmptyEvents() {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+        ]
+        let requiredNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: []
+            )
+        ]
+        let optionalNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+                events: []
+            )
+        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        let sessionNamespaces = try! AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [Blockchain("eip155:1")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+            events: ["chainChanged", "accountsChanged"],
+            accounts: accounts
+        )
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+                ]),
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign", "personal_sign", "eth_sendTransaction"],
+                events: []
+            )
+        ]
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
+    
+    func testAutoNamespacesDifferentChainEmptyOptinalEvents() {
+        let accounts = [
+            Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
+            Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
+        ]
+        let requiredNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged", "accountsChanged"])
+        ]
+        let optionalNamespaces = [
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!],
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign"],
+                events: []
+            ),
+            "solana": ProposalNamespace(
+                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                methods: ["solana_signMessage"],
+                events: []
+            )
+        ]
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [])), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+        let sessionNamespaces = try! AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [Blockchain("eip155:1")!, Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+            methods: ["personal_sign", "eth_sendTransaction", "eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign", "solana_signMessage", "solana_signMessage"],
+            events: ["chainChanged", "accountsChanged"],
+            accounts: accounts
+        )
+        let expectedNamespaces: [String: SessionNamespace] = [
+            "eip155": SessionNamespace(
+                chains: [Blockchain("eip155:1")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
+                ]),
+                methods: ["eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign", "personal_sign", "eth_sendTransaction"],
+                events: ["chainChanged", "accountsChanged"]
+            ),
+            "solana": SessionNamespace(
+                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                accounts: Set([
+                    Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                ]),
+                methods: ["solana_signMessage"],
+                events: []
+            )
+        ]
+        XCTAssertEqual(sessionNamespaces, expectedNamespaces)
+    }
 }

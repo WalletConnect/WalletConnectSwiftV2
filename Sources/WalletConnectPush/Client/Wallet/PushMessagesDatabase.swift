@@ -1,6 +1,4 @@
-
 import Foundation
-import WalletConnectUtils
 import Combine
 
 class PushMessagesDatabase {
@@ -11,7 +9,9 @@ class PushMessagesDatabase {
     }
 
     func getPushMessages(topic: String) -> [PushMessageRecord] {
-        return store.getAll().filter{$0.topic == topic}
+        return store.getAll()
+            .filter{$0.topic == topic}
+            .sorted{$0.publishedAt > $1.publishedAt}
     }
 
     func deletePushMessages(topic: String) {

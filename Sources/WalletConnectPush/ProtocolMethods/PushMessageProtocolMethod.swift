@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectPairing
 
 struct PushMessageProtocolMethod: ProtocolMethod {
     let method: String = "wc_pushMessage"

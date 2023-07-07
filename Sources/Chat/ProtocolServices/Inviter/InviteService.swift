@@ -30,34 +30,37 @@ class InviteService {
 
     @discardableResult
     func invite(invite: Invite) async throws -> Int64 {
-        // TODO ad storage
         let protocolMethod = ChatInviteProtocolMethod()
+
         let selfPubKeyY = try kms.createX25519KeyPair()
+        let selfPrivKeyY = try kms.getPrivateKey(for: selfPubKeyY)!
+
         let inviteePublicKey = try DIDKey(did: invite.inviteePublicKey)
-        let symKeyI = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: inviteePublicKey.hexString)
-        let inviteTopic = try AgreementPublicKey(hex: inviteePublicKey.hexString).rawRepresentation.sha256().toHexString()
 
-        // overrides on invite toipic
-        try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
-
-        let payload = InvitePayload(
-            keyserver: keyserverURL,
-            message: invite.message,
-            inviteeAccount: invite.inviteeAccount,
-            inviterPublicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation)
+        let symKeyI = try kms.performKeyAgreement(
+            selfPublicKey: selfPubKeyY,
+            peerPublicKey: inviteePublicKey.hexString
         )
+
+        let pubKeyX = try AgreementPublicKey(hex: inviteePublicKey.hexString)
+        let inviteTopic = pubKeyX.rawRepresentation.sha256().toHexString()
+        let responseTopic = symKeyI.derivedTopic()
+
+        try kms.setSymmetricKey(symKeyI.sharedKey, for: inviteTopic)
+        try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
+
         let wrapper = try identityClient.signAndCreateWrapper(
-            payload: payload,
+            payload: InvitePayload(
+                keyserver: keyserverURL,
+                message: invite.message,
+                inviteeAccount: invite.inviteeAccount,
+                inviterPublicKey: DIDKey(rawData: selfPubKeyY.rawRepresentation)
+            ),
             account: invite.inviterAccount
         )
 
         let inviteId = RPCID()
         let request = RPCRequest(method: protocolMethod.method, params: wrapper, rpcid: inviteId)
-
-        // 2. Proposer subscribes to topic R which is the hash of the derived symKey
-        let responseTopic = symKeyI.derivedTopic()
-
-        try kms.setSymmetricKey(symKeyI.sharedKey, for: responseTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
         try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))
@@ -67,10 +70,14 @@ class InviteService {
             message: invite.message,
             inviterAccount: invite.inviterAccount,
             inviteeAccount: invite.inviteeAccount,
+            inviterPubKeyY: selfPubKeyY.hexRepresentation,
+            inviterPrivKeyY: selfPrivKeyY.rawRepresentation.toHexString(),
+            responseTopic: responseTopic,
+            symKey: symKeyI.sharedKey.hexRepresentation,
             timestamp: Date().millisecondsSince1970
         )
 
-        chatStorage.set(sentInvite: sentInvite, account: invite.inviterAccount)
+        try await chatStorage.set(sentInvite: sentInvite, account: invite.inviterAccount)
 
         logger.debug("invite sent on topic: \(inviteTopic)")
 
@@ -100,6 +107,14 @@ private extension InviteService {
                     )
                 }
             }.store(in: &publishers)
+
+        networkingInteractor.responseErrorSubscription(on: ChatInviteProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<InvitePayload.Wrapper>) in
+
+                Task(priority: .high) {
+                    try await chatStorage.reject(sentInviteId: payload.id.integer)
+                }
+            }.store(in: &publishers)
     }
 
     func createThread(sentInviteId: Int64, selfPubKeyHex: String, peerPubKey: DIDKey, account: Account, peerAccount: Account) async throws {
@@ -113,13 +128,12 @@ private extension InviteService {
         let thread = Thread(
             topic: threadTopic,
             selfAccount: account,
-            peerAccount: peerAccount
+            peerAccount: peerAccount,
+            symKey: agreementKeys.sharedKey.hexRepresentation
         )
 
-        chatStorage.set(thread: thread, account: account)
-
-        // TODO: Implement reject for sentInvite
-        chatStorage.accept(sentInviteId: sentInviteId, account: account, topic: threadTopic)
+        try await chatStorage.set(thread: thread, account: account)
+        try await chatStorage.accept(sentInviteId: sentInviteId, topic: threadTopic)
 
         // TODO - remove symKeyI
     }

@@ -38,7 +38,7 @@ class WalletRequestSubscriber {
                     peerMetadata: payload.request.requester.metadata
                 )
                 
-                let request = AuthRequest(id: payload.id, payload: payload.request.payloadParams)
+                let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
                 
                 guard let verifyClient else {
                     onRequest?((request, nil))

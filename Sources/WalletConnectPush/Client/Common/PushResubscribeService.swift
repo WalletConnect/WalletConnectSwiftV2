@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectNetworking
 import Combine
 
 final class PushResubscribeService {
@@ -7,11 +6,11 @@ final class PushResubscribeService {
     private var publishers = Set<AnyCancellable>()
 
     private let networkInteractor: NetworkInteracting
-    private let subscriptionsStorage: CodableStore<PushSubscription>
+    private let pushStorage: PushStorage
 
-    init(networkInteractor: NetworkInteracting, subscriptionsStorage: CodableStore<PushSubscription>) {
+    init(networkInteractor: NetworkInteracting, pushStorage: PushStorage) {
         self.networkInteractor = networkInteractor
-        self.subscriptionsStorage = subscriptionsStorage
+        self.pushStorage = pushStorage
         setUpResubscription()
     }
 
@@ -19,7 +18,7 @@ final class PushResubscribeService {
         networkInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                let topics = subscriptionsStorage.getAll().map{$0.topic}
+                let topics = pushStorage.getSubscriptions().map{$0.topic}
                 Task(priority: .high) {
                     try await networkInteractor.batchSubscribe(topics: topics)
                 }

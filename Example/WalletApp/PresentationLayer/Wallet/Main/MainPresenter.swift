@@ -2,7 +2,6 @@ import UIKit
 import Combine
 
 final class MainPresenter {
-
     private let interactor: MainInteractor
     private let router: MainRouter
     private var disposeBag = Set<AnyCancellable>()
@@ -35,15 +34,7 @@ extension MainPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] request in
 
-//                self?.router.present(pushRequest: request)
+                self?.router.present(pushRequest: request)
             }.store(in: &disposeBag)
-
-        interactor.sessionProposalPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] session in
-                self?.router.present(proposal: session.proposal, context: session.context)
-            }
-            .store(in: &disposeBag)
     }
 }
-

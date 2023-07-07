@@ -1,14 +1,17 @@
 import Foundation
-import WalletConnectUtils
-import WalletConnectPairing
 
-public struct PushSubscription: Codable, Equatable {
+public struct PushSubscription: DatabaseObject {
     public let topic: String
     public let account: Account
     public let relay: RelayProtocolOptions
     public let metadata: AppMetadata
     public let scope: [String: ScopeValue]
     public let expiry: Date
+    public let symKey: String
+
+    public var databaseId: String {
+        return topic
+    }
 }
 
 public struct ScopeValue: Codable, Equatable {

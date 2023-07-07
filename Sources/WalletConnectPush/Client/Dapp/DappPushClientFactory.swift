@@ -1,9 +1,8 @@
 import Foundation
-import WalletConnectPairing
 
 public struct DappPushClientFactory {
 
-    public static func create(metadata: AppMetadata, networkInteractor: NetworkInteracting) -> DappPushClient {
+    public static func create(metadata: AppMetadata, networkInteractor: NetworkInteracting, syncClient: SyncClient) -> DappPushClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
@@ -12,30 +11,29 @@ public struct DappPushClientFactory {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
-            networkInteractor: networkInteractor
+            networkInteractor: networkInteractor,
+            syncClient: syncClient
         )
     }
 
-    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting) -> DappPushClient {
+    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkInteractor: NetworkInteracting, syncClient: SyncClient) -> DappPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let pushProposer = PushProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
-        let subscriptionStore = CodableStore<PushSubscription>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushSubscription)
-        let proposalResponseSubscriber = ProposalResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata, relay: RelayProtocolOptions(protocol: "irn", data: nil), subscriptionsStore: subscriptionStore)
-        let pushMessageSender = PushMessageSender(networkingInteractor: networkInteractor, kms: kms, logger: logger)
-        let subscriptionProvider = SubscriptionsProvider(store: subscriptionStore)
-        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore, pushMessagesDatabase: nil)
-        let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushSubscriptionStore: subscriptionStore)
-        let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, subscriptionsStorage: subscriptionStore)
+        let subscriptionStore: SyncStore<PushSubscription> = SyncStoreFactory.create(name: PushStorageIdntifiers.pushSubscription, syncClient: syncClient, storage: keyValueStorage)
+
+        let subscriptionStoreDelegate = PushSubscriptionStoreDelegate(networkingInteractor: networkInteractor, kms: kms)
+        let pushStorage = PushStorage(subscriptionStore: subscriptionStore, subscriptionStoreDelegate: subscriptionStoreDelegate)
+        let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushStorage: pushStorage)
+        let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, pushStorage: pushStorage)
+        let notifyProposer = NotifyProposer(networkingInteractor: networkInteractor, kms: kms, appMetadata: metadata, logger: logger)
+        let notifyProposeResponseSubscriber = NotifyProposeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, metadata: metadata)
         return DappPushClient(
             logger: logger,
             kms: kms,
-            pushProposer: pushProposer,
-            proposalResponseSubscriber: proposalResponseSubscriber,
-            pushMessageSender: pushMessageSender,
-            subscriptionsProvider: subscriptionProvider,
-            deletePushSubscriptionService: deletePushSubscriptionService,
+            pushStorage: pushStorage,
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
-            resubscribeService: resubscribeService
+            resubscribeService: resubscribeService,
+            notifyProposer: notifyProposer,
+            notifyProposeResponseSubscriber: notifyProposeResponseSubscriber
         )
     }
 }

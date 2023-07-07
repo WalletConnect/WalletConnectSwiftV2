@@ -1,6 +1,7 @@
 import Foundation
 @testable import WalletConnectRelay
 @testable import WalletConnectNetworking
+@testable import HTTPClient
 
 extension NSError {
 

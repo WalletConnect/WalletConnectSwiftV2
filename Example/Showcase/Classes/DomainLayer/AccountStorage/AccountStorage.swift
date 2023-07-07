@@ -24,15 +24,3 @@ final class AccountStorage {
         }
     }
 }
-
-private extension ImportAccount {
-
-    var storageId: String {
-        switch self {
-        case .swift, .kotlin, .js:
-            return name
-        case .custom(let privateKey):
-            return privateKey
-        }
-    }
-}

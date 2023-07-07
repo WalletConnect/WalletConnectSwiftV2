@@ -16,6 +16,14 @@
         "value" : "$(RELAY_HOST)"
       },
       {
+        "key" : "GM_DAPP_PROJECT_ID",
+        "value" : "$(GM_DAPP_PROJECT_ID)"
+      },
+      {
+        "key" : "CAST_HOST",
+        "value" : "$(CAST_HOST)"
+      },
+      {
         "key" : "PROJECT_ID",
         "value" : "$(PROJECT_ID)"
       }
@@ -28,9 +36,11 @@
   },
   "testTargets" : [
     {
+      "parallelizable" : true,
       "skippedTests" : [
         "AuthTests\/testEIP1271RespondSuccess()",
-        "ChatTests"
+        "ChatTests",
+        "ENSResolverTests"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",

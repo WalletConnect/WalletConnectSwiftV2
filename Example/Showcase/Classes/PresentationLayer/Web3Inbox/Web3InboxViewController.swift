@@ -18,7 +18,7 @@ final class Web3InboxViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        Web3Inbox.configure(account: importAccount.account, config: [.pushEnabled: false], onSign: onSing, environment: .sandbox)
+        Web3Inbox.configure(account: importAccount.account, bip44: DefaultBIP44Provider(), config: [.pushEnabled: false], environment: .sandbox, onSign: onSing)
 
         edgesForExtendedLayout = []
         navigationItem.title = "Web3Inbox SDK"
@@ -30,9 +30,11 @@ final class Web3InboxViewController: UIViewController {
 private extension Web3InboxViewController {
 
     func onSing(_ message: String) -> SigningResult {
+
         let privateKey = Data(hex: importAccount.privateKey)
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
         let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+
         return .signed(signature)
     }
 }

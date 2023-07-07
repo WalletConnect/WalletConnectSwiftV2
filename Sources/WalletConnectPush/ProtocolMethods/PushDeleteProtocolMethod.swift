@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectPairing
 
 struct PushDeleteProtocolMethod: ProtocolMethod {
     let method: String = "wc_pushDelete"

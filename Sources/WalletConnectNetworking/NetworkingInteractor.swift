@@ -71,9 +71,14 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
-                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(RequestParams.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+            .compactMap { [weak self] topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
+                do {
+                    guard let id = rpcRequest.id, let request = try rpcRequest.params?.get(RequestParams.self) else { return nil }
+                    return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                } catch {
+                    self?.logger.debug("Networking Interactor - \(error)")
+                }
+                return nil
             }
             .eraseToAnyPublisher()
     }
@@ -111,7 +116,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
         try rpcHistory.resolve(response)
-        let message = try! serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
+        let message = try serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
         try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.responseConfig.tag, prompt: protocolMethod.responseConfig.prompt, ttl: protocolMethod.responseConfig.ttl)
     }
 

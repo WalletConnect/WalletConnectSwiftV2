@@ -1,7 +1,6 @@
 import Foundation
 import UIKit
-import WalletConnectSign
-import WalletConnectPairing
+import WalletConnectModal
 
 class ConnectViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     let uri: WalletConnectURI
@@ -63,7 +62,7 @@ class ConnectViewController: UIViewController, UITableViewDataSource, UITableVie
     }
 
     @objc func connectWithExampleWallet() {
-        let url = URL(string: "https://walletconnect.com/wc?uri=\(uri.absoluteString)")!
+        let url = URL(string: "walletapp://wc?uri=\(uri.deeplinkUri)")!
         DispatchQueue.main.async {
             UIApplication.shared.open(url, options: [:]) { [weak self] _ in
                 self?.dismiss(animated: true, completion: nil)

@@ -1,7 +1,6 @@
 import SwiftUI
 
 final class MainModule {
-
     @discardableResult
     static func create(app: Application) -> UIViewController {
         let router = MainRouter(app: app)
@@ -13,5 +12,4 @@ final class MainModule {
 
         return viewController
     }
-
 }
