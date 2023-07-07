@@ -92,7 +92,7 @@ extension WalletPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] session in
                 showPairingLoading = false
-                router.present(request: result.request, importAccount: importAccount, context: result.context)
+                router.present(proposal: session.proposal, importAccount: importAccount, context: session.context)
             }
             .store(in: &disposeBag)
         
