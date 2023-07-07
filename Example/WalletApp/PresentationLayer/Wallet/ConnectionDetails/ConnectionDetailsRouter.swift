@@ -11,8 +11,8 @@ final class ConnectionDetailsRouter {
         self.app = app
     }
 
-    func present(request: AuthRequest, context: VerifyContext) {
-        AuthRequestModule.create(app: app, request: request, context: context)
+    func present(request: AuthRequest, importAccount: ImportAccount, context: VerifyContext) {
+        AuthRequestModule.create(app: app, request: request, importAccount: importAccount, context: context)
             .wrapToNavigationController()
             .present(from: viewController)
     }

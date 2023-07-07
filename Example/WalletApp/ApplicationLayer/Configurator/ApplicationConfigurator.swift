@@ -11,6 +11,11 @@ struct ApplicationConfigurator: Configurator {
     }
 
     func configure() {
-        WelcomeModule.create(app: app).present()
+        if let importAccount = app.accountStorage.importAccount {
+            MainModule.create(app: app, importAccount: importAccount)
+                .present()
+        } else {
+            WelcomeModule.create(app: app).present()
+        }
     }
 }
