@@ -10,11 +10,10 @@ final class AuthRequestInteractor {
     }
 
     func approve(request: AuthRequest, importAccount: ImportAccount) async throws {
-        let privateKey = importAccount.privateKey.data(using: .utf8)!
         let account = importAccount.account
         let signature = try messageSigner.sign(
             payload: request.payload.cacaoPayload(address: account.address),
-            privateKey: privateKey,
+            privateKey: Data(hex: importAccount.privateKey),
             type: .eip191)
         try await Web3Wallet.instance.respond(requestId: request.id, signature: signature, from: account)
     }
