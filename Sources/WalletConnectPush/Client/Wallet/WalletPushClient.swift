@@ -86,6 +86,7 @@ public class WalletPushClient {
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
     }
 
+    // TODO: Add docs
     public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
         try await pushStorage.setupSubscriptions(account: account)
         try await pushSyncService.registerSyncIfNeeded(account: account, onSign: onSign)
