@@ -6,7 +6,7 @@ let package = Package(
     name: "WalletConnect",
     platforms: [
         .iOS(.v14),
-        .macOS(.v11),
+        .macOS(.v12),
         .tvOS(.v14)
     ],
     products: [
@@ -55,6 +55,7 @@ let package = Package(
 
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
         .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
     ],
     targets: [
@@ -134,7 +135,10 @@ let package = Package(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],
             exclude: ["Secrets/secrets.json.sample"],
-            resources: [.copy("Secrets/secrets.json")]
+            resources: [
+                .copy("Secrets/secrets.json"),
+                .copy("Resources/Assets.xcassets")
+            ]
         ),
         .target(
             name: "WalletConnectSync",
