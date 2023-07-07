@@ -1,3 +1,0 @@
-module WalletConnectRouter {
-    header "Router.h"
-}
