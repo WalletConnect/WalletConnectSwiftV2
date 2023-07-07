@@ -88,10 +88,10 @@ public class WalletPushClient {
 
     // TODO: Add docs
     public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
+        try await pushStorage.initialize(account: account)
         try await pushStorage.setupSubscriptions(account: account)
         try await pushSyncService.registerSyncIfNeeded(account: account, onSign: onSign)
         try await pushSyncService.fetchHistoryIfNeeded(account: account)
-        try await pushStorage.initialize(account: account)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {

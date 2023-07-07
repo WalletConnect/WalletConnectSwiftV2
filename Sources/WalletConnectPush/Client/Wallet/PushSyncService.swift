@@ -6,6 +6,7 @@ final class PushSyncService {
     private let historyClient: HistoryClient
     private let logger: ConsoleLogging
     private let subscriptionsStore: SyncStore<PushSubscription>
+    private let messagesStore: KeyedDatabase<PushMessageRecord>
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
 
@@ -14,6 +15,7 @@ final class PushSyncService {
         logger: ConsoleLogging,
         historyClient: HistoryClient,
         subscriptionsStore: SyncStore<PushSubscription>,
+        messagesStore: KeyedDatabase<PushMessageRecord>,
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol
     ) {
@@ -21,6 +23,7 @@ final class PushSyncService {
         self.logger = logger
         self.historyClient = historyClient
         self.subscriptionsStore = subscriptionsStore
+        self.messagesStore = messagesStore
         self.networkingInteractor = networkingInteractor
         self.kms = kms
     }
@@ -75,13 +78,13 @@ final class PushSyncService {
             try kms.setSymmetricKey(symmetricKey, for: subscription.topic)
             try await networkingInteractor.subscribe(topic: subscription.topic)
 
-            let messages: [PushMessage] = try await historyClient.getMessages(
+            let messages: [PushMessageRecord] = try await historyClient.getMessages(
                 topic: subscription.topic,
                 count: 200,
                 direction: .backward
             )
 
-
+            messagesStore.set(elements: messages, for: subscription.topic)
         }
     }
 }
