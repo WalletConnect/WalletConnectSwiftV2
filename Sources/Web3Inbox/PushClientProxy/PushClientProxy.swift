@@ -7,9 +7,13 @@ final class PushClientProxy {
     var onSign: SigningCallback
     var onResponse: ((RPCResponse) async throws -> Void)?
 
-    init(client: WalletPushClient, onSign: @escaping SigningCallback) {
+    init(account: Account, client: WalletPushClient, onSign: @escaping SigningCallback) {
         self.client = client
         self.onSign = onSign
+
+        Task {
+            try await client.enableSync(account: account, onSign: onSign)
+        }
     }
 
     func request(_ request: RPCRequest) async throws {
