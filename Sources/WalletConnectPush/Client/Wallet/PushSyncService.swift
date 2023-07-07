@@ -78,13 +78,22 @@ final class PushSyncService {
             try kms.setSymmetricKey(symmetricKey, for: subscription.topic)
             try await networkingInteractor.subscribe(topic: subscription.topic)
 
-            let messages: [PushMessageRecord] = try await historyClient.getMessages(
+            let historyRecords: [HistoryRecord<PushMessage>] = try await historyClient.getRecords(
                 topic: subscription.topic,
                 count: 200,
                 direction: .backward
             )
 
-            messagesStore.set(elements: messages, for: subscription.topic)
+            let messageRecords = historyRecords.map { record in
+                return PushMessageRecord(
+                    id: record.id.string,
+                    topic: subscription.topic,
+                    message: record.object,
+                    publishedAt: Date()
+                )
+            }
+
+            messagesStore.set(elements: messageRecords, for: subscription.topic)
         }
     }
 }
