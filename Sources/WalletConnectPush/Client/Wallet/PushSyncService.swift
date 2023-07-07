@@ -6,7 +6,7 @@ final class PushSyncService {
     private let historyClient: HistoryClient
     private let logger: ConsoleLogging
     private let subscriptionsStore: SyncStore<PushSubscription>
-    private let networkingInteractor: NetworkingInteractor
+    private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
 
     init(
@@ -14,7 +14,7 @@ final class PushSyncService {
         logger: ConsoleLogging,
         historyClient: HistoryClient,
         subscriptionsStore: SyncStore<PushSubscription>,
-        networkingInteractor: NetworkingInteractor,
+        networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol
     ) {
         self.syncClient = syncClient

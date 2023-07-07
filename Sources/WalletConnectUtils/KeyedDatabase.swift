@@ -91,6 +91,17 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
 
         return true
     }
+
+    @discardableResult
+    public func deleteAll(for key: String) -> Bool {
+        var map = index[key]
+
+        guard index[key] != nil else { return false }
+
+        index[key] = nil
+
+        return true
+    }
 }
 
 private extension KeyedDatabase {

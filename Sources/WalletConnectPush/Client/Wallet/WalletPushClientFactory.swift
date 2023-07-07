@@ -2,7 +2,7 @@ import Foundation
 
 public struct WalletPushClientFactory {
 
-    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient, syncClient: SyncClient) -> WalletPushClient {
+    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient, syncClient: SyncClient, historyClient: HistoryClient) -> WalletPushClient {
         let logger = ConsoleLogger(suffix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
@@ -18,7 +18,8 @@ public struct WalletPushClientFactory {
             networkInteractor: networkInteractor,
             pairingRegisterer: pairingRegisterer,
             echoClient: echoClient,
-            syncClient: syncClient
+            syncClient: syncClient,
+            historyClient: historyClient
         )
     }
 
@@ -31,19 +32,20 @@ public struct WalletPushClientFactory {
         networkInteractor: NetworkInteracting,
         pairingRegisterer: PairingRegisterer,
         echoClient: EchoClient,
-        syncClient: SyncClient
+        syncClient: SyncClient,
+        historyClient: HistoryClient
     ) -> WalletPushClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let subscriptionStore: SyncStore<PushSubscription> = SyncStoreFactory.create(name: PushStorageIdntifiers.pushSubscription, syncClient: syncClient, storage: keyValueStorage)
         let subscriptionStoreDelegate = PushSubscriptionStoreDelegate(networkingInteractor: networkInteractor, kms: kms)
-        let pushStorage = PushStorage(subscriptionStore: subscriptionStore, subscriptionStoreDelegate: subscriptionStoreDelegate)
-        let pushSyncService = PushSyncService(syncClient: syncClient, logger: logger)
+        let messagesStore = KeyedDatabase<PushMessageRecord>(storage: keyValueStorage, identifier: PushStorageIdntifiers.pushMessagesRecords)
+        let pushStorage = PushStorage(subscriptionStore: subscriptionStore, messagesStore: messagesStore, subscriptionStoreDelegate: subscriptionStoreDelegate)
+        let pushSyncService = PushSyncService(syncClient: syncClient, logger: logger, historyClient: historyClient, subscriptionsStore: subscriptionStore, networkingInteractor: networkInteractor, kms: kms)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let pushMessagesRecordsStore = CodableStore<PushMessageRecord>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.pushMessagesRecords)
-        let pushMessagesDatabase = PushMessagesDatabase(store: pushMessagesRecordsStore)
-        let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, pushMessagesDatabase: pushMessagesDatabase, logger: logger)
-        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushStorage: pushStorage, pushMessagesDatabase: pushMessagesDatabase)
+        let pushMessageSubscriber = PushMessageSubscriber(networkingInteractor: networkInteractor, pushStorage: pushStorage, logger: logger)
+        let deletePushSubscriptionService = DeletePushSubscriptionService(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushStorage: pushStorage)
         let resubscribeService = PushResubscribeService(networkInteractor: networkInteractor, pushStorage: pushStorage)
 
         let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: PushStorageIdntifiers.dappsMetadataStore)
@@ -71,7 +73,6 @@ public struct WalletPushClientFactory {
             pushMessageSubscriber: pushMessageSubscriber,
             pushStorage: pushStorage,
             pushSyncService: pushSyncService,
-            pushMessagesDatabase: pushMessagesDatabase,
             deletePushSubscriptionService: deletePushSubscriptionService,
             resubscribeService: resubscribeService,
             pushSubscribeRequester: pushSubscribeRequester,

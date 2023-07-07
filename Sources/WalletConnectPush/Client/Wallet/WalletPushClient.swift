@@ -43,7 +43,6 @@ public class WalletPushClient {
     private let pushStorage: PushStorage
     private let pushSyncService: PushSyncService
     private let pushMessageSubscriber: PushMessageSubscriber
-    private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
@@ -59,7 +58,6 @@ public class WalletPushClient {
          pushMessageSubscriber: PushMessageSubscriber,
          pushStorage: PushStorage,
          pushSyncService: PushSyncService,
-         pushMessagesDatabase: PushMessagesDatabase,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          resubscribeService: PushResubscribeService,
          pushSubscribeRequester: PushSubscribeRequester,
@@ -76,7 +74,6 @@ public class WalletPushClient {
         self.pushMessageSubscriber = pushMessageSubscriber
         self.pushStorage = pushStorage
         self.pushSyncService = pushSyncService
-        self.pushMessagesDatabase = pushMessagesDatabase
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.resubscribeService = resubscribeService
         self.pushSubscribeRequester = pushSubscribeRequester
@@ -91,7 +88,8 @@ public class WalletPushClient {
 
     public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
         try await pushStorage.setupSubscriptions(account: account)
-        try await pushSyncService.registerIfNeeded(account: account, onSign: onSign)
+        try await pushSyncService.registerSyncIfNeeded(account: account, onSign: onSign)
+        try await pushSyncService.fetchHistoryIfNeeded(account: account)
         try await pushStorage.initialize(account: account)
     }
 
@@ -116,7 +114,7 @@ public class WalletPushClient {
     }
 
     public func getMessageHistory(topic: String) -> [PushMessageRecord] {
-        pushMessagesDatabase.getPushMessages(topic: topic)
+        pushStorage.getMessages(topic: topic)
     }
 
     public func deleteSubscription(topic: String) async throws {
@@ -124,7 +122,7 @@ public class WalletPushClient {
     }
 
     public func deletePushMessage(id: String) {
-        pushMessagesDatabase.deletePushMessage(id: id)
+        pushStorage.deleteMessage(id: id)
     }
 
     public func register(deviceToken: Data) async throws {
