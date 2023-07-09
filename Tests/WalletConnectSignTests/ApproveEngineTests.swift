@@ -18,6 +18,7 @@ final class ApproveEngineTests: XCTestCase {
     var sessionStorageMock: WCSessionStorageMock!
     var pairingRegisterer: PairingRegistererMock<SessionProposal>!
     var proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>!
+    var verifyContextStore: CodableStore<VerifyContext>!
     var sessionTopicToProposal: CodableStore<Session.Proposal>!
 
     var publishers = Set<AnyCancellable>()
@@ -30,10 +31,12 @@ final class ApproveEngineTests: XCTestCase {
         sessionStorageMock = WCSessionStorageMock()
         pairingRegisterer = PairingRegistererMock()
         proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        verifyContextStore = CodableStore<VerifyContext>(defaults: RuntimeKeyValueStorage(), identifier: "")
         sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: "")
         engine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
+            verifyContextStore: verifyContextStore,
             sessionTopicToProposal: sessionTopicToProposal,
             pairingRegisterer: pairingRegisterer,
             metadata: metadata,

@@ -196,7 +196,7 @@ public class Web3WalletClient {
     
     /// Query pending proposals
     /// - Returns: Pending proposals received from peer with `wc_sessionPropose` protocol method
-    public func getPendingProposals(topic: String? = nil) -> [Session.Proposal] {
+    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
         signClient.getPendingProposals(topic: topic)
     }
     

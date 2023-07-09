@@ -20,6 +20,7 @@ final class ApproveEngine {
     private let sessionStore: WCSessionStorage
     private let verifyClient: VerifyClient?
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
+    private let verifyContextStore: CodableStore<VerifyContext>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
     private let metadata: AppMetadata
@@ -31,6 +32,7 @@ final class ApproveEngine {
     init(
         networkingInteractor: NetworkInteracting,
         proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
+        verifyContextStore: CodableStore<VerifyContext>,
         sessionTopicToProposal: CodableStore<Session.Proposal>,
         pairingRegisterer: PairingRegisterer,
         metadata: AppMetadata,
@@ -42,6 +44,7 @@ final class ApproveEngine {
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
+        self.verifyContextStore = verifyContextStore
         self.sessionTopicToProposal = sessionTopicToProposal
         self.pairingRegisterer = pairingRegisterer
         self.metadata = metadata
@@ -304,6 +307,7 @@ private extension ApproveEngine {
                 origin: origin,
                 domain: payload.request.proposer.metadata.url
             )
+            verifyContextStore.set(verifyContext, forKey: proposal.proposer.publicKey)
             onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
         }
     }

@@ -4,13 +4,16 @@ final class HistoryService {
 
     private let history: RPCHistory
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
+    private let verifyContextStore: CodableStore<VerifyContext>
 
     init(
         history: RPCHistory,
-        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
+        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
+        verifyContextStore: CodableStore<VerifyContext>
     ) {
         self.history = history
         self.proposalPayloadsStore = proposalPayloadsStore
+        self.verifyContextStore = verifyContextStore
     }
 
     public func getSessionRequest(id: RPCID) -> Request? {
@@ -28,7 +31,7 @@ final class HistoryService {
         return getPendingRequests().filter { $0.topic == topic }
     }
     
-    func getPendingProposals() -> [Session.Proposal] {
+    func getPendingProposals() -> [(proposal: Session.Proposal, context: VerifyContext?)] {
         let pendingHistory = history.getPending()
         
         let requestSubscriptionPayloads = pendingHistory
@@ -44,12 +47,14 @@ final class HistoryService {
             proposalPayloadsStore.set($0, forKey: proposal.proposer.publicKey)
         }
         
-        return pendingHistory
+        let proposals = pendingHistory
             .compactMap { mapProposalRecord($0) }
+        
+        return proposals.map { ($0, try? verifyContextStore.get(key: $0.proposal.proposer.publicKey)) }
     }
     
-    func getPendingProposals(topic: String) -> [Session.Proposal] {
-        return getPendingProposals().filter { $0.pairingTopic == topic }
+    func getPendingProposals(topic: String) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
+        return getPendingProposals().filter { $0.proposal.pairingTopic == topic }
     }
 }
 

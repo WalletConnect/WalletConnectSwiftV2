@@ -37,12 +37,10 @@ final class WalletPresenter: ObservableObject {
     func onAppear() {
         showPairingLoading = app.requestSent
         removePairingIndicator()
-    }
-    
-    func onAppear() {
+        
         let proposals = interactor.getPendingProposals()
         if let proposal = proposals.last {
-            router.present(sessionProposal: proposal, sessionContext: nil)
+            router.present(sessionProposal: proposal.proposal, sessionContext: proposal.context)
         }
     }
     

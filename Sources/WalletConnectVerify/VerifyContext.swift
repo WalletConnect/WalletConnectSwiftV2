@@ -1,5 +1,5 @@
-public struct VerifyContext: Equatable, Hashable {
-    public enum ValidationStatus {
+public struct VerifyContext: Equatable, Hashable, Codable {
+    public enum ValidationStatus: Codable {
         case unknown
         case valid
         case invalid

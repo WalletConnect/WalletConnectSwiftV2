@@ -32,7 +32,7 @@ final class WalletInteractor {
         try await Web3Wallet.instance.disconnect(topic: session.topic)
     }
     
-    func getPendingProposals() -> [Session.Proposal] {
+    func getPendingProposals() -> [(proposal: Session.Proposal, context: VerifyContext?)] {
         Web3Wallet.instance.getPendingProposals()
     }
 }
