@@ -4,10 +4,10 @@ import Web3Wallet
 
 final class AuthRequestModule {
     @discardableResult
-    static func create(app: Application, request: AuthRequest, context: VerifyContext?) -> UIViewController {
+    static func create(app: Application, request: AuthRequest, importAccount: ImportAccount, context: VerifyContext?) -> UIViewController {
         let router = AuthRequestRouter(app: app)
-        let interactor = AuthRequestInteractor()
-        let presenter = AuthRequestPresenter(interactor: interactor, router: router, request: request, context: context)
+        let interactor = AuthRequestInteractor(messageSigner: app.messageSigner)
+        let presenter = AuthRequestPresenter(importAccount: importAccount, interactor: interactor, router: router, request: request, context: context)
         let view = AuthRequestView().environmentObject(presenter)
         let viewController = SceneViewController(viewModel: presenter, content: view)
 

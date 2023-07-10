@@ -60,13 +60,17 @@ class AccountRequestViewController: UIViewController, UITableViewDelegate, UITab
             do {
                 try await Sign.instance.request(params: request)
                 DispatchQueue.main.async { [weak self] in
-                    self?.presentConfirmationAlert()
+                    self?.openWallet()
                 }
             } catch {
                 print(error)
                 // show failure alert
             }
         }
+    }
+    
+    private func openWallet() {
+        UIApplication.shared.open(URL(string: "walletapp://wc?requestSent")!)
     }
 
     private func presentConfirmationAlert() {

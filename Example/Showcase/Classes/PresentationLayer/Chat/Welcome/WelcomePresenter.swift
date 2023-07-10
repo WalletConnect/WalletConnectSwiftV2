@@ -33,6 +33,8 @@ final class WelcomePresenter: ObservableObject {
 private extension WelcomePresenter {
 
     func setupInitialState() {
-        
+        interactor.trackConnection().sink { status in
+            print("Socket connection status: \(status)")
+        }.store(in: &disposeBag)
     }
 }

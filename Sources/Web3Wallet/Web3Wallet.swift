@@ -47,8 +47,7 @@ public class Web3Wallet {
     ) {
         Pair.configure(metadata: metadata)
         Auth.configure(crypto: crypto)
-        let clientId = try! Networking.interactor.getClientId()
-        Echo.configure(clientId: clientId, echoHost: echoHost, environment: environment)
+        Echo.configure(echoHost: echoHost, environment: environment)
         Web3Wallet.config = Web3Wallet.Config(crypto: crypto)
     }
 }

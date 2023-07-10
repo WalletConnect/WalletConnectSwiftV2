@@ -11,7 +11,8 @@ public class Chat {
         return ChatClientFactory.create(
             keyserverUrl: keyserverUrl,
             relayClient: Relay.instance,
-            networkingInteractor: Networking.interactor
+            networkingInteractor: Networking.interactor,
+            syncClient: Sync.instance
         )
     }()
 
@@ -22,7 +23,12 @@ public class Chat {
     /// Chat instance config method
     /// - Parameters:
     ///   - account: Chat initial account
-    static public func configure(keyserverUrl: String = "https://keys.walletconnect.com") {
+    ///   - crypto: Crypto utils implementation
+    static public func configure(
+        keyserverUrl: String = "https://keys.walletconnect.com",
+        bip44: BIP44Provider
+    ) {
         Chat.keyserverUrl = keyserverUrl
+        Sync.configure(bip44: bip44)
     }
 }

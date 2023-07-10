@@ -1,40 +1,36 @@
 import Foundation
 import Combine
-import WalletConnectUtils
 
 public class DappPushClient {
     public var proposalResponsePublisher: AnyPublisher<Result<PushSubscription, PushError>, Never> {
         return notifyProposeResponseSubscriber.proposalResponsePublisher
     }
 
-    private let deleteSubscriptionPublisherSubject = PassthroughSubject<String, Never>()
-
     public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        deleteSubscriptionPublisherSubject.eraseToAnyPublisher()
+        return pushStorage.deleteSubscriptionPublisher
     }
 
     public let logger: ConsoleLogging
 
     private let notifyProposer: NotifyProposer
-    private let subscriptionsProvider: SubscriptionsProvider
+    private let pushStorage: PushStorage
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let resubscribeService: PushResubscribeService
     private let notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         subscriptionsProvider: SubscriptionsProvider,
+         pushStorage: PushStorage,
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          resubscribeService: PushResubscribeService,
          notifyProposer: NotifyProposer,
          notifyProposeResponseSubscriber: NotifyProposeResponseSubscriber) {
         self.logger = logger
-        self.subscriptionsProvider = subscriptionsProvider
+        self.pushStorage = pushStorage
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.resubscribeService = resubscribeService
         self.notifyProposer = notifyProposer
         self.notifyProposeResponseSubscriber = notifyProposeResponseSubscriber
-        setupSubscriptions()
     }
 
     public func propose(account: Account, topic: String) async throws {
@@ -42,15 +38,6 @@ public class DappPushClient {
     }
 
     public func getActiveSubscriptions() -> [PushSubscription] {
-        subscriptionsProvider.getActiveSubscriptions()
-    }
-}
-
-private extension DappPushClient {
-
-    func setupSubscriptions() {
-        deletePushSubscriptionSubscriber.onDelete = {[unowned self] topic in
-            deleteSubscriptionPublisherSubject.send(topic)
-        }
+        pushStorage.getSubscriptions()
     }
 }

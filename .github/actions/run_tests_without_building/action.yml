@@ -8,9 +8,20 @@ inputs:
     description: 'The endpoint of the relay e.g. relay.walletconnect.com'
     required: false
     default: 'relay.walletconnect.com'
+  notify-endpoint:
+    description: 'The endpoint of the notify server e.g. cast.walletconnect.com'
+    required: false
+    default: 'cast.walletconnect.com'
   project-id:
     description: 'WalletConnect project id'
     required: true
+  slack-webhook-url:
+    description: 'Smoke tests slack webhoook url'
+    required: false
+  gm-dapp-project-id:
+    description: 'GM DApp Project ID'
+    required: false
+
 
 runs:
   using: "composite"
@@ -38,13 +49,13 @@ runs:
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
       shell: bash
-      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
+      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }}
 
     # Relay Integration tests
     - name: Run Relay integration tests
       if: inputs.type == 'relay-tests'
       shell: bash
-      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
+      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }}
 
     # Smoke tests
     - name: Run smoke tests
@@ -52,13 +63,29 @@ runs:
       shell: bash
       run: make smoke_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }}
 
+      # Notify tests
+    - name: Run notify tests
+      if: inputs.type == 'notify-tests'
+      shell: bash
+      run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }}
+
+      # Slack notification for failing smoke and relay tests
+    - name: Slack Notification for Failure
+      if: failure() && (inputs.type == 'smoke-tests' || inputs.type == 'relay-tests')
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: The smoke tests failed in the CI pipeline. Check the logs for more details.
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
+
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
       if: success() || failure()
       with:
           check_name: ${{ inputs.type }} junit report
           report_paths: 'test_results/report.junit'
-       
+
     - name: Zip test artifacts
       if: always()
       shell: bash

@@ -21,14 +21,12 @@ final class ChatListPresenter: ObservableObject {
 
     var receivedInviteViewModels: [InviteViewModel] {
         return receivedInvites
-            .filter { $0.status == .pending }
             .sorted(by: { $0.timestamp < $1.timestamp })
             .map { InviteViewModel(invite: $0) }
     }
 
     var sentInviteViewModels: [InviteViewModel] {
         return sentInvites
-            .filter { $0.status == .pending }
             .sorted(by: { $0.timestamp < $1.timestamp })
             .map { InviteViewModel(invite: $0) }
     }
@@ -64,6 +62,14 @@ final class ChatListPresenter: ObservableObject {
     func didLogoutPress() async throws {
         try await interactor.logout()
         router.presentWelcome()
+    }
+
+    @MainActor
+    func didCopyPress() async throws {
+        guard let account = interactor.account else { return }
+        UIPasteboard.general.string = account.absoluteString
+
+        throw AlertError(message: "Account copied to clipboard")
     }
 
     func didPressNewChat() {

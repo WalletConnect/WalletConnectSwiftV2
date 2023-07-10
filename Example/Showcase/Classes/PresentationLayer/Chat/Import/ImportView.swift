@@ -1,4 +1,5 @@
 import SwiftUI
+import WalletConnectModal
 
 struct ImportView: View {
 
@@ -17,8 +18,8 @@ struct ImportView: View {
 
             VStack {
                 
-                BrandButton(title: "Web3Modal WIP") {
-                    try await presenter.didPressWeb3Modal()
+                BrandButton(title: "WalletConnectModal WIP") {
+                    try await presenter.didPressWalletConnectModal()
                 }
                 
                 BrandButton(title: "Ok, done" ) {
@@ -26,6 +27,14 @@ struct ImportView: View {
                 }
             }
             .padding(16.0)
+
+            PlainButton {
+                try await presenter.didPressRandom()
+            } label: {
+                Text("Create new account")
+                    .foregroundColor(.white)
+            }
+            .padding(.bottom, 16)
         }
     }
 }

@@ -56,8 +56,7 @@ final class ApproveEngine {
         setupResponseErrorSubscriptions()
     }
 
-    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
-
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
@@ -87,9 +86,19 @@ final class ApproveEngine {
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
 
-        async let proposeResponse: () = networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SessionProposeProtocolMethod())
+        async let proposeResponse: () = networkingInteractor.respond(
+            topic: payload.topic,
+            response: response,
+            protocolMethod: SessionProposeProtocolMethod()
+        )
 
-        async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces, pairingTopic: pairingTopic)
+        async let settleRequest: () = settle(
+            topic: sessionTopic,
+            proposal: proposal,
+            namespaces: sessionNamespaces,
+            sessionProperties: sessionProperties,
+            pairingTopic: pairingTopic
+        )
 
         _ = try await [proposeResponse, settleRequest]
 
@@ -108,7 +117,7 @@ final class ApproveEngine {
         // TODO: Delete pairing if inactive 
     }
 
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], pairingTopic: String) async throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil, pairingTopic: String) async throws {
         guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
@@ -129,7 +138,9 @@ final class ApproveEngine {
             relay: relay,
             controller: selfParticipant,
             namespaces: namespaces,
-            expiry: Int64(expiry))
+            sessionProperties: sessionProperties,
+            expiry: Int64(expiry)
+        )
 
         let session = WCSession(
             topic: topic,
@@ -139,7 +150,8 @@ final class ApproveEngine {
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
             requiredNamespaces: proposal.requiredNamespaces,
-            acknowledged: false)
+            acknowledged: false
+        )
 
         logger.debug("Sending session settle request")
 

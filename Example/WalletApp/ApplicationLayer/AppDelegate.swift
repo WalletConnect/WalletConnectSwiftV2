@@ -1,5 +1,5 @@
 import UIKit
-import WalletConnectPush
+import Web3Inbox
 import Combine
 
 @main
@@ -25,8 +25,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
 
+        let deviceTokenString = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        UserDefaults.standard.set(deviceTokenString.joined(), forKey: "deviceToken")
+
         Task(priority: .high) {            
-            try await Push.wallet.register(deviceToken: deviceToken)
+            try await Web3Inbox.instance.register(deviceToken: deviceToken)
         }
     }
 

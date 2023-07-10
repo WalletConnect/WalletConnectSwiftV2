@@ -80,6 +80,9 @@
          <TestPlanReference
             reference = "container:RelayIntegrationTests.xctestplan">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:../NotifyTests.xctestplan">
+         </TestPlanReference>
       </TestPlans>
    </TestAction>
    <LaunchAction
