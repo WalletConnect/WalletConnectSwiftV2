@@ -20,7 +20,7 @@ public struct EchoClientFactory {
                        environment: APNSEnvironment) -> EchoClient {
 
         let logger = ConsoleLogger(suffix: "👂🏻", loggingLevel: .debug)
-        
+
         let httpClient = HTTPNetworkClient(host: echoHost)
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)

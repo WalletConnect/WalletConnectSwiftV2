@@ -1,8 +1,9 @@
 import Foundation
 import XCTest
-import Web3Wallet
 import Combine
-import TestingUtils
+@testable import Web3Wallet
+@testable import Auth
+@testable import WalletConnectEcho
 
 final class XPlatformW3WTests: XCTestCase {
     var w3wClient: Web3WalletClient!
@@ -22,13 +23,14 @@ final class XPlatformW3WTests: XCTestCase {
         let networkingLogger = ConsoleLogger(suffix: "🕸️" + " [Networking]", loggingLevel: .debug)
         let authLogger = ConsoleLogger(suffix: "✍🏿", loggingLevel: .debug)
 
-        let relayClient = RelayClient(
+        let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
-            keyValueStorage: RuntimeKeyValueStorage(),
+            keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
-            logger: relayLogger)
+            logger: relayLogger
+        )
 
         let networkingClient = NetworkingClientFactory.create(
             relayClient: relayClient,
@@ -48,7 +50,7 @@ final class XPlatformW3WTests: XCTestCase {
             networkingClient: networkingClient)
 
         let authClient = AuthClientFactory.create(
-            metadata: AppMetadata.stub(),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
             logger: authLogger,
@@ -98,6 +100,9 @@ final class XPlatformW3WTests: XCTestCase {
 class RemoteClientController {
     private let httpClient: HTTPClient
 
+    init(httpClient: HTTPClient) {
+        self.httpClient = httpClient
+    }
 
     func registerTest() async throws -> WalletConnectURI {
 
@@ -111,3 +116,18 @@ class RemoteClientController {
     
 }
 
+enum JavaScriptAutoTestsAPI {
+    struct QuickConnectEndpoint: HTTPService {
+        var path: String
+
+        var method: HTTPClient.HTTPMethod
+
+        var body: Data?
+
+        var queryParameters: [String : String]?
+
+        var additionalHeaderFields: [String : String]?
+
+
+    }
+}
