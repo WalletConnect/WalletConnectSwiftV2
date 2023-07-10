@@ -282,8 +282,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.sentInviteStoreDelegate.onUpdate(object)
-            case .delete(let id):
-                self.sentInviteStoreDelegate.onDelete(id)
+            case .delete(let object):
+                self.sentInviteStoreDelegate.onDelete(object)
             }
         }.store(in: &publishers)
 
@@ -291,8 +291,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.threadStoreDelegate.onUpdate(object, storage: self)
-            case .delete(let id):
-                self.threadStoreDelegate.onDelete(id)
+            case .delete(let object):
+                self.threadStoreDelegate.onDelete(object)
             }
         }.store(in: &publishers)
 
@@ -300,8 +300,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.inviteKeyDelegate.onUpdate(object, account: account)
-            case .delete(let id):
-                self.inviteKeyDelegate.onDelete(id)
+            case .delete(let object):
+                self.inviteKeyDelegate.onDelete(object)
             }
         }.store(in: &publishers)
 
@@ -309,8 +309,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.receiviedInviteStatusDelegate.onUpdate(object, storage: self, account: account)
-            case .delete(let id):
-                self.receiviedInviteStatusDelegate.onDelete(id)
+            case .delete(let object):
+                self.receiviedInviteStatusDelegate.onDelete(object)
             }
         }.store(in: &publishers)
     }

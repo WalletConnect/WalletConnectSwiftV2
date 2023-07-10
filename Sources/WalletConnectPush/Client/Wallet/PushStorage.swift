@@ -102,9 +102,9 @@ private extension PushStorage {
             case .set(let subscription):
                 subscriptionStoreDelegate.onUpdate(subscription)
                 newSubscriptionSubject.send(subscription)
-            case .delete(let id):
-                subscriptionStoreDelegate.onDelete(id)
-                deleteSubscriptionSubject.send(id)
+            case .delete(let object):
+                subscriptionStoreDelegate.onDelete(object, pushStorage: self)
+                deleteSubscriptionSubject.send(object.topic)
             }
         }.store(in: &publishers)
     }

@@ -44,8 +44,7 @@ final class Web3InboxClientFactory {
     }
 
     private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
-        // TODO: Revert url after testing session !!!
-        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden-git-feature-push-sync-walletconnect1.vercel.app/")!
+        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
         var queryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios"), URLQueryItem(name: "account", value: account.address), URLQueryItem(name: "authProvider", value: "ios")]
 
         for param in config.filter({ $0.value == false}) {
