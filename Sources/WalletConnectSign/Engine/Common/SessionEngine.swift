@@ -17,6 +17,7 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let historyService: HistoryService
+    private let verifyContextStore: CodableStore<VerifyContext>
     private let verifyClient: VerifyClient?
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -25,6 +26,7 @@ final class SessionEngine {
     init(
         networkingInteractor: NetworkInteracting,
         historyService: HistoryService,
+        verifyContextStore: CodableStore<VerifyContext>,
         verifyClient: VerifyClient?,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
@@ -32,6 +34,7 @@ final class SessionEngine {
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService
+        self.verifyContextStore = verifyContextStore
         self.verifyClient = verifyClient
         self.kms = kms
         self.sessionStore = sessionStore
@@ -185,7 +188,7 @@ private extension SessionEngine {
     }
 
     func sessionRequestNotExpired(requestId: RPCID) -> Bool {
-        guard let request = historyService.getSessionRequest(id: requestId)
+        guard let request = historyService.getSessionRequest(id: requestId)?.request
         else { return false }
 
         return !request.isExpired()
@@ -249,6 +252,7 @@ private extension SessionEngine {
                 origin: origin,
                 domain: session.peerParticipant.metadata.url
             )
+            verifyContextStore.set(verifyContext, forKey: request.id.string)
             onSessionRequest?(request, verifyContext)
         }
     }

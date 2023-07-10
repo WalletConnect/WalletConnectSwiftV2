@@ -338,7 +338,7 @@ public final class SignClient: SignClientProtocol {
     /// Query pending requests
     /// - Returns: Pending requests received from peer with `wc_sessionRequest` protocol method
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
-    public func getPendingRequests(topic: String? = nil) -> [Request] {
+    public func getPendingRequests(topic: String? = nil) -> [(request: Request, context: VerifyContext?)] {
         if let topic = topic {
             return historyService.getPendingRequests(topic: topic)
         } else {
@@ -358,7 +358,7 @@ public final class SignClient: SignClientProtocol {
 
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> Request? {
+    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         return historyService.getSessionRequest(id: id)
     }
 

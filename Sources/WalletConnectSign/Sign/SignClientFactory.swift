@@ -32,6 +32,7 @@ public struct SignClientFactory {
         let sessionEngine = SessionEngine(
             networkingInteractor: networkingClient,
             historyService: historyService,
+            verifyContextStore: verifyContextStore,
             verifyClient: verifyClient,
             kms: kms,
             sessionStore: sessionStore,

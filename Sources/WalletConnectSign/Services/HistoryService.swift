@@ -16,19 +16,23 @@ final class HistoryService {
         self.verifyContextStore = verifyContextStore
     }
 
-    public func getSessionRequest(id: RPCID) -> Request? {
+    public func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         guard let record = history.get(recordId: id) else { return nil }
-        return mapRequestRecord(record)
+        guard let request = mapRequestRecord(record) else {
+            return nil
+        }
+        return (request, try? verifyContextStore.get(key: request.id.string))
     }
     
-    func getPendingRequests() -> [Request] {
-        return history.getPending()
+    func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
+        let requests = history.getPending()
             .compactMap { mapRequestRecord($0) }
             .filter { !$0.isExpired() }
+        return requests.map { ($0, try? verifyContextStore.get(key: $0.id.string)) }
     }
 
-    func getPendingRequests(topic: String) -> [Request] {
-        return getPendingRequests().filter { $0.topic == topic }
+    func getPendingRequests(topic: String) -> [(request: Request, context: VerifyContext?)] {
+        return getPendingRequests().filter { $0.request.topic == topic }
     }
     
     func getPendingProposals() -> [(proposal: Session.Proposal, context: VerifyContext?)] {

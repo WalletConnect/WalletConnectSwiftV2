@@ -35,4 +35,8 @@ final class WalletInteractor {
     func getPendingProposals() -> [(proposal: Session.Proposal, context: VerifyContext?)] {
         Web3Wallet.instance.getPendingProposals()
     }
+    
+    func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
+        Web3Wallet.instance.getPendingRequests()
+    }
 }

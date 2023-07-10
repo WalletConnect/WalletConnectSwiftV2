@@ -42,6 +42,11 @@ final class WalletPresenter: ObservableObject {
         if let proposal = proposals.last {
             router.present(sessionProposal: proposal.proposal, sessionContext: proposal.context)
         }
+        
+        let pendingRequests = interactor.getPendingRequests()
+        if let request = pendingRequests.first(where: { $0.context != nil }) {
+            router.present(sessionRequest: request.0, sessionContext: request.1)
+        }
     }
     
     func onConnection(session: Session) {
