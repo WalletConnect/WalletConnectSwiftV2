@@ -119,12 +119,12 @@ final class SignClientMock: SignClientProtocol {
         return []
     }
     
-    func getPendingRequests(topic: String?) -> [WalletConnectSign.Request] {
-        return [request]
+    func getPendingRequests(topic: String?) -> [(request: WalletConnectSign.Request, context: WalletConnectSign.VerifyContext?)] {
+        return [(request, nil)]
     }
     
-    func getSessionRequestRecord(id: JSONRPC.RPCID) -> WalletConnectSign.Request? {
-        return request
+    func getSessionRequestRecord(id: JSONRPC.RPCID) -> (request: WalletConnectSign.Request, context: WalletConnectSign.VerifyContext?)? {
+        return (request, nil)
     }
     
     func cleanup() async throws {

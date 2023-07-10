@@ -28,6 +28,7 @@ final class SessionEngineTests: XCTestCase {
                 proposalPayloadsStore: proposalPayloadsStore,
                 verifyContextStore: verifyContextStore
             ),
+            verifyContextStore: verifyContextStore,
             verifyClient: nil,
             kms: KeyManagementServiceMock(),
             sessionStore: sessionStorage,
