@@ -2,7 +2,12 @@ import Foundation
 import HTTPClient
 
 enum ExplorerAPI: HTTPService {
-    case getListings(projectId: String, metadata: AppMetadata)
+    case getListings(
+        projectId: String,
+        metadata: AppMetadata,
+        recommendedIds: [String],
+        excludedIds: [String]
+    )
 
     var path: String {
         switch self {
@@ -22,9 +27,11 @@ enum ExplorerAPI: HTTPService {
 
     var queryParameters: [String: String]? {
         switch self {
-        case let .getListings(projectId, _):
+        case let .getListings(projectId, _, recommendedIds, excludedIds):
             return [
                 "projectId": projectId,
+                "recommendedIds": recommendedIds.joined(separator: ","),
+                "excludedIds": excludedIds.joined(separator: ",")
             ]
         }
     }
@@ -36,7 +43,7 @@ enum ExplorerAPI: HTTPService {
     var additionalHeaderFields: [String: String]? {
         
         switch self {
-        case let .getListings(_, metadata):
+        case let .getListings(_, metadata, _, _):
             return [
                 "User-Agent": ExplorerAPI.userAgent,
                 "referer": metadata.name

@@ -1,7 +1,14 @@
 import Foundation
 import Combine
 
-final class PushStorage {
+protocol PushStoring {
+    func getSubscriptions() -> [PushSubscription]
+    func getSubscription(topic: String) -> PushSubscription?
+    func setSubscription(_ subscription: PushSubscription) async throws
+    func deleteSubscription(topic: String) async throws
+}
+
+final class PushStorage: PushStoring {
 
     private var publishers = Set<AnyCancellable>()
 

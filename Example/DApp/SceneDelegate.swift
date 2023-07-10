@@ -22,7 +22,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             icons: ["https://avatars.githubusercontent.com/u/37784886"]
         )
         
-        WalletConnectModal.configure(projectId: InputConfig.projectId, metadata: metadata)
+        WalletConnectModal.configure(
+            projectId: InputConfig.projectId, 
+            metadata: metadata
+        )
 
         setupWindow(scene: scene)
     }

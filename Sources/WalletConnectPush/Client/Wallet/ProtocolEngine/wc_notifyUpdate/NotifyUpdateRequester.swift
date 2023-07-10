@@ -1,6 +1,10 @@
 import Foundation
 
-class NotifyUpdateRequester {
+protocol NotifyUpdateRequesting {
+    func update(topic: String, scope: Set<String>) async throws
+}
+
+class NotifyUpdateRequester: NotifyUpdateRequesting {
     enum Errors: Error {
         case noSubscriptionForGivenTopic
     }

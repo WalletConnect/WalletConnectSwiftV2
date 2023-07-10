@@ -36,6 +36,9 @@ public class WalletConnectModal {
         let projectId: String
         var metadata: AppMetadata
         var sessionParams: SessionParams
+        
+        let recommendedWalletIds: [String]
+        let excludedWalletIds: [String]
     }
     
     private(set) static var config: Config!
@@ -48,13 +51,17 @@ public class WalletConnectModal {
     public static func configure(
         projectId: String,
         metadata: AppMetadata,
-        sessionParams: SessionParams = .default
+        sessionParams: SessionParams = .default,
+        recommendedWalletIds: [String] = [],
+        excludedWalletIds: [String] = []
     ) {
         Pair.configure(metadata: metadata)
         WalletConnectModal.config = WalletConnectModal.Config(
             projectId: projectId,
             metadata: metadata,
-            sessionParams: sessionParams
+            sessionParams: sessionParams,
+            recommendedWalletIds: recommendedWalletIds,
+            excludedWalletIds: excludedWalletIds
         )
     }
     

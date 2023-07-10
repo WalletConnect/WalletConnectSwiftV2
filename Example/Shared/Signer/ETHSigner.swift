@@ -4,17 +4,21 @@ import Web3
 
 struct ETHSigner {
 
-    private init() {}
+    private let importAccount: ImportAccount
 
-    static var address: String {
+    init(importAccount: ImportAccount) {
+        self.importAccount = importAccount
+    }
+
+    var address: String {
         return privateKey.address.hex(eip55: true)
     }
 
-    private static let privateKey: EthereumPrivateKey = {
-        return EthKeyStore.shared.privateKey
-    }()
+    private var privateKey: EthereumPrivateKey {
+        return try! EthereumPrivateKey(hexPrivateKey: importAccount.privateKey)
+    }
 
-    static func personalSign(_ params: AnyCodable) -> AnyCodable {
+    func personalSign(_ params: AnyCodable) -> AnyCodable {
         let params = try! params.get([String].self)
         let messageToSign = params[0]
         let dataToHash = dataToHash(messageToSign)
@@ -23,12 +27,12 @@ struct ETHSigner {
         return AnyCodable(result)
     }
 
-    static func signTypedData(_ params: AnyCodable) -> AnyCodable {
+    func signTypedData(_ params: AnyCodable) -> AnyCodable {
         let result = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c"
         return AnyCodable(result)
     }
 
-    static func sendTransaction(_ params: AnyCodable) -> AnyCodable {
+    func sendTransaction(_ params: AnyCodable) -> AnyCodable {
         let params = try! params.get([EthereumTransaction].self)
         var transaction = params[0]
         transaction.gas = EthereumQuantity(quantity: BigUInt("1234"))
@@ -39,7 +43,7 @@ struct ETHSigner {
         return AnyCodable(result)
     }
 
-    private static func dataToHash(_ message: String) -> Bytes {
+    private func dataToHash(_ message: String) -> Bytes {
         let prefix = "\u{19}Ethereum Signed Message:\n"
         let messageData = Data(hex: message)
         let prefixData = (prefix + String(messageData.count)).data(using: .utf8)!

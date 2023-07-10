@@ -5,6 +5,7 @@ import WalletConnectPush
 final class PushRequestPresenter: ObservableObject {
     private let interactor: PushRequestInteractor
     private let router: PushRequestRouter
+    private let importAccount: ImportAccount
 
     let pushRequest: PushRequest
 
@@ -17,17 +18,19 @@ final class PushRequestPresenter: ObservableObject {
     init(
         interactor: PushRequestInteractor,
         router: PushRequestRouter,
-        pushRequest: PushRequest
+        pushRequest: PushRequest,
+        importAccount: ImportAccount
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.pushRequest = pushRequest
+        self.importAccount = importAccount
     }
 
     @MainActor
     func onApprove() async throws {
-        try await interactor.approve(pushRequest: pushRequest)
+        try await interactor.approve(pushRequest: pushRequest, importAccount: importAccount)
         router.dismiss()
     }
 
