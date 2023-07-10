@@ -43,12 +43,12 @@ final class WalletPresenter: ObservableObject {
         
         let proposals = interactor.getPendingProposals()
         if let proposal = proposals.last {
-            router.present(sessionProposal: proposal.proposal, sessionContext: proposal.context)
+            router.present(sessionProposal: proposal.proposal, importAccount: importAccount, sessionContext: proposal.context)
         }
         
         let pendingRequests = interactor.getPendingRequests()
         if let request = pendingRequests.first(where: { $0.context != nil }) {
-            router.present(sessionRequest: request.0, sessionContext: request.1)
+            router.present(sessionRequest: request.request, importAccount: importAccount, sessionContext: request.context)
         }
     }
     
