@@ -7,7 +7,7 @@ import Combine
 
 final class XPlatformW3WTests: XCTestCase {
     var w3wClient: Web3WalletClient!
-    var remoteClientController: RemoteClientController!
+    var javaScriptAutoTestsAPI: JavaScriptAutoTestsAPI!
     private var publishers = [AnyCancellable]()
 
     override func setUp() {
@@ -69,6 +69,7 @@ final class XPlatformW3WTests: XCTestCase {
 
     func testSessionRequest() async throws {
 
+        let expectation = expectation(description: "session settled")
         w3wClient.sessionProposalPublisher
             .sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
@@ -78,56 +79,51 @@ final class XPlatformW3WTests: XCTestCase {
             }
             .store(in: &publishers)
 
-        w3wClient.sessionRequestPublisher
-            .sink { [unowned self] (request, _) in
-                Task(priority: .high) {
-                    try await w3wClient.respond(topic: request.topic, requestId: request.id, response: .response(AnyCodable("")))
-                }
-            }
-            .store(in: &publishers)
+        w3wClient.sessionSettlePublisher.sink { _ in
+            expectation.fulfill()
+        }
+        .store(in: &publishers)
 
-
-
-
-        let pairingUri = try await remoteClientController.registerTest()
+        let pairingUri = try await javaScriptAutoTestsAPI.quickConnect()
         try await w3wClient.pair(uri: pairingUri)
 
-        wait(for: [], timeout: InputConfig.defaultTimeout)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 }
 
 
-class RemoteClientController {
+class JavaScriptAutoTestsAPI {
     private let httpClient: HTTPClient
 
     init(httpClient: HTTPClient) {
         self.httpClient = httpClient
     }
 
-    func registerTest() async throws -> WalletConnectURI {
-
+    func quickConnect() async throws -> WalletConnectURI {
+        let endpoint = Endpoint(path: "/quick_connect", method: .get)
+        return try await httpClient.request(WalletConnectURI.self, at: endpoint)
     }
-
-
-    func validateTest() async throws {
-        
-    }
-    
-    
 }
 
-enum JavaScriptAutoTestsAPI {
-    struct QuickConnectEndpoint: HTTPService {
-        var path: String
 
-        var method: HTTPClient.HTTPMethod
+struct Endpoint: HTTPService {
+    var path: String
 
-        var body: Data?
+    var method: HTTPMethod
 
-        var queryParameters: [String : String]?
+    var body: Data?
 
-        var additionalHeaderFields: [String : String]?
+    var queryParameters: [String : String]?
 
+    var additionalHeaderFields: [String : String]?
 
+    init(path: String, method: HTTPMethod, body: Data? = nil, queryParameters: [String : String]? = nil, additionalHeaderFields: [String : String]? = nil) {
+        self.path = path
+        self.method = method
+        self.body = body
+        self.queryParameters = queryParameters
+        self.additionalHeaderFields = additionalHeaderFields
     }
+
+
 }

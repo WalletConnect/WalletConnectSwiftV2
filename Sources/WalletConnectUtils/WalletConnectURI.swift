@@ -1,6 +1,6 @@
 import Foundation
 
-public struct WalletConnectURI: Equatable {
+public struct WalletConnectURI: Equatable, Codable {
 
     public let topic: String
     public let version: String
