@@ -18,7 +18,7 @@ final class SessionEngine {
     private let networkingInteractor: NetworkInteracting
     private let historyService: HistoryService
     private let verifyContextStore: CodableStore<VerifyContext>
-    private let verifyClient: VerifyClient?
+    private let verifyClient: VerifyClientProtocol
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -27,7 +27,7 @@ final class SessionEngine {
         networkingInteractor: NetworkInteracting,
         historyService: HistoryService,
         verifyContextStore: CodableStore<VerifyContext>,
-        verifyClient: VerifyClient?,
+        verifyClient: VerifyClientProtocol,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging
@@ -241,19 +241,20 @@ private extension SessionEngine {
         guard !request.isExpired() else {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
-        guard let verifyClient else {
-            onSessionRequest?(request, nil)
-            return
-        }
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
-            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
-            let verifyContext = await verifyClient.createVerifyContext(
-                origin: origin,
-                domain: session.peerParticipant.metadata.url
-            )
-            verifyContextStore.set(verifyContext, forKey: request.id.string)
-            onSessionRequest?(request, verifyContext)
+            do {
+                let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let verifyContext = verifyClient.createVerifyContext(
+                    origin: origin,
+                    domain: session.peerParticipant.metadata.url
+                )
+                verifyContextStore.set(verifyContext, forKey: request.id.string)
+                onSessionRequest?(request, verifyContext)
+            } catch {
+                onSessionRequest?(request, nil)
+                return
+            }
         }
     }
 

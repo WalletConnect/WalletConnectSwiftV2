@@ -33,7 +33,7 @@ class WalletRequestSubscriberTests: XCTestCase {
             kms: KeyManagementServiceMock(),
             walletErrorResponder: walletErrorResponder,
             pairingRegisterer: pairingRegisterer,
-            verifyClient: nil,
+            verifyClient: VerifyClientMock(),
             verifyContextStore: verifyContextStore
         )
     }

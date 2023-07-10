@@ -50,6 +50,10 @@ final class PushClientProxy {
             let params = try parse(DeletePushMessageRequest.self, params: request.params)
             client.deletePushMessage(id: params.id)
             try await respond(request: request)
+        case .enableSync:
+            let params = try parse(EnableSyncRequest.self, params: request.params)
+            try await client.enableSync(account: params.account, onSign: onSign)
+            try await respond(request: request)
         }
     }
 }
@@ -91,6 +95,10 @@ private extension PushClientProxy {
 
     struct DeletePushMessageRequest: Codable {
         let id: String
+    }
+
+    struct EnableSyncRequest: Codable {
+        let account: Account
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {

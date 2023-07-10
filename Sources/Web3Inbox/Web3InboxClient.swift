@@ -22,7 +22,7 @@ public final class Web3InboxClient {
     private let chatWebviewSubscriber: WebViewRequestSubscriber
     private let pushWebviewSubscriber: WebViewRequestSubscriber
 
-init(
+    init(
         webView: WKWebView,
         account: Account,
         logger: ConsoleLogging,

@@ -28,16 +28,8 @@ public struct SignClientFactory {
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.proposals.rawValue)
         let verifyContextStore = CodableStore<VerifyContext>(defaults: keyValueStorage, identifier: VerifyStorageIdentifiers.context.rawValue)
         let historyService = HistoryService(history: rpcHistory, proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
-        let verifyClient = try? VerifyClientFactory.create(verifyHost: metadata.verifyUrl)
-        let sessionEngine = SessionEngine(
-            networkingInteractor: networkingClient,
-            historyService: historyService,
-            verifyContextStore: verifyContextStore,
-            verifyClient: verifyClient,
-            kms: kms,
-            sessionStore: sessionStore,
-            logger: logger
-        )
+        let verifyClient = VerifyClientFactory.create()
+        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyContextStore: verifyContextStore, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.sessionTopicToProposal.rawValue)

@@ -6,6 +6,7 @@ import Web3Wallet
 final class SessionRequestPresenter: ObservableObject {
     private let interactor: SessionRequestInteractor
     private let router: SessionRequestRouter
+    private let importAccount: ImportAccount
     
     let sessionRequest: Request
     let verified: Bool?
@@ -23,19 +24,21 @@ final class SessionRequestPresenter: ObservableObject {
         interactor: SessionRequestInteractor,
         router: SessionRequestRouter,
         sessionRequest: Request,
+        importAccount: ImportAccount,
         context: VerifyContext?
     ) {
         defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.sessionRequest = sessionRequest
+        self.importAccount = importAccount
         self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
     }
 
     @MainActor
     func onApprove() async throws {
         do {
-            try await interactor.approve(sessionRequest: sessionRequest)
+            try await interactor.approve(sessionRequest: sessionRequest, importAccount: importAccount)
             router.dismiss()
         } catch {
             errorMessage = error.localizedDescription

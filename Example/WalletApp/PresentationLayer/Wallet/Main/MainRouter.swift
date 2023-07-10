@@ -12,8 +12,8 @@ final class MainRouter {
         self.app = app
     }
 
-    func walletViewController() -> UIViewController {
-        return WalletModule.create(app: app)
+    func walletViewController(importAccount: ImportAccount) -> UIViewController {
+        return WalletModule.create(app: app, importAccount: importAccount)
             .wrapToNavigationController()
     }
 
@@ -24,6 +24,11 @@ final class MainRouter {
 
     func web3InboxViewController() -> UIViewController {
         return Web3InboxModule.create(app: app)
+            .wrapToNavigationController()
+    }
+
+    func settingsViewController() -> UIViewController {
+        return SettingsModule.create(app: app)
             .wrapToNavigationController()
     }
 

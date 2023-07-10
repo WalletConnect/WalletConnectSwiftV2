@@ -4,7 +4,6 @@ import Web3Inbox
 
 final class Web3InboxViewController: UIViewController {
 
-
     init() {
         super.init(nibName: nil, bundle: nil)
     }

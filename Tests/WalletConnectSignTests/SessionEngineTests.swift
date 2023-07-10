@@ -29,7 +29,7 @@ final class SessionEngineTests: XCTestCase {
                 verifyContextStore: verifyContextStore
             ),
             verifyContextStore: verifyContextStore,
-            verifyClient: nil,
+            verifyClient: VerifyClientMock(),
             kms: KeyManagementServiceMock(),
             sessionStore: sessionStorage,
             logger: ConsoleLoggerMock()

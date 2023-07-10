@@ -33,7 +33,6 @@ struct ModalContainerView_Previews: PreviewProvider {
     struct Content: View {
         
         init() {
-            
             let projectId = "9bfe94c9cbf74aaa0597094ef561f703"
             let metadata = AppMetadata(
                 name: "Showcase App",

@@ -70,7 +70,7 @@ final class AppProposalServiceTests: XCTestCase {
             logger: logger,
             pairingStore: storageMock,
             sessionStore: WCSessionStorageMock(),
-            verifyClient: nil
+            verifyClient: VerifyClientMock()
         )
     }
 

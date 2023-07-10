@@ -8,9 +8,9 @@ class WalletRequestSubscriber {
     private var publishers = [AnyCancellable]()
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
-    private let verifyClient: VerifyClient?
+    private let verifyClient: VerifyClientProtocol
     private let verifyContextStore: CodableStore<VerifyContext>
-    
+
     var onRequest: (((request: AuthRequest, context: VerifyContext?)) -> Void)?
     
     init(
@@ -19,7 +19,7 @@ class WalletRequestSubscriber {
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
-        verifyClient: VerifyClient?,
+        verifyClient: VerifyClientProtocol,
         verifyContextStore: CodableStore<VerifyContext>
     ) {
         self.networkingInteractor = networkingInteractor
@@ -44,19 +44,20 @@ class WalletRequestSubscriber {
                 
                 let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
                 
-                guard let verifyClient else {
-                    onRequest?((request, nil))
-                    return
-                }
                 Task(priority: .high) {
                     let assertionId = payload.decryptedPayload.sha256().toHexString()
-                    let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
-                    let verifyContext = await verifyClient.createVerifyContext(
-                        origin: origin,
-                        domain: payload.request.payloadParams.domain
-                    )
-                    verifyContextStore.set(verifyContext, forKey: request.id.string)
-                    onRequest?((request, verifyContext))
+                    do {
+                        let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                        let verifyContext = verifyClient.createVerifyContext(
+                            origin: origin,
+                            domain: payload.request.payloadParams.domain
+                        )
+                        verifyContextStore.set(verifyContext, forKey: request.id.string)
+                        onRequest?((request, verifyContext))
+                    } catch {
+                        onRequest?((request, nil))
+                        return
+                    }
                 }
             }.store(in: &publishers)
     }

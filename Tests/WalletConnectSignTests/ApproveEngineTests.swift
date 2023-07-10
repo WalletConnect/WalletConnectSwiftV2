@@ -44,7 +44,7 @@ final class ApproveEngineTests: XCTestCase {
             logger: ConsoleLoggerMock(),
             pairingStore: pairingStorageMock,
             sessionStore: sessionStorageMock,
-            verifyClient: nil
+            verifyClient: VerifyClientMock()
         )
     }
 
