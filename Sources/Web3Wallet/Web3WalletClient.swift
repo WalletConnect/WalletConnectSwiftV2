@@ -208,7 +208,7 @@ public class Web3WalletClient {
     
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests() throws -> [AuthRequest] {
+    public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
         try authClient.getPendingRequests()
     }
     

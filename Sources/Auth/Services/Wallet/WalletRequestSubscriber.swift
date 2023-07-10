@@ -9,6 +9,8 @@ class WalletRequestSubscriber {
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
     private let verifyClient: VerifyClient?
+    private let verifyContextStore: CodableStore<VerifyContext>
+    
     var onRequest: (((request: AuthRequest, context: VerifyContext?)) -> Void)?
     
     init(
@@ -17,7 +19,8 @@ class WalletRequestSubscriber {
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
-        verifyClient: VerifyClient?
+        verifyClient: VerifyClient?,
+        verifyContextStore: CodableStore<VerifyContext>
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -25,6 +28,7 @@ class WalletRequestSubscriber {
         self.walletErrorResponder = walletErrorResponder
         self.pairingRegisterer = pairingRegisterer
         self.verifyClient = verifyClient
+        self.verifyContextStore = verifyContextStore
         subscribeForRequest()
     }
     
@@ -51,6 +55,7 @@ class WalletRequestSubscriber {
                         origin: origin,
                         domain: payload.request.payloadParams.domain
                     )
+                    verifyContextStore.set(verifyContext, forKey: request.id.string)
                     onRequest?((request, verifyContext))
                 }
             }.store(in: &publishers)
