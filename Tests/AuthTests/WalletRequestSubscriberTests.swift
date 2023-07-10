@@ -25,7 +25,7 @@ class WalletRequestSubscriberTests: XCTestCase {
                                       kms: KeyManagementServiceMock(),
                                       walletErrorResponder: walletErrorResponder,
                                       pairingRegisterer: pairingRegisterer,
-                                      verifyClient: nil)
+                                      verifyClient: VerifyClientMock())
     }
 
     func testSubscribeRequest() {

@@ -25,7 +25,7 @@ public struct SignClientFactory {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.sessions.rawValue)))
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.proposals.rawValue)
         let historyService = HistoryService(history: rpcHistory)
-        let verifyClient = try? VerifyClientFactory.create(verifyHost: metadata.verifyUrl)
+        let verifyClient = VerifyClientFactory.create()
         let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
