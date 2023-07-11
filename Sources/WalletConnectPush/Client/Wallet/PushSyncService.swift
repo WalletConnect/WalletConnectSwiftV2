@@ -9,6 +9,7 @@ final class PushSyncService {
     private let messagesStore: KeyedDatabase<PushMessageRecord>
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
+    private let coldStartStore: CodableStore<Date>
 
     init(
         syncClient: SyncClient,
@@ -17,7 +18,8 @@ final class PushSyncService {
         subscriptionsStore: SyncStore<PushSubscription>,
         messagesStore: KeyedDatabase<PushMessageRecord>,
         networkingInteractor: NetworkInteracting,
-        kms: KeyManagementServiceProtocol
+        kms: KeyManagementServiceProtocol,
+        coldStartStore: CodableStore<Date>
     ) {
         self.syncClient = syncClient
         self.logger = logger
@@ -26,6 +28,7 @@ final class PushSyncService {
         self.messagesStore = messagesStore
         self.networkingInteractor = networkingInteractor
         self.kms = kms
+        self.coldStartStore = coldStartStore
     }
 
     func registerSyncIfNeeded(account: Account, onSign: @escaping SigningCallback) async throws {
@@ -43,7 +46,7 @@ final class PushSyncService {
     }
 
     func fetchHistoryIfNeeded(account: Account) async throws {
-        guard isColdStart(account: account) else { return }
+        guard try isColdStart(account: account) else { return }
 
         try await historyClient.register(tags: [
             "5000", // sync_set
@@ -95,6 +98,8 @@ final class PushSyncService {
 
             messagesStore.set(elements: messageRecords, for: subscription.topic)
         }
+
+        coldStartStore.set(Date(), forKey: account.absoluteString)
     }
 }
 
@@ -105,8 +110,14 @@ private extension PushSyncService {
         let value: String?
     }
 
-    func isColdStart(account: Account) -> Bool {
-        // TODO: Add cold start logic
-        return true
+    func isColdStart(account: Account) throws -> Bool {
+        guard let lastFetch = try coldStartStore.get(key: account.absoluteString) else {
+            return true
+        }
+        guard let days = Calendar.current.dateComponents([.day], from: lastFetch, to: Date()).day else {
+            return true
+        }
+
+        return days < 30
     }
 }
