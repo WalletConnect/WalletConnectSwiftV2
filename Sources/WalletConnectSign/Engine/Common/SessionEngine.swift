@@ -85,6 +85,7 @@ final class SessionEngine {
                 protocolMethod: protocolMethod,
                 reason: SignReasonCode.sessionRequestExpired
             )
+            verifyContextStore.delete(forKey: requestId.string)
             throw Errors.sessionRequestExpired
         }
 
@@ -93,6 +94,7 @@ final class SessionEngine {
             response: RPCResponse(id: requestId, outcome: response),
             protocolMethod: protocolMethod
         )
+        verifyContextStore.delete(forKey: requestId.string)
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
