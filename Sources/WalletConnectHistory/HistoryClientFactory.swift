@@ -1,8 +1,9 @@
 import Foundation
 
-public class HistoryClientFactory {
+class HistoryClientFactory {
 
-    public static func create(keychain: KeychainStorageProtocol) -> HistoryClient {
+    static func create() -> HistoryClient {
+        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return HistoryClientFactory.create(
             historyUrl: "https://history.walletconnect.com",
             relayUrl: "wss://relay.walletconnect.com",

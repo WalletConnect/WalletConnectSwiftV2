@@ -9,6 +9,7 @@ import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
 @testable import WalletConnectSync
+@testable import WalletConnectHistory
 
 final class PairingTests: XCTestCase {
 
@@ -81,6 +82,11 @@ final class PairingTests: XCTestCase {
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        let historyClient = HistoryClientFactory.create(
+            historyUrl: "https://history.walletconnect.com",
+            relayUrl: "wss://relay.walletconnect.com",
+            keychain: keychain
+        )
         walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
                                                           logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
@@ -89,7 +95,8 @@ final class PairingTests: XCTestCase {
                                                           networkInteractor: networkingInteractor,
                                                           pairingRegisterer: pairingClient,
                                                           echoClient: echoClient,
-                                                          syncClient: syncClient)
+                                                          syncClient: syncClient,
+                                                          historyClient: historyClient)
     }
 
     func makeWalletPairingClient() {

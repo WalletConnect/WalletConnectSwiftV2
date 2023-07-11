@@ -26,7 +26,7 @@ final class SentInviteStoreDelegate {
         }
     }
 
-    func onDelete(_ id: String) {
+    func onDelete(_ object: SentInvite) {
         // TODO: Implement unsubscribe
     }
 }

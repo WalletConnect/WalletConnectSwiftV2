@@ -8,16 +8,14 @@ class DeletePushSubscriptionService {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let pushStorage: PushStorage
-    private let pushMessagesDatabase: PushMessagesDatabase?
+
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         pushStorage: PushStorage,
-         pushMessagesDatabase: PushMessagesDatabase?) {
+         pushStorage: PushStorage) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
-        self.pushMessagesDatabase = pushMessagesDatabase
         self.pushStorage = pushStorage
     }
 
@@ -28,7 +26,7 @@ class DeletePushSubscriptionService {
         else { throw Errors.pushSubscriptionNotFound}
         let protocolMethod = PushDeleteProtocolMethod()
         try await pushStorage.deleteSubscription(topic: topic)
-        pushMessagesDatabase?.deletePushMessages(topic: topic)
+        pushStorage.deleteMessages(topic: topic)
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 

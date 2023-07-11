@@ -3,7 +3,7 @@ import Combine
 
 class PushMessageSubscriber {
     private let networkingInteractor: NetworkInteracting
-    private let pushMessagesDatabase: PushMessagesDatabase
+    private let pushStorage: PushStorage
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
     private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
@@ -12,11 +12,9 @@ class PushMessageSubscriber {
         pushMessagePublisherSubject.eraseToAnyPublisher()
     }
 
-    init(networkingInteractor: NetworkInteracting,
-         pushMessagesDatabase: PushMessagesDatabase,
-         logger: ConsoleLogging) {
+    init(networkingInteractor: NetworkInteracting, pushStorage: PushStorage, logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
-        self.pushMessagesDatabase = pushMessagesDatabase
+        self.pushStorage = pushStorage
         self.logger = logger
         subscribeForPushMessages()
     }
@@ -28,7 +26,7 @@ class PushMessageSubscriber {
                 logger.debug("Received Push Message")
 
                 let record = PushMessageRecord(id: payload.id.string, topic: payload.topic, message: payload.request, publishedAt: payload.publishedAt)
-                pushMessagesDatabase.setPushMessageRecord(record)
+                pushStorage.setMessage(record)
                 pushMessagePublisherSubject.send(record)
 
             }.store(in: &publishers)
