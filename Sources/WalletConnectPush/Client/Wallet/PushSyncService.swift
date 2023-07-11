@@ -118,6 +118,6 @@ private extension PushSyncService {
             return true
         }
 
-        return days < 30
+        return days >= 30
     }
 }
