@@ -4,6 +4,10 @@ import Web3Inbox
 
 final class Web3InboxViewController: UIViewController {
 
+    private var webView: WKWebView? {
+        return view as? WKWebView
+    }
+
     init() {
         super.init(nibName: nil, bundle: nil)
     }
@@ -19,6 +23,13 @@ final class Web3InboxViewController: UIViewController {
         navigationItem.title = "Web3Inbox SDK"
         navigationItem.largeTitleDisplayMode = .never
         view = Web3Inbox.instance.getWebView()
+
+        let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshTapped))
+        navigationItem.rightBarButtonItem = refresh
+    }
+
+    @objc func refreshTapped() {
+        webView?.reload()
     }
 }
 

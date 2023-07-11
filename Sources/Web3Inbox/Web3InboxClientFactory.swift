@@ -12,9 +12,8 @@ final class Web3InboxClientFactory {
     ) -> Web3InboxClient {
         let url = buildUrl(account: account, config: config)
         let logger = ConsoleLogger(suffix: "📬", loggingLevel: .debug)
-        let chatWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
-        let pushWebviewSubscriber = WebViewRequestSubscriber(logger: logger)
-        let webView = WebViewFactory(url: url, chatWebviewSubscriber: chatWebviewSubscriber, pushWebviewSubscriber: pushWebviewSubscriber).create()
+        let webviewSubscriber = WebViewRequestSubscriber(url: url, logger: logger)
+        let webView = WebViewFactory(url: url, webviewSubscriber: webviewSubscriber).create()
         let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter(), logger: logger)
         let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter(), logger: logger)
 
@@ -24,8 +23,6 @@ final class Web3InboxClientFactory {
         let pushClientProxy = PushClientProxy(client: pushClient, onSign: onSign)
         let pushClientSubscriber = PushClientRequestSubscriber(client: pushClient, logger: logger)
 
-        let webViewRefreshHandler = WebViewRefreshHandler(webView: webView, initUrl: url, logger: logger)
-
         return Web3InboxClient(
             webView: webView,
             account: account,
@@ -34,12 +31,10 @@ final class Web3InboxClientFactory {
             clientSubscriber: clientSubscriber,
             chatWebviewProxy: chatWebViewProxy,
             pushWebviewProxy: pushWebViewProxy,
-            chatWebviewSubscriber: chatWebviewSubscriber,
-            pushWebviewSubscriber: pushWebviewSubscriber,
+            webviewSubscriber: webviewSubscriber,
             pushClientProxy: pushClientProxy,
             pushClientSubscriber: pushClientSubscriber,
-            pushClient: pushClient,
-            webViewRefreshHandler: webViewRefreshHandler
+            pushClient: pushClient
         )
     }
 
