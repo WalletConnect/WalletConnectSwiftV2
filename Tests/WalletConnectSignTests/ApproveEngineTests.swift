@@ -165,7 +165,7 @@ final class ApproveEngineTests: XCTestCase {
         }
         pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
 
-        wait(for: [proposalReceivedExpectation], timeout: 1)
+        wait(for: [proposalReceivedExpectation])
         
         XCTAssertTrue(verifyContextStore.getAll().count == 1)
     }
@@ -184,7 +184,7 @@ final class ApproveEngineTests: XCTestCase {
         }
         pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
         
-        await fulfillment(of: [proposalReceivedExpectation])
+        wait(for: [proposalReceivedExpectation])
         
         XCTAssertTrue(verifyContextStore.getAll().count == 1)
         
@@ -207,7 +207,7 @@ final class ApproveEngineTests: XCTestCase {
         }
         pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
         
-        await fulfillment(of: [proposalReceivedExpectation])
+        wait(for: [proposalReceivedExpectation])
         
         XCTAssertTrue(verifyContextStore.getAll().count == 1)
         
