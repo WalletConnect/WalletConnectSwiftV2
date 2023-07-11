@@ -1,5 +1,7 @@
 import Foundation
+import WalletConnectIdentity
 import Web3
+import WalletConnectSigner
 import WalletConnectSign
 
 enum ImportAccount: Codable {
@@ -12,7 +14,6 @@ enum ImportAccount: Codable {
     static let swiftId = "swift.eth"
     static let kotlinId = "kotlin.eth"
     static let jsId = "js.eth"
-    static let privateKeyId = "privateKey"
     static let web3ModalId = "web3Modal"
 
     init?(input: String) {
@@ -25,7 +26,14 @@ enum ImportAccount: Codable {
             self = .js
         default:
             switch true {
-            case input.starts(with: ImportAccount.privateKeyId):
+            case input.starts(with: ImportAccount.web3ModalId):
+                let components = input.components(separatedBy: "-")
+                guard components.count == 3, let account = Account(components[1]) else {
+                    return nil
+                }
+                self = .web3Modal(account: account, topic: components[2])
+
+            default:
                 if let _ = try? EthereumPrivateKey(hexPrivateKey: "0x" + input, ctx: nil) {
                     self = .custom(privateKey: input)
                 } else if let _ = try? EthereumPrivateKey(hexPrivateKey: input, ctx: nil) {
@@ -33,14 +41,6 @@ enum ImportAccount: Codable {
                 } else {
                     return nil
                 }
-            case input.starts(with: ImportAccount.web3ModalId):
-                let components = input.components(separatedBy: "-")
-                guard components.count == 3, let account = Account(components[1]) else {
-                    return nil
-                }
-                self = .web3Modal(account: account, topic: components[2])
-            default:
-                return nil
             }
         }
     }
@@ -54,7 +54,7 @@ enum ImportAccount: Codable {
         case .js:
             return ImportAccount.jsId
         case .custom(let privateKey):
-            return "\(ImportAccount.privateKeyId)-\(privateKey)"
+            return privateKey
         case .web3Modal(let account, let topic):
             return "\(ImportAccount.web3ModalId)-\(account.absoluteString)-\(topic)"
         }
@@ -67,7 +67,7 @@ enum ImportAccount: Codable {
         case .kotlin:
             return Account("eip155:1:0xC313B6F74FcB89147e751220184F0C56D37a210e")!
         case .js:
-            return Account("eip155:1:0x265F4Eb49ab95ED142C4995EF8B5FC9e57538836")!
+            return Account("eip155:1:0xd96576825acfDe5182857514C93a204E9aFe3436")!
         case .custom(let privateKey):
             let address = try! EthereumPrivateKey(hexPrivateKey: "0x" + privateKey, ctx: nil).address.hex(eip55: true)
             return Account("eip155:1:\(address)")!
@@ -83,12 +83,19 @@ enum ImportAccount: Codable {
         case .kotlin:
             return "646a0ebac6bd34ba5f498b809148b2aca3793374cafe9dc417cf63bea80450bf"
         case .js:
-            return "8df6b8206eebcd3da89b750f1cf9bba887630c3c5eade83f44c06fa4f7cc5f65"
+            return "0e0c9cea8b4854b93e142d1c613d6a6cbd87a506008cd153996275475f20eb7d"
         case .custom(let privateKey):
             return privateKey
         case .web3Modal:
             fatalError("Private key not available")
         }
+    }
+
+    func onSign(message: String) -> SigningResult {
+        let privateKey = Data(hex: privateKey)
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+        let signature = try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        return .signed(signature)
     }
 
     static func new() -> ImportAccount {

@@ -141,7 +141,23 @@ final class ModalViewModel: ObservableObject {
     }
         
     func onCopyButton() {
+        
+        
+        guard let uri else {
+            toast = Toast(style: .error, message: "No uri found")
+            return
+        }
+        
+        #if os(iOS)
+        
         UIPasteboard.general.string = uri
+        
+        #elseif canImport(AppKit)
+        
+        NSPasteboard.general.setString(uri, forType: .string)
+        
+        #endif
+        
         toast = Toast(style: .info, message: "URI copied into clipboard")
     }
     

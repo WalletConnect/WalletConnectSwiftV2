@@ -3,7 +3,7 @@ import Combine
 
 public enum SyncUpdate<Object: DatabaseObject> {
     case set(object: Object)
-    case delete(id: String)
+    case delete(object: Object)
 }
 
 public final class SyncStore<Object: DatabaseObject> {
@@ -87,6 +87,16 @@ public final class SyncStore<Object: DatabaseObject> {
         let record = try indexStore.getRecord(topic: result.key)
         try await delete(id: id, for: record.account)
     }
+
+    public func getStoreTopic(account: Account) throws -> String {
+        let record = try indexStore.getRecord(account: account, name: name)
+        return record.topic
+    }
+
+    public func setInStore(objects: [Object], for account: Account) throws {
+        let record = try indexStore.getRecord(account: account, name: name)
+        objectStore.set(elements: objects, for: record.topic)
+    }
 }
 
 private extension SyncStore {
@@ -105,8 +115,8 @@ private extension SyncStore {
                     syncUpdateSubject.send((topic, record.account, .set(object: object)))
                 }
             case .delete(let delete):
-                if try! deleteInStore(id: delete.key, for: record.account) {
-                    syncUpdateSubject.send((topic, record.account, .delete(id: delete.key)))
+                if let object = get(for: delete.key), try! deleteInStore(id: delete.key, for: record.account) {
+                    syncUpdateSubject.send((topic, record.account, .delete(object: object)))
                 }
             }
         }.store(in: &publishers)

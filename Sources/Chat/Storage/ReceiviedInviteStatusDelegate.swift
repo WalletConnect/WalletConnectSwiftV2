@@ -14,7 +14,7 @@ final class ReceiviedInviteStatusDelegate {
         }
     }
 
-    func onDelete(_ id: String) {
+    func onDelete(_ status: ReceivedInviteStatus) {
 
     }
 }

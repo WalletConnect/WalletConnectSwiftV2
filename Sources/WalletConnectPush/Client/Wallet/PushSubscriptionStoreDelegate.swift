@@ -18,7 +18,11 @@ final class PushSubscriptionStoreDelegate {
         }
     }
 
-    func onDelete(_ id: String) {
-
+    func onDelete(_ subscription: PushSubscription, pushStorage: PushStorage) {
+        Task(priority: .high) {
+            kms.deleteSymmetricKey(for: subscription.topic)
+            networkingInteractor.unsubscribe(topic: subscription.topic)
+            pushStorage.deleteMessages(topic: subscription.topic)
+        }
     }
 }

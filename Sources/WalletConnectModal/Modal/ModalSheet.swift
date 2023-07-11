@@ -78,8 +78,12 @@ public struct ModalSheet: View {
             VStack {
                 if viewModel.destination.hasSearch {
                     TextField("Search", text: $viewModel.searchTerm)
-                        .textFieldStyle(.roundedBorder)
-                        .autocapitalization(.none)
+                        .transform {
+                            #if os(iOS)
+                            $0.textFieldStyle(.roundedBorder)
+                                .autocapitalization(.none)
+                            #endif
+                        }
                         .padding(.horizontal, 50)
                 } else {
                     Text(viewModel.destination.contentTitle)
@@ -93,18 +97,16 @@ public struct ModalSheet: View {
     
     @ViewBuilder
     private func welcome() -> some View {
-        if #available(iOS 14.0, *) {
-            WalletList(
-                wallets: .init(get: {
-                    viewModel.filteredWallets
-                }, set: { _ in }),
-                destination: .init(get: {
-                    viewModel.destination
-                }, set: { _ in }),
-                navigateTo: viewModel.navigateTo(_:),
-                onListingTap: viewModel.onListingTap(_:)
-            )
-        }
+        WalletList(
+            wallets: .init(get: {
+                viewModel.filteredWallets
+            }, set: { _ in }),
+            destination: .init(get: {
+                viewModel.destination
+            }, set: { _ in }),
+            navigateTo: viewModel.navigateTo(_:),
+            onListingTap: viewModel.onListingTap(_:)
+        )
     }
     
     private func qrCode() -> some View {
@@ -112,7 +114,7 @@ public struct ModalSheet: View {
             if let uri = viewModel.uri {
                 QRCodeView(uri: uri)
             } else {
-                ActivityIndicator(isAnimating: .constant(true), style: .large)
+                ActivityIndicator(isAnimating: .constant(true))
             }
         }
     }

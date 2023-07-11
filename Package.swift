@@ -5,9 +5,9 @@ import PackageDescription
 let package = Package(
     name: "WalletConnect",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15),
-        .tvOS(.v13)
+        .iOS(.v14),
+        .macOS(.v11),
+        .tvOS(.v14)
     ],
     products: [
         .library(
@@ -76,7 +76,7 @@ let package = Package(
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync"],
+            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectEcho",
@@ -148,6 +148,9 @@ let package = Package(
         .testTarget(
             name: "ChatTests",
             dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
+        .testTarget(
+            name: "NotifyTests",
+            dependencies: ["WalletConnectPush", "TestingUtils"]),
         .testTarget(
             name: "AuthTests",
             dependencies: ["Auth", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
