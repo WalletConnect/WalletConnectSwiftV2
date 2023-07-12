@@ -3,6 +3,7 @@ import SwiftUI
 struct WhatIsWalletView: View {
     
     var navigateTo: (Destination) -> Void
+    var navigateToExternalLink: (URL) -> Void
     
     var body: some View {
         
@@ -10,17 +11,17 @@ struct WhatIsWalletView: View {
             HelpSection(
                 title: "A home for your digital assets",
                 description: "A wallet lets you store, send and receive digital assets like cryptocurrencies and NFTs.",
-                assets: ["DeFi", "NFT", "ETH"]
+                assets: [.DeFi, .NFT, .ETH]
             )
             HelpSection(
                 title: "One login for all of web3",
                 description: "Log in to any app by connecting your wallet. Say goodbye to countless passwords!",
-                assets: ["Login", "Profile", "Lock"]
+                assets: [.Login, .Profile, .Lock]
             )
             HelpSection(
                 title: "Your gateway to a new web",
                 description: "With your wallet, you can explore and interact with DeFi, NFTs, DAOs, and much more.",
-                assets: ["Browser", "Noun", "DAO"]
+                assets: [.Browser, .Noun, .DAO]
             )
             
             HStack {
@@ -28,16 +29,16 @@ struct WhatIsWalletView: View {
                     navigateTo(.getWallet)
                 }) {
                     HStack {
-                        Image("wallet", bundle: .module)
+                        Image(.wallet)
                         Text("Get a Wallet")
                     }
                 }
                 Button(action: {
-                    
+                    navigateToExternalLink(URL(string: "https://ethereum.org/en/wallets/")!)
                 }) {
                     HStack {
                         Text("Learn More")
-                        Image("external_link", bundle: .module)
+                        Image(.external_link)
                     }
                 }
             }
@@ -51,13 +52,13 @@ struct HelpSection: View {
     
     let title: String
     let description: String
-    let assets: [String]
+    let assets: [Asset]
     
     var body: some View {
         VStack {
             HStack {
                 ForEach(assets, id: \.self) { asset in
-                    Image(asset, bundle: .module)
+                    Image(asset)
                 }
             }
             
@@ -81,6 +82,6 @@ struct WhatIsWalletView_Previews: PreviewProvider {
     
     static var previews: some View {
         
-        WhatIsWalletView(navigateTo: { _ in})
+        WhatIsWalletView(navigateTo: { _ in}, navigateToExternalLink: { _ in })
     }
 }

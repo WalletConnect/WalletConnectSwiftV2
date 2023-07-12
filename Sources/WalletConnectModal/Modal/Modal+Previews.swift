@@ -22,7 +22,6 @@ class WebSocketFactoryMock: WebSocketFactory {
     }
 }
 
-@available(iOS 14.0, *)
 struct ModalContainerView_Previews: PreviewProvider {
     
     static var previews: some View {
@@ -33,7 +32,8 @@ struct ModalContainerView_Previews: PreviewProvider {
     struct Content: View {
         
         init() {
-            let projectId = "9bfe94c9cbf74aaa0597094ef561f703"
+            
+            let projectId = Secrets.load().projectID
             let metadata = AppMetadata(
                 name: "Showcase App",
                 description: "Showcase description",

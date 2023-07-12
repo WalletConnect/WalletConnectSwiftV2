@@ -139,9 +139,9 @@ struct WalletList: View {
             .padding(.vertical, 3)
             .frame(width: 60, height: 60)
             .background(Color.background2)
-            .cornerRadius(8)
+            .cornerRadius(16)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 16)
                     .stroke(.gray.opacity(0.4), lineWidth: 1)
             )
             
@@ -153,7 +153,7 @@ struct WalletList: View {
             
             Spacer()
         }
-        .frame(maxWidth: 80, maxHeight: 96)
+        .frame(width: 80, height: 96)
     }
     
     @ViewBuilder
@@ -162,6 +162,11 @@ struct WalletList: View {
             VStack {
                 WalletImage(wallet: wallet)
                     .frame(width: 60, height: 60)
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(.gray.opacity(0.4), lineWidth: 1)
+                    )
                 
                 Text(wallet.name)
                     .font(.system(size: 12))
@@ -209,7 +214,7 @@ struct WalletList: View {
             } label: {
                 HStack {
                     Text("Try Again")
-                    Image("external_link", bundle: .module)
+                    Image(.external_link)
                 }
             }
             .buttonStyle(W3MButtonStyle())

@@ -132,7 +132,10 @@ let package = Package(
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "WalletConnectModal",
-            dependencies: ["QRCode", "WalletConnectSign"]),
+            dependencies: ["QRCode", "WalletConnectSign"],
+            exclude: ["Secrets/secrets.json.sample"],
+            resources: [.copy("Secrets/secrets.json")]
+        ),
         .target(
             name: "WalletConnectSync",
             dependencies: ["WalletConnectSigner"]),
