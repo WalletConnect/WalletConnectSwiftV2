@@ -7,19 +7,7 @@ struct ModalContainerView: View {
         
     var body: some View {
         VStack(spacing: 0) {
-                        
-            Color.thickOverlay
-                .colorScheme(.light)
-                .transform {
-                    #if os(iOS)
-                        $0.onTapGesture {
-                            withAnimation {
-                                showModal = false
-                            }
-                        }
-                    #endif
-                }
-                .opacity(showModal ? 1 : 0)
+            Color.clear
             
             if showModal {
                 ModalSheet(
@@ -31,11 +19,22 @@ struct ModalContainerView: View {
                 .environment(\.projectId, WalletConnectModal.config.projectId)
                 .transition(.move(edge: .bottom))
                 .animation(.spring(), value: showModal)
-                .background(Color.thickOverlay
-                    .colorScheme(.light).opacity(showModal ? 1 : 0))
             }
         }
-        .background(Color.clear)
+        .background(
+            Color.thickOverlay
+                .colorScheme(.light)
+                .opacity(showModal ? 1 : 0)
+                .transform {
+                    #if os(iOS)
+                        $0.onTapGesture {
+                            withAnimation {
+                                showModal = false
+                            }
+                        }
+                    #endif
+                }
+        )
         .edgesIgnoringSafeArea(.all)
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
