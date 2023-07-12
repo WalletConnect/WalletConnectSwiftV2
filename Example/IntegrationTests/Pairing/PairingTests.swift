@@ -68,6 +68,7 @@ final class PairingTests: XCTestCase {
                                                      logger: pushLogger,
                                                      keyValueStorage: keyValueStorage,
                                                      keychainStorage: keychain,
+                                                     groupKeychainStorage: KeychainStorageMock(),
                                                      networkInteractor: networkingInteractor,
                                                      syncClient: syncClient)
     }
