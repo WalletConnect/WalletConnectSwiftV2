@@ -19,7 +19,8 @@ public class Push {
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
             echoClient: Echo.instance,
-            syncClient: Sync.instance
+            syncClient: Sync.instance,
+            historyClient: History.instance
         )
     }()
 

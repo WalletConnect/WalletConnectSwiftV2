@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-
 public class WalletPushClient {
 
     private var publishers = Set<AnyCancellable>()
@@ -44,7 +43,6 @@ public class WalletPushClient {
     private let pushStorage: PushStorage
     private let pushSyncService: PushSyncService
     private let pushMessageSubscriber: PushMessageSubscriber
-    private let pushMessagesDatabase: PushMessagesDatabase
     private let resubscribeService: PushResubscribeService
     private let pushSubscribeResponseSubscriber: PushSubscribeResponseSubscriber
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
@@ -52,6 +50,7 @@ public class WalletPushClient {
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let notifyProposeResponder: NotifyProposeResponder
     private let notifyProposeSubscriber: NotifyProposeSubscriber
+    private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -59,7 +58,6 @@ public class WalletPushClient {
          pushMessageSubscriber: PushMessageSubscriber,
          pushStorage: PushStorage,
          pushSyncService: PushSyncService,
-         pushMessagesDatabase: PushMessagesDatabase,
          deletePushSubscriptionService: DeletePushSubscriptionService,
          resubscribeService: PushResubscribeService,
          pushSubscribeRequester: PushSubscribeRequester,
@@ -68,14 +66,14 @@ public class WalletPushClient {
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyProposeResponder: NotifyProposeResponder,
-         notifyProposeSubscriber: NotifyProposeSubscriber
+         notifyProposeSubscriber: NotifyProposeSubscriber,
+         subscriptionsAutoUpdater: SubscriptionsAutoUpdater
     ) {
         self.logger = logger
         self.echoClient = echoClient
         self.pushMessageSubscriber = pushMessageSubscriber
         self.pushStorage = pushStorage
         self.pushSyncService = pushSyncService
-        self.pushMessagesDatabase = pushMessagesDatabase
         self.deletePushSubscriptionService = deletePushSubscriptionService
         self.resubscribeService = resubscribeService
         self.pushSubscribeRequester = pushSubscribeRequester
@@ -85,12 +83,15 @@ public class WalletPushClient {
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyProposeResponder = notifyProposeResponder
         self.notifyProposeSubscriber = notifyProposeSubscriber
+        self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
     }
 
+    // TODO: Add docs
     public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
-        try await pushSyncService.registerIfNeeded(account: account, onSign: onSign)
+        try await pushSyncService.registerSyncIfNeeded(account: account, onSign: onSign)
         try await pushStorage.initialize(account: account)
         try await pushStorage.setupSubscriptions(account: account)
+        try await pushSyncService.fetchHistoryIfNeeded(account: account)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
@@ -114,7 +115,7 @@ public class WalletPushClient {
     }
 
     public func getMessageHistory(topic: String) -> [PushMessageRecord] {
-        pushMessagesDatabase.getPushMessages(topic: topic)
+        pushStorage.getMessages(topic: topic)
     }
 
     public func deleteSubscription(topic: String) async throws {
@@ -122,7 +123,7 @@ public class WalletPushClient {
     }
 
     public func deletePushMessage(id: String) {
-        pushMessagesDatabase.deletePushMessage(id: id)
+        pushStorage.deleteMessage(id: id)
     }
 
     public func register(deviceToken: Data) async throws {

@@ -115,6 +115,10 @@ final class ModalViewModel: ObservableObject {
         destinationStack.append(destination)
     }
     
+    func navigateToExternalLink(_ url: URL) {
+        uiApplicationWrapper.openURL(url, nil)
+    }
+    
     func onListingTap(_ listing: Listing) {
         navigateToDeepLink(
             universalLink: listing.mobile.universal ?? "",
@@ -159,6 +163,12 @@ final class ModalViewModel: ObservableObject {
         #endif
         
         toast = Toast(style: .info, message: "URI copied into clipboard")
+    }
+    
+    func onCloseButton() {
+        withAnimation {
+            isShown.wrappedValue = false
+        }
     }
     
     @MainActor

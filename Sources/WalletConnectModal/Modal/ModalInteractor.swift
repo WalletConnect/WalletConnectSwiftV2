@@ -21,7 +21,9 @@ final class DefaultModalSheetInteractor: ModalSheetInteractor {
             ListingsResponse.self,
             at: ExplorerAPI.getListings(
                 projectId: WalletConnectModal.config.projectId,
-                metadata: WalletConnectModal.config.metadata
+                metadata: WalletConnectModal.config.metadata,
+                recommendedIds: WalletConnectModal.config.recommendedWalletIds,
+                excludedIds: WalletConnectModal.config.excludedWalletIds
             )
         )
     

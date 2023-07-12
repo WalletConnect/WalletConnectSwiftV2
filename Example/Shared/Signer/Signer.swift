@@ -9,16 +9,18 @@ final class Signer {
     
     private init() {}
 
-    static func sign(request: Request) throws -> AnyCodable {
+    static func sign(request: Request, importAccount: ImportAccount) throws -> AnyCodable {
+        let signer = ETHSigner(importAccount: importAccount)
+
         switch request.method {
         case "personal_sign":
-            return ETHSigner.personalSign(request.params)
+            return signer.personalSign(request.params)
 
         case "eth_signTypedData":
-            return ETHSigner.signTypedData(request.params)
+            return signer.signTypedData(request.params)
 
         case "eth_sendTransaction":
-            return ETHSigner.sendTransaction(request.params)
+            return signer.sendTransaction(request.params)
 
         case "solana_signTransaction":
             return SOLSigner.signTransaction(request.params)
