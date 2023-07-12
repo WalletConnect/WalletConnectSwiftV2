@@ -6,7 +6,7 @@ import Web3Inbox
 final class ConfigurationService {
 
     func configure(importAccount: ImportAccount) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(projectId: InputConfig.projectId)
 
         let metadata = AppMetadata(
             name: "Example Wallet",
