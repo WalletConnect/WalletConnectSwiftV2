@@ -1,18 +1,17 @@
 import SwiftUI
 
 struct GetAWalletView: View {
-    
     let wallets: [Listing]
     let onWalletTap: (Listing) -> Void
     let navigateToExternalLink: (URL) -> Void
     
     var body: some View {
-        List {
-            ForEach(wallets, id: \.id) { wallet in
-                Button {
+        ScrollView {
+            List {
+                ForEach(wallets, id: \.id) { wallet in
+                    Button {
                         onWalletTap(wallet)
-                } label: {
-                        
+                    } label: {
                         HStack {
                             WalletImage(wallet: wallet)
                                 .frame(width: 40, height: 40)
@@ -32,8 +31,8 @@ struct GetAWalletView: View {
             .frame(minHeight: 400)
             .listStyle(.plain)
             
+            
             VStack(alignment: .center, spacing: 8) {
-                
                 Text("Not what you’re looking for?")
                     .font(
                         .system(size: 16)
@@ -69,9 +68,7 @@ struct GetAWalletView: View {
 }
 
 struct GetAWalletView_Previews: PreviewProvider {
-    
     static var previews: some View {
-        
         GetAWalletView(
             wallets: Listing.stubList,
             onWalletTap: { _ in },

@@ -149,6 +149,7 @@ public struct ModalSheet: View {
                 onWalletTap: viewModel.onGetWalletTap(_:),
                 navigateToExternalLink: viewModel.navigateToExternalLink(_:)
             )
+            .frame(minHeight: isLandscape ? 200 : 550)
             .padding(.bottom, 20)
         }
     }
