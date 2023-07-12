@@ -6,14 +6,15 @@ struct GetAWalletView: View {
     let navigateToExternalLink: (URL) -> Void
     
     var body: some View {
-        List {
-            ForEach(wallets, id: \.id) { wallet in
-                Button {
-                    onWalletTap(wallet)
-                } label: {
-                    HStack {
-                        WalletImage(wallet: wallet)
-                            .frame(width: 40, height: 40)
+        ScrollView {
+            List {
+                ForEach(wallets, id: \.id) { wallet in
+                    Button {
+                        onWalletTap(wallet)
+                    } label: {
+                        HStack {
+                            WalletImage(wallet: wallet)
+                                .frame(width: 40, height: 40)
                             
                         Text(wallet.name)
                             .font(.system(size: 16, weight: .medium))
@@ -30,10 +31,11 @@ struct GetAWalletView: View {
         .frame(minHeight: 400)
         .listStyle(.plain)
             
-        VStack(alignment: .center, spacing: 8) {
-            Text("Not what you’re looking for?")
-                .font(
-                    .system(size: 16)
+            
+            VStack(alignment: .center, spacing: 8) {
+                Text("Not what you’re looking for?")
+                    .font(
+                        .system(size: 16)
                         .weight(.semibold)
                 )
                 .multilineTextAlignment(.center)
