@@ -3,6 +3,12 @@ import SwiftUI
 public struct ModalSheet: View {
     @ObservedObject var viewModel: ModalViewModel
     
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+    
+    var isLandscape: Bool {
+        verticalSizeClass == .compact
+    }
+    
     public var body: some View {
         VStack(spacing: 0) {
             modalHeader()
@@ -15,27 +21,25 @@ public struct ModalSheet: View {
             .background(Color.background1)
             .cornerRadius(30, corners: [.topLeft, .topRight])
         }
-        .padding(.bottom, 40)
         .edgesIgnoringSafeArea(.bottom)
+        .background(
+            VStack(spacing: 0) {
+                Color.accent
+                    .frame(height: 90)
+                    .cornerRadius(8, corners: [[.topLeft, .topRight]])
+                Color.background1
+            }
+        )
+        .toastView(toast: $viewModel.toast)
+        .if(isLandscape) {
+            $0.padding(.horizontal, 80)
+        }
         .onAppear {
             Task {
                 await viewModel.fetchWallets()
                 await viewModel.createURI()
             }
         }
-        .background(
-            ZStack {
-                Color.thickOverlay.colorScheme(.light)
-                
-                VStack(spacing: 0) {
-                    Color.accent
-                        .frame(height: 90)
-                        .cornerRadius(8, corners: [[.topLeft, .topRight]])
-                    Color.background1
-                }
-            }
-        )
-        .toastView(toast: $viewModel.toast)
     }
     
     private func modalHeader() -> some View {
@@ -55,7 +59,7 @@ public struct ModalSheet: View {
             .padding(.trailing, 10)
         }
         .foregroundColor(Color.foreground1)
-        .frame(height: 48)
+        .frame(height: 44)
     }
     
     private func contentHeader() -> some View {
@@ -77,7 +81,7 @@ public struct ModalSheet: View {
         }
         .animation(.default)
         .foregroundColor(.accent)
-        .frame(height: 60)
+        .frame(height: 50)
         .overlay(
             VStack {
                 if viewModel.destination.hasSearch {
@@ -135,14 +139,17 @@ public struct ModalSheet: View {
                 navigateTo: viewModel.navigateTo(_:),
                 navigateToExternalLink: viewModel.navigateToExternalLink(_:)
             )
+            .padding(.bottom, 20)
         case .qr:
             qrCode()
+                .padding(.bottom, 20)
         case .getWallet:
             GetAWalletView(
                 wallets: Array(viewModel.wallets.prefix(6)),
                 onWalletTap: viewModel.onGetWalletTap(_:),
                 navigateToExternalLink: viewModel.navigateToExternalLink(_:)
             )
+            .padding(.bottom, 20)
         }
     }
 }

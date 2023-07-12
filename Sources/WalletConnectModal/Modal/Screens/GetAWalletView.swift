@@ -7,13 +7,11 @@ struct GetAWalletView: View {
     let navigateToExternalLink: (URL) -> Void
     
     var body: some View {
-        VStack {
-            
-            List {
-                ForEach(wallets) { wallet in
-                    Button {
+        List {
+            ForEach(wallets, id: \.id) { wallet in
+                Button {
                         onWalletTap(wallet)
-                    } label: {
+                } label: {
                         
                         HStack {
                             WalletImage(wallet: wallet)
