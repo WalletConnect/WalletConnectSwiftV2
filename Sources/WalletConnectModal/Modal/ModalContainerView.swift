@@ -31,9 +31,11 @@ struct ModalContainerView: View {
                 .environment(\.projectId, WalletConnectModal.config.projectId)
                 .transition(.move(edge: .bottom))
                 .animation(.spring(), value: showModal)
+                .background(Color.thickOverlay
+                    .colorScheme(.light).opacity(showModal ? 1 : 0))
             }
         }
-        
+        .background(Color.clear)
         .edgesIgnoringSafeArea(.all)
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
