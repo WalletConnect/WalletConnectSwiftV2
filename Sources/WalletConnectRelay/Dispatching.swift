@@ -113,9 +113,11 @@ final class Dispatcher: NSObject, Dispatching {
 
     private func setUpSocketConnectionObserving() {
         socket.onConnect = { [unowned self] in
+            logger.debug("[WebSocket] - Connected")
             self.socketConnectionStatusPublisherSubject.send(.connected)
         }
         socket.onDisconnect = { [unowned self] error in
+            logger.debug("[WebSocket] - Disconnected")
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
             if error != nil {
                 self.socket.request.url = relayUrlFactory.create()
