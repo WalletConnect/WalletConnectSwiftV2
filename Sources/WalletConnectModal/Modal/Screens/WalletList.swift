@@ -118,20 +118,22 @@ struct WalletList: View {
     func viewAllItem() -> some View {
         VStack {
             VStack(spacing: 3) {
-                let startingIndex = (2 * numberOfColumns - 1)
+                let viewAllWalletsFirstRow = wallets.dropFirst(2 * numberOfColumns - 1).prefix(2)
                 
                 HStack(spacing: 3) {
-                    ForEach(startingIndex..<(startingIndex + 2)) { index in
-                        WalletImage(wallet: wallets[safe: index])
+                    ForEach(viewAllWalletsFirstRow) { wallet in
+                        WalletImage(wallet: wallet)
                             .cornerRadius(8)
                             .aspectRatio(1, contentMode: .fit)
                     }
                 }
                 .padding(.horizontal, 5)
                 
+                let viewAllWalletsSecondRow = wallets.dropFirst(2 * numberOfColumns + 1).prefix(2)
+                
                 HStack(spacing: 3) {
-                    ForEach((startingIndex + 2)..<(startingIndex + 4)) { index in
-                        WalletImage(wallet: wallets[safe: index])
+                    ForEach(viewAllWalletsSecondRow) { wallet in
+                        WalletImage(wallet: wallet)
                             .cornerRadius(8)
                             .aspectRatio(1, contentMode: .fit)
                     }
