@@ -10,6 +10,7 @@ final class PushSyncService {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let coldStartStore: CodableStore<Date>
+    private let groupKeychainStorage: KeychainStorageProtocol
 
     init(
         syncClient: SyncClient,
@@ -19,7 +20,8 @@ final class PushSyncService {
         messagesStore: KeyedDatabase<PushMessageRecord>,
         networkingInteractor: NetworkInteracting,
         kms: KeyManagementServiceProtocol,
-        coldStartStore: CodableStore<Date>
+        coldStartStore: CodableStore<Date>,
+        groupKeychainStorage: KeychainStorageProtocol
     ) {
         self.syncClient = syncClient
         self.logger = logger
@@ -29,6 +31,7 @@ final class PushSyncService {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.coldStartStore = coldStartStore
+        self.groupKeychainStorage = groupKeychainStorage
     }
 
     func registerSyncIfNeeded(account: Account, onSign: @escaping SigningCallback) async throws {
@@ -79,6 +82,7 @@ final class PushSyncService {
         for subscription in subscriptions {
             let symmetricKey = try SymmetricKey(hex: subscription.symKey)
             try kms.setSymmetricKey(symmetricKey, for: subscription.topic)
+            try groupKeychainStorage.add(symmetricKey, forKey: subscription.topic)
             try await networkingInteractor.subscribe(topic: subscription.topic)
 
             let historyRecords: [HistoryRecord<PushMessage>] = try await historyClient.getRecords(
