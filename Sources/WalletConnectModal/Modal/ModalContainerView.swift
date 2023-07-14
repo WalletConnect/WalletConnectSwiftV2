@@ -36,6 +36,7 @@ struct ModalContainerView: View {
                 }
         )
         .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
                 withAnimation {
