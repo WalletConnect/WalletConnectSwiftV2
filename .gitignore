@@ -31,3 +31,5 @@ DerivedDataCache
 *.ipa
 *.zip
 test_results/
+
+Sources/WalletConnectModal/Secrets/secrets.json

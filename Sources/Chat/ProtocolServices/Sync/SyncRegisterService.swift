@@ -18,6 +18,10 @@ final class SyncRegisterService {
             throw Errors.signatureRejected
         }
     }
+
+    func isRegistered(account: Account) -> Bool {
+        return syncClient.isRegistered(account: account)
+    }
 }
 
 private extension SyncRegisterService {

@@ -34,4 +34,4 @@ runs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
+        key: ${{ runner.os }}-deriveddata-${{ github.event.pull_request.head.sha }}

@@ -3,12 +3,12 @@ import Foundation
 struct RelayUrlFactory {
     private let relayHost: String
     private let projectId: String
-    private let socketAuthenticator: SocketAuthenticating
+    private let socketAuthenticator: ClientIdAuthenticating
 
     init(
         relayHost: String,
         projectId: String,
-        socketAuthenticator: SocketAuthenticating
+        socketAuthenticator: ClientIdAuthenticating
     ) {
         self.relayHost = relayHost
         self.projectId = projectId

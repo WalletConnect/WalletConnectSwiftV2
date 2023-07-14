@@ -47,12 +47,12 @@ public final class RelayClient {
     init(
         dispatcher: Dispatching,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage,
+        rpcHistory: RPCHistory,
         clientIdStorage: ClientIdStoring
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
-        self.rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: keyValueStorage)
+        self.rpcHistory = rpcHistory
         self.clientIdStorage = clientIdStorage
         setUpBindings()
     }
@@ -61,41 +61,6 @@ public final class RelayClient {
         dispatcher.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
         }
-    }
-
-    /// Instantiates Relay Client
-    /// - Parameters:
-    ///   - relayHost: proxy server host that your application will use to connect to Relay Network. If you register your project at `www.walletconnect.com` you can use `relay.walletconnect.com`
-    ///   - projectId: an optional parameter used to access the public WalletConnect infrastructure. Go to `www.walletconnect.com` for info.
-    ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
-    ///   - socketConnectionType: socket connection type
-    ///   - logger: logger instance
-    public convenience init(
-        relayHost: String,
-        projectId: String,
-        keyValueStorage: KeyValueStorage = UserDefaults.standard,
-        keychainStorage: KeychainStorageProtocol = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk"),
-        socketConnectionType: SocketConnectionType = .automatic,
-        logger: ConsoleLogging = ConsoleLogger(loggingLevel: .debug)
-    ) {
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
-        let socketAuthenticator = SocketAuthenticator(
-            clientIdStorage: clientIdStorage,
-            relayHost: relayHost
-        )
-        let relayUrlFactory = RelayUrlFactory(
-            relayHost: relayHost,
-            projectId: projectId,
-            socketAuthenticator: socketAuthenticator
-        )
-        let webSocketClientFactory = WebSocketClientFactory()
-        let dispatcher = Dispatcher(
-            socketFactory: webSocketClientFactory,
-            relayUrlFactory: relayUrlFactory,
-            socketConnectionType: socketConnectionType,
-            logger: logger
-        )
-        self.init(dispatcher: dispatcher, logger: logger, keyValueStorage: keyValueStorage, clientIdStorage: clientIdStorage)
     }
 
     /// Connects web socket

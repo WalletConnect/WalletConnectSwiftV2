@@ -9,7 +9,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
-    
+
 jobs:
   authorize:
     environment:
@@ -32,7 +32,7 @@ jobs:
         with:
           project-id: ${{ secrets.PROJECT_ID }}
 
-  test:    
+  test:
     needs: prepare
     runs-on: macos-12
     timeout-minutes: 15
@@ -50,9 +50,7 @@ jobs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.ref }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-deriveddata-${{ github.ref }}-
+        key: ${{ runner.os }}-deriveddata-${{ github.event.pull_request.head.sha }}
 
     - name: Untar DerivedDataCache
       shell: bash
@@ -64,11 +62,11 @@ jobs:
       shell: bash
       run: make unit_tests
 
-     # Integration tests
+    # Integration tests
     - name: Run integration tests
       if: matrix.type == 'integration-tests'
       shell: bash
-      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }} CAST_HOST=cast.walletconnect.com GM_DAPP_PROJECT_ID=${{ secrets.GM_DAPP_PROJECT_ID }} GM_DAPP_PROJECT_SECRET=${{ secrets.GM_DAPP_PROJECT_SECRET }}
 
     # Relay Integration tests
     - name: Run Relay integration tests
@@ -82,7 +80,7 @@ jobs:
       with:
           check_name: ${{ matrix.type }} junit report
           report_paths: 'test_results/report.junit'
-       
+
     - name: Zip test artifacts
       if: always()
       shell: bash
@@ -95,4 +93,3 @@ jobs:
         name: ${{ matrix.type }} test_results
         path: ./artifacts.zip
         if-no-files-found: warn
-

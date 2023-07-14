@@ -21,6 +21,10 @@ final class SyncSignatureStore {
 
         return key
     }
+
+    func isSignatureExists(account: Account) -> Bool {
+        return (try? getSignature(for: account)) != nil
+    }
 }
 
 private extension SyncSignatureStore {

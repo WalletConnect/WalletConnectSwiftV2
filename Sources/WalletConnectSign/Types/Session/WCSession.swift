@@ -18,6 +18,7 @@ struct WCSession: SequenceObject, Equatable {
     private(set) var timestamp: Date
     private(set) var namespaces: [String: SessionNamespace]
     private(set) var requiredNamespaces: [String: ProposalNamespace]
+    private(set) var sessionProperties: [String: String]?
 
     static var defaultTimeToLive: Int64 {
         Int64(7*Time.day)
@@ -43,6 +44,7 @@ struct WCSession: SequenceObject, Equatable {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = settleParams.namespaces
+        self.sessionProperties = settleParams.sessionProperties
         self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
@@ -58,6 +60,7 @@ struct WCSession: SequenceObject, Equatable {
         selfParticipant: Participant,
         peerParticipant: Participant,
         namespaces: [String: SessionNamespace],
+        sessionProperties: [String: String],
         requiredNamespaces: [String: ProposalNamespace],
         events: Set<String>,
         accounts: Set<Account>,
@@ -72,6 +75,7 @@ struct WCSession: SequenceObject, Equatable {
         self.selfParticipant = selfParticipant
         self.peerParticipant = peerParticipant
         self.namespaces = namespaces
+        self.sessionProperties = sessionProperties
         self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
@@ -165,8 +169,11 @@ struct WCSession: SequenceObject, Equatable {
             topic: topic,
             pairingTopic: pairingTopic,
             peer: peerParticipant.metadata,
+            requiredNamespaces: requiredNamespaces,
             namespaces: namespaces,
-            expiryDate: expiryDate)
+            sessionProperties: sessionProperties,
+            expiryDate: expiryDate
+        )
     }
 }
 
@@ -175,7 +182,7 @@ struct WCSession: SequenceObject, Equatable {
 extension WCSession {
 
     enum CodingKeys: String, CodingKey {
-        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces
+        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces, sessionProperties
     }
 
     init(from decoder: Decoder) throws {
@@ -186,6 +193,7 @@ extension WCSession {
         self.selfParticipant = try container.decode(Participant.self, forKey: .selfParticipant)
         self.peerParticipant = try container.decode(Participant.self, forKey: .peerParticipant)
         self.namespaces = try container.decode([String: SessionNamespace].self, forKey: .namespaces)
+        self.sessionProperties = try container.decodeIfPresent([String: String].self, forKey: .sessionProperties)
         self.acknowledged = try container.decode(Bool.self, forKey: .acknowledged)
         self.expiryDate = try container.decode(Date.self, forKey: .expiryDate)
         self.timestamp = try container.decode(Date.self, forKey: .timestamp)
@@ -202,6 +210,7 @@ extension WCSession {
         try container.encode(selfParticipant, forKey: .selfParticipant)
         try container.encode(peerParticipant, forKey: .peerParticipant)
         try container.encode(namespaces, forKey: .namespaces)
+        try container.encode(sessionProperties, forKey: .sessionProperties)
         try container.encode(acknowledged, forKey: .acknowledged)
         try container.encode(expiryDate, forKey: .expiryDate)
         try container.encode(timestamp, forKey: .timestamp)

@@ -1,6 +1,5 @@
 import Foundation
-import WalletConnectSign
-import WalletConnectPairing
+import WalletConnectModal
 import UIKit
 import Combine
 
@@ -70,16 +69,16 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
         let sessionProperties: [String: String] = [
             "caip154-mandatory": "true"
         ]
+        
         Task {
-            let uri = try await Pair.instance.create()
-            try await Sign.instance.connect(
+            WalletConnectModal.set(sessionParams: .init(
                 requiredNamespaces: namespaces,
                 optionalNamespaces: optionalNamespaces,
-                sessionProperties: sessionProperties,
-                topic: uri.topic
-            )
-            showConnectScreen(uri: uri)
+                sessionProperties: sessionProperties
+            ))
         }
+        
+        WalletConnectModal.present(from: self)
     }
 
     @objc

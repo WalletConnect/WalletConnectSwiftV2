@@ -1,20 +1,20 @@
 import Foundation
 import Combine
-import WalletConnectKMS
-import WalletConnectPairing
 
 class PushMessageSubscriber {
     private let networkingInteractor: NetworkInteracting
-    private let pushMessagesDatabase: PushMessagesDatabase
+    private let pushStorage: PushStorage
     private let logger: ConsoleLogging
     private var publishers = [AnyCancellable]()
-    var onPushMessage: ((_ message: PushMessageRecord) -> Void)?
+    private let pushMessagePublisherSubject = PassthroughSubject<PushMessageRecord, Never>()
 
-    init(networkingInteractor: NetworkInteracting,
-         pushMessagesDatabase: PushMessagesDatabase,
-         logger: ConsoleLogging) {
+    public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
+        pushMessagePublisherSubject.eraseToAnyPublisher()
+    }
+
+    init(networkingInteractor: NetworkInteracting, pushStorage: PushStorage, logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
-        self.pushMessagesDatabase = pushMessagesDatabase
+        self.pushStorage = pushStorage
         self.logger = logger
         subscribeForPushMessages()
     }
@@ -26,8 +26,8 @@ class PushMessageSubscriber {
                 logger.debug("Received Push Message")
 
                 let record = PushMessageRecord(id: payload.id.string, topic: payload.topic, message: payload.request, publishedAt: payload.publishedAt)
-                pushMessagesDatabase.setPushMessageRecord(record)
-                onPushMessage?(record)
+                pushStorage.setMessage(record)
+                pushMessagePublisherSubject.send(record)
 
             }.store(in: &publishers)
 

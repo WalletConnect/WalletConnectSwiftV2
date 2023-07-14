@@ -28,4 +28,4 @@ jobs:
 
       - name: Lint CocoaPods
         run: |
-          pod lib lint WalletConnectSwiftV2.podspec --verbose --allow-warnings
+          pod lib lint --verbose --no-clean --quick --allow-warnings --platforms=ios WalletConnectSwiftV2.podspec

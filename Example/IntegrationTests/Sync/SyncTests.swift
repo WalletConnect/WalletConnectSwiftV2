@@ -7,11 +7,11 @@ import Web3
 
 final class SyncTests: XCTestCase {
 
-    struct TestObject: SyncObject {
+    struct TestObject: DatabaseObject {
         let id: String
         let value: String
 
-        var syncId: String {
+        var databaseId: String {
             return id
         }
     }
@@ -57,7 +57,8 @@ final class SyncTests: XCTestCase {
         let kms = KeyManagementService(keychain: keychain)
         let derivationService = SyncDerivationService(syncStorage: syncSignatureStore, bip44: DefaultBIP44Provider(), kms: kms)
         let logger = ConsoleLogger(suffix: suffix, loggingLevel: .debug)
-        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, logger: logger)
+        let relayClient = RelayClientFactory.create(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, logger: logger)
+
         let networkingInteractor = NetworkingClientFactory.create(
             relayClient: relayClient,
             logger: logger,
@@ -75,8 +76,7 @@ final class SyncTests: XCTestCase {
     }
 
     func makeSyncStore(client: SyncClient, indexStore: SyncIndexStore) -> SyncStore<TestObject> {
-        let store = NewKeyedDatabase<[String: TestObject]>(storage: RuntimeKeyValueStorage(), identifier: "objectStore")
-        let objectStore = SyncObjectStore(store: store)
+        let objectStore = KeyedDatabase<TestObject>(storage: RuntimeKeyValueStorage(), identifier: "objectStore")
         return SyncStore(name: storeName, syncClient: client, indexStore: indexStore, objectStore: objectStore)
     }
 

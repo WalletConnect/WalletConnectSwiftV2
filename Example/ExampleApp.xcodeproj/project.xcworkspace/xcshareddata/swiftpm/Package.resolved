@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "eee9ad754926c40a0f7e73f152357d37b119b7fa",
-          "version": "1.7.1"
+          "revision": "32f641cf24fc7abc1c591a2025e9f2f572648b0f",
+          "version": "1.7.2"
         }
       },
       {
@@ -62,6 +62,24 @@
           "branch": "feature/available-13",
           "revision": "a98811518e0a90c2dfc60c30cfd3ec85c33b6790",
           "version": null
+        }
+      },
+      {
+        "package": "SwiftDocCPlugin",
+        "repositoryURL": "https://github.com/apple/swift-docc-plugin",
+        "state": {
+          "branch": null,
+          "revision": "26ac5758409154cc448d7ab82389c520fa8a8247",
+          "version": "1.3.0"
+        }
+      },
+      {
+        "package": "SymbolKit",
+        "repositoryURL": "https://github.com/apple/swift-docc-symbolkit",
+        "state": {
+          "branch": null,
+          "revision": "b45d1f2ed151d057b54504d653e0da5552844e34",
+          "version": "1.0.0"
         }
       },
       {

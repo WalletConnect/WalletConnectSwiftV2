@@ -4,6 +4,7 @@ import XCTest
 import WalletConnectUtils
 @testable import WalletConnectKMS
 @testable import WalletConnectSync
+@testable import WalletConnectHistory
 import WalletConnectRelay
 import Combine
 import Web3
@@ -48,9 +49,10 @@ final class ChatTests: XCTestCase {
     func makeClient(prefix: String, account: Account) -> ChatClient {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, logger: logger)
         let keyValueStorage = RuntimeKeyValueStorage()
+        let keychain = KeychainStorageMock()
+        let relayClient = RelayClientFactory.create(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, logger: logger)
+
         let networkingInteractor = NetworkingClientFactory.create(
             relayClient: relayClient,
             logger: logger,
@@ -63,10 +65,16 @@ final class ChatTests: XCTestCase {
             keychain: keychain
         )
 
+        let historyClient = HistoryClientFactory.create(
+            historyUrl: "https://history.walletconnect.com",
+            relayUrl: "wss://relay.walletconnect.com",
+            keychain: keychain
+        )
+
         let clientId = try! networkingInteractor.getClientId()
         logger.debug("My client id is: \(clientId)")
 
-        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient)
+        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient, historyClient: historyClient)
     }
 
     func testInvite() async throws {

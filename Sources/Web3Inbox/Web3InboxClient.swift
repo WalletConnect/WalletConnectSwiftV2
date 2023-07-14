@@ -6,6 +6,7 @@ public final class Web3InboxClient {
     private let webView: WKWebView
     private var account: Account
     private let logger: ConsoleLogging
+    private let pushClient: WalletPushClient
 
     private let chatClientProxy: ChatClientProxy
     private let chatClientSubscriber: ChatClientRequestSubscriber
@@ -16,10 +17,9 @@ public final class Web3InboxClient {
     private let chatWebviewProxy: WebViewProxy
     private let pushWebviewProxy: WebViewProxy
 
-    private let chatWebviewSubscriber: WebViewRequestSubscriber
-    private let pushWebviewSubscriber: WebViewRequestSubscriber
+    private let webviewSubscriber: WebViewRequestSubscriber
 
-init(
+    init(
         webView: WKWebView,
         account: Account,
         logger: ConsoleLogging,
@@ -27,10 +27,10 @@ init(
         clientSubscriber: ChatClientRequestSubscriber,
         chatWebviewProxy: WebViewProxy,
         pushWebviewProxy: WebViewProxy,
-        chatWebviewSubscriber: WebViewRequestSubscriber,
-        pushWebviewSubscriber: WebViewRequestSubscriber,
+        webviewSubscriber: WebViewRequestSubscriber,
         pushClientProxy: PushClientProxy,
-        pushClientSubscriber: PushClientRequestSubscriber
+        pushClientSubscriber: PushClientRequestSubscriber,
+        pushClient: WalletPushClient
     ) {
         self.webView = webView
         self.account = account
@@ -39,11 +39,10 @@ init(
         self.chatClientSubscriber = clientSubscriber
         self.chatWebviewProxy = chatWebviewProxy
         self.pushWebviewProxy = pushWebviewProxy
-        self.chatWebviewSubscriber = chatWebviewSubscriber
-        self.pushWebviewSubscriber = pushWebviewSubscriber
+        self.webviewSubscriber = webviewSubscriber
         self.pushClientProxy = pushClientProxy
         self.pushClientSubscriber = pushClientSubscriber
-
+        self.pushClient = pushClient
         setupSubscriptions()
     }
 
@@ -57,6 +56,10 @@ init(
     ) async throws {
         chatClientProxy.onSign = onSign
         try await authorize(account: account)
+    }
+
+    public func register(deviceToken: Data) async throws {
+        try await pushClient.register(deviceToken: deviceToken)
     }
 }
 
@@ -76,8 +79,8 @@ private extension Web3InboxClient {
             try await self.chatWebviewProxy.request(request)
         }
 
-        chatWebviewSubscriber.onRequest = { [unowned self] request in
-            logger.debug("w3i: chat method \(request.method) requested")
+        webviewSubscriber.onChatRequest = { [unowned self] request in
+            logger.debug("w3i: method \(request.method) requested")
             try await self.chatClientProxy.request(request)
         }
 
@@ -91,7 +94,7 @@ private extension Web3InboxClient {
             try await self.pushWebviewProxy.request(request)
         }
 
-        pushWebviewSubscriber.onRequest = { [unowned self] request in
+        webviewSubscriber.onPushRequest = { [unowned self] request in
             logger.debug("w3i: push method \(request.method) requested")
             try await self.pushClientProxy.request(request)
         }

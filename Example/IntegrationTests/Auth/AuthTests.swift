@@ -32,9 +32,9 @@ final class AuthTests: XCTestCase {
 
     func makeClients(prefix: String, iatProvider: IATProvider) -> (PairingClient, AuthClient) {
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let keychain = KeychainStorageMock()
-        let relayClient = RelayClient(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keychainStorage: keychain, logger: logger)
         let keyValueStorage = RuntimeKeyValueStorage()
+        let keychain = KeychainStorageMock()
+        let relayClient = RelayClientFactory.create(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, logger: logger)
 
         let networkingClient = NetworkingClientFactory.create(
             relayClient: relayClient,

@@ -6,12 +6,13 @@ final class ChatStorage {
     private var publishers = Set<AnyCancellable>()
 
     private let kms: KeyManagementServiceProtocol
-    private let messageStore: KeyedDatabase<[Message]>
-    private let receivedInviteStore: KeyedDatabase<[ReceivedInvite]>
+    private let messageStore: KeyedDatabase<Message>
+    private let receivedInviteStore: KeyedDatabase<ReceivedInvite>
     private let sentInviteStore: SyncStore<SentInvite>
     private let threadStore: SyncStore<Thread>
     private let inviteKeyStore: SyncStore<InviteKey>
     private let receivedInviteStatusStore: SyncStore<ReceivedInviteStatus>
+    private let historyService: HistoryService
 
     private let sentInviteStoreDelegate: SentInviteStoreDelegate
     private let threadStoreDelegate: ThreadStoreDelegate
@@ -70,12 +71,13 @@ final class ChatStorage {
 
     init(
         kms: KeyManagementServiceProtocol,
-        messageStore: KeyedDatabase<[Message]>,
-        receivedInviteStore: KeyedDatabase<[ReceivedInvite]>,
+        messageStore: KeyedDatabase<Message>,
+        receivedInviteStore: KeyedDatabase<ReceivedInvite>,
         sentInviteStore: SyncStore<SentInvite>,
         threadStore: SyncStore<Thread>,
         inviteKeyStore: SyncStore<InviteKey>,
         receivedInviteStatusStore: SyncStore<ReceivedInviteStatus>,
+        historyService: HistoryService,
         sentInviteStoreDelegate: SentInviteStoreDelegate,
         threadStoreDelegate: ThreadStoreDelegate,
         inviteKeyDelegate: InviteKeyDelegate,
@@ -88,6 +90,7 @@ final class ChatStorage {
         self.threadStore = threadStore
         self.inviteKeyStore = inviteKeyStore
         self.receivedInviteStatusStore = receivedInviteStatusStore
+        self.historyService = historyService
         self.sentInviteStoreDelegate = sentInviteStoreDelegate
         self.threadStoreDelegate = threadStoreDelegate
         self.inviteKeyDelegate = inviteKeyDelegate
@@ -107,9 +110,18 @@ final class ChatStorage {
 
     func initializeDelegates() async throws {
         try await sentInviteStoreDelegate.onInitialization(sentInviteStore.getAll())
-        try await threadStoreDelegate.onInitialization(threadStore.getAll())
+        try await threadStoreDelegate.onInitialization(storage: self)
         try await inviteKeyDelegate.onInitialization(inviteKeyStore.getAll())
         try await receiviedInviteStatusDelegate.onInitialization()
+    }
+
+    func initializeHistory(account: Account) async throws {
+        try await historyService.register()
+
+        for thread in getAllThreads() {
+            let messages = try await historyService.fetchMessageHistory(thread: thread)
+            set(messages: messages, account: account)
+        }
     }
 
     func setupSubscriptions(account: Account) throws {
@@ -138,7 +150,7 @@ final class ChatStorage {
     }
 
     func set(receivedInvite: ReceivedInvite, account: Account) {
-        receivedInviteStore.set(receivedInvite, for: account.absoluteString)
+        receivedInviteStore.set(element: receivedInvite, for: account.absoluteString)
         newReceivedInvitePublisherSubject.send(receivedInvite)
     }
 
@@ -148,7 +160,7 @@ final class ChatStorage {
     }
 
     func getReceivedInvites(account: Account) -> [ReceivedInvite] {
-        return receivedInviteStore.getElements(for: account.absoluteString) ?? []
+        return receivedInviteStore.getAll(for: account.absoluteString)
     }
 
     func syncRejectedReceivedInviteStatus(id: Int64, account: Account) async throws {
@@ -171,17 +183,17 @@ final class ChatStorage {
     }
 
     func accept(receivedInvite: ReceivedInvite, account: Account) {
-        receivedInviteStore.delete(receivedInvite, for: account.absoluteString)
+        receivedInviteStore.delete(id: receivedInvite.databaseId, for: account.absoluteString)
 
         let accepted = ReceivedInvite(invite: receivedInvite, status: .approved)
-        receivedInviteStore.set(accepted, for: account.absoluteString)
+        receivedInviteStore.set(element: accepted, for: account.absoluteString)
     }
 
     func reject(receivedInvite: ReceivedInvite, account: Account) {
-        receivedInviteStore.delete(receivedInvite, for: account.absoluteString)
+        receivedInviteStore.delete(id: receivedInvite.databaseId, for: account.absoluteString)
 
         let rejected = ReceivedInvite(invite: receivedInvite, status: .rejected)
-        receivedInviteStore.set(rejected, for: account.absoluteString)
+        receivedInviteStore.set(element: rejected, for: account.absoluteString)
     }
 
     func accept(sentInviteId: Int64, topic: String) async throws {
@@ -246,8 +258,12 @@ final class ChatStorage {
     // MARK: - Messages
 
     func set(message: Message, account: Account) {
-        messageStore.set(message, for: account.absoluteString)
+        messageStore.set(element: message, for: account.absoluteString)
         newMessagePublisherSubject.send(message)
+    }
+
+    func set(messages: [Message], account: Account) {
+        messageStore.set(elements: messages, for: account.absoluteString)
     }
 
     func getMessages(topic: String) -> [Message] {
@@ -255,7 +271,7 @@ final class ChatStorage {
     }
 
     func getMessages(account: Account) -> [Message] {
-        return messageStore.getElements(for: account.absoluteString) ?? []
+        return messageStore.getAll(for: account.absoluteString) 
     }
 }
 
@@ -266,8 +282,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.sentInviteStoreDelegate.onUpdate(object)
-            case .delete(let id):
-                self.sentInviteStoreDelegate.onDelete(id)
+            case .delete(let object):
+                self.sentInviteStoreDelegate.onDelete(object)
             }
         }.store(in: &publishers)
 
@@ -275,8 +291,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.threadStoreDelegate.onUpdate(object, storage: self)
-            case .delete(let id):
-                self.threadStoreDelegate.onDelete(id)
+            case .delete(let object):
+                self.threadStoreDelegate.onDelete(object)
             }
         }.store(in: &publishers)
 
@@ -284,8 +300,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.inviteKeyDelegate.onUpdate(object, account: account)
-            case .delete(let id):
-                self.inviteKeyDelegate.onDelete(id)
+            case .delete(let object):
+                self.inviteKeyDelegate.onDelete(object)
             }
         }.store(in: &publishers)
 
@@ -293,8 +309,8 @@ private extension ChatStorage {
             switch update {
             case .set(let object):
                 self.receiviedInviteStatusDelegate.onUpdate(object, storage: self, account: account)
-            case .delete(let id):
-                self.receiviedInviteStatusDelegate.onDelete(id)
+            case .delete(let object):
+                self.receiviedInviteStatusDelegate.onDelete(object)
             }
         }.store(in: &publishers)
     }

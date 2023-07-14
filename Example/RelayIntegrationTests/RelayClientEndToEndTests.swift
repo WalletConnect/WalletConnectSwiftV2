@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
-import Starscream
 @testable import WalletConnectRelay
 
 private class RelayKeychainStorageMock: KeychainStorageProtocol {
@@ -15,9 +14,9 @@ private class RelayKeychainStorageMock: KeychainStorageProtocol {
 }
 
 class WebSocketFactoryMock: WebSocketFactory {
-    private let webSocket: WebSocket
+    private let webSocket: WebSocketClient
     
-    init(webSocket: WebSocket) {
+    init(webSocket: WebSocketClient) {
         self.webSocket = webSocket
     }
     
@@ -32,25 +31,35 @@ final class RelayClientEndToEndTests: XCTestCase {
 
     func makeRelayClient(prefix: String) -> RelayClient {
         let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
-        let socketAuthenticator = SocketAuthenticator(
+        let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
-            relayHost: InputConfig.relayHost
+            url: InputConfig.relayUrl
         )
         let urlFactory = RelayUrlFactory(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
             socketAuthenticator: socketAuthenticator
         )
-        let socket = WebSocket(url: urlFactory.create())
-        let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
         let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let socket = WebSocketClient(url: urlFactory.create(), logger: ConsoleLogger(suffix: prefix, loggingLevel: .debug))
+        let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
+        
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
             socketConnectionType: .manual,
             logger: logger
         )
-        let relayClient = RelayClient(dispatcher: dispatcher, logger: logger, keyValueStorage: RuntimeKeyValueStorage(), clientIdStorage: clientIdStorage)
+        let keychain = KeychainStorageMock()
+        let keyValueStorage = RuntimeKeyValueStorage()
+        let relayClient = RelayClientFactory.create(
+            relayHost: InputConfig.relayHost,
+            projectId: InputConfig.projectId,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            socketConnectionType: .manual,
+            logger: logger
+        )
         let clientId = try! relayClient.getClientId()
         logger.debug("My client id is: \(clientId)")
 
@@ -101,18 +110,23 @@ final class RelayClientEndToEndTests: XCTestCase {
 
         relayB.messagePublisher.sink { topic, payload, _ in
             (subscriptionBTopic, subscriptionBPayload) = (topic, payload)
+            Task(priority: .high) {
+                sleep(1)
+                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
+            }
             expectationB.fulfill()
         }.store(in: &publishers)
 
-        relayA.socketConnectionStatusPublisher.sink {  _ in
+        relayA.socketConnectionStatusPublisher.sink {  status in
+            guard status == .connected else {return}
             Task(priority: .high) {
-                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
                 try await relayA.subscribe(topic: randomTopic)
+                try await relayA.publish(topic: randomTopic, payload: payloadA, tag: 0, prompt: false, ttl: 60)
             }
         }.store(in: &publishers)
-        relayB.socketConnectionStatusPublisher.sink {  _ in
+        relayB.socketConnectionStatusPublisher.sink {  status in
+            guard status == .connected else {return}
             Task(priority: .high) {
-                try await relayB.publish(topic: randomTopic, payload: payloadB, tag: 0, prompt: false, ttl: 60)
                 try await relayB.subscribe(topic: randomTopic)
             }
         }.store(in: &publishers)

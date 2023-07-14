@@ -16,6 +16,8 @@ final class PushClientProxy {
         guard let event = PushWebViewEvent(rawValue: request.method)
         else { throw Errors.unregisteredMethod }
 
+        // TODO: Handle register event
+
         switch event {
         case .approve:
             let params = try parse(ApproveRequest.self, params: request.params)
@@ -46,7 +48,11 @@ final class PushClientProxy {
             try await respond(request: request)
         case .deletePushMessage:
             let params = try parse(DeletePushMessageRequest.self, params: request.params)
-            client.deletePushMessage(id: params.id)
+            client.deletePushMessage(id: params.id.string)
+            try await respond(request: request)
+        case .enableSync:
+            let params = try parse(EnableSyncRequest.self, params: request.params)
+            try await client.enableSync(account: params.account, onSign: onSign)
             try await respond(request: request)
         }
     }
@@ -88,7 +94,11 @@ private extension PushClientProxy {
     }
 
     struct DeletePushMessageRequest: Codable {
-        let id: String
+        let id: RPCID
+    }
+
+    struct EnableSyncRequest: Codable {
+        let account: Account
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {

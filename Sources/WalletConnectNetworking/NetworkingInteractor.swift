@@ -71,9 +71,14 @@ public class NetworkingInteractor: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
-                guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(RequestParams.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+            .compactMap { [weak self] topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
+                do {
+                    guard let id = rpcRequest.id, let request = try rpcRequest.params?.get(RequestParams.self) else { return nil }
+                    return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                } catch {
+                    self?.logger.debug("Networking Interactor - \(error)")
+                }
+                return nil
             }
             .eraseToAnyPublisher()
     }

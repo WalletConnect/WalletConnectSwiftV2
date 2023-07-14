@@ -18,7 +18,7 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
-    private let verifyClient: VerifyClient?
+    private let verifyClient: VerifyClientProtocol
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
@@ -38,7 +38,7 @@ final class ApproveEngine {
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
-        verifyClient: VerifyClient?
+        verifyClient: VerifyClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -56,8 +56,7 @@ final class ApproveEngine {
         setupResponseErrorSubscriptions()
     }
 
-    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace]) async throws {
-
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
@@ -87,9 +86,19 @@ final class ApproveEngine {
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
 
-        async let proposeResponse: () = networkingInteractor.respond(topic: payload.topic, response: response, protocolMethod: SessionProposeProtocolMethod())
+        async let proposeResponse: () = networkingInteractor.respond(
+            topic: payload.topic,
+            response: response,
+            protocolMethod: SessionProposeProtocolMethod()
+        )
 
-        async let settleRequest: () = settle(topic: sessionTopic, proposal: proposal, namespaces: sessionNamespaces, pairingTopic: pairingTopic)
+        async let settleRequest: () = settle(
+            topic: sessionTopic,
+            proposal: proposal,
+            namespaces: sessionNamespaces,
+            sessionProperties: sessionProperties,
+            pairingTopic: pairingTopic
+        )
 
         _ = try await [proposeResponse, settleRequest]
 
@@ -108,7 +117,7 @@ final class ApproveEngine {
         // TODO: Delete pairing if inactive 
     }
 
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], pairingTopic: String) async throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil, pairingTopic: String) async throws {
         guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
@@ -129,7 +138,9 @@ final class ApproveEngine {
             relay: relay,
             controller: selfParticipant,
             namespaces: namespaces,
-            expiry: Int64(expiry))
+            sessionProperties: sessionProperties,
+            expiry: Int64(expiry)
+        )
 
         let session = WCSession(
             topic: topic,
@@ -139,7 +150,8 @@ final class ApproveEngine {
             peerParticipant: proposal.proposer,
             settleParams: settleParams,
             requiredNamespaces: proposal.requiredNamespaces,
-            acknowledged: false)
+            acknowledged: false
+        )
 
         logger.debug("Sending session settle request")
 
@@ -281,18 +293,19 @@ private extension ApproveEngine {
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
-        guard let verifyClient else {
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
-            return
-        }
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
-            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
-            let verifyContext = await verifyClient.createVerifyContext(
-                origin: origin,
-                domain: payload.request.proposer.metadata.url
-            )
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            do {
+                let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let verifyContext = await verifyClient.createVerifyContext(
+                    origin: origin,
+                    domain: payload.request.proposer.metadata.url
+                )
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            } catch {
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+                return
+            }
         }
     }
 
