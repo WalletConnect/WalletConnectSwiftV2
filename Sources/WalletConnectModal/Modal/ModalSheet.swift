@@ -5,6 +5,8 @@ public struct ModalSheet: View {
     
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
+    @State var searchEditing = false
+    
     var isLandscape: Bool {
         verticalSizeClass == .compact
     }
@@ -16,6 +18,7 @@ public struct ModalSheet: View {
             VStack(spacing: 0) {
                 contentHeader()
                 content()
+                    
             }
             .frame(maxWidth: .infinity)
             .background(Color.background1)
@@ -59,7 +62,7 @@ public struct ModalSheet: View {
             .padding(.trailing, 10)
         }
         .foregroundColor(Color.foreground1)
-        .frame(height: 44)
+        .frame(height: 48)
     }
     
     private func contentHeader() -> some View {
@@ -81,18 +84,35 @@ public struct ModalSheet: View {
         }
         .animation(.default)
         .foregroundColor(.accent)
-        .frame(height: 50)
+        .frame(height: 60)
         .overlay(
             VStack {
                 if viewModel.destination.hasSearch {
-                    TextField("Search", text: $viewModel.searchTerm)
-                        .transform {
-                            #if os(iOS)
-                            $0.textFieldStyle(.roundedBorder)
-                                .autocapitalization(.none)
-                            #endif
-                        }
-                        .padding(.horizontal, 50)
+                    
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                        TextField("Search", text: $viewModel.searchTerm, onEditingChanged: { editing in
+                            self.searchEditing = editing
+                        })
+                    }
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 10)
+                    .background(Color.background3)
+                    .foregroundColor(searchEditing ? .foreground1 : .foreground3)
+                    .cornerRadius(28)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 28)
+                            .stroke(searchEditing ? Color.accent : Color.thinOverlay, lineWidth: 1)
+                    )
+                    .onDisappear {
+                        searchEditing = false
+                    }
+                    .transform {
+                        #if os(iOS)
+                            $0.autocapitalization(.none)
+                        #endif
+                    }
+                    .padding(.horizontal, 50)
                 } else {
                     Text(viewModel.destination.contentTitle)
                         .font(.system(size: 20).weight(.semibold))
