@@ -32,7 +32,7 @@ final class ThreadStoreDelegate {
         }
     }
 
-    func onDelete(_ id: String) {
+    func onDelete(_ object: Thread) {
 
     }
 }

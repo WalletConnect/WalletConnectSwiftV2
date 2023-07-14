@@ -17,10 +17,7 @@ public final class Web3InboxClient {
     private let chatWebviewProxy: WebViewProxy
     private let pushWebviewProxy: WebViewProxy
 
-    private let webViewRefreshHandler: WebViewRefreshHandler
-
-    private let chatWebviewSubscriber: WebViewRequestSubscriber
-    private let pushWebviewSubscriber: WebViewRequestSubscriber
+    private let webviewSubscriber: WebViewRequestSubscriber
 
     init(
         webView: WKWebView,
@@ -30,12 +27,10 @@ public final class Web3InboxClient {
         clientSubscriber: ChatClientRequestSubscriber,
         chatWebviewProxy: WebViewProxy,
         pushWebviewProxy: WebViewProxy,
-        chatWebviewSubscriber: WebViewRequestSubscriber,
-        pushWebviewSubscriber: WebViewRequestSubscriber,
+        webviewSubscriber: WebViewRequestSubscriber,
         pushClientProxy: PushClientProxy,
         pushClientSubscriber: PushClientRequestSubscriber,
-        pushClient: WalletPushClient,
-        webViewRefreshHandler: WebViewRefreshHandler
+        pushClient: WalletPushClient
     ) {
         self.webView = webView
         self.account = account
@@ -44,12 +39,10 @@ public final class Web3InboxClient {
         self.chatClientSubscriber = clientSubscriber
         self.chatWebviewProxy = chatWebviewProxy
         self.pushWebviewProxy = pushWebviewProxy
-        self.chatWebviewSubscriber = chatWebviewSubscriber
-        self.pushWebviewSubscriber = pushWebviewSubscriber
+        self.webviewSubscriber = webviewSubscriber
         self.pushClientProxy = pushClientProxy
         self.pushClientSubscriber = pushClientSubscriber
         self.pushClient = pushClient
-        self.webViewRefreshHandler = webViewRefreshHandler
         setupSubscriptions()
     }
 
@@ -86,8 +79,8 @@ private extension Web3InboxClient {
             try await self.chatWebviewProxy.request(request)
         }
 
-        chatWebviewSubscriber.onRequest = { [unowned self] request in
-            logger.debug("w3i: chat method \(request.method) requested")
+        webviewSubscriber.onChatRequest = { [unowned self] request in
+            logger.debug("w3i: method \(request.method) requested")
             try await self.chatClientProxy.request(request)
         }
 
@@ -101,7 +94,7 @@ private extension Web3InboxClient {
             try await self.pushWebviewProxy.request(request)
         }
 
-        pushWebviewSubscriber.onRequest = { [unowned self] request in
+        webviewSubscriber.onPushRequest = { [unowned self] request in
             logger.debug("w3i: push method \(request.method) requested")
             try await self.pushClientProxy.request(request)
         }

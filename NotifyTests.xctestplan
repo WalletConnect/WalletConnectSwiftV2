@@ -15,6 +15,10 @@
         "value" : "$(RELAY_HOST)"
       },
       {
+        "key" : "GM_DAPP_PROJECT_SECRET",
+        "value" : "$(GM_DAPP_PROJECT_SECRET)"
+      },
+      {
         "key" : "GM_DAPP_PROJECT_ID",
         "value" : "$(GM_DAPP_PROJECT_ID)"
       },
