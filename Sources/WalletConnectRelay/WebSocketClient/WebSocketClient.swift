@@ -42,6 +42,8 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
         didSet {
             if let url = request.url {
                 let configuration = URLSessionConfiguration.default
+                configuration.timeoutIntervalForResource = .infinity
+                
                 let urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
                 let urlRequest = URLRequest(url: url)
                 socket = urlSession.webSocketTask(with: urlRequest)
@@ -83,6 +85,12 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
         isConnected = false
         logger.debug("[WebSocketClient]: Did close with code: \(closeCode)")
         onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        isConnected = false
+        logger.debug("[WebSocketClient]: Did complete with error: \(error?.localizedDescription ?? "unknown")")
+        onDisconnect?(error)
     }
     
     func receiveMessage() {
