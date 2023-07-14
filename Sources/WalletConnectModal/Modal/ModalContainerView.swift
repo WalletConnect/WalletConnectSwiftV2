@@ -1,15 +1,13 @@
 import SwiftUI
 
 struct ModalContainerView: View {
-    
     @Environment(\.presentationMode) var presentationMode
     
     @State var showModal: Bool = false
         
     var body: some View {
-        
-        VStack(spacing: -10) {
-            
+        VStack(spacing: 0) {
+                        
             Color.thickOverlay
                 .colorScheme(.light)
                 .transform {
@@ -21,6 +19,7 @@ struct ModalContainerView: View {
                         }
                     #endif
                 }
+                .opacity(showModal ? 1 : 0)
             
             if showModal {
                 ModalSheet(
@@ -34,6 +33,7 @@ struct ModalContainerView: View {
                 .animation(.spring(), value: showModal)
             }
         }
+        
         .edgesIgnoringSafeArea(.all)
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {

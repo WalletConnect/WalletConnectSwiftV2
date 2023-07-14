@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "QRCode",
+        "repositoryURL": "https://github.com/WalletConnect/QRCode",
+        "state": {
+          "branch": null,
+          "revision": "263f280d2c8144adfb0b6676109846cfc8dd552b",
+          "version": "14.3.1"
+        }
+      },
+      {
+        "package": "SwiftDocCPlugin",
+        "repositoryURL": "https://github.com/apple/swift-docc-plugin",
+        "state": {
+          "branch": null,
+          "revision": "26ac5758409154cc448d7ab82389c520fa8a8247",
+          "version": "1.3.0"
+        }
+      },
+      {
+        "package": "SymbolKit",
+        "repositoryURL": "https://github.com/apple/swift-docc-symbolkit",
+        "state": {
+          "branch": null,
+          "revision": "b45d1f2ed151d057b54504d653e0da5552844e34",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "swift-qrcode-generator",
+        "repositoryURL": "https://github.com/dagronf/swift-qrcode-generator",
+        "state": {
+          "branch": null,
+          "revision": "5ca09b6a2ad190f94aa3d6ddef45b187f8c0343b",
+          "version": "1.0.3"
+        }
+      },
+      {
+        "package": "SwiftImageReadWrite",
+        "repositoryURL": "https://github.com/dagronf/SwiftImageReadWrite",
+        "state": {
+          "branch": null,
+          "revision": "5596407d1cf61b953b8e658fa8636a471df3c509",
+          "version": "1.1.6"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

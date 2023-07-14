@@ -76,8 +76,6 @@ class SelectChainViewController: UIViewController, UITableViewDataSource {
                 optionalNamespaces: optionalNamespaces,
                 sessionProperties: sessionProperties
             ))
-            
-            let uri = try await WalletConnectModal.instance.connect(topic: nil)
         }
         
         WalletConnectModal.present(from: self)
