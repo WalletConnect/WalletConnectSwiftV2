@@ -63,7 +63,7 @@ class AutomaticSocketConnectionHandler {
 
     private func reconnectIfNeeded() {
         if !socket.isConnected {
-            socket.connect()
+            socket.reconnect()
         }
     }
 }

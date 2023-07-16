@@ -32,6 +32,10 @@ class WebSocketMock: WebSocketConnecting {
         isConnected = false
         onDisconnect?(nil)
     }
+    
+    func reconnect() {
+        isConnected = true
+    }
 
     func send(message: String, completion: (() -> Void)?) {
         sendCallCount+=1

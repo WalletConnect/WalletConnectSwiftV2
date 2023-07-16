@@ -9,6 +9,7 @@ public protocol WebSocketConnecting: AnyObject {
     
     func connect()
     func disconnect()
+    func reconnect()
     func send(message: String, completion: (() -> Void)?)
 }
 

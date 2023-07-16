@@ -119,7 +119,9 @@ final class Dispatcher: NSObject, Dispatching {
         socket.onDisconnect = { [unowned self] error in
             logger.debug("[WebSocket] - Disconnected")
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
-            self.socket.request.url = relayUrlFactory.create()
+            if error != nil {
+                self.socket.request.url = relayUrlFactory.create()
+            }
             Task(priority: .high) {
                 await self.socketConnectionHandler.handleDisconnection()
             }
