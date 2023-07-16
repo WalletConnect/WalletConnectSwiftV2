@@ -62,6 +62,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
     func disconnect() {
         logger.debug("[WebSocketClient]: Disconnect called")
         socket?.cancel()
+        isConnected = false
     }
     
     func send(message: String, completion: (() -> Void)?) {
@@ -85,6 +86,10 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
         isConnected = false
         logger.debug("[WebSocketClient]: Did close with code: \(closeCode)")
         onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        logger.debug("[WebSocketClient]: Did complete with error: \(error?.localizedDescription ?? "unknown")")
     }
     
     func receiveMessage() {
