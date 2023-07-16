@@ -77,11 +77,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
         onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
     }
     
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        isConnected = false
-        logger.debug("[WebSocketClient]: Did complete with error: \(error?.localizedDescription ?? "unknown")")
-        onDisconnect?(error)
-    }
+//    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+//        isConnected = false
+//        logger.debug("[WebSocketClient]: Did complete with error: \(error?.localizedDescription ?? "unknown")")
+//        onDisconnect?(error)
+//    }
     
     func receiveMessage() {
         socket?.receive { [weak self] result in
@@ -106,7 +106,9 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
                     self.logger.debug("[WebSocketClient]: Received unknown data")
                 }
             }
-            self.receiveMessage()
+            if self.isConnected == true {
+                self.receiveMessage()
+            }
         }
     }
 }
