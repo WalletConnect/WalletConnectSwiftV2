@@ -23,6 +23,16 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
         super.init()
     }
     
+    public func reconnect() {
+        let configuration = URLSessionConfiguration.default
+        let urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
+        let urlRequest = URLRequest(url: url)
+        socket = urlSession.webSocketTask(with: urlRequest)
+
+        isConnected = false
+        connect()
+    }
+    
     // MARK: - WebSocketConnecting
     var isConnected: Bool
     var onConnect: (() -> Void)?
@@ -32,7 +42,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
         didSet {
             if let url = request.url {
                 let configuration = URLSessionConfiguration.default
-                configuration.timeoutIntervalForResource = .infinity
+                //configuration.timeoutIntervalForResource = .infinity
                 
                 let urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
                 let urlRequest = URLRequest(url: url)
@@ -77,12 +87,6 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
         onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
     }
     
-//    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-//        isConnected = false
-//        logger.debug("[WebSocketClient]: Did complete with error: \(error?.localizedDescription ?? "unknown")")
-//        onDisconnect?(error)
-//    }
-    
     func receiveMessage() {
         socket?.receive { [weak self] result in
             guard let self else {
@@ -91,7 +95,12 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
             switch result {
             case .failure(let error):
                 self.logger.debug("[WebSocketClient]: Error receiving: \(error)")
-                    
+                let nsError = error as NSError
+                if nsError.code == 57 && nsError.domain == "NSPOSIXErrorDomain" {
+                    self.isConnected = false
+                    self.reconnect()
+                }
+                
             case .success(let message):
                 switch message {
                 case .string(let messageString):
