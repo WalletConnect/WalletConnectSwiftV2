@@ -13,6 +13,7 @@ class WebSocketMock: WebSocketConnecting {
 
     func connect() {}
     func disconnect() {}
+    func reconnect() {}
     func send(message: String, completion: (() -> Void)?) {}
 }
 
