@@ -16,10 +16,8 @@ import WalletConnectSigner
 
 final class PushTests: XCTestCase {
 
-    var dappPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
-    var dappPushClient: DappPushClient!
     var walletPushClient: WalletPushClient!
 
     var pairingStorage: PairingStorage!
@@ -71,20 +69,6 @@ final class PushTests: XCTestCase {
         return (pairingClient, networkingClient, syncClient, keychain, keyValueStorage)
     }
 
-    func makeDappClients() {
-        let prefix = "🦄 Dapp: "
-        let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
-        let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
-        dappPairingClient = pairingClient
-        dappPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: []),
-                                                      logger: pushLogger,
-                                                      keyValueStorage: keyValueStorage,
-                                                      keychainStorage: keychain,
-                                                      groupKeychainStorage: KeychainStorageMock(),
-                                                      networkInteractor: networkingInteractor,
-                                                      syncClient: syncClient)
-    }
-
     func makeWalletClients() {
         let prefix = "🦋 Wallet: "
         let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
@@ -113,53 +97,7 @@ final class PushTests: XCTestCase {
     }
 
     override func setUp() {
-        makeDappClients()
         makeWalletClients()
-    }
-
-    func testPushPropose() async {
-        let expectation = expectation(description: "expects dapp to receive error response")
-
-        let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await walletPushClient.enableSync(account: account, onSign: sign)
-        try! await dappPushClient.propose(account: account, topic: uri.topic)
-
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
-        }.store(in: &publishers)
-
-        dappPushClient.proposalResponsePublisher.sink { (result) in
-            guard case .success = result else {
-                XCTFail()
-                return
-            }
-            expectation.fulfill()
-        }.store(in: &publishers)
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-
-    }
-
-    func testWalletRejectsPushPropose() async {
-        let expectation = expectation(description: "expects dapp to receive error response")
-
-        let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await dappPushClient.propose(account: account, topic: uri.topic)
-
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.reject(id: id) }
-        }.store(in: &publishers)
-
-        dappPushClient.proposalResponsePublisher.sink { (result) in
-            guard case .failure = result else {
-                XCTFail()
-                return
-            }
-            expectation.fulfill()
-        }.store(in: &publishers)
-
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testWalletCreatesSubscription() async {
@@ -174,35 +112,6 @@ final class PushTests: XCTestCase {
                 Task { try! await walletPushClient.deleteSubscription(topic: subscriptions.first!.topic) }
                 expectation.fulfill()
             }.store(in: &publishers)
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
-    func testDeletePushSubscription() async {
-        let expectation = expectation(description: "expects to delete push subscription")
-        let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
-        try! await walletPushClient.enableSync(account: account, onSign: sign)
-        try! await dappPushClient.propose(account: account, topic: uri.topic)
-        var subscriptionTopic: String!
-
-        walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
-            Task(priority: .high) { try! await walletPushClient.approve(id: id, onSign: sign) }
-        }.store(in: &publishers)
-
-        dappPushClient.proposalResponsePublisher.sink { [unowned self] (result) in
-            guard case .success(let pushSubscription) = result else {
-                XCTFail()
-                return
-            }
-            subscriptionTopic = pushSubscription.topic
-            sleep(1)
-            Task(priority: .userInitiated) { try! await walletPushClient.deleteSubscription(topic: pushSubscription.topic)}
-        }.store(in: &publishers)
-
-        dappPushClient.deleteSubscriptionPublisher.sink { topic in
-            XCTAssertEqual(subscriptionTopic, topic)
-            expectation.fulfill()
-        }.store(in: &publishers)
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
     

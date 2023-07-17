@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import WalletConnectUtils
+@testable import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
@@ -205,11 +205,5 @@ final class AuthTests: XCTestCase {
         }
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
-    }
-}
-
-private struct IATProviderMock: IATProvider {
-    var iat: String {
-        return "2022-10-10T23:03:35.700Z"
     }
 }
