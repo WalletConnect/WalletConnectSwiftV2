@@ -22,10 +22,6 @@ public class WalletPushClient {
         return pushStorage.subscriptionsPublisher
     }
 
-    public var requestPublisher: AnyPublisher<PushRequest, Never> {
-        notifyProposeSubscriber.requestPublisher
-    }
-
     public var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
         pushMessageSubscriber.pushMessagePublisher
     }
@@ -48,8 +44,6 @@ public class WalletPushClient {
     private let deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
-    private let notifyProposeResponder: NotifyProposeResponder
-    private let notifyProposeSubscriber: NotifyProposeSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
 
     init(logger: ConsoleLogging,
@@ -65,8 +59,6 @@ public class WalletPushClient {
          deletePushSubscriptionSubscriber: DeletePushSubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
-         notifyProposeResponder: NotifyProposeResponder,
-         notifyProposeSubscriber: NotifyProposeSubscriber,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater
     ) {
         self.logger = logger
@@ -81,8 +73,6 @@ public class WalletPushClient {
         self.deletePushSubscriptionSubscriber = deletePushSubscriptionSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
-        self.notifyProposeResponder = notifyProposeResponder
-        self.notifyProposeSubscriber = notifyProposeSubscriber
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
     }
 
@@ -96,14 +86,6 @@ public class WalletPushClient {
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
         try await pushSubscribeRequester.subscribe(metadata: metadata, account: account, onSign: onSign)
-    }
-
-    public func approve(id: RPCID, onSign: @escaping SigningCallback) async throws {
-        try await notifyProposeResponder.approve(requestId: id, onSign: onSign)
-    }
-
-    public func reject(id: RPCID) async throws {
-        try await notifyProposeResponder.reject(requestId: id)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {

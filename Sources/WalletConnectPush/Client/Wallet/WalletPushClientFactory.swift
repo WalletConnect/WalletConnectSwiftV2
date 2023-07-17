@@ -58,9 +58,6 @@ public struct WalletPushClientFactory {
         let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, identityClient: identityClient, networkingInteractor: networkInteractor, logger: logger, pushStorage: pushStorage)
 
         let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, subscriptionScopeProvider: subscriptionScopeProvider, pushStorage: pushStorage)
-        let notifyProposeResponder = NotifyProposeResponder(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushStorage: pushStorage, pushSubscribeRequester: pushSubscribeRequester, rpcHistory: history, pushSubscribeResponseSubscriber: pushSubscribeResponseSubscriber)
-
-        let notifyProposeSubscriber = NotifyProposeSubscriber(networkingInteractor: networkInteractor, pushStorage: pushStorage, logger: logger, pairingRegisterer: pairingRegisterer)
 
         let deletePushSubscriptionSubscriber = DeletePushSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, pushStorage: pushStorage)
 
@@ -80,8 +77,6 @@ public struct WalletPushClientFactory {
             deletePushSubscriptionSubscriber: deletePushSubscriptionSubscriber,
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
-            notifyProposeResponder: notifyProposeResponder,
-            notifyProposeSubscriber: notifyProposeSubscriber,
             subscriptionsAutoUpdater: subscriptionsAutoUpdater
         )
     }
