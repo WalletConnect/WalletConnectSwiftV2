@@ -1,15 +1,6 @@
 import Foundation
 
 public class Push {
-
-    public static var dapp: DappPushClient = {
-        return DappPushClientFactory.create(
-            metadata: Pair.metadata,
-            networkInteractor: Networking.interactor,
-            syncClient: Sync.instance
-        )
-    }()
-
     public static var wallet: WalletPushClient = {
         guard let config = Push.config else {
             fatalError("Error - you must call Push.configure(_:) before accessing the shared wallet instance.")
