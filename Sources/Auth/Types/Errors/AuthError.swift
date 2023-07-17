@@ -2,6 +2,7 @@ import Foundation
 
 /// Authentication error
 public enum AuthError: Codable, Equatable, Error {
+    case methodUnsupported
     case userDisconnected
     case userRejeted
     case malformedResponseParams
@@ -14,6 +15,8 @@ extension AuthError: Reason {
 
     init?(code: Int) {
         switch code {
+        case Self.methodUnsupported.code:
+            self = .methodUnsupported
         case Self.userRejeted.code:
             self = .userRejeted
         case Self.malformedResponseParams.code:
@@ -31,6 +34,8 @@ extension AuthError: Reason {
 
     public var code: Int {
         switch self {
+        case .methodUnsupported:
+            return 10001
         case .userDisconnected:
             return 6000
         case .userRejeted:
@@ -48,6 +53,8 @@ extension AuthError: Reason {
 
     public var message: String {
         switch self {
+        case .methodUnsupported:
+            return "Method Unsupported"
         case .userRejeted:
             return "Auth request rejected by user"
         case .malformedResponseParams:
