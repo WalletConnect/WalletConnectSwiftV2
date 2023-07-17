@@ -12,3 +12,11 @@ public struct DefaultIATProvider: IATProvider {
         return ISO8601DateFormatter().string(from: Date())
     }
 }
+
+#if DEBUG
+struct IATProviderMock: IATProvider {
+    var iat: String {
+        return "2022-10-10T23:03:35.700Z"
+    }
+}
+#endif

@@ -1,12 +1,12 @@
 import Foundation
 import XCTest
-import WalletConnectUtils
+@testable import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
 import WalletConnectEcho
-@testable import WalletConnectPush
+@testable import Auth
 @testable import WalletConnectPairing
 @testable import WalletConnectSync
 @testable import WalletConnectHistory
@@ -16,14 +16,14 @@ final class PairingTests: XCTestCase {
     var appPairingClient: PairingClient!
     var walletPairingClient: PairingClient!
 
-    var appPushClient: DappPushClient!
-    var walletPushClient: WalletPushClient!
+    var appAuthClient: AuthClient!
+    var walletAuthClient: AuthClient!
 
     var pairingStorage: PairingStorage!
 
     private var publishers = [AnyCancellable]()
 
-    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, SyncClient, KeychainStorageProtocol, KeyValueStorage) {
+    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkingInteractor, SyncClient, KeychainStorageProtocol, KeyValueStorage) {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
@@ -64,13 +64,17 @@ final class PairingTests: XCTestCase {
         let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
         appPairingClient = pairingClient
-        appPushClient = DappPushClientFactory.create(metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
-                                                     logger: pushLogger,
-                                                     keyValueStorage: keyValueStorage,
-                                                     keychainStorage: keychain,
-                                                     groupKeychainStorage: KeychainStorageMock(),
-                                                     networkInteractor: networkingInteractor,
-                                                     syncClient: syncClient)
+        
+        appAuthClient = AuthClientFactory.create(
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            projectId: InputConfig.projectId,
+            crypto: DefaultCryptoProvider(),
+            logger: pushLogger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            networkingClient: networkingInteractor,
+            pairingRegisterer: pairingClient,
+            iatProvider: IATProviderMock())
     }
 
     func makeWalletClients() {
@@ -88,16 +92,16 @@ final class PairingTests: XCTestCase {
             relayUrl: "wss://relay.walletconnect.com",
             keychain: keychain
         )
-        walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
-                                                          logger: pushLogger,
-                                                          keyValueStorage: keyValueStorage,
-                                                          keychainStorage: keychain,
-                                                          groupKeychainStorage: KeychainStorageMock(),
-                                                          networkInteractor: networkingInteractor,
-                                                          pairingRegisterer: pairingClient,
-                                                          echoClient: echoClient,
-                                                          syncClient: syncClient,
-                                                          historyClient: historyClient)
+        appAuthClient = AuthClientFactory.create(
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            projectId: InputConfig.projectId,
+            crypto: DefaultCryptoProvider(),
+            logger: pushLogger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
+            networkingClient: networkingInteractor,
+            pairingRegisterer: pairingClient,
+            iatProvider: IATProviderMock())
     }
 
     func makeWalletPairingClient() {
@@ -108,23 +112,6 @@ final class PairingTests: XCTestCase {
 
     override func setUp() {
         makeDappClients()
-    }
-
-    func testProposePushOnPairing() async {
-        makeWalletClients()
-        let expectation = expectation(description: "propose push on pairing")
-
-        walletPushClient.requestPublisher.sink { _ in
-            expectation.fulfill()
-        }.store(in: &publishers)
-
-        let uri = try! await appPairingClient.create()
-
-        try! await walletPairingClient.pair(uri: uri)
-
-        try! await appPushClient.propose(account: Account.stub(), topic: uri.topic)
-
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testPing() async {
@@ -145,8 +132,8 @@ final class PairingTests: XCTestCase {
         makeWalletPairingClient()
         let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
 
-        appPushClient.proposalResponsePublisher.sink { (response) in
-            XCTAssertEqual(response, .failure(PushError(code: 10001)!))
+        appAuthClient.authResponsePublisher.sink { (_, response) in
+            XCTAssertEqual(response, .failure(AuthError(code: 10001)!))
             expectation.fulfill()
         }.store(in: &publishers)
 
@@ -154,7 +141,7 @@ final class PairingTests: XCTestCase {
 
         try! await walletPairingClient.pair(uri: uri)
 
-        try! await appPushClient.propose(account: Account.stub(), topic: uri.topic)
+        try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
