@@ -45,13 +45,6 @@ final class SignCoordinator {
                 presentResponse(for: response)
             }.store(in: &publishers)
 
-        Sign.instance.sessionSettlePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] session in
-                let vc = showAccountsScreen(session)
-                vc.proposePushSubscription()
-            }.store(in: &publishers)
-
         if let session = Sign.instance.getSessions().first {
             _ = showAccountsScreen(session)
         } else {

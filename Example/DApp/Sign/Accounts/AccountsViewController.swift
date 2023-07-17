@@ -54,21 +54,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
             }
         }
     }
-
-    func proposePushSubscription() {
-        let account = session.namespaces.values.first!.accounts.first!
-
-        Task(priority: .high){ try! await Push.dapp.propose(account: account, topic: session.pairingTopic)}
-        Push.dapp.proposalResponsePublisher.sink { result in
-            switch result {
-            case .success(let subscription):
-                self.pushSubscription = subscription
-            case .failure(let error):
-                print(error)
-            }
-        }.store(in: &publishers)
-    }
-
+    
     @objc
     private func disconnect() {
         Task {
