@@ -54,7 +54,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
     }
     
     func connect() {
-        logger.debug("[WebSocketClient]: Connect called")
+        logger.debug("[WebSocketClient]: Connect called 🔗 \(url.host ?? "nil")")
         socket?.resume()
     }
     

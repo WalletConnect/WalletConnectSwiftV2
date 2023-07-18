@@ -20,7 +20,8 @@ final class Dispatcher: NSObject, Dispatching {
     private let logger: ConsoleLogging
     
     private let defaultTimeout: Int = 5
-
+    private var fallback = false
+    
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -38,7 +39,7 @@ final class Dispatcher: NSObject, Dispatching {
         self.relayUrlFactory = relayUrlFactory
         self.logger = logger
         
-        let socket = socketFactory.create(with: relayUrlFactory.create())
+        let socket = socketFactory.create(with: relayUrlFactory.create(fallback: fallback))
         socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
         self.socket = socket
         
@@ -72,10 +73,14 @@ final class Dispatcher: NSObject, Dispatching {
             .filter { $0 == .connected }
             .setFailureType(to: NetworkError.self)
             .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .webSocketNotConnected })
-            .sink(receiveCompletion: { result in
+            .sink(receiveCompletion: { [weak self] result in
+                guard let self else {
+                    return
+                }
                 switch result {
                 case .failure(let error):
                     cancellable?.cancel()
+                    self.handleFallbackIfNeeded(error: error)
                     completion(error)
                 case .finished: break
                 }
@@ -104,7 +109,10 @@ final class Dispatcher: NSObject, Dispatching {
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try socketConnectionHandler.handleDisconnect(closeCode: closeCode)
     }
+}
 
+// MARK: - Private functions
+extension Dispatcher {
     private func setUpWebSocketSession() {
         socket.receive = { [unowned self] in
             self.onMessage?($0)
@@ -120,11 +128,20 @@ final class Dispatcher: NSObject, Dispatching {
             logger.debug("[WebSocket] - Disconnected")
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
             if error != nil {
-                self.socket.request.url = relayUrlFactory.create()
+                self.socket.request.url = relayUrlFactory.create(fallback: fallback)
             }
             Task(priority: .high) {
                 await self.socketConnectionHandler.handleDisconnection()
             }
+        }
+    }
+    
+    private func handleFallbackIfNeeded(error: NetworkError) {
+        if error == .webSocketNotConnected && socket.request.url?.host == NetworkConstants.defaultUrl {
+            logger.debug("[WebSocket] - Fallback to \(NetworkConstants.fallbackUrl)")
+            fallback = true
+            socket.request.url = relayUrlFactory.create(fallback: fallback)
+            socket.connect()
         }
     }
 }

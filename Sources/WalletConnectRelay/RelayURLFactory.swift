@@ -4,6 +4,7 @@ struct RelayUrlFactory {
     private let relayHost: String
     private let projectId: String
     private let socketAuthenticator: ClientIdAuthenticating
+    private var fallback = false
 
     init(
         relayHost: String,
@@ -15,10 +16,10 @@ struct RelayUrlFactory {
         self.socketAuthenticator = socketAuthenticator
     }
 
-    func create() -> URL {
+    func create(fallback: Bool) -> URL {
         var components = URLComponents()
         components.scheme = "wss"
-        components.host = relayHost
+        components.host = fallback ? NetworkConstants.fallbackUrl : relayHost
         components.queryItems = [
             URLQueryItem(name: "projectId", value: projectId)
         ]
