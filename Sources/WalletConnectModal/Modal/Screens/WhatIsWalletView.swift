@@ -53,7 +53,7 @@ struct WhatIsWalletView: View {
                     }
                 }
             }
-            .buttonStyle(W3MButtonStyle())
+            .buttonStyle(WCMMainButtonStyle())
         }
         .padding(.horizontal, 24)
     }

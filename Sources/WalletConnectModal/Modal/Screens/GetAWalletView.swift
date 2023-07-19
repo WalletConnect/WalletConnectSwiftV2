@@ -57,7 +57,7 @@ struct GetAWalletView: View {
                         Image(.external_link)
                     }
                 }
-                .buttonStyle(W3MButtonStyle())
+                .buttonStyle(WCMMainButtonStyle())
             }
             .multilineTextAlignment(.center)
             .padding(.horizontal, 0)

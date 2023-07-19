@@ -119,10 +119,11 @@ final class ModalViewModel: ObservableObject {
         uiApplicationWrapper.openURL(url, nil)
     }
     
-    func onListingTap(_ listing: Listing) {
+    func onListingTap(_ listing: Listing, preferUniversal: Bool) {
         navigateToDeepLink(
             universalLink: listing.mobile.universal ?? "",
-            nativeLink: listing.mobile.native ?? ""
+            nativeLink: listing.mobile.native ?? "",
+            preferUniversal: preferUniversal
         )
     }
     
@@ -215,12 +216,12 @@ private extension ModalViewModel {
         }
     }
 
-    func navigateToDeepLink(universalLink: String, nativeLink: String) {
+    func navigateToDeepLink(universalLink: String, nativeLink: String, preferUniversal: Bool) {
         do {
             let nativeUrlString = try formatNativeUrlString(nativeLink)
             let universalUrlString = try formatUniversalUrlString(universalLink)
             
-            if let nativeUrl = nativeUrlString?.toURL() {
+            if let nativeUrl = nativeUrlString?.toURL(), !preferUniversal {
                 uiApplicationWrapper.openURL(nativeUrl) { success in
                     if !success {
                         self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
