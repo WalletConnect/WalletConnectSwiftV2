@@ -5,6 +5,9 @@ on:
     branches:
       - develop
       - main
+  pull_request:
+    branches:
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.ref_name }}
