@@ -22,7 +22,7 @@ jobs:
 
   prepare:
     needs: authorize
-    runs-on: macos-12
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
         with:
@@ -34,7 +34,7 @@ jobs:
 
   test:
     needs: prepare
-    runs-on: macos-12
+    runs-on: self-hosted
     timeout-minutes: 15
     strategy:
       fail-fast: false
