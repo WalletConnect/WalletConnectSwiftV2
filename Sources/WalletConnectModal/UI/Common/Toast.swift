@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct Toast: Equatable {
-    var style: ToastStyle
-    var message: String
+    let style: ToastStyle
+    let message: String
     var duration: Double = 3
     var width: Double = .infinity
 }

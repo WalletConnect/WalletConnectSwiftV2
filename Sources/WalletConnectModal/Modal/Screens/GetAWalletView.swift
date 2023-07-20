@@ -16,20 +16,20 @@ struct GetAWalletView: View {
                             WalletImage(wallet: wallet)
                                 .frame(width: 40, height: 40)
                             
-                        Text(wallet.name)
-                            .font(.system(size: 16, weight: .medium))
-                            .padding(.horizontal)
+                            Text(wallet.name)
+                                .font(.system(size: 16, weight: .medium))
+                                .padding(.horizontal)
                             
-                        Spacer()
+                            Spacer()
                             
-                        Image(systemName: "chevron.right")
-                            .font(.system(.footnote).weight(.semibold))
+                            Image(systemName: "chevron.right")
+                                .font(.system(.footnote).weight(.semibold))
+                        }
                     }
                 }
             }
-        }
-        .frame(minHeight: 400)
-        .listStyle(.plain)
+            .frame(minHeight: 400)
+            .listStyle(.plain)
             
             
             VStack(alignment: .center, spacing: 8) {
@@ -37,32 +37,33 @@ struct GetAWalletView: View {
                     .font(
                         .system(size: 16)
                         .weight(.semibold)
-                )
-                .multilineTextAlignment(.center)
-                .foregroundColor(.foreground1)
+                    )
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.foreground1)
                 
-            Text("With hundreds of wallets out there,  there’s something for everyone ")
-                .font(
-                    .system(size: 14)
+                Text("With hundreds of wallets out there,  there’s something for everyone ")
+                    .font(
+                        .system(size: 14)
                         .weight(.medium)
-                )
-                .foregroundColor(.foreground2)
-                .fixedSize(horizontal: false, vertical: true)
+                    )
+                    .foregroundColor(.foreground2)
+                    .fixedSize(horizontal: false, vertical: true)
                 
-            Button(action: {
-                navigateToExternalLink(URL(string: "https://walletconnect.com/explorer?type=wallet")!)
-            }) {
-                HStack {
-                    Text("Explore Wallets")
-                    Image(.external_link)
+                Button(action: {
+                    navigateToExternalLink(URL(string: "https://walletconnect.com/explorer?type=wallet")!)
+                }) {
+                    HStack {
+                        Text("Explore Wallets")
+                        Image(.external_link)
+                    }
                 }
+                .buttonStyle(W3MButtonStyle())
             }
-            .buttonStyle(W3MButtonStyle())
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 0)
+            .padding(.top, 0)
+            .frame(maxHeight: .infinity, alignment: .bottom)
         }
-        .multilineTextAlignment(.center)
-        .padding(.horizontal, 0)
-        .padding(.top, 0)
-        .frame(maxHeight: .infinity, alignment: .bottom)
     }
 }
 

@@ -94,6 +94,13 @@ public struct ModalSheet: View {
                         TextField("Search", text: $viewModel.searchTerm, onEditingChanged: { editing in
                             self.searchEditing = editing
                         })
+                        .transform { view in
+                            #if os(macOS)
+                            view
+                            #else
+                            view.autocapitalization(.none)
+                            #endif
+                        }
                     }
                     .padding(.vertical, 4)
                     .padding(.horizontal, 10)
@@ -106,11 +113,6 @@ public struct ModalSheet: View {
                     )
                     .onDisappear {
                         searchEditing = false
-                    }
-                    .transform {
-                        #if os(iOS)
-                            $0.autocapitalization(.none)
-                        #endif
                     }
                     .padding(.horizontal, 50)
                 } else {
