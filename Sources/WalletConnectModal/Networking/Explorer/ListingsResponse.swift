@@ -12,6 +12,7 @@ struct Listing: Codable, Hashable, Identifiable {
     let imageId: String
     let app: App
     let mobile: Mobile
+    var lastTimeUsed: Date? 
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -21,6 +22,7 @@ struct Listing: Codable, Hashable, Identifiable {
         case imageId = "image_id"
         case app
         case mobile
+        case lastTimeUsed
     }
 
     struct App: Codable, Hashable {
