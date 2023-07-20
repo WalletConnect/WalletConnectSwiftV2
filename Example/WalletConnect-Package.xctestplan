@@ -1,0 +1,108 @@
+{
+  "configurations" : [
+    {
+      "id" : "BDCC881D-E5D4-477B-A899-4984FA326FED",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "AuthTests",
+        "name" : "AuthTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "ChatTests",
+        "name" : "ChatTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "CommonsTests",
+        "name" : "CommonsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "JSONRPCTests",
+        "name" : "JSONRPCTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "RelayerTests",
+        "name" : "RelayerTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "VerifyTests",
+        "name" : "VerifyTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "WalletConnectKMSTests",
+        "name" : "WalletConnectKMSTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "WalletConnectPairingTests",
+        "name" : "WalletConnectPairingTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "WalletConnectSignTests",
+        "name" : "WalletConnectSignTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "WalletConnectUtilsTests",
+        "name" : "WalletConnectUtilsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "Web3WalletTests",
+        "name" : "Web3WalletTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "WalletConnectModalTests",
+        "name" : "WalletConnectModalTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "NotifyTests",
+        "name" : "NotifyTests"
+      }
+    }
+  ],
+  "version" : 1
+}
