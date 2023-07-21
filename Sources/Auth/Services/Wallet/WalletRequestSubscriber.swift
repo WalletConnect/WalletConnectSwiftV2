@@ -48,14 +48,13 @@ class WalletRequestSubscriber {
                     let assertionId = payload.decryptedPayload.sha256().toHexString()
                     do {
                         let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
-                        let verifyContext = verifyClient.createVerifyContext(
-                            origin: origin,
-                            domain: payload.request.payloadParams.domain
-                        )
+                        let verifyContext = verifyClient.createVerifyContext(origin: origin, domain: payload.request.payloadParams.domain)
                         verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                     } catch {
-                        onRequest?((request, nil))
+                        let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.payloadParams.domain)
+                        verifyContextStore.set(verifyContext, forKey: request.id.string)
+                        onRequest?((request, verifyContext))
                         return
                     }
                 }

@@ -247,14 +247,13 @@ private extension SessionEngine {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
                 let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
-                let verifyContext = verifyClient.createVerifyContext(
-                    origin: origin,
-                    domain: session.peerParticipant.metadata.url
-                )
+                let verifyContext = verifyClient.createVerifyContext(origin: origin, domain: session.peerParticipant.metadata.url)
                 verifyContextStore.set(verifyContext, forKey: request.id.string)
                 onSessionRequest?(request, verifyContext)
             } catch {
-                onSessionRequest?(request, nil)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: session.peerParticipant.metadata.url)
+                verifyContextStore.set(verifyContext, forKey: request.id.string)
+                onSessionRequest?(request, verifyContext)
                 return
             }
         }

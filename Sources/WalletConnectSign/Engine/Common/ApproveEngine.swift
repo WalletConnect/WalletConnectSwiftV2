@@ -309,7 +309,8 @@ private extension ApproveEngine {
                 verifyContextStore.set(verifyContext, forKey: proposal.proposer.publicKey)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
             } catch {
-                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url)
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
                 return
             }
         }
