@@ -1,7 +1,7 @@
 import UIKit
 
 import Web3Wallet
-import WalletConnectPush
+import WalletConnectNotify
 
 final class MainRouter {
     weak var viewController: UIViewController!
@@ -30,10 +30,5 @@ final class MainRouter {
     func settingsViewController() -> UIViewController {
         return SettingsModule.create(app: app)
             .wrapToNavigationController()
-    }
-
-    func present(pushRequest: PushRequest) {
-//        PushRequestModule.create(app: app, pushRequest: pushRequest)
-//            .presentFullScreen(from: viewController, transparentBackground: true)
     }
 }

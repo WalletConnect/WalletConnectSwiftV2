@@ -54,8 +54,8 @@ private extension NotificationsPresenter {
             }
         interactor.subscriptionsPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] pushSubscriptions in
-                self?.subscriptions = pushSubscriptions
+            .sink { [weak self] notifySubscriptions in
+                self?.subscriptions = notifySubscriptions
                     .map { SubscriptionsViewModel(subscription: $0) }
             }
             .store(in: &disposeBag)

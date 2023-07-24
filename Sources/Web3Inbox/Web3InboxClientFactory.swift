@@ -5,7 +5,7 @@ final class Web3InboxClientFactory {
 
     static func create(
         chatClient: ChatClient,
-        pushClient: WalletPushClient,
+        notifyClient: WalletNotifyClient,
         account: Account,
         config: [ConfigParam: Bool],
         onSign: @escaping SigningCallback
@@ -15,13 +15,13 @@ final class Web3InboxClientFactory {
         let webviewSubscriber = WebViewRequestSubscriber(url: url, logger: logger)
         let webView = WebViewFactory(url: url, webviewSubscriber: webviewSubscriber).create()
         let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter(), logger: logger)
-        let pushWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: PushWebViewScriptFormatter(), logger: logger)
+        let notifyWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: NotifyWebViewScriptFormatter(), logger: logger)
 
         let clientProxy = ChatClientProxy(client: chatClient, onSign: onSign)
         let clientSubscriber = ChatClientRequestSubscriber(chatClient: chatClient, logger: logger)
 
-        let pushClientProxy = PushClientProxy(client: pushClient, onSign: onSign)
-        let pushClientSubscriber = PushClientRequestSubscriber(client: pushClient, logger: logger)
+        let notifyClientProxy = NotifyClientProxy(client: notifyClient, onSign: onSign)
+        let notifyClientSubscriber = NotifyClientRequestSubscriber(client: notifyClient, logger: logger)
 
         return Web3InboxClient(
             webView: webView,
@@ -30,17 +30,17 @@ final class Web3InboxClientFactory {
             chatClientProxy: clientProxy,
             clientSubscriber: clientSubscriber,
             chatWebviewProxy: chatWebViewProxy,
-            pushWebviewProxy: pushWebViewProxy,
+            notifyWebviewProxy: notifyWebViewProxy,
             webviewSubscriber: webviewSubscriber,
-            pushClientProxy: pushClientProxy,
-            pushClientSubscriber: pushClientSubscriber,
-            pushClient: pushClient
+            notifyClientProxy: notifyClientProxy,
+            notifyClientSubscriber: notifyClientSubscriber,
+            notifyClient: notifyClient
         )
     }
 
     private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
         var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
-        var queryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "pushProvider", value: "ios"), URLQueryItem(name: "account", value: account.address), URLQueryItem(name: "authProvider", value: "ios")]
+        var queryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "notifyProvider", value: "ios"), URLQueryItem(name: "account", value: account.address), URLQueryItem(name: "authProvider", value: "ios")]
 
         for param in config.filter({ $0.value == false}) {
             queryItems.append(URLQueryItem(name: "\(param.key)", value: "false"))

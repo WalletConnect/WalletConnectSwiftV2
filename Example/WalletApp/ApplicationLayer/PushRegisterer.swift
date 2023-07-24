@@ -1,5 +1,5 @@
 
-import WalletConnectPush
+import WalletConnectNotify
 import Combine
 import UIKit
 

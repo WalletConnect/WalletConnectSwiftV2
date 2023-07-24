@@ -1,8 +1,8 @@
 import Foundation
-import WalletConnectPush
+import WalletConnectNotify
 
 struct SubscriptionsViewModel: Identifiable {
-    let subscription: WalletConnectPush.PushSubscription
+    let subscription: NotifySubscription
 
     var id: String {
         return subscription.topic

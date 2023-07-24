@@ -1,5 +1,5 @@
 import Foundation
-import WalletConnectPush
+import WalletConnectNotify
 
 class BuildConfiguration {
     enum Environment: String {

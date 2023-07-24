@@ -39,11 +39,5 @@ extension MainPresenter {
     private func setupInitialState() {
         configurationService.configure(importAccount: importAccount)
         pushRegisterer.registerForPushNotifications()
-
-        interactor.pushRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] request in
-                router.present(pushRequest: request)
-            }.store(in: &disposeBag)
     }
 }
