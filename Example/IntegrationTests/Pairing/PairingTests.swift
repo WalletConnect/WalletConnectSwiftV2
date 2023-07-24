@@ -5,7 +5,7 @@ import XCTest
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
-import WalletConnectEcho
+import WalletConnectPush
 @testable import Auth
 @testable import WalletConnectPairing
 @testable import WalletConnectSync

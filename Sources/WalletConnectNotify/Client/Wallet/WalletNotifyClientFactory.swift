@@ -2,7 +2,7 @@ import Foundation
 
 public struct WalletNotifyClientFactory {
 
-    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, echoClient: EchoClient, syncClient: SyncClient, historyClient: HistoryClient) -> WalletNotifyClient {
+    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, syncClient: SyncClient, historyClient: HistoryClient) -> WalletNotifyClient {
         let logger = ConsoleLogger(suffix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
@@ -17,7 +17,7 @@ public struct WalletNotifyClientFactory {
             groupKeychainStorage: groupKeychainService,
             networkInteractor: networkInteractor,
             pairingRegisterer: pairingRegisterer,
-            echoClient: echoClient,
+            pushClient: pushClient,
             syncClient: syncClient,
             historyClient: historyClient
         )
@@ -31,7 +31,7 @@ public struct WalletNotifyClientFactory {
         groupKeychainStorage: KeychainStorageProtocol,
         networkInteractor: NetworkInteracting,
         pairingRegisterer: PairingRegisterer,
-        echoClient: EchoClient,
+        pushClient: PushClient,
         syncClient: SyncClient,
         historyClient: HistoryClient
     ) -> WalletNotifyClient {
@@ -66,7 +66,7 @@ public struct WalletNotifyClientFactory {
         return WalletNotifyClient(
             logger: logger,
             kms: kms,
-            echoClient: echoClient,
+            pushClient: pushClient,
             notifyMessageSubscriber: notifyMessageSubscriber,
             notifyStorage: notifyStorage,
             notifySyncService: notifySyncService,

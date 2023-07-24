@@ -2,7 +2,7 @@ import Foundation
 
 extension Notify {
     struct Config {
-        let echoHost: String
+        let pushHost: String
         let environment: APNSEnvironment
     }
 }
