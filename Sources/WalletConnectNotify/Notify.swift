@@ -5,11 +5,11 @@ public class Notify {
         guard let config = Notify.config else {
             fatalError("Error - you must call Notify.configure(_:) before accessing the shared wallet instance.")
         }
-        Echo.configure(echoHost: config.echoHost, environment: config.environment)
+        Push.configure(pushHost: config.pushHost, environment: config.environment)
         return WalletNotifyClientFactory.create(
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
-            echoClient: Echo.instance,
+            pushClient: Push.instance,
             syncClient: Sync.instance,
             historyClient: History.instance
         )
@@ -20,8 +20,8 @@ public class Notify {
     private init() { }
 
     /// Wallet's configuration method
-    static public func configure(echoHost: String = "echo.walletconnect.com", environment: APNSEnvironment) {
-        Notify.config = Notify.Config(echoHost: echoHost, environment: environment)
+    static public func configure(pushHost: String = "echo.walletconnect.com", environment: APNSEnvironment) {
+        Notify.config = Notify.Config(pushHost: pushHost, environment: environment)
     }
 
 }

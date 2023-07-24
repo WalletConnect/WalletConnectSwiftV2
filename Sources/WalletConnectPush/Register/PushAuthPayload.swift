@@ -1,6 +1,6 @@
 import Foundation
 
-struct EchoAuthPayload: JWTClaimsCodable {
+struct PushAuthPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         let iss: String

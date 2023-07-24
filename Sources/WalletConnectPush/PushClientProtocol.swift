@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol EchoClientProtocol {
+public protocol PushClientProtocol {
     func register(deviceToken: Data) async throws
 #if DEBUG
     func register(deviceToken: String) async throws

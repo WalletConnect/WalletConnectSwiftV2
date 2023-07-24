@@ -1,9 +1,9 @@
 import Foundation
 import Combine
 
-@testable import WalletConnectEcho
+@testable import WalletConnectPush
 
-final class EchoClientMock: EchoClientProtocol {
+final class PushClientMock: PushClientProtocol {
     var registedCalled = false
     
     func register(deviceToken: Data) async throws {

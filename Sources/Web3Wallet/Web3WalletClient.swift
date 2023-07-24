@@ -67,7 +67,7 @@ public class Web3WalletClient {
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
     private let pairingClient: PairingClientProtocol
-    private let echoClient: EchoClientProtocol
+    private let pushClient: PushClientProtocol
     
     private var account: Account?
 
@@ -75,12 +75,12 @@ public class Web3WalletClient {
         authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
         pairingClient: PairingClientProtocol,
-        echoClient: EchoClientProtocol
+        pushClient: PushClientProtocol
     ) {
         self.authClient = authClient
         self.signClient = signClient
         self.pairingClient = pairingClient
-        self.echoClient = echoClient
+        self.pushClient = pushClient
     }
     
     /// For a wallet to approve a session proposal.
@@ -206,8 +206,8 @@ public class Web3WalletClient {
         try authClient.getPendingRequests()
     }
     
-    public func registerEchoClient(deviceToken: Data) async throws {
-        try await echoClient.register(deviceToken: deviceToken)
+    public func registerPushClient(deviceToken: Data) async throws {
+        try await pushClient.register(deviceToken: deviceToken)
     }
     
     /// Delete all stored data such as: pairings, sessions, keys
@@ -224,8 +224,8 @@ public class Web3WalletClient {
 
 #if DEBUG
 extension Web3WalletClient {
-    public func registerEchoClient(deviceToken: String) async throws {
-        try await echoClient.register(deviceToken: deviceToken)
+    public func registerPushClient(deviceToken: String) async throws {
+        try await pushClient.register(deviceToken: deviceToken)
     }
 }
 #endif

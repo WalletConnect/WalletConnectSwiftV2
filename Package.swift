@@ -29,8 +29,8 @@ let package = Package(
             name: "WalletConnectNotify",
             targets: ["WalletConnectNotify"]),
         .library(
-            name: "WalletConnectEcho",
-            targets: ["WalletConnectEcho"]),
+            name: "WalletConnectPush",
+            targets: ["WalletConnectPush"]),
         .library(
             name: "WalletConnectRouter",
             targets: ["WalletConnectRouter"]),
@@ -73,16 +73,16 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
-            dependencies: ["Auth", "WalletConnectSign", "WalletConnectEcho", "WalletConnectVerify"],
+            dependencies: ["Auth", "WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectNotify",
-            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
+            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
             path: "Sources/WalletConnectNotify"),
         .target(
-            name: "WalletConnectEcho",
+            name: "WalletConnectPush",
             dependencies: ["WalletConnectNetworking", "WalletConnectJWT"],
-            path: "Sources/WalletConnectEcho"),
+            path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectJWT"],

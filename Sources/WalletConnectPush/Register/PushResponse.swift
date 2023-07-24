@@ -1,6 +1,6 @@
 import Foundation
 
-struct EchoResponse: Codable {
+struct PushResponse: Codable {
     enum Status: String, Codable {
         case success = "SUCCESS"
         case failed = "FAILED"
