@@ -1,7 +1,7 @@
 import Combine
 
 import Web3Wallet
-import WalletConnectPush
+import WalletConnectNotify
 
 final class WalletInteractor {
     var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> {

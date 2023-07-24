@@ -1,10 +1,10 @@
 import SwiftUI
-import WalletConnectPush
+import WalletConnectNotify
 
 final class PushMessagesModule {
 
     @discardableResult
-    static func create(app: Application, subscription: PushSubscription) -> UIViewController {
+    static func create(app: Application, subscription: NotifySubscription) -> UIViewController {
         let router = PushMessagesRouter(app: app)
         let interactor = PushMessagesInteractor(subscription: subscription)
         let presenter = PushMessagesPresenter(interactor: interactor, router: router)
