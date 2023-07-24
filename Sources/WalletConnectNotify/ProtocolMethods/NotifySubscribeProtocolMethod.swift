@@ -2,7 +2,7 @@
 import Foundation
 
 struct NotifySubscribeProtocolMethod: ProtocolMethod {
-    let method: String = "wc_notifySubscribe"
+    let method: String = "wc_pushSubscribe"
 
     let requestConfig: RelayConfig = RelayConfig(tag: 4006, prompt: true, ttl: 86400)
 
