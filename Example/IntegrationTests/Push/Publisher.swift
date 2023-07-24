@@ -11,7 +11,7 @@ class Publisher {
         let payload = try encoder.encode(notifyRequestPayload)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Authorization", forHTTPHeaderField: InputConfig.gmDappProjectSecret)
+        request.setValue("Bearer \(InputConfig.gmDappProjectSecret)", forHTTPHeaderField: "Authorization")
         request.httpBody = payload
         let (_, response) = try await URLSession.shared.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Notify error") }
