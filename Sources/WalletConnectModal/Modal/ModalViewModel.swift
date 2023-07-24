@@ -79,7 +79,7 @@ final class ModalViewModel: ObservableObject {
             .sink { sessions in
                 print(sessions)
                 isShown.wrappedValue = false
-                self.toast = Toast(style: .success, message: "Session estabilished", duration: 15)
+                self.toast = Toast(style: .success, message: "Session estabilished", duration: 5)
             }
             .store(in: &disposeBag)
         

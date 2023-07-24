@@ -7,19 +7,7 @@ struct ModalContainerView: View {
         
     var body: some View {
         VStack(spacing: 0) {
-                        
-            Color.thickOverlay
-                .colorScheme(.light)
-                .transform {
-                    #if os(iOS)
-                        $0.onTapGesture {
-                            withAnimation {
-                                showModal = false
-                            }
-                        }
-                    #endif
-                }
-                .opacity(showModal ? 1 : 0)
+            Color.clear
             
             if showModal {
                 ModalSheet(
@@ -33,8 +21,22 @@ struct ModalContainerView: View {
                 .animation(.spring(), value: showModal)
             }
         }
-        
+        .background(
+            Color.thickOverlay
+                .colorScheme(.light)
+                .opacity(showModal ? 1 : 0)
+                .transform {
+                    #if os(iOS)
+                        $0.onTapGesture {
+                            withAnimation {
+                                showModal = false
+                            }
+                        }
+                    #endif
+                }
+        )
         .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
                 withAnimation {
