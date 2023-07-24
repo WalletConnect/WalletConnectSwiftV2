@@ -6,7 +6,7 @@ import Web3
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
-import WalletConnectEcho
+import WalletConnectPush
 @testable import WalletConnectNotify
 @testable import WalletConnectPairing
 @testable import WalletConnectSync
@@ -74,8 +74,8 @@ final class NotifyTests: XCTestCase {
         let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let notifyLogger = ConsoleLogger(suffix: prefix + " [Notify]", loggingLevel: .debug)
         walletPairingClient = pairingClient
-        let echoClient = EchoClientFactory.create(projectId: "",
-                                                  echoHost: "echo.walletconnect.com",
+        let pushClient = PushClientFactory.create(projectId: "",
+                                                  pushHost: "echo.walletconnect.com",
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
@@ -85,15 +85,15 @@ final class NotifyTests: XCTestCase {
             keychain: keychain
         )
         walletNotifyClient = WalletNotifyClientFactory.create(keyserverURL: keyserverURL,
-                                                          logger: notifyLogger,
-                                                          keyValueStorage: keyValueStorage,
-                                                          keychainStorage: keychain,
-                                                          groupKeychainStorage: KeychainStorageMock(),
-                                                          networkInteractor: networkingInteractor,
-                                                          pairingRegisterer: pairingClient,
-                                                          echoClient: echoClient,
-                                                          syncClient: syncClient,
-                                                          historyClient: historyClient)
+                                                              logger: notifyLogger,
+                                                              keyValueStorage: keyValueStorage,
+                                                              keychainStorage: keychain,
+                                                              groupKeychainStorage: KeychainStorageMock(),
+                                                              networkInteractor: networkingInteractor,
+                                                              pairingRegisterer: pairingClient,
+                                                              pushClient: pushClient,
+                                                              syncClient: syncClient,
+                                                              historyClient: historyClient)
     }
 
     override func setUp() {

@@ -1,8 +1,8 @@
 import Foundation
 
-extension Echo {
+extension Push {
     struct Config {
-        let echoHost: String
+        let pushHost: String
         let environment: APNSEnvironment
     }
 }

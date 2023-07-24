@@ -1,26 +1,26 @@
 import Foundation
 
-protocol EchoAuthenticating {
+protocol PushAuthenticating {
     func createAuthToken() throws -> String
 }
 
-class EchoAuthenticator: EchoAuthenticating {
+class PushAuthenticator: PushAuthenticating {
     private let clientIdStorage: ClientIdStoring
-    private let echoHost: String
+    private let pushHost: String
 
-    init(clientIdStorage: ClientIdStoring, echoHost: String) {
+    init(clientIdStorage: ClientIdStoring, pushHost: String) {
         self.clientIdStorage = clientIdStorage
-        self.echoHost = echoHost
+        self.pushHost = pushHost
     }
 
     func createAuthToken() throws -> String {
         let keyPair = try clientIdStorage.getOrCreateKeyPair()
-        let payload = EchoAuthPayload(subject: getSubject(), audience: getAudience())
+        let payload = PushAuthPayload(subject: getSubject(), audience: getAudience())
         return try payload.signAndCreateWrapper(keyPair: keyPair).jwtString
     }
 
     private func getAudience() -> String {
-        return "https://\(echoHost)"
+        return "https://\(pushHost)"
     }
 
     private func getSubject() -> String {

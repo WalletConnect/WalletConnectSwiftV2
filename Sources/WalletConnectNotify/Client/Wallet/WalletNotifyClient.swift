@@ -35,7 +35,7 @@ public class WalletNotifyClient {
 
     public let logger: ConsoleLogging
 
-    private let echoClient: EchoClient
+    private let pushClient: PushClient
     private let notifyStorage: NotifyStorage
     private let notifySyncService: NotifySyncService
     private let notifyMessageSubscriber: NotifyMessageSubscriber
@@ -48,7 +48,7 @@ public class WalletNotifyClient {
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         echoClient: EchoClient,
+         pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
          notifySyncService: NotifySyncService,
@@ -62,7 +62,7 @@ public class WalletNotifyClient {
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater
     ) {
         self.logger = logger
-        self.echoClient = echoClient
+        self.pushClient = pushClient
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
         self.notifySyncService = notifySyncService
@@ -109,14 +109,14 @@ public class WalletNotifyClient {
     }
 
     public func register(deviceToken: Data) async throws {
-        try await echoClient.register(deviceToken: deviceToken)
+        try await pushClient.register(deviceToken: deviceToken)
     }
 }
 
 #if targetEnvironment(simulator)
 extension WalletNotifyClient {
     public func register(deviceToken: String) async throws {
-        try await echoClient.register(deviceToken: deviceToken)
+        try await pushClient.register(deviceToken: deviceToken)
     }
 }
 #endif

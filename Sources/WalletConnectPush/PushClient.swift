@@ -1,9 +1,9 @@
 import Foundation
 
-public class EchoClient: EchoClientProtocol {
-    private let registerService: EchoRegisterService
+public class PushClient: PushClientProtocol {
+    private let registerService: PushRegisterService
 
-    init(registerService: EchoRegisterService) {
+    init(registerService: PushRegisterService) {
         self.registerService = registerService
     }
 

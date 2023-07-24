@@ -1,6 +1,6 @@
 import Foundation
 
-enum EchoAPI: HTTPService {
+enum PushAPI: HTTPService {
     case register(clientId: String, token: String, projectId: String, environment: APNSEnvironment, auth: String)
     case unregister(clientId: String, projectId: String, auth: String)
 
