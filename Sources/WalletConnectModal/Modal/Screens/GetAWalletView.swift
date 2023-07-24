@@ -41,7 +41,7 @@ struct GetAWalletView: View {
                     .multilineTextAlignment(.center)
                     .foregroundColor(.foreground1)
                 
-                Text("With hundreds of wallets out there,  there’s something for everyone ")
+                Text("With hundreds of wallets out there, there’s something for everyone ")
                     .font(
                         .system(size: 14)
                         .weight(.medium)
@@ -67,6 +67,8 @@ struct GetAWalletView: View {
     }
 }
 
+#if DEBUG
+
 struct GetAWalletView_Previews: PreviewProvider {
     static var previews: some View {
         GetAWalletView(
@@ -77,3 +79,5 @@ struct GetAWalletView_Previews: PreviewProvider {
         .environment(\.projectId, Secrets.load().projectID)
     }
 }
+
+#endif
