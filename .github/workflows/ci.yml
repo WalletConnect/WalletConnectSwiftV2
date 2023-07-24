@@ -1,13 +1,13 @@
 name: ci
 
 on:
-  pull_request_target:
+  # pull_request_target:
+  #   branches:
+  #     - develop
+  #     - main
+  push:
     branches:
-      - develop
-      - main
-  pull_request:
-    branches:
-      - develop
+      - feat/ci/self-hosted-runners
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.ref_name }}
