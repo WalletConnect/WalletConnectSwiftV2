@@ -23,8 +23,8 @@ test_setup:
 
 build_all:
 	rm -rf test_results
-	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
-	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' CAST_HOST='$(CAST_HOST)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' CAST_HOST='$(CAST_HOST)' build-for-testing | xcpretty
 
 build_dapp:
 	fastlane build scheme:DApp
@@ -42,9 +42,9 @@ unitxctestrun = $(shell find . -name '*WalletConnect-Package*.xctestrun')
 
 unit_tests: test_setup
 ifneq ($(unitxctestrun),)
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache -resultBundlePath 'test_results/UnitTests.xcresult' -xctestrun '$(unitxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 13' -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache -resultBundlePath 'test_results/UnitTests.xcresult' -xctestrun '$(unitxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 else
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme WalletConnect-Package -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache -resultBundlePath 'test_results/UnitTests.xcresult' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme WalletConnect-Package -destination 'platform=iOS Simulator,name=iPhone 13' -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache -resultBundlePath 'test_results/UnitTests.xcresult' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 endif
 
 integrationxctestrun = $(shell find . -name '*_IntegrationTests*.xctestrun')
@@ -71,9 +71,9 @@ ifneq ($(relayxctestrun),)
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.RELAY_HOST -string $(RELAY_HOST) $(relayxctestrun)
 	plutil -replace TestConfigurations.0.TestTargets.0.EnvironmentVariables.PROJECT_ID -string $(PROJECT_ID) $(relayxctestrun)
 # test-without-building
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/RelayIntegrationTests.xcresult' -xctestrun '$(relayxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -destination 'platform=iOS Simulator,name=iPhone 12' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/RelayIntegrationTests.xcresult' -xctestrun '$(relayxctestrun)' test-without-building | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 else
-	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -project Example/ExampleApp.xcodeproj -scheme RelayIntegrationTests -destination 'platform=iOS Simulator,name=iPhone 14' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/RelayIntegrationTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -project Example/ExampleApp.xcodeproj -scheme RelayIntegrationTests -destination 'platform=iOS Simulator,name=iPhone 12' -derivedDataPath DerivedDataCache -resultBundlePath 'test_results/RelayIntegrationTests.xcresult' RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' test | tee ./test_results/xcodebuild.log | xcpretty --report junit --output ./test_results/report.junit
 endif
 
 notifyxctestrun = $(shell find . -name '*_NotifyTests*.xctestrun')
