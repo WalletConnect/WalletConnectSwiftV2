@@ -26,8 +26,8 @@ let package = Package(
             name: "WalletConnectPairing",
             targets: ["WalletConnectPairing"]),
         .library(
-            name: "WalletConnectPush",
-            targets: ["WalletConnectPush"]),
+            name: "WalletConnectNotify",
+            targets: ["WalletConnectNotify"]),
         .library(
             name: "WalletConnectEcho",
             targets: ["WalletConnectEcho"]),
@@ -76,9 +76,9 @@ let package = Package(
             dependencies: ["Auth", "WalletConnectSign", "WalletConnectEcho", "WalletConnectVerify"],
             path: "Sources/Web3Wallet"),
         .target(
-            name: "WalletConnectPush",
+            name: "WalletConnectNotify",
             dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
-            path: "Sources/WalletConnectPush"),
+            path: "Sources/WalletConnectNotify"),
         .target(
             name: "WalletConnectEcho",
             dependencies: ["WalletConnectNetworking", "WalletConnectJWT"],
@@ -100,7 +100,7 @@ let package = Package(
             dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "Web3Inbox",
-            dependencies: ["WalletConnectChat", "WalletConnectPush"]),
+            dependencies: ["WalletConnectChat", "WalletConnectNotify"]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
@@ -157,7 +157,7 @@ let package = Package(
             dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "NotifyTests",
-            dependencies: ["WalletConnectPush", "TestingUtils"]),
+            dependencies: ["WalletConnectNotify", "TestingUtils"]),
         .testTarget(
             name: "AuthTests",
             dependencies: ["Auth", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),

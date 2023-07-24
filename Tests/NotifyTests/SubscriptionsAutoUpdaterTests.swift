@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 import TestingUtils
-@testable import WalletConnectPush
+@testable import WalletConnectNotify
 
 class SubscriptionsAutoUpdaterTests: XCTestCase {
     var sut: SubscriptionsAutoUpdater!
