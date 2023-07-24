@@ -23,7 +23,11 @@ struct WhatIsWalletView: View {
                             .padding(.bottom, 40)
                     }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
+                .transform {
+                    #if os(iOS)
+                    $0.tabViewStyle(.page(indexDisplayMode: .always))
+                    #endif
+                }
                 .frame(height: 150)
 
             } else {

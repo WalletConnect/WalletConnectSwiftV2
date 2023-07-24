@@ -174,7 +174,7 @@ struct WalletList: View {
                 .multilineTextAlignment(.center)
             
             Text("RECENT")
-                .opacity(0)
+                .opacity(wallet.lastTimeUsed != nil ? 1 : 0)
                 .font(.system(size: 10))
                 .foregroundColor(.foreground3)
                 .padding(.horizontal, 12)
