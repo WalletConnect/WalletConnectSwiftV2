@@ -31,7 +31,6 @@ struct GetAWalletView: View {
             .frame(minHeight: 400)
             .listStyle(.plain)
             
-            
             VStack(alignment: .center, spacing: 8) {
                 Text("Not what you’re looking for?")
                     .font(
