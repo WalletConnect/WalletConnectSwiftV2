@@ -55,9 +55,11 @@ final class ModalViewModel: ObservableObject {
     }
     
     var filteredWallets: [Listing] {
-        if searchTerm.isEmpty { return wallets }
+        if searchTerm.isEmpty { return sortByRecent(wallets) }
         
-        return wallets.filter { $0.name.lowercased().contains(searchTerm.lowercased()) }
+        return sortByRecent(
+            wallets.filter { $0.name.lowercased().contains(searchTerm.lowercased()) }
+        )
     }
     
     private var disposeBag = Set<AnyCancellable>()
@@ -77,7 +79,7 @@ final class ModalViewModel: ObservableObject {
             .sink { sessions in
                 print(sessions)
                 isShown.wrappedValue = false
-                self.toast = Toast(style: .success, message: "Session estabilished", duration: 15)
+                self.toast = Toast(style: .success, message: "Session estabilished", duration: 5)
             }
             .store(in: &disposeBag)
         
@@ -120,6 +122,8 @@ final class ModalViewModel: ObservableObject {
     }
     
     func onListingTap(_ listing: Listing) {
+        setLastTimeUsed(listing.id)
+        
         navigateToDeepLink(
             universalLink: listing.mobile.universal ?? "",
             nativeLink: listing.mobile.native ?? ""
@@ -145,7 +149,6 @@ final class ModalViewModel: ObservableObject {
     }
         
     func onCopyButton() {
-        
         
         guard let uri else {
             toast = Toast(style: .error, message: "No uri found")
@@ -190,12 +193,71 @@ final class ModalViewModel: ObservableObject {
                     
                     return lhs < rhs
                 }
+                
+                loadRecentWallets()
             }
         } catch {
             toast = Toast(style: .error, message: error.localizedDescription)
         }
     }
 }
+
+// MARK: - Recent Wallets
+
+private extension ModalViewModel {
+    
+    func sortByRecent(_ input: [Listing]) -> [Listing] {
+        input.sorted { lhs, rhs in
+            guard let lhsLastTimeUsed = lhs.lastTimeUsed else {
+                return false
+            }
+            
+            guard let rhsLastTimeUsed = rhs.lastTimeUsed else {
+                return true
+            }
+            
+            return lhsLastTimeUsed > rhsLastTimeUsed
+        }
+    }
+    
+    func loadRecentWallets() {
+        RecentWalletsStorage().recentWallets.forEach { wallet in
+            
+            guard let lastTimeUsed = wallet.lastTimeUsed else {
+                return
+            }
+            
+            // Consider Recent only for 3 days
+            if abs(lastTimeUsed.timeIntervalSinceNow) > (24 * 60 * 60 * 3) {
+                return
+            }
+            
+            setLastTimeUsed(wallet.id, date: lastTimeUsed)
+        }
+    }
+    
+    func saveRecentWallets() {
+        RecentWalletsStorage().recentWallets = Array(wallets.filter {
+            $0.lastTimeUsed != nil
+        }.prefix(5))
+    }
+    
+    func setLastTimeUsed(_ walletId: String, date: Date = Date()) {
+        guard let index = wallets.firstIndex(where: {
+            $0.id == walletId
+        }) else {
+            return
+        }
+        
+        var copy = wallets[index]
+        copy.lastTimeUsed = date
+        wallets[index] = copy
+        
+        saveRecentWallets()
+    }
+}
+
+// MARK: - Deeplinking
 
 private extension ModalViewModel {
     enum DeeplinkErrors: LocalizedError {

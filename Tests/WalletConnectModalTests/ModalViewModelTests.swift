@@ -49,10 +49,8 @@ final class ModalViewModelTests: XCTestCase {
         XCTAssertEqual(sut.uri, "wc:foo@2?symKey=bar&relay-protocol=irn")
         
         XCTAssertEqual(sut.wallets.count, 2)
-        XCTAssertEqual(sut.wallets, [
-            Listing(id: "1", name: "Sample App", homepage: "https://example.com", order: 1, imageId: "1", app: Listing.App(ios: "https://example.com/download-ios", mac: "https://example.com/download-mac", safari: "https://example.com/download-safari"), mobile: Listing.Mobile(native: nil, universal: "https://example.com/universal")),
-            Listing(id: "2", name: "Awesome App", homepage: "https://example.com/awesome", order: 2, imageId: "2", app: Listing.App(ios: "https://example.com/download-ios", mac: "https://example.com/download-mac", safari: "https://example.com/download-safari"), mobile: Listing.Mobile(native: "awesomeapp://deeplink", universal: "https://awesome.com/awesome/universal")),
-        ])
+        XCTAssertEqual(sut.wallets.map(\.id), ["1", "2"])
+        XCTAssertEqual(sut.wallets.map(\.name), ["Sample App", "Awesome App"])
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called")
         

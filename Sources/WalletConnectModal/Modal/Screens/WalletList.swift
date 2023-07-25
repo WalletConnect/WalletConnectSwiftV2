@@ -13,18 +13,18 @@ struct WalletList: View {
     @State var availableSize: CGSize = .zero
     
     var body: some View {
-        content()
-            .readSize { size in
-                if availableSize == size {
-                    return
+        ZStack {
+            content()
+                .animation(.default)
+                .readSize { size in
+                    if availableSize == size {
+                        return
+                    }
+                    
+                    numberOfColumns = Int(round(size.width / 100))
+                    availableSize = size
                 }
-                
-                numberOfColumns = Int(round(size.width / 100))
-                availableSize = size
-                
-                return
-            }
-            .id(numberOfColumns)
+        }
     }
     
     @ViewBuilder
@@ -32,8 +32,10 @@ struct WalletList: View {
         switch destination {
         case .welcome:
             initialList()
+                .padding(.bottom, 20)
         case .viewAll:
             viewAll()
+                .frame(minHeight: 250)
         case let .walletDetail(wallet):
             walletDetail(wallet)
         default:
@@ -47,15 +49,15 @@ struct WalletList: View {
             
             VStack {
                 HStack {
-                    ForEach(0..<numberOfColumns) { index in
-                        gridItem(for: index)
+                    ForEach(wallets.prefix(numberOfColumns)) { wallet in
+                        gridItem(for: wallet)
                     }
                 }
                 HStack {
-                    ForEach(numberOfColumns..<(2 * numberOfColumns - 1)) { index in
-                        gridItem(for: index)
+                    ForEach(wallets.dropFirst(numberOfColumns).prefix(max(numberOfColumns - 1, 0))) { wallet in
+                        gridItem(for: wallet)
                     }
-                        
+                    
                     if wallets.count > numberOfColumns * 2 {
                         viewAllItem()
                             .transform {
@@ -80,21 +82,21 @@ struct WalletList: View {
     @ViewBuilder
     private func viewAll() -> some View {
         ZStack {
-            Spacer().frame(height: 450)
+            Spacer().frame(maxWidth: .infinity, maxHeight: 150)
             
             ScrollView(.vertical) {
                 VStack(alignment: .leading) {
                     ForEach(Array(stride(from: 0, to: wallets.count, by: numberOfColumns)), id: \.self) { row in
                         HStack {
                             ForEach(row..<(row + numberOfColumns), id: \.self) { index in
-                                if wallets.indices.contains(index) {
-                                    gridItem(for: index)
+                                if let wallet = wallets[safe: index] {
+                                    gridItem(for: wallet)
                                 }
                             }
                         }
                     }
                 }
-                .padding(.top)
+                .padding(.vertical)
             }
             
             LinearGradient(
@@ -116,20 +118,22 @@ struct WalletList: View {
     func viewAllItem() -> some View {
         VStack {
             VStack(spacing: 3) {
-                let startingIndex = (2 * numberOfColumns - 1)
+                let viewAllWalletsFirstRow = wallets.dropFirst(2 * numberOfColumns - 1).prefix(2)
                 
                 HStack(spacing: 3) {
-                    ForEach(startingIndex..<(startingIndex + 2)) { index in
-                        WalletImage(wallet: wallets[safe: index])
+                    ForEach(viewAllWalletsFirstRow) { wallet in
+                        WalletImage(wallet: wallet)
                             .cornerRadius(8)
                             .aspectRatio(1, contentMode: .fit)
                     }
                 }
                 .padding(.horizontal, 5)
                 
+                let viewAllWalletsSecondRow = wallets.dropFirst(2 * numberOfColumns + 1).prefix(2)
+                
                 HStack(spacing: 3) {
-                    ForEach((startingIndex + 2)..<(startingIndex + 4)) { index in
-                        WalletImage(wallet: wallets[safe: index])
+                    ForEach(viewAllWalletsSecondRow) { wallet in
+                        WalletImage(wallet: wallet)
                             .cornerRadius(8)
                             .aspectRatio(1, contentMode: .fit)
                     }
@@ -157,49 +161,44 @@ struct WalletList: View {
     }
     
     @ViewBuilder
-    func gridItem(for index: Int) -> some View {
-        if let wallet = wallets[safe: index] {
-            VStack {
-                WalletImage(wallet: wallet)
-                    .frame(width: 60, height: 60)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(.gray.opacity(0.4), lineWidth: 1)
-                    )
-                
-                Text(wallet.name)
-                    .font(.system(size: 12))
-                    .foregroundColor(.foreground1)
-                    .padding(.horizontal, 12)
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.4)
-                
-                Text("RECENT")
-                    .opacity(0)
-                    .font(.system(size: 10))
-                    .foregroundColor(.foreground3)
-                    .padding(.horizontal, 12)
-            }
-            .frame(maxWidth: 80, maxHeight: 96)
-            .transform {
-                #if os(iOS)
-                    $0.onTapGesture {
-                        withAnimation {
-                            navigateTo(.walletDetail(wallet))
-                        }
+    func gridItem(for wallet: Listing) -> some View {
+        VStack {
+            WalletImage(wallet: wallet)
+                .frame(width: 60, height: 60)
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.gray.opacity(0.4), lineWidth: 1)
+                )
+            
+            Text(String(wallet.name.split(separator: " ").first!))
+                .font(.system(size: 12))
+                .foregroundColor(.foreground1)
+                .multilineTextAlignment(.center)
+            
+            Text("RECENT")
+                .opacity(wallet.lastTimeUsed != nil ? 1 : 0)
+                .font(.system(size: 10))
+                .foregroundColor(.foreground3)
+                .padding(.horizontal, 12)
+        }
+        .frame(maxWidth: 80, maxHeight: 96)
+        .transform {
+            #if os(iOS)
+                $0.onTapGesture {
+                    withAnimation {
+                        navigateTo(.walletDetail(wallet))
                     }
-                #endif
-            }
-        } else {
-            EmptyView()
+                }
+            #endif
         }
     }
     
     private func walletDetail(_ wallet: Listing) -> some View {
         VStack(spacing: 8) {
             WalletImage(wallet: wallet, size: .large)
-                .frame(maxWidth: 96, maxHeight: 96)
+                .frame(width: 96, height: 96)
+                .minimumScaleFactor(0.4)
             
             Text("Continue in \(wallet.name)...")
                 .font(.system(size: 16, weight: .medium))
@@ -218,11 +217,10 @@ struct WalletList: View {
                 }
             }
             .buttonStyle(W3MButtonStyle())
-            .padding()
+            .padding(.vertical)
             .opacity(retryButtonShown ? 1 : 0)
             .animation(.easeIn)
         }
-        .padding()
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 onListingTap(wallet)

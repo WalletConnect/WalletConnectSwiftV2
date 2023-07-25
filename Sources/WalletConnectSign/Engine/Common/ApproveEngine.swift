@@ -297,13 +297,14 @@ private extension ApproveEngine {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
                 let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
-                let verifyContext = await verifyClient.createVerifyContext(
+                let verifyContext = verifyClient.createVerifyContext(
                     origin: origin,
                     domain: payload.request.proposer.metadata.url
                 )
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
             } catch {
-                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url)
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
                 return
             }
         }
