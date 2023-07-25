@@ -51,11 +51,8 @@ public struct ModalSheet: View {
             
             Spacer()
             
-            HStack(spacing: 16) {
-                helpButton()
-                closeButton()
-            }
-            .padding(.trailing, 10)
+            closeButton()
+                .padding(.trailing, 10)
         }
         .foregroundColor(Color.foreground1)
         .frame(height: 48)
@@ -152,12 +149,6 @@ public struct ModalSheet: View {
         case .welcome,
              .viewAll:
             welcome()
-        case .help:
-            WhatIsWalletView(
-                navigateTo: viewModel.navigateTo(_:),
-                navigateToExternalLink: viewModel.navigateToExternalLink(_:)
-            )
-            .padding(.bottom, 20)
         case .qr:
             qrCode()
                 .padding(.bottom, 20)
@@ -182,18 +173,6 @@ public struct ModalSheet: View {
 }
 
 extension ModalSheet {
-    private func helpButton() -> some View {
-        Button(action: {
-            withAnimation {
-                viewModel.navigateTo(.help)
-            }
-        }, label: {
-            Image(.help)
-                .padding(8)
-        })
-        .buttonStyle(CircuralIconButtonStyle())
-    }
-    
     private func closeButton() -> some View {
         Button {
             viewModel.onCloseButton()
