@@ -110,7 +110,6 @@ platform :ios do
       app_identifier: ENV["APP_IDENTIFIER"],
       changelog: "#{ENV["SCHEME"]} app weekly build 🚀",
       distribute_external: true,
-      skip_submission: true,
       notify_external_testers: true,
       skip_waiting_for_build_processing: false,
       groups: [
