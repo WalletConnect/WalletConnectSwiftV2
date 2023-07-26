@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+set -eE
+trap 'xcrun simctl delete "$DEVICE_ID"' ERR
 
 # Parse named arguments
 while [[ $# -gt 0 ]]; do
@@ -97,7 +98,6 @@ else
     )
 fi  
 
-# Remove ephemeral simulator
 echo "Removing ephemeral simulator"
 xcrun simctl delete "$DEVICE_ID"
 
