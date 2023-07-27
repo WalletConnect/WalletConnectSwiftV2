@@ -35,6 +35,7 @@ struct WalletList: View {
         case .viewAll:
             viewAll()
                 .frame(minHeight: 250)
+                .animation(nil)
         default:
             EmptyView()
         }
@@ -173,8 +174,8 @@ struct WalletList: View {
                 .foregroundColor(.foreground1)
                 .multilineTextAlignment(.center)
             
-            Text("RECENT")
-                .opacity(wallet.lastTimeUsed != nil ? 1 : 0)
+            Text(wallet.lastTimeUsed != nil ? "RECENT" : "INSTALLED")
+                .opacity(wallet.lastTimeUsed != nil || wallet.installed ? 1 : 0)
                 .font(.system(size: 10))
                 .foregroundColor(.foreground3)
                 .padding(.horizontal, 12)
