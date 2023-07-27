@@ -6,7 +6,7 @@ public final class Web3InboxClient {
     private let webView: WKWebView
     private var account: Account
     private let logger: ConsoleLogging
-    private let notifyClient: WalletNotifyClient
+    private let notifyClient: NotifyClient
 
     private let chatClientProxy: ChatClientProxy
     private let chatClientSubscriber: ChatClientRequestSubscriber
@@ -30,7 +30,7 @@ public final class Web3InboxClient {
         webviewSubscriber: WebViewRequestSubscriber,
         notifyClientProxy: NotifyClientProxy,
         notifyClientSubscriber: NotifyClientRequestSubscriber,
-        notifyClient: WalletNotifyClient
+        notifyClient: NotifyClient
     ) {
         self.webView = webView
         self.account = account

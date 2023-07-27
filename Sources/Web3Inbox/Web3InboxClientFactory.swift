@@ -5,7 +5,7 @@ final class Web3InboxClientFactory {
 
     static func create(
         chatClient: ChatClient,
-        notifyClient: WalletNotifyClient,
+        notifyClient: NotifyClient,
         account: Account,
         config: [ConfigParam: Bool],
         onSign: @escaping SigningCallback

@@ -18,7 +18,7 @@ final class NotifyTests: XCTestCase {
 
     var walletPairingClient: PairingClient!
 
-    var walletNotifyClient: WalletNotifyClient!
+    var walletNotifyClient: NotifyClient!
 
     var pairingStorage: PairingStorage!
 
@@ -84,7 +84,7 @@ final class NotifyTests: XCTestCase {
             relayUrl: "wss://relay.walletconnect.com",
             keychain: keychain
         )
-        walletNotifyClient = WalletNotifyClientFactory.create(keyserverURL: keyserverURL,
+        walletNotifyClient = NotifyClientFactory.create(keyserverURL: keyserverURL,
                                                               logger: notifyLogger,
                                                               keyValueStorage: keyValueStorage,
                                                               keychainStorage: keychain,
