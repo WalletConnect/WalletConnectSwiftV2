@@ -2,12 +2,12 @@ import Foundation
 
 final class NotifyClientProxy {
 
-    private let client: WalletNotifyClient
+    private let client: NotifyClient
 
     var onSign: SigningCallback
     var onResponse: ((RPCResponse) async throws -> Void)?
 
-    init(client: WalletNotifyClient, onSign: @escaping SigningCallback) {
+    init(client: NotifyClient, onSign: @escaping SigningCallback) {
         self.client = client
         self.onSign = onSign
     }

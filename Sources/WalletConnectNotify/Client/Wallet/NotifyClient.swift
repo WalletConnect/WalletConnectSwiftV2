@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-public class WalletNotifyClient {
+public class NotifyClient {
 
     private var publishers = Set<AnyCancellable>()
 
@@ -114,7 +114,7 @@ public class WalletNotifyClient {
 }
 
 #if targetEnvironment(simulator)
-extension WalletNotifyClient {
+extension NotifyClient {
     public func register(deviceToken: String) async throws {
         try await pushClient.register(deviceToken: deviceToken)
     }
