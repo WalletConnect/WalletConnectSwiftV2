@@ -95,6 +95,7 @@ extension QRCodeView {
 
 #endif
 
+#if DEBUG
 struct QRCodeView_Previews: PreviewProvider {
     static let stubUri: String = Array(repeating: ["a", "b", "c", "1", "2", "3"], count: 10)
         .flatMap { $0 }
@@ -106,3 +107,4 @@ struct QRCodeView_Previews: PreviewProvider {
             .previewLayout(.sizeThatFits)
     }
 }
+#endif

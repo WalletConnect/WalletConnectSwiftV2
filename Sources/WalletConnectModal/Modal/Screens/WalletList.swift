@@ -3,7 +3,6 @@ import SwiftUI
 struct WalletList: View {
     @Binding var wallets: [Listing]
     @Binding var destination: Destination
-    @State var retryButtonShown: Bool = false
     
     var navigateTo: (Destination) -> Void
     var onListingTap: (Listing) -> Void
@@ -36,8 +35,6 @@ struct WalletList: View {
         case .viewAll:
             viewAll()
                 .frame(minHeight: 250)
-        case let .walletDetail(wallet):
-            walletDetail(wallet)
         default:
             EmptyView()
         }
@@ -88,7 +85,7 @@ struct WalletList: View {
                 VStack(alignment: .leading) {
                     ForEach(Array(stride(from: 0, to: wallets.count, by: numberOfColumns)), id: \.self) { row in
                         HStack {
-                            ForEach(row..<(row + numberOfColumns), id: \.self) { index in
+                            ForEach(row ..< (row + numberOfColumns), id: \.self) { index in
                                 if let wallet = wallets[safe: index] {
                                     gridItem(for: wallet)
                                 }
@@ -188,50 +185,14 @@ struct WalletList: View {
                 $0.onTapGesture {
                     withAnimation {
                         navigateTo(.walletDetail(wallet))
+                        
+                        // Small delay to let detail screen present before actually deeplinking
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            onListingTap(wallet)
+                        }
                     }
                 }
             #endif
-        }
-    }
-    
-    private func walletDetail(_ wallet: Listing) -> some View {
-        VStack(spacing: 8) {
-            WalletImage(wallet: wallet, size: .large)
-                .frame(width: 96, height: 96)
-                .minimumScaleFactor(0.4)
-            
-            Text("Continue in \(wallet.name)...")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.foreground1)
-            
-            Text("Accept connection request in the app")
-                .font(.system(size: 14))
-                .foregroundColor(.foreground3)
-            
-            Button {
-                onListingTap(wallet)
-            } label: {
-                HStack {
-                    Text("Try Again")
-                    Image(.external_link)
-                }
-            }
-            .buttonStyle(W3MButtonStyle())
-            .padding(.vertical)
-            .opacity(retryButtonShown ? 1 : 0)
-            .animation(.easeIn)
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                onListingTap(wallet)
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                retryButtonShown = true
-            }
-        }
-        .onDisappear {
-            retryButtonShown = false
         }
     }
 }

@@ -57,7 +57,7 @@ struct WhatIsWalletView: View {
                     }
                 }
             }
-            .buttonStyle(W3MButtonStyle())
+            .buttonStyle(WCMMainButtonStyle())
         }
         .padding(.horizontal, 24)
     }
@@ -112,8 +112,10 @@ struct HelpSection: View {
     }
 }
 
+#if DEBUG
 struct WhatIsWalletView_Previews: PreviewProvider {
     static var previews: some View {
         WhatIsWalletView(navigateTo: { _ in }, navigateToExternalLink: { _ in })
     }
 }
+#endif
