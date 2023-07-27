@@ -112,8 +112,10 @@ struct HelpSection: View {
     }
 }
 
+#if DEBUG
 struct WhatIsWalletView_Previews: PreviewProvider {
     static var previews: some View {
         WhatIsWalletView(navigateTo: { _ in }, navigateToExternalLink: { _ in })
     }
 }
+#endif

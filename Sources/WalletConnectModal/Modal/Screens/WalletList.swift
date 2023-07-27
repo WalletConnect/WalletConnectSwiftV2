@@ -186,6 +186,7 @@ struct WalletList: View {
                     withAnimation {
                         navigateTo(.walletDetail(wallet))
                         
+                        // Small delay to let detail screen present before actually deeplinking
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             onListingTap(wallet)
                         }
@@ -194,6 +195,4 @@ struct WalletList: View {
             #endif
         }
     }
-    
-   
 }

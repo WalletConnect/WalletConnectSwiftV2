@@ -45,6 +45,7 @@ struct WCMMainButtonStyle: ButtonStyle {
     }
 }
 
+#if DEBUG
 struct ButtonStyle_Previews: PreviewProvider {
     
     static var previews: some View {
@@ -63,3 +64,4 @@ struct ButtonStyle_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
+#endif
