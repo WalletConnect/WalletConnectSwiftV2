@@ -1,6 +1,16 @@
 import Foundation
 import Combine
 
+import WalletConnectRelay
+
+public enum WalletConnectState {
+    case idle
+    case pairing
+    case received
+    case pairingTimeout
+    case networkConnected
+    case networkDisconnected
+}
 
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
@@ -8,10 +18,13 @@ public class NetworkingInteractor: NetworkInteracting {
     private let serializer: Serializing
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let networkMonitor: NetworkMonitoring
 
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
-
+    
+    public var walletConnectStatePublisherSubject = CurrentValueSubject<WalletConnectState, Never>(.idle)
+    
     public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
@@ -20,20 +33,27 @@ public class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
+    public var walletConnectStatusPublisher: AnyPublisher<WalletConnectState, Never> {
+        walletConnectStatePublisherSubject.eraseToAnyPublisher()
+    }
+    
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
-
+    
     public init(
         relayClient: RelayClient,
         serializer: Serializing,
         logger: ConsoleLogging,
-        rpcHistory: RPCHistory
+        rpcHistory: RPCHistory,
+        networkMonitor: NetworkMonitoring = NetworkMonitor()
     ) {
         self.relayClient = relayClient
         self.serializer = serializer
         self.rpcHistory = rpcHistory
+        self.networkMonitor = networkMonitor
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
         setupRelaySubscribtion()
+        setupNetworkMonitoring()
     }
 
     private func setupRelaySubscribtion() {
@@ -42,7 +62,15 @@ public class NetworkingInteractor: NetworkInteracting {
                 manageSubscription(topic, message, publishedAt)
             }.store(in: &publishers)
     }
-
+    
+    private func setupNetworkMonitoring() {
+        networkMonitor.connectionStatusPublisher
+            .sink { [weak self] connected in
+                self?.walletConnectStatePublisherSubject.send(connected == true ? .networkConnected : .networkDisconnected)
+            }
+            .store(in: &publishers)
+    }
+    
     public func subscribe(topic: String) async throws {
         try await relayClient.subscribe(topic: topic)
     }
@@ -137,8 +165,10 @@ public class NetworkingInteractor: NetworkInteracting {
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String, _ publishedAt: Date) {
         if let (deserializedJsonRpcRequest, derivedTopic, decryptedPayload): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            logger.debug("[NetworkingInteractor]: Proposal or request received 1?")
             handleRequest(topic: topic, request: deserializedJsonRpcRequest, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            logger.debug("[NetworkingInteractor]: Proposal or request received 2?")
             handleResponse(topic: topic, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")

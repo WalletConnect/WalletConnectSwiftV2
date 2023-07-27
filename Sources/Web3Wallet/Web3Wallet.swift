@@ -27,7 +27,8 @@ public class Web3Wallet {
             authClient: Auth.instance,
             signClient: Sign.instance,
             pairingClient: Pair.instance as! PairingClient,
-            echoClient: Echo.instance
+            echoClient: Echo.instance,
+            networkingInteractor: Networking.interactor
         )
     }()
     

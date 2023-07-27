@@ -71,6 +71,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     /// - When URI is invalid format or missing params
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
+        networkingInteractor.walletConnectStatePublisherSubject.send(.pairing)
         try await walletPairService.pair(uri)
     }
 

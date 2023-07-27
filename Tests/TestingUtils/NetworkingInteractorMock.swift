@@ -28,6 +28,10 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
+    public var walletConnectStatusPublisher: AnyPublisher<WalletConnectNetworking.WalletConnectState, Never> {
+        walletConnectStatePublisherSubject.eraseToAnyPublisher()
+    }
+    public var walletConnectStatePublisherSubject = CurrentValueSubject<WalletConnectNetworking.WalletConnectState, Never>(.idle)
 
     public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
     public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()

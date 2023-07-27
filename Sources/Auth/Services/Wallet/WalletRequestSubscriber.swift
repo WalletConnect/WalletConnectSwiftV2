@@ -39,6 +39,7 @@ class WalletRequestSubscriber {
                 )
                 
                 let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
+                networkingInteractor.walletConnectStatePublisherSubject.send(.received)
                 
                 Task(priority: .high) {
                     let assertionId = payload.decryptedPayload.sha256().toHexString()

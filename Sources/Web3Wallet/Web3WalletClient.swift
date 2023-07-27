@@ -58,9 +58,16 @@ public class Web3WalletClient {
     
     /// Publisher that sends response for session request
     ///
-    /// In most cases that event will be emited on dApp client.
+    /// Event can be emited on a wallet client.
     public var sessionResponsePublisher: AnyPublisher<Response, Never> {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
+    }
+    
+    /// Publisher that sends connection states
+    ///
+    /// In most cases event will be emited on wallet
+    public var walletConnectStatePublisher: AnyPublisher<WalletConnectState, Never> {
+        networkingInteractor.walletConnectStatusPublisher.eraseToAnyPublisher()
     }
 
     // MARK: - Private Properties
@@ -68,6 +75,7 @@ public class Web3WalletClient {
     private let signClient: SignClientProtocol
     private let pairingClient: PairingClientProtocol
     private let echoClient: EchoClientProtocol
+    private let networkingInteractor: NetworkInteracting
     
     private var account: Account?
 
@@ -75,12 +83,14 @@ public class Web3WalletClient {
         authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
         pairingClient: PairingClientProtocol,
-        echoClient: EchoClientProtocol
+        echoClient: EchoClientProtocol,
+        networkingInteractor: NetworkInteracting
     ) {
         self.authClient = authClient
         self.signClient = signClient
         self.pairingClient = pairingClient
         self.echoClient = echoClient
+        self.networkingInteractor = networkingInteractor
     }
     
     /// For a wallet to approve a session proposal.

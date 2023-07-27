@@ -238,6 +238,8 @@ private extension SessionEngine {
         guard !request.isExpired() else {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
+        networkingInteractor.walletConnectStatePublisherSubject.send(.received)
+        
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {

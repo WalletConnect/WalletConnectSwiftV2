@@ -273,7 +273,6 @@
 		C56EE28E293F5757004840D1 /* ApplicationConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE284293F5757004840D1 /* ApplicationConfigurator.swift */; };
 		C56EE28F293F5757004840D1 /* MigrationConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE283293F5757004840D1 /* MigrationConfigurator.swift */; };
 		C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */; };
-		C58099352A543CD000AB58F5 /* BlinkAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C58099342A543CD000AB58F5 /* BlinkAnimation.swift */; };
 		C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F12970511B000DBA0E /* SessionRequestModule.swift */; };
 		C5B2F6F729705293000DBA0E /* SessionRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F32970511B000DBA0E /* SessionRequestRouter.swift */; };
 		C5B2F6F829705293000DBA0E /* SessionRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2F6F52970511B000DBA0E /* SessionRequestView.swift */; };
@@ -601,7 +600,6 @@
 		C56EE287293F5757004840D1 /* AppearanceConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceConfigurator.swift; sourceTree = "<group>"; };
 		C56EE29F293F5C4F004840D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIPasteboardWrapper.swift; sourceTree = "<group>"; };
-		C58099342A543CD000AB58F5 /* BlinkAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlinkAnimation.swift; sourceTree = "<group>"; };
 		C5B2F6F12970511B000DBA0E /* SessionRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestModule.swift; sourceTree = "<group>"; };
 		C5B2F6F22970511B000DBA0E /* SessionRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestPresenter.swift; sourceTree = "<group>"; };
 		C5B2F6F32970511B000DBA0E /* SessionRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestRouter.swift; sourceTree = "<group>"; };
@@ -1649,7 +1647,6 @@
 			isa = PBXGroup;
 			children = (
 				C56EE26E293F56D7004840D1 /* View.swift */,
-				C58099342A543CD000AB58F5 /* BlinkAnimation.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -2297,7 +2294,6 @@
 				847BD1D82989492500076C90 /* MainModule.swift in Sources */,
 				847BD1E7298A806800076C90 /* NotificationsInteractor.swift in Sources */,
 				C56EE241293F566D004840D1 /* WalletModule.swift in Sources */,
-				C58099352A543CD000AB58F5 /* BlinkAnimation.swift in Sources */,
 				C56EE245293F566D004840D1 /* WalletPresenter.swift in Sources */,
 				C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */,
 				A51606FB2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,

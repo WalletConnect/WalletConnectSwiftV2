@@ -19,6 +19,8 @@ final class WalletPresenter: ObservableObject {
     @Published var showPairingLoading = false
     @Published var showError = false
     @Published var errorMessage = "Error"
+    @Published var networkConnected = true
+    @Published var socketConnected = false
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -39,7 +41,38 @@ final class WalletPresenter: ObservableObject {
     
     func onAppear() {
         showPairingLoading = app.requestSent
-        removePairingIndicator()
+        //removePairingIndicator()
+        
+        interactor.walletConnectStatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                switch state {
+                case .idle:
+                    print("IDLE")
+                case .pairing:
+                    print("STATE SHOW")
+                    self?.showPairingLoading = true
+                case .received:
+                    print("STATE HIDE")
+                    self?.showPairingLoading = false
+                case .pairingTimeout:
+                    print("PAIRING TIMEOUT")
+                    self?.showPairingLoading = false
+                case .networkConnected:     self?.networkConnected = true
+                case .networkDisconnected:  self?.networkConnected = false
+                }
+            }
+            .store(in: &disposeBag)
+        
+        interactor.socketConnectionStatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                switch state {
+                case .connected:    self?.socketConnected = true
+                case .disconnected: self?.socketConnected = false
+                }
+            }
+            .store(in: &disposeBag)
     }
     
     func onConnection(session: Session) {
@@ -49,6 +82,7 @@ final class WalletPresenter: ObservableObject {
     func onPasteUri() {
         router.presentPaste { [weak self] uri in
             guard let uri = WalletConnectURI(string: uri) else {
+                self?.showPairingLoading = false
                 self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
                 self?.showError.toggle()
                 return
@@ -58,6 +92,7 @@ final class WalletPresenter: ObservableObject {
 
         } onError: { [weak self] error in
             print(error.localizedDescription)
+            self?.showPairingLoading = false
             self?.router.dismiss()
         }
     }
@@ -65,6 +100,7 @@ final class WalletPresenter: ObservableObject {
     func onScanUri() {
         router.presentScan { [weak self] uri in
             guard let uri = WalletConnectURI(string: uri) else {
+                self?.showPairingLoading = false
                 self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
                 self?.showError.toggle()
                 return
@@ -72,9 +108,10 @@ final class WalletPresenter: ObservableObject {
             print("URI: \(uri)")
             self?.pair(uri: uri)
             self?.router.dismiss()
-        } onError: { error in
+        } onError: { [weak self] error in
             print(error.localizedDescription)
-            self.router.dismiss()
+            self?.showPairingLoading = false
+            self?.router.dismiss()
         }
     }
     
@@ -91,7 +128,6 @@ extension WalletPresenter {
         interactor.sessionProposalPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] session in
-                showPairingLoading = false
                 router.present(proposal: session.proposal, importAccount: importAccount, context: session.context)
             }
             .store(in: &disposeBag)
@@ -99,14 +135,12 @@ extension WalletPresenter {
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] request, context in
-                showPairingLoading = false
                 router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
             }.store(in: &disposeBag)
         
         interactor.requestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] result in
-                showPairingLoading = false
                 router.present(request: result.request, importAccount: importAccount, context: result.context)
             }
             .store(in: &disposeBag)
@@ -126,8 +160,6 @@ extension WalletPresenter {
     private func pair(uri: WalletConnectURI) {
         Task.detached(priority: .high) { @MainActor [unowned self] in
             do {
-                self.showPairingLoading = true
-                self.removePairingIndicator()
                 try await self.interactor.pair(uri: uri)
             } catch {
                 self.showPairingLoading = false
@@ -147,7 +179,7 @@ extension WalletPresenter {
     }
     
     private func removePairingIndicator() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             if self.showPairingLoading {
                 self.errorMessage = "WalletConnect - Pairing timeout error"
                 self.showError.toggle()

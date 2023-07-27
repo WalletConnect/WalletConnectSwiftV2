@@ -4,12 +4,27 @@ import Web3Wallet
 struct WalletView: View {
     @EnvironmentObject var presenter: WalletPresenter
     
+    @State var showLoading = false
+    
     var body: some View {
         ZStack {
             Color.grey100
                 .edgesIgnoringSafeArea(.all)
             
             VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Spacer()
+                    
+                    Image(systemName: "link")
+                        .font(.system(size: 20))
+                        .foregroundColor(presenter.socketConnected ? .green : .red)
+                    
+                    Image(systemName: presenter.networkConnected ? "wifi" : "wifi.slash")
+                        .font(.system(size: 20))
+                        .foregroundColor(presenter.networkConnected ? .green : .red)
+                }
+                .padding(.horizontal, 20)
+                
                 ZStack {
                     if presenter.sessions.isEmpty {
                         VStack(spacing: 10) {
@@ -47,23 +62,30 @@ struct WalletView: View {
                                     Spacer()
                                     
                                     ZStack {
-                                        RoundedRectangle(cornerRadius: 20).fill(
+                                        Circle().fill(
                                             LinearGradient(
                                                 gradient: Gradient(colors: [
                                                     .blue100,
                                                     .blue200
                                                 ]),
-                                                startPoint: .top, endPoint: .bottom)
+                                                startPoint: .top, endPoint: .bottom
+                                            )
                                         )
-                                        .blink()
+                                        .frame(width: 56, height: 56)
+                                        .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
                                         
-                                        Text("WalletConnect is pairing...")
-                                            .foregroundColor(.white)
-                                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                                            .padding(.vertical, 10)
-                                            .padding(.horizontal, 15)
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle())
+                                            .tint(.white)
                                     }
-                                    .fixedSize(horizontal: true, vertical: true)
+                                    .offset(y: showLoading ? 0 : 300)
+                                    .animation(.spring(response: 0.55, dampingFraction: 0.5), value: showLoading)
+                                    .onAppear {
+                                        showLoading.toggle()
+                                    }
+                                    .onDisappear {
+                                        showLoading.toggle()
+                                    }
                                 }
                             }
                         }

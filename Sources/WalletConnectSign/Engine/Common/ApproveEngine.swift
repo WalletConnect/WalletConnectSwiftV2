@@ -292,6 +292,7 @@ private extension ApproveEngine {
             return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
+        networkingInteractor.walletConnectStatePublisherSubject.send(.received)
         
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()

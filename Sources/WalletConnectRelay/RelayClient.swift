@@ -142,7 +142,7 @@ public final class RelayClient {
         rpcHistory.deleteAll(forTopic: topic)
         dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
-                self?.logger.debug("[RelayClient]:Failed to unsubscribe from topic")
+                self?.logger.debug("[RelayClient]: Failed to unsubscribe from topic")
                 completion(error)
             } else {
                 self?.concurrentQueue.async(flags: .barrier) {
@@ -152,7 +152,6 @@ public final class RelayClient {
             }
         }
     }
-
 
     private func observeSubscription(requestId: RPCID, topics: [String]) {
         var cancellable: AnyCancellable?

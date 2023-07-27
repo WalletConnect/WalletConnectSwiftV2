@@ -4,6 +4,14 @@ import Web3Wallet
 import WalletConnectPush
 
 final class WalletInteractor {
+    var walletConnectStatePublisher: AnyPublisher<WalletConnectState, Never> {
+        return Web3Wallet.instance.walletConnectStatePublisher
+    }
+    
+    var socketConnectionStatePublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        return Web3Wallet.instance.socketConnectionStatusPublisher
+    }
+    
     var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> {
         return Web3Wallet.instance.sessionProposalPublisher
     }
