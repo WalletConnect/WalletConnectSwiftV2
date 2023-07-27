@@ -5,12 +5,12 @@ final class NotifyClientRequestSubscriber {
 
     private var publishers: Set<AnyCancellable> = []
 
-    private let client: WalletNotifyClient
+    private let client: NotifyClient
     private let logger: ConsoleLogging
 
     var onRequest: ((RPCRequest) async throws -> Void)?
 
-    init(client: WalletNotifyClient, logger: ConsoleLogging) {
+    init(client: NotifyClient, logger: ConsoleLogging) {
         self.client = client
         self.logger = logger
 

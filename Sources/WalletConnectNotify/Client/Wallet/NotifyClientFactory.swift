@@ -1,15 +1,15 @@
 import Foundation
 
-public struct WalletNotifyClientFactory {
+public struct NotifyClientFactory {
 
-    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, syncClient: SyncClient, historyClient: HistoryClient) -> WalletNotifyClient {
+    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, syncClient: SyncClient, historyClient: HistoryClient) -> NotifyClient {
         let logger = ConsoleLogger(suffix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
 
-        return WalletNotifyClientFactory.create(
+        return NotifyClientFactory.create(
             keyserverURL: keyserverURL,
             logger: logger,
             keyValueStorage: keyValueStorage,
@@ -34,7 +34,7 @@ public struct WalletNotifyClientFactory {
         pushClient: PushClient,
         syncClient: SyncClient,
         historyClient: HistoryClient
-    ) -> WalletNotifyClient {
+    ) -> NotifyClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let subscriptionStore: SyncStore<NotifySubscription> = SyncStoreFactory.create(name: NotifyStorageIdntifiers.notifySubscription, syncClient: syncClient, storage: keyValueStorage)
@@ -63,7 +63,7 @@ public struct WalletNotifyClientFactory {
 
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
 
-        return WalletNotifyClient(
+        return NotifyClient(
             logger: logger,
             kms: kms,
             pushClient: pushClient,

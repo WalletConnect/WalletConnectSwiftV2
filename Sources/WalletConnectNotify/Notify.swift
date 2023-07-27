@@ -1,12 +1,12 @@
 import Foundation
 
 public class Notify {
-    public static var wallet: WalletNotifyClient = {
+    public static var wallet: NotifyClient = {
         guard let config = Notify.config else {
             fatalError("Error - you must call Notify.configure(_:) before accessing the shared wallet instance.")
         }
         Push.configure(pushHost: config.pushHost, environment: config.environment)
-        return WalletNotifyClientFactory.create(
+        return NotifyClientFactory.create(
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
             pushClient: Push.instance,
