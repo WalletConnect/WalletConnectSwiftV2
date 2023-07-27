@@ -1,23 +1,22 @@
-
 import Foundation
 @testable import WalletConnectNotify
 
-class MockPushStoring: PushStoring {
-    var subscriptions: [PushSubscription]
+class MockNotifyStoring: NotifyStoring {
+    var subscriptions: [NotifySubscription]
 
-    init(subscriptions: [PushSubscription]) {
+    init(subscriptions: [NotifySubscription]) {
         self.subscriptions = subscriptions
     }
 
-    func getSubscriptions() -> [PushSubscription] {
+    func getSubscriptions() -> [NotifySubscription] {
         return subscriptions
     }
 
-    func getSubscription(topic: String) -> PushSubscription? {
+    func getSubscription(topic: String) -> NotifySubscription? {
         return subscriptions.first { $0.topic == topic }
     }
 
-    func setSubscription(_ subscription: PushSubscription) async throws {
+    func setSubscription(_ subscription: NotifySubscription) async throws {
         if let index = subscriptions.firstIndex(where: { $0.topic == subscription.topic }) {
             subscriptions[index] = subscription
         } else {
