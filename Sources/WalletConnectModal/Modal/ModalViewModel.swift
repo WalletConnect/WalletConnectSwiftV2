@@ -6,7 +6,6 @@ import SwiftUI
 enum Destination: Equatable {
     case welcome
     case viewAll
-    case help
     case qr
     case walletDetail(Listing)
     case getWallet
@@ -19,8 +18,6 @@ enum Destination: Equatable {
             return "View all"
         case .qr:
             return "Scan the code"
-        case .help:
-            return "What is a wallet?"
         case .getWallet:
             return "Get a wallet"
         case let .walletDetail(wallet):
