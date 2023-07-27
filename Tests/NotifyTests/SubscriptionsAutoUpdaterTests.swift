@@ -24,10 +24,11 @@ class SubscriptionsAutoUpdaterTests: XCTestCase {
                 expectation.fulfill()
             }
         }
-
-        sut = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester,
-                                     logger: logger,
-                                     pushStorage: pushStorage)
+        
+        sut = SubscriptionsAutoUpdater(
+            notifyUpdateRequester: notifyUpdateRequester,
+            logger: logger,
+            notifyStorage: pushStorage)
 
         await waitForExpectations(timeout: 1, handler: nil)
 
