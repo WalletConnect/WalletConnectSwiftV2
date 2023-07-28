@@ -60,7 +60,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
 
     func encode(iss: String) throws -> Claims {
         return Claims(
-            iat: defaultIatMilliseconds(),
+            iat: defaultIat(),
             exp: expiry(days: 1),
             iss: castServerPubKey.multibase(variant: .ED25519),
             ksu: keyserver.absoluteString,
