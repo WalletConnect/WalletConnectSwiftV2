@@ -19,6 +19,8 @@ public class NotifyDecryptionService {
     public func decryptMessage(topic: String, ciphertext: String) throws -> NotifyMessage {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
         guard let params = rpcRequest.params else { throw Errors.malformedNotifyMessage }
-        return try params.get(NotifyMessage.self)
+        let wrapper = try params.get(NotifyMessagePayload.Wrapper.self)
+        let (messagePayload, _) = try NotifyMessagePayload.decodeAndVerify(from: wrapper)
+        return messagePayload.message
     }
 }
