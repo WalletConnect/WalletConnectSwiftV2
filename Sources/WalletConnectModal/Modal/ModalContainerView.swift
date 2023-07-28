@@ -36,7 +36,13 @@ struct ModalContainerView: View {
                 }
         )
         .edgesIgnoringSafeArea(.all)
-        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .transform {
+            if #available(iOS 14.0, *) {
+                $0.ignoresSafeArea(.keyboard, edges: .bottom)
+            } else {
+                $0
+            }
+        }
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
                 withAnimation {
