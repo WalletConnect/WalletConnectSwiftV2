@@ -108,10 +108,14 @@ platform :ios do
     upload_to_testflight(
       apple_id: ENV["APPLE_ID"],
       app_identifier: ENV["APP_IDENTIFIER"],
-      skip_waiting_for_build_processing: true,
-      distribute_external: true,
       changelog: "#{ENV["SCHEME"]} app weekly build 🚀",
-      notify_external_testers: false,
+      distribute_external: true,
+      notify_external_testers: true,
+      skip_waiting_for_build_processing: false,
+      groups: [
+        "WalletConnect",
+        "WalletConnect Users"
+      ]
     )
     clean_build_artifacts()
   end

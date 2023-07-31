@@ -74,6 +74,7 @@ extension AssetColor {
     }
 }
 
+#if DEBUG
 @available(iOS 15.0, tvOS 14.0, *)
 struct Color_Previews: PreviewProvider {
     static var allColors: [AssetColor] {
@@ -116,3 +117,4 @@ struct Color_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
+#endif

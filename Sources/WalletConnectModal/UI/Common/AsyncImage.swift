@@ -10,10 +10,7 @@ struct AsyncImage<Content>: View where Content: View {
         init(_ url: URL?) {
             guard let url = url else { return }
             
-            var request = URLRequest(url: url)
-            request.setValue(ExplorerAPI.userAgent, forHTTPHeaderField: "User-Agent")
-            request.setValue(WalletConnectModal.config?.metadata.name, forHTTPHeaderField: "Referer")
-            
+            let request = URLRequest(url: url)
             URLSession.shared.dataTaskPublisher(for: request)
                 .map(\.data)
                 .map { $0 as Data? }
