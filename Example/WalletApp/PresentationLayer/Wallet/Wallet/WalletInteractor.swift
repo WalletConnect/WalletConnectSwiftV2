@@ -4,8 +4,8 @@ import Web3Wallet
 import WalletConnectPush
 
 final class WalletInteractor {
-    var walletConnectStatePublisher: AnyPublisher<WalletConnectState, Never> {
-        return Web3Wallet.instance.walletConnectStatePublisher
+    var web3WalletStatePublisher: AnyPublisher<Web3WalletState, Never> {
+        return Web3Wallet.instance.web3WalletStatePublisher
     }
     
     var socketConnectionStatePublisher: AnyPublisher<SocketConnectionStatus, Never> {

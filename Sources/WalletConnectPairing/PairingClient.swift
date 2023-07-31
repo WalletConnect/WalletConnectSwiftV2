@@ -72,6 +72,12 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     /// - When topic is already in use
     public func pair(uri: WalletConnectURI) async throws {
         networkingInteractor.walletConnectStatePublisherSubject.send(.pairing)
+        Task {
+            try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+            if networkingInteractor.walletConnectStatePublisherSubject.value == .pairing {
+                networkingInteractor.walletConnectStatePublisherSubject.send(.pairingTimeout)
+            }
+        }
         try await walletPairService.pair(uri)
     }
 

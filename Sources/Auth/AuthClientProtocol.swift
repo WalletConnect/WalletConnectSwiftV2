@@ -3,6 +3,7 @@ import Combine
 
 public protocol AuthClientProtocol {
     var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> { get }
+    var authStatePublisher: AnyPublisher<AuthState, Never> { get }
     
     func formatMessage(payload: AuthPayload, address: String) throws -> String
     func respond(requestId: RPCID, signature: CacaoSignature, from account: Account) async throws

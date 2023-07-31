@@ -4,7 +4,7 @@ import Combine
 public protocol NetworkInteracting {
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never> { get }
-    var walletConnectStatusPublisher: AnyPublisher<WalletConnectState, Never> { get }
+    var walletConnectStatePublisher: AnyPublisher<WalletConnectState, Never> { get }
     var walletConnectStatePublisherSubject: CurrentValueSubject<WalletConnectState, Never> { set get }
     
     func subscribe(topic: String) async throws

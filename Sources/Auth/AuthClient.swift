@@ -1,6 +1,13 @@
 import Foundation
 import Combine
 
+public enum AuthState {
+    case idle
+    case pairing
+    case received
+    case pairingTimeout
+}
+
 /// WalletConnect Auth Client
 ///
 /// Cannot be instantiated outside of the SDK
@@ -28,6 +35,13 @@ public class AuthClient: AuthClientProtocol {
 
     /// Publisher that sends web socket connection status
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    
+    /// Publisher that sends Auth states
+    ///
+    /// In most cases event will be emited on wallet
+    public var authStatePublisher: AnyPublisher<AuthState, Never> {
+        authStatePublisherSubject.eraseToAnyPublisher()
+    }
 
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
@@ -38,6 +52,7 @@ public class AuthClient: AuthClientProtocol {
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthRequest, context: VerifyContext?), Never>()
+    private let authStatePublisherSubject = CurrentValueSubject<AuthState, Never>(.idle)
     private let appRequestService: AppRequestService
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletRequestSubscriber: WalletRequestSubscriber
@@ -104,6 +119,7 @@ public class AuthClient: AuthClientProtocol {
 
         walletRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
+            authStatePublisherSubject.send(.received)
         }
     }
 }

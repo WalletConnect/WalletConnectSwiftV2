@@ -28,7 +28,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
-    public var walletConnectStatusPublisher: AnyPublisher<WalletConnectNetworking.WalletConnectState, Never> {
+    public var walletConnectStatePublisher: AnyPublisher<WalletConnectNetworking.WalletConnectState, Never> {
         walletConnectStatePublisherSubject.eraseToAnyPublisher()
     }
     public var walletConnectStatePublisherSubject = CurrentValueSubject<WalletConnectNetworking.WalletConnectState, Never>(.idle)

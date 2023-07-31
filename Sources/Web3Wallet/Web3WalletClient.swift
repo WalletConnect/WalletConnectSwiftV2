@@ -1,6 +1,15 @@
 import Foundation
 import Combine
 
+public enum Web3WalletState {
+    case idle
+    case pairing
+    case received
+    case pairingTimeout
+    case networkConnected
+    case networkDisconnected
+}
+
 /// Web3 Wallet Client
 ///
 /// Cannot be instantiated outside of the SDK
@@ -63,11 +72,17 @@ public class Web3WalletClient {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
     }
     
-    /// Publisher that sends connection states
+    /// Publisher that sends WalletConnect states
     ///
     /// In most cases event will be emited on wallet
-    public var walletConnectStatePublisher: AnyPublisher<WalletConnectState, Never> {
-        networkingInteractor.walletConnectStatusPublisher.eraseToAnyPublisher()
+    public var web3WalletStatePublisher: AnyPublisher<Web3WalletState, Never> {
+        Publishers.CombineLatest(signClient.signStatePublisher, authClient.authStatePublisher)
+            .last()
+            .map { signState, authState in
+                print("STATE TEST - Sign: \(signState), Auth: \(authState)")
+                return Web3WalletState.idle
+            }
+            .eraseToAnyPublisher()
     }
 
     // MARK: - Private Properties
@@ -75,7 +90,6 @@ public class Web3WalletClient {
     private let signClient: SignClientProtocol
     private let pairingClient: PairingClientProtocol
     private let echoClient: EchoClientProtocol
-    private let networkingInteractor: NetworkInteracting
     
     private var account: Account?
 
@@ -83,14 +97,12 @@ public class Web3WalletClient {
         authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
         pairingClient: PairingClientProtocol,
-        echoClient: EchoClientProtocol,
-        networkingInteractor: NetworkInteracting
+        echoClient: EchoClientProtocol
     ) {
         self.authClient = authClient
         self.signClient = signClient
         self.pairingClient = pairingClient
         self.echoClient = echoClient
-        self.networkingInteractor = networkingInteractor
     }
     
     /// For a wallet to approve a session proposal.

@@ -33,7 +33,7 @@ public class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
-    public var walletConnectStatusPublisher: AnyPublisher<WalletConnectState, Never> {
+    public var walletConnectStatePublisher: AnyPublisher<WalletConnectState, Never> {
         walletConnectStatePublisherSubject.eraseToAnyPublisher()
     }
     

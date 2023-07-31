@@ -1,6 +1,13 @@
 import Foundation
 import Combine
 
+public enum SignState {
+    case idle
+    case pairing
+    case received
+    case pairingTimeout
+}
+
 /// WalletConnect Sign Client
 ///
 /// Cannot be instantiated outside of the SDK
@@ -94,6 +101,13 @@ public final class SignClient: SignClientProtocol {
     public var sessionsPublisher: AnyPublisher<[Session], Never> {
         sessionsPublisherSubject.eraseToAnyPublisher()
     }
+    
+    /// Publisher that sends Sign states
+    ///
+    /// In most cases event will be emited on wallet
+    public var signStatePublisher: AnyPublisher<SignState, Never> {
+        signStatePublisherSubject.eraseToAnyPublisher()
+    }
 
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
@@ -125,6 +139,7 @@ public final class SignClient: SignClientProtocol {
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
+    private let signStatePublisherSubject = CurrentValueSubject<SignState, Never>(.idle)
 
     private var publishers = Set<AnyCancellable>()
 
@@ -232,6 +247,13 @@ public final class SignClient: SignClientProtocol {
     /// - When topic is already in use
     @available(*, deprecated, message: "use Pair.instance.pair(uri: WalletConnectURI): instead")
     public func pair(uri: WalletConnectURI) async throws {
+        signStatePublisherSubject.send(.pairing)
+        Task {
+            try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+            if signStatePublisherSubject.value == .pairing {
+                signStatePublisherSubject.send(.pairingTimeout)
+            }
+        }
         try await pairingClient.pair(uri: uri)
     }
 
@@ -373,6 +395,7 @@ public final class SignClient: SignClientProtocol {
     private func setUpEnginesCallbacks() {
         approveEngine.onSessionProposal = { [unowned self] (proposal, context) in
             sessionProposalPublisherSubject.send((proposal, context))
+            signStatePublisherSubject.send(.received)
         }
         approveEngine.onSessionRejected = { [unowned self] proposal, reason in
             sessionRejectionPublisherSubject.send((proposal, reason))
@@ -382,6 +405,7 @@ public final class SignClient: SignClientProtocol {
         }
         sessionEngine.onSessionRequest = { [unowned self] (sessionRequest, context) in
             sessionRequestPublisherSubject.send((sessionRequest, context))
+            signStatePublisherSubject.send(.received)
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             sessionDeletePublisherSubject.send((topic, reason))

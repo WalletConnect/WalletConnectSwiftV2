@@ -41,25 +41,32 @@ final class WalletPresenter: ObservableObject {
     
     func onAppear() {
         showPairingLoading = app.requestSent
-        //removePairingIndicator()
         
-        interactor.walletConnectStatePublisher
+        interactor.web3WalletStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 switch state {
                 case .idle:
                     print("IDLE")
+                    
                 case .pairing:
                     print("STATE SHOW")
                     self?.showPairingLoading = true
+                    
                 case .received:
                     print("STATE HIDE")
                     self?.showPairingLoading = false
+                    
                 case .pairingTimeout:
-                    print("PAIRING TIMEOUT")
                     self?.showPairingLoading = false
-                case .networkConnected:     self?.networkConnected = true
-                case .networkDisconnected:  self?.networkConnected = false
+                    self?.errorMessage = "WalletConnect - Pairing timeout error"
+                    self?.showError.toggle()
+                    
+                case .networkConnected:
+                    self?.networkConnected = true
+                    
+                case .networkDisconnected:
+                    self?.networkConnected = false
                 }
             }
             .store(in: &disposeBag)
@@ -176,16 +183,6 @@ extension WalletPresenter {
             return
         }
         pair(uri: walletConnectUri)
-    }
-    
-    private func removePairingIndicator() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            if self.showPairingLoading {
-                self.errorMessage = "WalletConnect - Pairing timeout error"
-                self.showError.toggle()
-            }
-            self.showPairingLoading = false
-        }
     }
 }
 
