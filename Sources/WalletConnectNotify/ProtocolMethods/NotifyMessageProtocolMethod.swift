@@ -1,7 +1,7 @@
 import Foundation
 
 struct NotifyMessageProtocolMethod: ProtocolMethod {
-    let method: String = "wc_pushMessage"
+    let method: String = "wc_notifyMessage"
 
     let requestConfig: RelayConfig = RelayConfig(tag: 4002, prompt: true, ttl: 2592000)
 

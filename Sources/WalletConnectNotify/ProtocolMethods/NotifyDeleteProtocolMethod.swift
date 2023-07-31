@@ -1,7 +1,7 @@
 import Foundation
 
 struct NotifyDeleteProtocolMethod: ProtocolMethod {
-    let method: String = "wc_pushDelete"
+    let method: String = "wc_notifyDelete"
 
     let requestConfig = RelayConfig(tag: 4004, prompt: false, ttl: 86400)
 

@@ -12,7 +12,7 @@ class SubscriptionScopeProvider {
         if let availableScope = cache[dappUrl] {
             return availableScope
         }
-        guard let scopeUrl = URL(string: "\(dappUrl)/.well-known/wc-push-config.json") else { throw Errors.invalidUrl }
+        guard let scopeUrl = URL(string: "\(dappUrl)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: scopeUrl)
         let config = try JSONDecoder().decode(NotificationConfig.self, from: data)
         let availableScope = Set(config.types)
