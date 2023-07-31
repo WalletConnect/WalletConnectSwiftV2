@@ -1,7 +1,10 @@
 import Foundation
+import Combine
 
 /// Logging Protocol
 public protocol ConsoleLogging {
+    var logsPublisher: AnyPublisher<[String], Never> { get }
+    
     /// Writes a debug message to the log.
     func debug(_ items: Any...)
 
@@ -21,6 +24,12 @@ public class ConsoleLogger: ConsoleLogging {
     private var loggingLevel: LoggingLevel
     private var suffix: String
 
+    public var logsPublisher: AnyPublisher<[String], Never> {
+        return logsPublisherSubject.eraseToAnyPublisher()
+    }
+    private var logs = [String]()
+    private var logsPublisherSubject = PassthroughSubject<[String], Never>()
+    
     public func setLogging(level: LoggingLevel) {
         self.loggingLevel = level
     }
@@ -33,7 +42,10 @@ public class ConsoleLogger: ConsoleLogging {
     public func debug(_ items: Any...) {
         if loggingLevel >= .debug {
             items.forEach {
-                Swift.print("\(suffix) \($0) - \(logFormattedDate(Date()))")
+                let log = "\(suffix) \($0) - \(logFormattedDate(Date()))"
+                Swift.print(log)
+                logs.append(log)
+                logsPublisherSubject.send(logs)
             }
         }
     }

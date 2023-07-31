@@ -26,6 +26,10 @@ public final class RelayClient {
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         dispatcher.socketConnectionStatusPublisher
     }
+    
+    public var logsPublisher: AnyPublisher<[String], Never> {
+        logger.logsPublisher.eraseToAnyPublisher()
+    }
 
     private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String, publishedAt: Date), Never>()
 

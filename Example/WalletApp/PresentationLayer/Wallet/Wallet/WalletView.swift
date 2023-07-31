@@ -1,8 +1,18 @@
 import SwiftUI
 import Web3Wallet
 
+enum LogOptions: String {
+    case all = "All"
+    case relay = "Relay"
+    case webSocket = "WebSocket"
+}
+
 struct WalletView: View {
     @EnvironmentObject var presenter: WalletPresenter
+    
+    @State var showLogs = false
+    @State var selectedLogOption = LogOptions.all
+    private let logOptions: [LogOptions] = [.all, .relay, .webSocket]
     
     var body: some View {
         ZStack {
@@ -71,6 +81,71 @@ struct WalletView: View {
                         Spacer()
                         
                         HStack(spacing: 20) {
+                            if #available(iOS 16.0, *) {
+                                Button {
+                                    showLogs.toggle()
+                                } label: {
+                                    ZStack {
+                                        Circle()
+                                            .fill(
+                                                LinearGradient(
+                                                    gradient: Gradient(colors: [
+                                                        .blue100,
+                                                        .blue200
+                                                    ]),
+                                                    startPoint: .top, endPoint: .bottom)
+                                            )
+                                            .frame(width: 56, height: 56)
+                                        
+                                        Text("🛠️")
+                                            .font(.system(size: 24))
+                                    }
+                                }
+                                .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+                                .sheet(isPresented: $showLogs) {
+                                    VStack(alignment: .leading) {
+                                        Picker("", selection: $selectedLogOption) {
+                                            ForEach(logOptions, id: \.self) {
+                                                Text($0.rawValue)
+                                            }
+                                        }
+                                        .pickerStyle(.segmented)
+                                        
+                                        switch selectedLogOption {
+                                        case .all:
+                                            ScrollView {
+                                                ForEach(presenter.logs, id: \.self) { log in
+                                                    Text(log)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                    Divider()
+                                                }
+                                            }
+                                        case .relay:
+                                            ScrollView {
+                                                ForEach(presenter.logs.filter { $0.contains("[RelayClient]") }, id: \.self) { log in
+                                                    Text(log)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                    Divider()
+                                                }
+                                            }
+                                        case .webSocket:
+                                            ScrollView {
+                                                ForEach(presenter.logs.filter { $0.contains("[WebSocket") }, id: \.self) { log in
+                                                    VStack {
+                                                        Text(log)
+                                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                                        Divider()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                    }
+                                    .padding()
+                                    .presentationDetents([.medium, .large])
+                                }
+                            }
+                            
                             Spacer()
                             
                             Button {

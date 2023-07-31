@@ -5,8 +5,14 @@ enum WebSocketClientError: Error {
 }
 
 struct WebSocketClientFactory: WebSocketFactory {
+    private let logger: ConsoleLogging
+    
+    public init(logger: ConsoleLogging) {
+        self.logger = logger
+    }
+    
     func create(with url: URL) -> WebSocketConnecting {
-        return WebSocketClient(url: url, logger: ConsoleLogger(loggingLevel: .debug))
+        return WebSocketClient(url: url, logger: logger)
     }
 }
 

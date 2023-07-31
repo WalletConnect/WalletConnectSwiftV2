@@ -2,6 +2,7 @@ import UIKit
 import Combine
 
 import Web3Wallet
+import WalletConnectRelay
 
 final class WalletPresenter: ObservableObject {
     enum Errors: Error {
@@ -19,6 +20,8 @@ final class WalletPresenter: ObservableObject {
     @Published var showPairingLoading = false
     @Published var showError = false
     @Published var errorMessage = "Error"
+    
+    @Published var logs = [String]()
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -40,6 +43,13 @@ final class WalletPresenter: ObservableObject {
     func onAppear() {
         showPairingLoading = app.requestSent
         removePairingIndicator()
+        
+        Relay.instance.logsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] logs in
+                self?.logs = logs
+            }
+            .store(in: &disposeBag)
     }
     
     func onConnection(session: Session) {

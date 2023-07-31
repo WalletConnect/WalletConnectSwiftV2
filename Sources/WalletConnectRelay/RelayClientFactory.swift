@@ -47,7 +47,7 @@ public struct RelayClientFactory {
             projectId: projectId,
             socketAuthenticator: socketAuthenticator
         )
-        let webSocketClientFactory = WebSocketClientFactory()
+        let webSocketClientFactory = WebSocketClientFactory(logger: logger)
         let dispatcher = Dispatcher(
             socketFactory: webSocketClientFactory,
             relayUrlFactory: relayUrlFactory,
