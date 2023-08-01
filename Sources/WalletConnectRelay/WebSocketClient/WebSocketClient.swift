@@ -2,6 +2,7 @@ import Foundation
 
 enum WebSocketClientError: Error {
     case errorWithCode(URLSessionWebSocketTask.CloseCode)
+    case lostNetworkConnection
 }
 
 struct WebSocketClientFactory: WebSocketFactory {
@@ -95,6 +96,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         logger.debug("[WebSocketClient]: Did complete with error: \(error?.localizedDescription ?? "unknown")")
+        if let error = error, (error as NSError).code == -1005 || error.localizedDescription == "The network connection was lost." {
+            logger.debug("[WebSocketClient]: Will reconnect when back online.")
+            isConnected = false
+            onDisconnect?(WebSocketClientError.lostNetworkConnection)
+        }
     }
     
     func receiveMessage() {
