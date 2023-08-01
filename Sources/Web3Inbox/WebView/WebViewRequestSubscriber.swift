@@ -4,7 +4,7 @@ import WebKit
 final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
 
     static let chat = "web3inboxChat"
-    static let notify = "web3inboxNotify"
+    static let notify = "web3inboxPush"
 
     var onChatRequest: ((RPCRequest) async throws -> Void)?
     var onNotifyRequest: ((RPCRequest) async throws -> Void)?
