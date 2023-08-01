@@ -47,7 +47,6 @@ final class ModalViewModelTests: XCTestCase {
         await sut.createURI()
         
         XCTAssertEqual(sut.uri, "wc:foo@2?symKey=bar&relay-protocol=irn")
-        
         XCTAssertEqual(sut.wallets.count, 2)
         XCTAssertEqual(sut.wallets.map(\.id), ["1", "2"])
         XCTAssertEqual(sut.wallets.map(\.name), ["Sample App", "Awesome App"])
