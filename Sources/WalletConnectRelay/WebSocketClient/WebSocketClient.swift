@@ -89,9 +89,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
     }
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        isConnected = false
-        logger.debug("[WebSocketClient]: Did close with code: \(closeCode)")
-        onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
+        if isConnected {
+            isConnected = false
+            logger.debug("[WebSocketClient]: Did close with code: \(closeCode)")
+            onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
+        }
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -113,8 +115,10 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
                 self.logger.debug("[WebSocketClient]: Error receiving: \(error)")
                 let nsError = error as NSError
                 if nsError.code == 57 && nsError.domain == "NSPOSIXErrorDomain" {
-                    self.isConnected = false
-                    self.reconnect()
+                    if self.isConnected {
+                        self.isConnected = false
+                        self.reconnect()
+                    }
                 }
                     
             case .success(let message):
