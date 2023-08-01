@@ -24,6 +24,7 @@ public protocol SignClientProtocol {
     func getSessions() -> [Session]
     func cleanup() async throws
     
-    func getPendingRequests(topic: String?) -> [Request]
-    func getSessionRequestRecord(id: RPCID) -> Request?
+    func getPendingRequests(topic: String?) -> [(request: Request, context: VerifyContext?)]
+    func getPendingProposals(topic: String?) -> [(proposal: Session.Proposal, context: VerifyContext?)]
+    func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)?
 }
