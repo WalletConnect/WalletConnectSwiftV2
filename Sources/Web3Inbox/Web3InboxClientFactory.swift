@@ -40,7 +40,7 @@ final class Web3InboxClientFactory {
     }
 
     private static func buildUrl(account: Account, config: [ConfigParam: Bool]) -> URL {
-        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden.vercel.app/")!
+        var urlComponents = URLComponents(string: "https://web3inbox-dev-hidden-git-chore-filter-by-notify-walletconnect1.vercel.app/")!
         var queryItems = [URLQueryItem(name: "chatProvider", value: "ios"), URLQueryItem(name: "notifyProvider", value: "ios"), URLQueryItem(name: "account", value: account.address), URLQueryItem(name: "authProvider", value: "ios")]
 
         for param in config.filter({ $0.value == false}) {
