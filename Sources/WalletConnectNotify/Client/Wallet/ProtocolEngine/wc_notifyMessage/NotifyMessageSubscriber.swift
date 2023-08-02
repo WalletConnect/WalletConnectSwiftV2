@@ -22,10 +22,16 @@ class NotifyMessageSubscriber {
     private func subscribeForNotifyMessages() {
         let protocolMethod = NotifyMessageProtocolMethod()
         networkingInteractor.requestSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyMessage>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyMessagePayload.Wrapper>) in
                 logger.debug("Received Notify Message")
 
-                let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: payload.request, publishedAt: payload.publishedAt)
+                // TODO: 
+
+                guard
+                    let (messagePayload, _) = try? NotifyMessagePayload.decodeAndVerify(from: payload.request)
+                else { fatalError() /* TODO: Handle error */ }
+
+                let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
                 notifyStorage.setMessage(record)
                 notifyMessagePublisherSubject.send(record)
 

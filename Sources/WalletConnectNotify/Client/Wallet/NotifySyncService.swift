@@ -85,17 +85,21 @@ final class NotifySyncService {
             try groupKeychainStorage.add(symmetricKey, forKey: subscription.topic)
             try await networkingInteractor.subscribe(topic: subscription.topic)
 
-            let historyRecords: [HistoryRecord<NotifyMessage>] = try await historyClient.getRecords(
+            let historyRecords: [HistoryRecord<NotifyMessagePayload.Wrapper>] = try await historyClient.getRecords(
                 topic: subscription.topic,
                 count: 200,
                 direction: .backward
             )
 
-            let messageRecords = historyRecords.map { record in
+            let messageRecords = historyRecords.compactMap { record in
+                guard
+                    let (messagePayload, _) = try? NotifyMessagePayload.decodeAndVerify(from: record.object)
+                else { fatalError() /* TODO: Handle error */ }
+
                 return NotifyMessageRecord(
                     id: record.id.string,
                     topic: subscription.topic,
-                    message: record.object,
+                    message: messagePayload.message,
                     publishedAt: Date()
                 )
             }
