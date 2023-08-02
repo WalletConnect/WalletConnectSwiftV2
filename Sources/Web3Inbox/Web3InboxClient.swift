@@ -71,8 +71,8 @@ private extension Web3InboxClient {
 
         // Chat
         
-        chatClientProxy.onResponse = { [unowned self] response in
-            try await self.chatWebviewProxy.respond(response)
+        chatClientProxy.onResponse = { [unowned self] response, request in
+            try await self.chatWebviewProxy.respond(response, request)
         }
 
         chatClientSubscriber.onRequest = { [unowned self] request in
@@ -86,8 +86,8 @@ private extension Web3InboxClient {
 
         // Notify
 
-        notifyClientProxy.onResponse = { [unowned self] response in
-            try await self.notifyWebviewProxy.respond(response)
+        notifyClientProxy.onResponse = { [unowned self] response, request in
+            try await self.notifyWebviewProxy.respond(response, request)
         }
 
         notifyClientSubscriber.onRequest = { [unowned self] request in
