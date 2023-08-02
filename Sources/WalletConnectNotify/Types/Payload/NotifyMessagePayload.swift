@@ -5,7 +5,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
     struct Claims: JWTClaims {
         let iat: UInt64 // issued at
         let exp: UInt64 // expiry
-        let iss: String // public key of cast server (did:key)
+        let iss: String // did:key of an identity key. Enables to resolve associated Dapp domain used. diddoc authentication key
         let ksu: String // key server url
         let aud: String // blockchain account (did:pkh)
         let act: String // action intent (must be "notify_message")
