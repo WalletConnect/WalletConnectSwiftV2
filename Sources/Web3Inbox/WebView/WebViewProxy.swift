@@ -46,6 +46,6 @@ class ChatWebViewScriptFormatter: WebViewScriptFormatter {
 
 class NotifyWebViewScriptFormatter: WebViewScriptFormatter {
     func formatScript(body: String) -> String {
-        return "window.web3inbox.notify.postMessage(\(body))"
+        return "window.web3inbox.push.postMessage(\(body))"
     }
 }
