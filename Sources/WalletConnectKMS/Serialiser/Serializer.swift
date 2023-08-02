@@ -54,7 +54,6 @@ public class Serializer: Serializing {
     private func handleType0Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) throws -> (T, Data) {
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             let decoded: (T, Data) = try decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
-            print(decoded)
             return decoded
         } else {
             throw Errors.symmetricKeyForTopicNotFound
@@ -75,11 +74,7 @@ public class Serializer: Serializing {
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> (T, Data) {
         let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
         let str = String(decoding: decryptedData, as: UTF8.self)
-        print(str)
-        print(T.self)
         let decoded = try JSONDecoder().decode(T.self, from: decryptedData)
-
-        print(decoded)
         return (decoded, decryptedData)
     }
 }
