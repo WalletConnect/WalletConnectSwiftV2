@@ -8,6 +8,9 @@ inputs:
   project-id:
     description: 'WalletConnect project id'
     required: true
+  cache-key:
+    description: 'Cache key to use for caching'
+    required: true
 
 runs:
   using: "composite"
@@ -34,4 +37,4 @@ runs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.event.pull_request.head.sha }}
+        key: ${{ runner.os }}-deriveddata-${{ inputs.cache-key }}-${{ github.event.pull_request.head.sha }}
