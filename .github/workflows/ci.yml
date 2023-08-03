@@ -31,6 +31,7 @@ jobs:
       - uses: ./.github/actions/build
         with:
           project-id: ${{ secrets.PROJECT_ID }}
+          cache-key: ci
 
   test:
     needs: prepare
