@@ -6,7 +6,6 @@ import SwiftUI
 enum Destination: Equatable {
     case welcome
     case viewAll
-    case help
     case qr
     case walletDetail(Listing)
     case getWallet
@@ -19,8 +18,6 @@ enum Destination: Equatable {
             return "View all"
         case .qr:
             return "Scan the code"
-        case .help:
-            return "What is a wallet?"
         case .getWallet:
             return "Get a wallet"
         case let .walletDetail(wallet):
@@ -121,12 +118,13 @@ final class ModalViewModel: ObservableObject {
         uiApplicationWrapper.openURL(url, nil)
     }
     
-    func onListingTap(_ listing: Listing) {
+    func onListingTap(_ listing: Listing, preferUniversal: Bool) {
         setLastTimeUsed(listing.id)
         
         navigateToDeepLink(
             universalLink: listing.mobile.universal ?? "",
-            nativeLink: listing.mobile.native ?? ""
+            nativeLink: listing.mobile.native ?? "",
+            preferUniversal: preferUniversal
         )
     }
     
@@ -277,12 +275,12 @@ private extension ModalViewModel {
         }
     }
 
-    func navigateToDeepLink(universalLink: String, nativeLink: String) {
+    func navigateToDeepLink(universalLink: String, nativeLink: String, preferUniversal: Bool) {
         do {
             let nativeUrlString = try formatNativeUrlString(nativeLink)
             let universalUrlString = try formatUniversalUrlString(universalLink)
             
-            if let nativeUrl = nativeUrlString?.toURL() {
+            if let nativeUrl = nativeUrlString?.toURL(), !preferUniversal {
                 uiApplicationWrapper.openURL(nativeUrl) { success in
                     if !success {
                         self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)

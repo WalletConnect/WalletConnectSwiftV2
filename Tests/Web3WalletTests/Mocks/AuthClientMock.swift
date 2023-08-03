@@ -43,7 +43,7 @@ final class AuthClientMock: AuthClientProtocol {
         rejectCalled = true
     }
     
-    func getPendingRequests() throws -> [AuthRequest] {
-        return [authRequest]
+    func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
+        return [(authRequest, nil)]
     }
 }

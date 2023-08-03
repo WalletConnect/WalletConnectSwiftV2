@@ -38,11 +38,19 @@ public actor VerifyClient: VerifyClientProtocol {
     }
     
     nonisolated public func createVerifyContext(origin: String?, domain: String) -> VerifyContext {
-        return VerifyContext(
-            origin: origin,
-            validation: (origin == domain) ? .valid : (origin == nil ? .unknown : .invalid),
-            verifyUrl: verifyHost
-        )
+        if let origin, let originUrl = URL(string: origin), let domainUrl = URL(string: domain) {
+            return VerifyContext(
+                origin: origin,
+                validation: (originUrl.host == domainUrl.host) ? .valid : .invalid,
+                verifyUrl: verifyHost
+            )
+        } else {
+            return VerifyContext(
+                origin: origin,
+                validation: .unknown,
+                verifyUrl: verifyHost
+            )
+        }
     }
 
     public func registerAssertion() async throws {

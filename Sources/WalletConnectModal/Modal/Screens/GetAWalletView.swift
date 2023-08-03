@@ -31,7 +31,6 @@ struct GetAWalletView: View {
             .frame(minHeight: 400)
             .listStyle(.plain)
             
-            
             VStack(alignment: .center, spacing: 8) {
                 Text("Not what you’re looking for?")
                     .font(
@@ -57,7 +56,7 @@ struct GetAWalletView: View {
                         Image(.external_link)
                     }
                 }
-                .buttonStyle(W3MButtonStyle())
+                .buttonStyle(WCMMainButtonStyle())
             }
             .multilineTextAlignment(.center)
             .padding(.horizontal, 0)

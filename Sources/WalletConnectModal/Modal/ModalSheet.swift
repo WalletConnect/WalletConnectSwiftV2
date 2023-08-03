@@ -7,10 +7,6 @@ public struct ModalSheet: View {
     
     @State var searchEditing = false
     
-    var isLandscape: Bool {
-        verticalSizeClass == .compact
-    }
-    
     public var body: some View {
         VStack(spacing: 0) {
             modalHeader()
@@ -34,7 +30,7 @@ public struct ModalSheet: View {
             }
         )
         .toastView(toast: $viewModel.toast)
-        .if(isLandscape) {
+        .if(verticalSizeClass == .compact) {
             $0.padding(.horizontal, 80)
         }
         .onAppear {
@@ -55,11 +51,8 @@ public struct ModalSheet: View {
             
             Spacer()
             
-            HStack(spacing: 16) {
-                helpButton()
-                closeButton()
-            }
-            .padding(.trailing, 10)
+            closeButton()
+                .padding(.trailing, 10)
         }
         .foregroundColor(Color.foreground1)
         .frame(height: 48)
@@ -135,7 +128,7 @@ public struct ModalSheet: View {
                 viewModel.destination
             }, set: { _ in }),
             navigateTo: viewModel.navigateTo(_:),
-            onListingTap: viewModel.onListingTap(_:)
+            onListingTap: { viewModel.onListingTap($0, preferUniversal: false) }
         )
     }
     
@@ -151,17 +144,11 @@ public struct ModalSheet: View {
     
     @ViewBuilder
     private func content() -> some View {
+        
         switch viewModel.destination {
         case .welcome,
-             .walletDetail,
              .viewAll:
             welcome()
-        case .help:
-            WhatIsWalletView(
-                navigateTo: viewModel.navigateTo(_:),
-                navigateToExternalLink: viewModel.navigateToExternalLink(_:)
-            )
-            .padding(.bottom, 20)
         case .qr:
             qrCode()
                 .padding(.bottom, 20)
@@ -171,25 +158,21 @@ public struct ModalSheet: View {
                 onWalletTap: viewModel.onGetWalletTap(_:),
                 navigateToExternalLink: viewModel.navigateToExternalLink(_:)
             )
-            .frame(minHeight: isLandscape ? 200 : 550)
+            .frame(minHeight: verticalSizeClass == .compact ? 200 : 550)
             .padding(.bottom, 20)
+            
+        case let .walletDetail(wallet):
+            WalletDetail(
+                wallet: wallet,
+                deeplink: { viewModel.onListingTap($0, preferUniversal: false) },
+                deeplinkUniversal: { viewModel.onListingTap($0, preferUniversal: true) },
+                openAppStore: viewModel.onGetWalletTap(_:)
+            )
         }
     }
 }
 
 extension ModalSheet {
-    private func helpButton() -> some View {
-        Button(action: {
-            withAnimation {
-                viewModel.navigateTo(.help)
-            }
-        }, label: {
-            Image(.help)
-                .padding(8)
-        })
-        .buttonStyle(CircuralIconButtonStyle())
-    }
-    
     private func closeButton() -> some View {
         Button {
             viewModel.onCloseButton()

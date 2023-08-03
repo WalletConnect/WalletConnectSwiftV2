@@ -1,9 +1,18 @@
 import Foundation
 
-enum NetworkError: Error {
+enum NetworkError: Error, Equatable {
     case webSocketNotConnected
     case sendMessageFailed(Error)
     case receiveMessageFailure(Error)
+    
+    static func == (lhs: NetworkError, rhs: NetworkError) -> Bool {
+        switch (lhs, rhs) {
+        case (.webSocketNotConnected, .webSocketNotConnected):  return true
+        case (.sendMessageFailed, .sendMessageFailed):          return true
+        case (.receiveMessageFailure, .receiveMessageFailure):  return true
+        default:                                                return false
+        }
+    }
 }
 
 extension NetworkError: LocalizedError {
