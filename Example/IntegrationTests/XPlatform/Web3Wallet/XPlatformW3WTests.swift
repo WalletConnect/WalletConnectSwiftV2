@@ -75,9 +75,10 @@ final class XPlatformW3WTests: XCTestCase {
             echoClient: EchoClientMock())
     }
 
-    func testSessionRequest() async throws {
+    func testSessionSettle() async throws {
 
         let expectation = expectation(description: "session settled")
+
         w3wClient.sessionProposalPublisher
             .sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
@@ -90,7 +91,8 @@ final class XPlatformW3WTests: XCTestCase {
         w3wClient.sessionSettlePublisher.sink { [unowned self] session in
             Task {
                 sleep(1)
-                try await javaScriptAutoTestsAPI.getSession(topic: session.topic)
+                let jsSession = try await javaScriptAutoTestsAPI.getSession(topic: session.topic)
+                XCTAssertEqual(jsSession.topic, session.topic)
                 expectation.fulfill()
             }
         }
@@ -101,45 +103,29 @@ final class XPlatformW3WTests: XCTestCase {
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
+
 }
 
 
 class JavaScriptAutoTestsAPI {
-    private let httpClient = HTTPNetworkClient(host: "test-automation-api.walletconnect.com")
+    private let host = "https://test-automation-api.walletconnect.com"
 
     func quickConnect() async throws -> WalletConnectURI {
-        let url = URL(string: "https://test-automation-api.walletconnect.com/quick_connect")!
+        let url = URL(string: "\(host)/quick_connect")!
         let (data, _) = try await URLSession.shared.data(from: url)
         let uriString = String(decoding: data, as: UTF8.self)
         return WalletConnectURI(string: uriString)!
     }
 
     func getSession(topic: String) async throws -> Session {
-        let endpoint = Endpoint(path: "/session/\(topic)", method: .get)
-        return try await httpClient.request(Session.self, at: endpoint)
-    }
-}
-
-
-
-struct Endpoint: HTTPService {
-    var path: String
-
-    var method: HTTPMethod
-
-    var body: Data?
-
-    var queryParameters: [String : String]?
-
-    var additionalHeaderFields: [String : String]?
-
-    init(path: String, method: HTTPMethod, body: Data? = nil, queryParameters: [String : String]? = nil, additionalHeaderFields: [String : String]? = nil) {
-        self.path = path
-        self.method = method
-        self.body = body
-        self.queryParameters = queryParameters
-        self.additionalHeaderFields = additionalHeaderFields
+        let url = URL(string: "\(host)/session/\(topic)")!
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try JSONDecoder().decode(Session.self, from: data)
     }
 
+    // Testing Data Structures to match JS responses
 
+    struct Session: Decodable {
+        let topic: String
+    }
 }
