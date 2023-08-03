@@ -43,6 +43,7 @@ public actor HTTPNetworkClient: HTTPClient {
                 guard let validData = data else {
                     throw HTTPError.responseDataNil
                 }
+                print(String(decoding: validData, as: UTF8.self))
                 let decoded = try JSONDecoder().decode(T.self, from: validData)
                 completion(.success(decoded))
             } catch {

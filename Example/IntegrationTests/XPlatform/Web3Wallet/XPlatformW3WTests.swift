@@ -3,6 +3,7 @@ import XCTest
 import Combine
 @testable import Web3Wallet
 @testable import Auth
+@testable import WalletConnectSign
 @testable import WalletConnectEcho
 
 final class XPlatformW3WTests: XCTestCase {
@@ -12,6 +13,7 @@ final class XPlatformW3WTests: XCTestCase {
 
     override func setUp() {
         makeClient()
+        javaScriptAutoTestsAPI = JavaScriptAutoTestsAPI()
     }
 
     func makeClient() {
@@ -21,7 +23,9 @@ final class XPlatformW3WTests: XCTestCase {
         let relayLogger = ConsoleLogger(suffix: "🚄" + " [Relay]", loggingLevel: .debug)
         let pairingLogger = ConsoleLogger(suffix: "👩‍❤️‍💋‍👩" + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(suffix: "🕸️" + " [Networking]", loggingLevel: .debug)
-        let authLogger = ConsoleLogger(suffix: "✍🏿", loggingLevel: .debug)
+        let authLogger = ConsoleLogger(suffix: "🪪", loggingLevel: .debug)
+
+        let signLogger = ConsoleLogger(suffix: "✍🏿", loggingLevel: .debug)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
@@ -45,9 +49,13 @@ final class XPlatformW3WTests: XCTestCase {
             networkingClient: networkingClient)
 
         let signClient = SignClientFactory.create(
-            metadata: AppMetadata.stub(),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            logger: signLogger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychain,
             pairingClient: pairingClient,
-            networkingClient: networkingClient)
+            networkingClient: networkingClient
+        )
 
         let authClient = AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
@@ -79,8 +87,12 @@ final class XPlatformW3WTests: XCTestCase {
             }
             .store(in: &publishers)
 
-        w3wClient.sessionSettlePublisher.sink { _ in
-            expectation.fulfill()
+        w3wClient.sessionSettlePublisher.sink { [unowned self] session in
+            Task {
+                sleep(1)
+                try await javaScriptAutoTestsAPI.getSession(topic: session.topic)
+                expectation.fulfill()
+            }
         }
         .store(in: &publishers)
 
@@ -93,17 +105,21 @@ final class XPlatformW3WTests: XCTestCase {
 
 
 class JavaScriptAutoTestsAPI {
-    private let httpClient: HTTPClient
-
-    init(httpClient: HTTPClient) {
-        self.httpClient = httpClient
-    }
+    private let httpClient = HTTPNetworkClient(host: "test-automation-api.walletconnect.com")
 
     func quickConnect() async throws -> WalletConnectURI {
-        let endpoint = Endpoint(path: "/quick_connect", method: .get)
-        return try await httpClient.request(WalletConnectURI.self, at: endpoint)
+        let url = URL(string: "https://test-automation-api.walletconnect.com/quick_connect")!
+        let (data, _) = try await URLSession.shared.data(from: url)
+        let uriString = String(decoding: data, as: UTF8.self)
+        return WalletConnectURI(string: uriString)!
+    }
+
+    func getSession(topic: String) async throws -> Session {
+        let endpoint = Endpoint(path: "/session/\(topic)", method: .get)
+        return try await httpClient.request(Session.self, at: endpoint)
     }
 }
+
 
 
 struct Endpoint: HTTPService {
