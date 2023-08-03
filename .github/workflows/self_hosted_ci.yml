@@ -51,7 +51,7 @@ jobs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.event.pull_request.head.sha }}
+        key: ${{ runner.os }}-deriveddata-self_hosted_ci-${{ github.event.pull_request.head.sha }}
 
     - name: Untar DerivedDataCache
       shell: bash
