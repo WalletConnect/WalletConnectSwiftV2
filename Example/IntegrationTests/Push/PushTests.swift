@@ -10,6 +10,7 @@ import WalletConnectEcho
 @testable import WalletConnectPush
 @testable import WalletConnectPairing
 @testable import WalletConnectSync
+@testable import WalletConnectHistory
 import WalletConnectIdentity
 import WalletConnectSigner
 
@@ -79,6 +80,7 @@ final class PushTests: XCTestCase {
                                                       logger: pushLogger,
                                                       keyValueStorage: keyValueStorage,
                                                       keychainStorage: keychain,
+                                                      groupKeychainStorage: KeychainStorageMock(),
                                                       networkInteractor: networkingInteractor,
                                                       syncClient: syncClient)
     }
@@ -93,6 +95,11 @@ final class PushTests: XCTestCase {
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        let historyClient = HistoryClientFactory.create(
+            historyUrl: "https://history.walletconnect.com",
+            relayUrl: "wss://relay.walletconnect.com",
+            keychain: keychain
+        )
         walletPushClient = WalletPushClientFactory.create(keyserverURL: keyserverURL,
                                                           logger: pushLogger,
                                                           keyValueStorage: keyValueStorage,
@@ -101,7 +108,8 @@ final class PushTests: XCTestCase {
                                                           networkInteractor: networkingInteractor,
                                                           pairingRegisterer: pairingClient,
                                                           echoClient: echoClient,
-                                                          syncClient: syncClient)
+                                                          syncClient: syncClient,
+                                                          historyClient: historyClient)
     }
 
     override func setUp() {

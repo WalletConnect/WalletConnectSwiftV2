@@ -62,6 +62,7 @@ final class AppProposalServiceTests: XCTestCase {
         approveEngine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: .init(defaults: RuntimeKeyValueStorage(), identifier: ""),
+            verifyContextStore: CodableStore<VerifyContext>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             sessionTopicToProposal: CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: ""),
             pairingRegisterer: pairingRegisterer,
             metadata: meta,
@@ -69,7 +70,7 @@ final class AppProposalServiceTests: XCTestCase {
             logger: logger,
             pairingStore: storageMock,
             sessionStore: WCSessionStorageMock(),
-            verifyClient: nil
+            verifyClient: VerifyClientMock()
         )
     }
 

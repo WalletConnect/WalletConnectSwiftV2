@@ -1,26 +1,13 @@
 import SwiftUI
 
 struct ModalContainerView: View {
-    
     @Environment(\.presentationMode) var presentationMode
     
     @State var showModal: Bool = false
         
     var body: some View {
-        
-        VStack(spacing: -10) {
-            
-            Color.thickOverlay
-                .colorScheme(.light)
-                .transform {
-                    #if os(iOS)
-                        $0.onTapGesture {
-                            withAnimation {
-                                showModal = false
-                            }
-                        }
-                    #endif
-                }
+        VStack(spacing: 0) {
+            Color.clear
             
             if showModal {
                 ModalSheet(
@@ -34,7 +21,28 @@ struct ModalContainerView: View {
                 .animation(.spring(), value: showModal)
             }
         }
+        .background(
+            Color.thickOverlay
+                .colorScheme(.light)
+                .opacity(showModal ? 1 : 0)
+                .transform {
+                    #if os(iOS)
+                        $0.onTapGesture {
+                            withAnimation {
+                                showModal = false
+                            }
+                        }
+                    #endif
+                }
+        )
         .edgesIgnoringSafeArea(.all)
+        .transform {
+            if #available(iOS 14.0, *) {
+                $0.ignoresSafeArea(.keyboard, edges: .bottom)
+            } else {
+                $0
+            }
+        }
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
                 withAnimation {

@@ -12,7 +12,8 @@ public class Chat {
             keyserverUrl: keyserverUrl,
             relayClient: Relay.instance,
             networkingInteractor: Networking.interactor,
-            syncClient: Sync.instance
+            syncClient: Sync.instance,
+            historyClient: History.instance
         )
     }()
 

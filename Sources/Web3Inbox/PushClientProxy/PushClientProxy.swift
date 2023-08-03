@@ -7,13 +7,9 @@ final class PushClientProxy {
     var onSign: SigningCallback
     var onResponse: ((RPCResponse) async throws -> Void)?
 
-    init(account: Account, client: WalletPushClient, onSign: @escaping SigningCallback) {
+    init(client: WalletPushClient, onSign: @escaping SigningCallback) {
         self.client = client
         self.onSign = onSign
-
-        Task {
-            try await client.enableSync(account: account, onSign: onSign)
-        }
     }
 
     func request(_ request: RPCRequest) async throws {
@@ -52,7 +48,11 @@ final class PushClientProxy {
             try await respond(request: request)
         case .deletePushMessage:
             let params = try parse(DeletePushMessageRequest.self, params: request.params)
-            client.deletePushMessage(id: params.id)
+            client.deletePushMessage(id: params.id.string)
+            try await respond(request: request)
+        case .enableSync:
+            let params = try parse(EnableSyncRequest.self, params: request.params)
+            try await client.enableSync(account: params.account, onSign: onSign)
             try await respond(request: request)
         }
     }
@@ -94,7 +94,11 @@ private extension PushClientProxy {
     }
 
     struct DeletePushMessageRequest: Codable {
-        let id: String
+        let id: RPCID
+    }
+
+    struct EnableSyncRequest: Codable {
+        let account: Account
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {

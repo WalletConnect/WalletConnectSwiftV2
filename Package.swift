@@ -5,9 +5,9 @@ import PackageDescription
 let package = Package(
     name: "WalletConnect",
     platforms: [
-        .iOS(.v14),
+        .iOS(.v13),
         .macOS(.v11),
-        .tvOS(.v14)
+        .tvOS(.v13)
     ],
     products: [
         .library(
@@ -55,6 +55,7 @@ let package = Package(
 
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
         .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
     ],
     targets: [
@@ -76,7 +77,7 @@ let package = Package(
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync"],
+            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
             path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectEcho",
@@ -132,7 +133,13 @@ let package = Package(
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "WalletConnectModal",
-            dependencies: ["QRCode", "WalletConnectSign"]),
+            dependencies: ["QRCode", "WalletConnectSign"],
+            exclude: ["Secrets/secrets.json.sample"],
+            resources: [
+                .copy("Secrets/secrets.json"),
+                .copy("Resources/Assets.xcassets")
+            ]
+        ),
         .target(
             name: "WalletConnectSync",
             dependencies: ["WalletConnectSigner"]),

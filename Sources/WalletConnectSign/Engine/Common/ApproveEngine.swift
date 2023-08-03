@@ -18,8 +18,9 @@ final class ApproveEngine {
     private let networkingInteractor: NetworkInteracting
     private let pairingStore: WCPairingStorage
     private let sessionStore: WCSessionStorage
-    private let verifyClient: VerifyClient?
+    private let verifyClient: VerifyClientProtocol
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
+    private let verifyContextStore: CodableStore<VerifyContext>
     private let sessionTopicToProposal: CodableStore<Session.Proposal>
     private let pairingRegisterer: PairingRegisterer
     private let metadata: AppMetadata
@@ -31,6 +32,7 @@ final class ApproveEngine {
     init(
         networkingInteractor: NetworkInteracting,
         proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
+        verifyContextStore: CodableStore<VerifyContext>,
         sessionTopicToProposal: CodableStore<Session.Proposal>,
         pairingRegisterer: PairingRegisterer,
         metadata: AppMetadata,
@@ -38,10 +40,11 @@ final class ApproveEngine {
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
-        verifyClient: VerifyClient?
+        verifyClient: VerifyClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
+        self.verifyContextStore = verifyContextStore
         self.sessionTopicToProposal = sessionTopicToProposal
         self.pairingRegisterer = pairingRegisterer
         self.metadata = metadata
@@ -65,6 +68,7 @@ final class ApproveEngine {
         let pairingTopic = payload.topic
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
+        verifyContextStore.delete(forKey: proposerPubKey)
 
         try Namespace.validate(sessionNamespaces)
         try Namespace.validateApproved(sessionNamespaces, against: proposal.requiredNamespaces)
@@ -113,6 +117,7 @@ final class ApproveEngine {
             throw Errors.proposalPayloadsNotFound
         }
         proposalPayloadsStore.delete(forKey: proposerPubKey)
+        verifyContextStore.delete(forKey: proposerPubKey)
         try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SessionProposeProtocolMethod(), reason: reason)
         // TODO: Delete pairing if inactive 
     }
@@ -293,18 +298,21 @@ private extension ApproveEngine {
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
-        guard let verifyClient else {
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), nil)
-            return
-        }
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
-            let origin = try? await verifyClient.verifyOrigin(assertionId: assertionId)
-            let verifyContext = await verifyClient.createVerifyContext(
-                origin: origin,
-                domain: payload.request.proposer.metadata.url
-            )
-            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            do {
+                let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let verifyContext = verifyClient.createVerifyContext(
+                    origin: origin,
+                    domain: payload.request.proposer.metadata.url
+                )
+                verifyContextStore.set(verifyContext, forKey: proposal.proposer.publicKey)
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            } catch {
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url)
+                onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+                return
+            }
         }
     }
 

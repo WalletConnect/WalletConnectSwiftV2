@@ -29,12 +29,10 @@ final class InviteKeyDelegate {
         }
     }
 
-    func onDelete(_ id: String) {
+    func onDelete(_ key: InviteKey) {
         Task(priority: .high) {
-            let inviteKey = try AgreementPublicKey(hex: id) // InviteKey id is pubKey hex
-            let topic = inviteKey.rawRepresentation.sha256().toHexString()
-            kms.deletePublicKey(for: topic)
-            networkingInteractor.unsubscribe(topic: topic)
+            kms.deletePublicKey(for: key.topic)
+            networkingInteractor.unsubscribe(topic: key.topic)
         }
     }
 }

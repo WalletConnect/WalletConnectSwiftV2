@@ -18,6 +18,7 @@ final class ApproveEngineTests: XCTestCase {
     var sessionStorageMock: WCSessionStorageMock!
     var pairingRegisterer: PairingRegistererMock<SessionProposal>!
     var proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>!
+    var verifyContextStore: CodableStore<VerifyContext>!
     var sessionTopicToProposal: CodableStore<Session.Proposal>!
 
     var publishers = Set<AnyCancellable>()
@@ -30,10 +31,12 @@ final class ApproveEngineTests: XCTestCase {
         sessionStorageMock = WCSessionStorageMock()
         pairingRegisterer = PairingRegistererMock()
         proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        verifyContextStore = CodableStore<VerifyContext>(defaults: RuntimeKeyValueStorage(), identifier: "")
         sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: "")
         engine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
+            verifyContextStore: verifyContextStore,
             sessionTopicToProposal: sessionTopicToProposal,
             pairingRegisterer: pairingRegisterer,
             metadata: metadata,
@@ -41,7 +44,7 @@ final class ApproveEngineTests: XCTestCase {
             logger: ConsoleLoggerMock(),
             pairingStore: pairingStorageMock,
             sessionStore: sessionStorageMock,
-            verifyClient: nil
+            verifyClient: VerifyClientMock()
         )
     }
 
@@ -146,5 +149,70 @@ final class ApproveEngineTests: XCTestCase {
         XCTAssertTrue(networkingInteractor.didUnsubscribe(to: session.topic), "Responder must unsubscribe topic B")
         XCTAssertFalse(cryptoMock.hasAgreementSecret(for: session.topic), "Responder must remove agreement secret")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: session.self.publicKey!), "Responder must remove private key")
+    }
+    
+    func testVerifyContextStorageAdd() {
+        let proposalReceivedExpectation = expectation(description: "Wallet expects to receive a proposal")
+        
+        let pairing = WCPairing.stub()
+        let topicA = pairing.topic
+        pairingStorageMock.setPairing(pairing)
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
+        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
+
+        engine.onSessionProposal = { _, _ in
+            proposalReceivedExpectation.fulfill()
+        }
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
+
+        wait(for: [proposalReceivedExpectation], timeout: 0.1)
+        
+        XCTAssertTrue(verifyContextStore.getAll().count == 1)
+    }
+    
+    func testVerifyContextStorageRemoveOnApprove() async throws {
+        let proposalReceivedExpectation = expectation(description: "Wallet expects to receive a proposal")
+        
+        let pairing = WCPairing.stub()
+        let topicA = pairing.topic
+        pairingStorageMock.setPairing(pairing)
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
+        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
+        
+        engine.onSessionProposal = { _, _ in
+            proposalReceivedExpectation.fulfill()
+        }
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
+        
+        wait(for: [proposalReceivedExpectation], timeout: 0.1)
+        
+        XCTAssertTrue(verifyContextStore.getAll().count == 1)
+        
+        try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
+        
+        XCTAssertTrue(verifyContextStore.getAll().isEmpty)
+    }
+    
+    func testVerifyContextStorageRemoveOnReject() async throws {
+        let proposalReceivedExpectation = expectation(description: "Wallet expects to receive a proposal")
+        
+        let pairing = WCPairing.stub()
+        let topicA = pairing.topic
+        pairingStorageMock.setPairing(pairing)
+        let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
+        let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
+        
+        engine.onSessionProposal = { _, _ in
+            proposalReceivedExpectation.fulfill()
+        }
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
+        
+        wait(for: [proposalReceivedExpectation], timeout: 0.1)
+        
+        XCTAssertTrue(verifyContextStore.getAll().count == 1)
+        
+        try await engine.reject(proposerPubKey: proposal.proposer.publicKey, reason: .userRejected)
+        
+        XCTAssertTrue(verifyContextStore.getAll().isEmpty)
     }
 }

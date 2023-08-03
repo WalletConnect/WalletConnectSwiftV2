@@ -193,7 +193,7 @@ extension WCSession {
         self.selfParticipant = try container.decode(Participant.self, forKey: .selfParticipant)
         self.peerParticipant = try container.decode(Participant.self, forKey: .peerParticipant)
         self.namespaces = try container.decode([String: SessionNamespace].self, forKey: .namespaces)
-        self.sessionProperties = try container.decode([String: String]?.self, forKey: .sessionProperties)
+        self.sessionProperties = try container.decodeIfPresent([String: String].self, forKey: .sessionProperties)
         self.acknowledged = try container.decode(Bool.self, forKey: .acknowledged)
         self.expiryDate = try container.decode(Date.self, forKey: .expiryDate)
         self.timestamp = try container.decode(Date.self, forKey: .timestamp)

@@ -3,17 +3,6 @@ import TestingUtils
 import XCTest
 
 final class ExplorerAPITests: XCTestCase {
-
-    func testCorrectUserAgent() throws {
-        
-        let request = ExplorerAPI
-            .getListings(projectId: "foo", metadata: .stub(), recommendedIds: [], excludedIds: [])
-            .resolve(for: "www.google.com")
-        
-        XCTAssertEqual(request?.allHTTPHeaderFields?["Referer"], "Wallet Connect")
-        // Should look something like this: w3m-ios-1.0.0/swift-v1.6.8/iOS-16.1
-        XCTAssertTrue(request?.allHTTPHeaderFields?["User-Agent"]?.starts(with: "w3m-ios-1.0.0/swift-v") ?? false)
-    }
     
     func testCorrectMappingOfWalletIds() throws {
         
@@ -21,10 +10,14 @@ final class ExplorerAPITests: XCTestCase {
             .getListings(projectId: "123", metadata: .stub(), recommendedIds: ["foo", "bar"], excludedIds: ["boo", "far"])
             .resolve(for: "www.google.com")
         
+        XCTAssertEqual(request?.allHTTPHeaderFields?["Referer"], "Wallet Connect")
+        
         XCTAssertEqual(request?.url?.queryParameters, [
             "projectId": "123",
             "recommendedIds": "foo,bar",
-            "excludedIds": "boo,far"
+            "excludedIds": "boo,far",
+            "sdkVersion": EnvironmentInfo.sdkName,
+            "sdkType": "wcm"
         ])
     }
 }

@@ -8,6 +8,7 @@ actor WalletRespondService {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let rpcHistory: RPCHistory
+    private let verifyContextStore: CodableStore<VerifyContext>
     private let logger: ConsoleLogging
     private let walletErrorResponder: WalletErrorResponder
 
@@ -15,11 +16,13 @@ actor WalletRespondService {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          rpcHistory: RPCHistory,
+         verifyContextStore: CodableStore<VerifyContext>,
          walletErrorResponder: WalletErrorResponder) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.rpcHistory = rpcHistory
+        self.verifyContextStore = verifyContextStore
         self.walletErrorResponder = walletErrorResponder
     }
 
@@ -35,10 +38,12 @@ actor WalletRespondService {
 
         let response = RPCResponse(id: requestId, result: responseParams)
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: AuthRequestProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        verifyContextStore.delete(forKey: requestId.string)
     }
 
     func respondError(requestId: RPCID) async throws {
         try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        verifyContextStore.delete(forKey: requestId.string)
     }
 
     private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {

@@ -11,21 +11,31 @@ class WalletRequestSubscriberTests: XCTestCase {
     var pairingRegisterer: PairingRegistererMock<AuthRequestParams>!
     var sut: WalletRequestSubscriber!
     var messageFormatter: SIWEMessageFormatterMock!
-
+    var verifyContextStore: CodableStore<VerifyContext>!
+    
     let defaultTimeout: TimeInterval = 0.01
 
     override func setUp() {
         let networkingInteractor = NetworkingInteractorMock()
         pairingRegisterer = PairingRegistererMock()
         messageFormatter = SIWEMessageFormatterMock()
-
-        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingInteractor, logger: ConsoleLoggerMock(), kms: KeyManagementServiceMock(), rpcHistory: RPCHistory(keyValueStore: CodableStore(defaults: RuntimeKeyValueStorage(), identifier: "")))
-        sut = WalletRequestSubscriber(networkingInteractor: networkingInteractor,
-                                      logger: ConsoleLoggerMock(),
-                                      kms: KeyManagementServiceMock(),
-                                      walletErrorResponder: walletErrorResponder,
-                                      pairingRegisterer: pairingRegisterer,
-                                      verifyClient: nil)
+        verifyContextStore = CodableStore<VerifyContext>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        
+        let walletErrorResponder = WalletErrorResponder(
+            networkingInteractor: networkingInteractor,
+            logger: ConsoleLoggerMock(),
+            kms: KeyManagementServiceMock(),
+            rpcHistory: RPCHistory(keyValueStore: CodableStore(defaults: RuntimeKeyValueStorage(), identifier: ""))
+        )
+        sut = WalletRequestSubscriber(
+            networkingInteractor: networkingInteractor,
+            logger: ConsoleLoggerMock(),
+            kms: KeyManagementServiceMock(),
+            walletErrorResponder: walletErrorResponder,
+            pairingRegisterer: pairingRegisterer,
+            verifyClient: VerifyClientMock(),
+            verifyContextStore: verifyContextStore
+        )
     }
 
     func testSubscribeRequest() {

@@ -24,13 +24,26 @@ public struct SignClientFactory {
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.pairings.rawValue)))
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.sessions.rawValue)))
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.proposals.rawValue)
-        let historyService = HistoryService(history: rpcHistory)
-        let verifyClient = try? VerifyClientFactory.create(verifyHost: metadata.verifyUrl)
-        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
+        let verifyContextStore = CodableStore<VerifyContext>(defaults: keyValueStorage, identifier: VerifyStorageIdentifiers.context.rawValue)
+        let historyService = HistoryService(history: rpcHistory, proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
+        let verifyClient = VerifyClientFactory.create()
+        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyContextStore: verifyContextStore, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.sessionTopicToProposal.rawValue)
-        let approveEngine = ApproveEngine(networkingInteractor: networkingClient, proposalPayloadsStore: proposalPayloadsStore, sessionTopicToProposal: sessionTopicToProposal, pairingRegisterer: pairingClient, metadata: metadata, kms: kms, logger: logger, pairingStore: pairingStore, sessionStore: sessionStore, verifyClient: verifyClient)
+        let approveEngine = ApproveEngine(
+            networkingInteractor: networkingClient,
+            proposalPayloadsStore: proposalPayloadsStore,
+            verifyContextStore: verifyContextStore,
+            sessionTopicToProposal: sessionTopicToProposal,
+            pairingRegisterer: pairingClient,
+            metadata: metadata,
+            kms: kms,
+            logger: logger,
+            pairingStore: pairingStore,
+            sessionStore: sessionStore,
+            verifyClient: verifyClient
+        )
         let cleanupService = SignCleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionTopicToProposal: sessionTopicToProposal, networkInteractor: networkingClient)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deleteSessionService: deleteSessionService, sessionStorage: sessionStore)

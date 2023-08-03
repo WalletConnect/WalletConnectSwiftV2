@@ -9,4 +9,5 @@ enum PushWebViewEvent: String {
     case getMessageHistory
     case deleteSubscription
     case deletePushMessage
+    case enableSync
 }
