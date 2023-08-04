@@ -19,7 +19,7 @@ struct InputConfig {
     }
 
     static var jsClientApiHost: String {
-        return config(for: "JS_CLIENT_API_HOST")
+        return config(for: "JS_CLIENT_API_HOST")!
     }
 
     static var relayUrl: String {
