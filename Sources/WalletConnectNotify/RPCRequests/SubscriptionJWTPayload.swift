@@ -60,7 +60,7 @@ struct SubscriptionJWTPayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             aud: dappUrl,
             sub: subscriptionAccount.did,
-            act: "push_subscription",
+            act: "notify_subscription",
             scp: scope
         )
     }

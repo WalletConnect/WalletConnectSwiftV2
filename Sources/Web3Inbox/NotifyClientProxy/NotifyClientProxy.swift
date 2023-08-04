@@ -5,7 +5,7 @@ final class NotifyClientProxy {
     private let client: NotifyClient
 
     var onSign: SigningCallback
-    var onResponse: ((RPCResponse) async throws -> Void)?
+    var onResponse: ((RPCResponse, RPCRequest) async throws -> Void)?
 
     init(client: NotifyClient, onSign: @escaping SigningCallback) {
         self.client = client
@@ -101,6 +101,6 @@ private extension NotifyClientProxy {
 
     func respond<Object: Codable>(with object: Object = Blob(), request: RPCRequest) async throws {
         let response = RPCResponse(matchingRequest: request, result: object)
-        try await onResponse?(response)
+        try await onResponse?(response, request)
     }
 }

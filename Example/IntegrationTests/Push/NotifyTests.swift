@@ -20,6 +20,8 @@ final class NotifyTests: XCTestCase {
 
     var walletNotifyClient: NotifyClient!
 
+    let gmDappUrl = "https://notify.gm.walletconnect.com/"
+
     var pairingStorage: PairingStorage!
 
     let pk = try! EthereumPrivateKey()
@@ -102,7 +104,7 @@ final class NotifyTests: XCTestCase {
 
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create notify subscription")
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         try! await walletNotifyClient.enableSync(account: account, onSign: sign)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletNotifyClient.subscriptionsPublisher
@@ -117,7 +119,7 @@ final class NotifyTests: XCTestCase {
     
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         let updateScope: Set<String> = ["alerts"]
         try! await walletNotifyClient.enableSync(account: account, onSign: sign)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
@@ -146,7 +148,7 @@ final class NotifyTests: XCTestCase {
         let messageExpectation = expectation(description: "receives a notify message")
         let notifyMessage = NotifyMessage.stub()
 
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: "https://gm-dapp-xi.vercel.app/", icons: [])
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         try! await walletNotifyClient.enableSync(account: account, onSign: sign)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         var subscription: NotifySubscription!
