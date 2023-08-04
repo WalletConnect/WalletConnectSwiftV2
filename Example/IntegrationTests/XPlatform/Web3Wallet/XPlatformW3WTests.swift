@@ -108,7 +108,7 @@ final class XPlatformW3WTests: XCTestCase {
 
 
 class JavaScriptAutoTestsAPI {
-    private let host = "https://test-automation-api.walletconnect.com"
+    private let host = InputConfig.jsClientApiHost
 
     func quickConnect() async throws -> WalletConnectURI {
         let url = URL(string: "\(host)/quick_connect")!

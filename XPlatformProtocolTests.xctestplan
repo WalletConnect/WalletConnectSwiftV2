@@ -9,7 +9,20 @@
     }
   ],
   "defaultOptions" : {
-
+    "environmentVariableEntries" : [
+      {
+        "key" : "JS_CLIENT_API_HOST",
+        "value" : "$(JS_CLIENT_API_HOST)"
+      },
+      {
+        "key" : "PROJECT_ID",
+        "value" : "$(PROJECT_ID)"
+      },
+      {
+        "key" : "RELAY_HOST",
+        "value" : "$(RELAY_HOST)"
+      }
+    ]
   },
   "testTargets" : [
     {

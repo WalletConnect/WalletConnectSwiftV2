@@ -16,6 +16,10 @@
         "value" : "$(RELAY_HOST)"
       },
       {
+        "key" : "JS_CLIENT_API_HOST",
+        "value" : "$(JS_CLIENT_API_HOST)"
+      },
+      {
         "key" : "GM_DAPP_PROJECT_SECRET",
         "value" : "$(GM_DAPP_PROJECT_SECRET)"
       },
