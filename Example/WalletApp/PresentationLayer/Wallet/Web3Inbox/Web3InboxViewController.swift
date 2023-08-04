@@ -25,11 +25,22 @@ final class Web3InboxViewController: UIViewController {
         view = Web3Inbox.instance.getWebView()
 
         let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshTapped))
-        navigationItem.rightBarButtonItem = refresh
+        let getUrl = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(getUrlPressed))
+
+        navigationItem.rightBarButtonItems = [refresh, getUrl]
     }
 
     @objc func refreshTapped() {
         webView?.reload()
+    }
+
+    @objc func getUrlPressed(_ sender: UIBarItem) {
+        UIPasteboard.general.string = webView?.url?.absoluteString
+
+        let alert = UIAlertController(title: "URL copied to clipboard", message: nil, preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .cancel)
+        alert.addAction(action)
+        present(alert, animated: true)
     }
 }
 
