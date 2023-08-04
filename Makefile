@@ -18,7 +18,7 @@ endif
 
 build_all:
 	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
-	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' CAST_HOST='$(CAST_HOST)' build-for-testing | xcpretty
+	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' CAST_HOST='$(CAST_HOST)' JS_CLIENT_API_HOST='$(JS_CLIENT_API_HOST)' build-for-testing | xcpretty
 
 echo_ui_tests:
 	echo "EchoUITests disabled"
@@ -40,6 +40,9 @@ notify_tests:
 
 smoke_tests:
 	./run_tests.sh --scheme IntegrationTests --testplan SmokeTests --project Example/ExampleApp.xcodeproj
+
+x_platform_tests:
+	./run_tests.sh --scheme IntegrationTests --testplan XPlatformProtocolTests --project Example/ExampleApp.xcodeproj
 
 release_wallet:
 	fastlane release_testflight username:$(APPLE_ID) token:$(TOKEN) relay_host:$(RELAY_HOST) project_id:$(PROJECT_ID) --env WalletApp
