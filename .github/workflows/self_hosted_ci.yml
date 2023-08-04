@@ -31,6 +31,7 @@ jobs:
       - uses: ./.github/actions/build
         with:
           project-id: ${{ secrets.PROJECT_ID }}
+          cache-key: self_hosted_ci
 
   test:
     needs: prepare
@@ -50,7 +51,7 @@ jobs:
       with:
         path: |
           products.tar
-        key: ${{ runner.os }}-deriveddata-${{ github.event.pull_request.head.sha }}
+        key: ${{ runner.os }}-deriveddata-self_hosted_ci-${{ github.event.pull_request.head.sha }}
 
     - name: Untar DerivedDataCache
       shell: bash
@@ -78,7 +79,7 @@ jobs:
       uses: mikepenz/action-junit-report@v3
       if: success() || failure()
       with:
-          check_name: ${{ matrix.type }} junit report
+          check_name: ${{ matrix.type }} self-hosted junit report
           report_paths: 'test_results/report.junit'
 
     - name: Zip test artifacts

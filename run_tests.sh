@@ -49,9 +49,13 @@ mkdir test_results
 DEVICE_ID=$(xcrun simctl create "EphemeralSim$SCHEME" "iPhone 14")
 echo "Created ephemeral simulator with id: $DEVICE_ID"
 
-# If xctestrun file exists, update it and run test-without-building otherwise run regular test
-XCTESTRUN=$(find . -name "*_$SCHEME*.xctestrun")
+if [ -z "$TESTPLAN" ]; then
+    XCTESTRUN=$(find . -name "*_$SCHEME*.xctestrun")
+else 
+    XCTESTRUN=$(find . -name "*_$TESTPLAN*.xctestrun")
+fi
 
+# If xctestrun file exists, update it and run test-without-building otherwise run regular test
 if [ -z "$XCTESTRUN" ]; then
     echo "XCTESTRUN file not found"
 
