@@ -41,7 +41,7 @@ notify_tests:
 smoke_tests:
 	./run_tests.sh --scheme IntegrationTests --testplan SmokeTests --project Example/ExampleApp.xcodeproj
 
-x_platform_tests:
+x_platform_protocol_tests:
 	./run_tests.sh --scheme IntegrationTests --testplan XPlatformProtocolTests --project Example/ExampleApp.xcodeproj
 
 release_wallet:

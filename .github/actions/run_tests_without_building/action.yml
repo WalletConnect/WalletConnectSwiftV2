@@ -75,6 +75,11 @@ runs:
       shell: bash
       run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }} GM_DAPP_PROJECT_SECRET=${{ inputs.gm-dapp-project-secret }}
 
+    - name: Run x-platform protocol tests
+      if: inputs.type == 'x-platform-protocol-tests'
+      shell: bash
+      run: make x_platform_protocol_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} JS_CLIENT_API_HOST=${{ inputs.js-client-api-host }}
+
     # Slack notification for failing smoke and relay tests
     - name: Slack Notification for Failure
       if: failure() && (inputs.type == 'smoke-tests' || inputs.type == 'relay-tests')
