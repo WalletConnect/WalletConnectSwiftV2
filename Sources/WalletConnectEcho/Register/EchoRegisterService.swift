@@ -33,14 +33,23 @@ actor EchoRegisterService {
         let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         logger.debug("APNS device token: \(token)")
-        let response = try await httpClient.request(
-            EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
-        )
-        guard response.status == .success else {
-            throw Errors.registrationFailed
+        
+        do {
+            let response = try await httpClient.request(
+                EchoResponse.self,
+                at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
+            )
+            guard response.status == .success else {
+                throw Errors.registrationFailed
+            }
+            logger.debug("Successfully registered at Echo Server")
+        } catch {
+            throw error
         }
-        logger.debug("Successfully registered at Echo Server")
+    }
+    
+    func echoHostFallback() async {
+        await httpClient.updateHost(host: "echo.walletconnect.org")
     }
 
 #if DEBUG
@@ -48,14 +57,19 @@ actor EchoRegisterService {
         let echoAuthToken = try echoAuthenticator.createAuthToken()
         let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
-        let response = try await httpClient.request(
-            EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: echoAuthToken)
-        )
-        guard response.status == .success else {
-            throw Errors.registrationFailed
+        
+        do {
+            let response = try await httpClient.request(
+                EchoResponse.self,
+                at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: echoAuthToken)
+            )
+            guard response.status == .success else {
+                throw Errors.registrationFailed
+            }
+            logger.debug("Successfully registered at Echo Server")
+        } catch {
+            throw error
         }
-        logger.debug("Successfully registered at Echo Server")
     }
 #endif
 }

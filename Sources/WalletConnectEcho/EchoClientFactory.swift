@@ -14,12 +14,18 @@ public struct EchoClientFactory {
             environment: environment)
     }
 
-    public static func create(projectId: String,
-                       echoHost: String,
-                       keychainStorage: KeychainStorageProtocol,
-                       environment: APNSEnvironment) -> EchoClient {
+    public static func create(
+        projectId: String,
+        echoHost: String,
+        keychainStorage: KeychainStorageProtocol,
+        environment: APNSEnvironment
+    ) -> EchoClient {
+        let sessionConfiguration = URLSessionConfiguration.default
+        sessionConfiguration.timeoutIntervalForRequest = 1.0
+        sessionConfiguration.timeoutIntervalForResource = 1.0
+        let session = URLSession(configuration: sessionConfiguration)
 
-        let httpClient = HTTPNetworkClient(host: echoHost)
+        let httpClient = HTTPNetworkClient(host: echoHost, session: session)
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
 

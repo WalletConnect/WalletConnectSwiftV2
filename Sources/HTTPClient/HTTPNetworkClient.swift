@@ -2,7 +2,7 @@ import Foundation
 
 public actor HTTPNetworkClient: HTTPClient {
 
-    let host: String
+    var host: String
 
     private let session: URLSession
 
@@ -30,6 +30,10 @@ public actor HTTPNetworkClient: HTTPClient {
                 continuation.resume(with: result)
             }
         }
+    }
+    
+    public func updateHost(host: String) async {
+        self.host = host
     }
 
     private func request<T: Decodable>(_ type: T.Type, at service: HTTPService, completion: @escaping (Result<T, Error>) -> Void) {
