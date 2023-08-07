@@ -5,22 +5,36 @@ public final class OriginVerifier {
         case registrationFailed
     }
     
-    private let verifyHost: String
+    private var verifyHost: String
     
     init(verifyHost: String) {
         self.verifyHost = verifyHost
     }
     
     func verifyOrigin(assertionId: String) async throws -> String {
-        let httpClient = HTTPNetworkClient(host: verifyHost)
-        let response = try await httpClient.request(
-            VerifyResponse.self,
-            at: VerifyAPI.resolve(assertionId: assertionId)
-        )
-        guard let origin = response.origin else {
-            throw Errors.registrationFailed
+        let sessionConfiguration = URLSessionConfiguration.default
+        sessionConfiguration.timeoutIntervalForRequest = 1.0
+        sessionConfiguration.timeoutIntervalForResource = 1.0
+        let session = URLSession(configuration: sessionConfiguration)
+        
+        let httpClient = HTTPNetworkClient(host: verifyHost, session: session)
+        
+        do {
+            let response = try await httpClient.request(
+                VerifyResponse.self,
+                at: VerifyAPI.resolve(assertionId: assertionId)
+            )
+            guard let origin = response.origin else {
+                throw Errors.registrationFailed
+            }
+            return origin
+        } catch {
+            throw error
         }
-        return origin
+    }
+    
+    func verifyHostFallback() {
+        verifyHost = "verify.walletconnect.org"
     }
 }
 

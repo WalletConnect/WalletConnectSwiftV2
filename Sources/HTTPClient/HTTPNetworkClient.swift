@@ -67,6 +67,9 @@ public actor HTTPNetworkClient: HTTPClient {
     }
 
     private static func validate(_ urlResponse: URLResponse?, _ error: Error?) throws {
+        if let error = (error as? NSError), error.code == -1004 {
+            throw HTTPError.couldNotConnect
+        }
         if let error = error {
             throw HTTPError.dataTaskError(error)
         }
