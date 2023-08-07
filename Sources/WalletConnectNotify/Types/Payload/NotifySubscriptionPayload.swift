@@ -1,6 +1,6 @@
 import Foundation
 
-struct SubscriptionJWTPayload: JWTClaimsCodable {
+struct NotifySubscriptionPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// timestamp when jwt was issued

@@ -42,7 +42,7 @@ class NotifySubscribeResponseSubscriber {
     private func subscribeForSubscriptionResponse() {
         let protocolMethod = NotifySubscribeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, SubscribeResponseParams>) in
+            .sink {[unowned self] (payload: ResponseSubscriptionPayload<NotifySubscriptionPayload.Wrapper, SubscribeResponseParams>) in
                 Task(priority: .high) {
                     logger.debug("NotifySubscribeResponseSubscriber: Received Notify Subscribe response")
 
@@ -60,7 +60,7 @@ class NotifySubscribeResponseSubscriber {
                     var notifySubscriptionTopic: String!
                     var subscribedTypes: Set<NotificationType>!
                     var agreementKeysP: AgreementKeys!
-                    let (subscriptionPayload, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    let (subscriptionPayload, claims) = try NotifySubscriptionPayload.decodeAndVerify(from: payload.request)
                     let subscribedScope = subscriptionPayload.scope
                         .components(separatedBy: " ")
                     do {

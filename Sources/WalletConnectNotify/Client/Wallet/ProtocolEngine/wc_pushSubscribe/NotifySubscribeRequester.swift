@@ -38,7 +38,7 @@ class NotifySubscribeRequester {
         self.dappsMetadataStore = dappsMetadataStore
     }
 
-    @discardableResult func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws -> SubscriptionJWTPayload.Wrapper {
+    @discardableResult func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws -> NotifySubscriptionPayload.Wrapper {
 
         let dappUrl = metadata.url
 
@@ -92,10 +92,10 @@ class NotifySubscribeRequester {
         return keys
     }
 
-    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) async throws -> SubscriptionJWTPayload.Wrapper {
+    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) async throws -> NotifySubscriptionPayload.Wrapper {
         let types = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
         let scope = types.map{$0.name}.joined(separator: " ")
-        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
+        let jwtPayload = NotifySubscriptionPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

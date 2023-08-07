@@ -32,13 +32,13 @@ class NotifyUpdateResponseSubscriber {
     private func subscribeForUpdateResponse() {
         let protocolMethod = NotifyUpdateProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, Bool>) in
+            .sink {[unowned self] (payload: ResponseSubscriptionPayload<NotifySubscriptionPayload.Wrapper, Bool>) in
                 Task(priority: .high) {
                     logger.debug("Received Notify Update response")
 
                     let subscriptionTopic = payload.topic
 
-                    let (_, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    let (_, claims) = try NotifySubscriptionPayload.decodeAndVerify(from: payload.request)
                     let scope = try await buildScope(selected: claims.scp, dappUrl: claims.aud)
 
                     guard let oldSubscription = notifyStorage.getSubscription(topic: subscriptionTopic) else {

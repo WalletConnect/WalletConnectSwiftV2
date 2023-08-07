@@ -43,7 +43,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
     private func createJWTRequest(subscriptionAccount: Account, dappUrl: String, scope: Set<String>) throws -> RPCRequest {
         let protocolMethod = NotifyUpdateProtocolMethod().method
         let scopeClaim = scope.joined(separator: " ")
-        let jwtPayload = SubscriptionJWTPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scopeClaim)
+        let jwtPayload = NotifySubscriptionPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scopeClaim)
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount
