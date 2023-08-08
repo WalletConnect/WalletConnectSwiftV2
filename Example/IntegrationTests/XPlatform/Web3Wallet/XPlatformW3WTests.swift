@@ -92,7 +92,9 @@ final class XPlatformW3WTests: XCTestCase {
             Task {
                 var jsSession: JavaScriptAutoTestsAPI.Session?
 
+                print(javaScriptAutoTestsAPI.host)
                 while jsSession == nil {
+                    print("🎃 geting session")
                     do {
                         jsSession = try await javaScriptAutoTestsAPI.getSession(topic: session.topic)
                     } catch {
@@ -120,7 +122,7 @@ final class XPlatformW3WTests: XCTestCase {
 
 
 class JavaScriptAutoTestsAPI {
-    private let host = "https://\(InputConfig.jsClientApiHost)"
+    let host = "https://\(InputConfig.jsClientApiHost)"
 
     func quickConnect() async throws -> WalletConnectURI {
         let url = URL(string: "\(host)/quick_connect")!
