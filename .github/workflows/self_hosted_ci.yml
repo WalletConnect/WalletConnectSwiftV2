@@ -22,7 +22,7 @@ jobs:
 
   prepare:
     needs: authorize
-    runs-on: self-hosted
+    runs-on: apple-silicon
     steps:
       - uses: actions/checkout@v3
         with:
@@ -35,7 +35,7 @@ jobs:
 
   test:
     needs: prepare
-    runs-on: self-hosted
+    runs-on: apple-silicon
     timeout-minutes: 15
     strategy:
       fail-fast: false
