@@ -1,9 +1,6 @@
 name: self_hosted_ci
 
 on:
-  push:
-    branches:
-      - E2E-tests
   pull_request_target:
     branches:
       - develop
