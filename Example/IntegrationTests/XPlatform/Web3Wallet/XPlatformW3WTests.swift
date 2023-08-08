@@ -90,9 +90,21 @@ final class XPlatformW3WTests: XCTestCase {
 
         w3wClient.sessionSettlePublisher.sink { [unowned self] session in
             Task {
-                sleep(1)
-                let jsSession = try await javaScriptAutoTestsAPI.getSession(topic: session.topic)
-                XCTAssertEqual(jsSession.topic, session.topic)
+                var jsSession: JavaScriptAutoTestsAPI.Session?
+
+                while jsSession == nil {
+                    do {
+                        jsSession = try await javaScriptAutoTestsAPI.getSession(topic: session.topic)
+                    } catch {
+                        print("No session on JS client yet")
+                    }
+
+                    if jsSession == nil {
+                        sleep(1)
+                    }
+                }
+
+                XCTAssertEqual(jsSession?.topic, session.topic)
                 expectation.fulfill()
             }
         }
