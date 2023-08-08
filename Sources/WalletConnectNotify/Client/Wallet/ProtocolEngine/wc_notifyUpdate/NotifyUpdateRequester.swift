@@ -10,18 +10,22 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
     }
 
     private let keyserverURL: URL
+    private let webDidResolver: WebDidResolver
     private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
 
-    init(keyserverURL: URL,
-         identityClient: IdentityClient,
-         networkingInteractor: NetworkInteracting,
-         logger: ConsoleLogging,
-         notifyStorage: NotifyStorage
+    init(
+        keyserverURL: URL,
+        webDidResolver: WebDidResolver,
+        identityClient: IdentityClient,
+        networkingInteractor: NetworkInteracting,
+        logger: ConsoleLogging,
+        notifyStorage: NotifyStorage
     ) {
         self.keyserverURL = keyserverURL
+        self.webDidResolver = webDidResolver
         self.identityClient = identityClient
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -33,17 +37,23 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
 
         guard let subscription = notifyStorage.getSubscription(topic: topic) else { throw Errors.noSubscriptionForGivenTopic }
 
-        let request = try createJWTRequest(subscriptionAccount: subscription.account, dappUrl: subscription.metadata.url, scope: scope)
+        let dappPubKey = try await webDidResolver.resolvePublicKey(dappUrl: subscription.metadata.url)
+
+        let request = try createJWTRequest(
+            dappPubKey: DIDKey(rawData: dappPubKey.rawRepresentation),
+            subscriptionAccount: subscription.account,
+            dappUrl: subscription.metadata.url, scope: scope
+        )
 
         let protocolMethod = NotifyUpdateProtocolMethod()
 
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
-    private func createJWTRequest(subscriptionAccount: Account, dappUrl: String, scope: Set<String>) throws -> RPCRequest {
+    private func createJWTRequest(dappPubKey: DIDKey, subscriptionAccount: Account, dappUrl: String, scope: Set<String>) throws -> RPCRequest {
         let protocolMethod = NotifyUpdateProtocolMethod().method
         let scopeClaim = scope.joined(separator: " ")
-        let jwtPayload = NotifySubscriptionPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scopeClaim)
+        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scopeClaim)
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

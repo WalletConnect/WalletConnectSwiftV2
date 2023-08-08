@@ -87,15 +87,16 @@ final class NotifyTests: XCTestCase {
             keychain: keychain
         )
         walletNotifyClient = NotifyClientFactory.create(keyserverURL: keyserverURL,
-                                                              logger: notifyLogger,
-                                                              keyValueStorage: keyValueStorage,
-                                                              keychainStorage: keychain,
-                                                              groupKeychainStorage: KeychainStorageMock(),
-                                                              networkInteractor: networkingInteractor,
-                                                              pairingRegisterer: pairingClient,
-                                                              pushClient: pushClient,
-                                                              syncClient: syncClient,
-                                                              historyClient: historyClient)
+                                                        logger: notifyLogger,
+                                                        keyValueStorage: keyValueStorage,
+                                                        keychainStorage: keychain,
+                                                        groupKeychainStorage: KeychainStorageMock(),
+                                                        networkInteractor: networkingInteractor,
+                                                        pairingRegisterer: pairingClient,
+                                                        pushClient: pushClient,
+                                                        syncClient: syncClient,
+                                                        historyClient: historyClient,
+                                                        crypto: DefaultCryptoProvider())
     }
 
     override func setUp() {

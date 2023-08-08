@@ -3,22 +3,24 @@ import Foundation
 struct NotifySubscriptionPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
-        /// timestamp when jwt was issued
+        /// Timestamp when JWT was issued
         let iat: UInt64
-        /// timestamp when jwt must expire
+        /// Timestamp when JWT must expire
         let exp: UInt64
-        /// did:key of an identity key. Enables to resolve attached blockchain account.
+        /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
-        /// key server for identity key verification
+        /// Key server for identity key verification
         let ksu: String
-        /// dapp's url
+        /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
         let aud: String
-        /// blockchain account that notify subscription has been proposed for (did:pkh)
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
-        /// description of action intent. Must be equal to "notify_subscription"
+        /// Description of action intent. Must be equal to `notify_subscription`
         let act: String
-
+        /// Scope of notification types authorized by the user
         let scp: String
+        /// Dapp's domain url
+        let app: String
     }
 
     struct Wrapper: JWTWrapper {
@@ -33,12 +35,14 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         }
     }
 
+    let dappPubKey: DIDKey
     let keyserver: URL
     let subscriptionAccount: Account
     let dappUrl: String
     let scope: String
 
-    init(keyserver: URL, subscriptionAccount: Account, dappUrl: String, scope: String) {
+    init(dappPubKey: DIDKey, keyserver: URL, subscriptionAccount: Account, dappUrl: String, scope: String) {
+        self.dappPubKey = dappPubKey
         self.keyserver = keyserver
         self.subscriptionAccount = subscriptionAccount
         self.dappUrl = dappUrl
@@ -46,22 +50,24 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
     }
 
     init(claims: Claims) throws {
+        self.dappPubKey = try DIDKey(did: claims.aud)
         self.keyserver = try claims.ksu.asURL()
         self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
-        self.dappUrl = claims.aud
+        self.dappUrl = claims.app
         self.scope = claims.scp
     }
 
     func encode(iss: String) throws -> Claims {
         return Claims(
-            iat: defaultIatMilliseconds(),
+            iat: defaultIat(),
             exp: expiry(days: 30),
             iss: iss,
             ksu: keyserver.absoluteString,
-            aud: dappUrl,
+            aud: dappPubKey.did(variant: .ED25519),
             sub: subscriptionAccount.did,
             act: "notify_subscription",
-            scp: scope
+            scp: scope,
+            app: dappUrl
         )
     }
 }

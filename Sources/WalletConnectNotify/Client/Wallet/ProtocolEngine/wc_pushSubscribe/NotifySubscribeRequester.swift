@@ -4,9 +4,6 @@ import Foundation
 class NotifySubscribeRequester {
 
     enum Errors: Error {
-        case didDocDoesNotContainKeyAgreement
-        case noVerificationMethodForKey
-        case unsupportedCurve
         case signatureRejected
     }
 
@@ -24,7 +21,7 @@ class NotifySubscribeRequester {
          identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         webDidResolver: WebDidResolver = WebDidResolver(),
+         webDidResolver: WebDidResolver,
          subscriptionScopeProvider: SubscriptionScopeProvider,
          dappsMetadataStore: CodableStore<AppMetadata>
     ) {
@@ -44,7 +41,7 @@ class NotifySubscribeRequester {
 
         logger.debug("Subscribing for Notify")
 
-        let peerPublicKey = try await resolvePublicKey(dappUrl: metadata.url)
+        let peerPublicKey = try await webDidResolver.resolvePublicKey(dappUrl: metadata.url)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
@@ -63,7 +60,11 @@ class NotifySubscribeRequester {
 
         let protocolMethod = NotifySubscribeProtocolMethod()
 
-        let subscriptionAuthWrapper = try await createJWTWrapper(subscriptionAccount: account, dappUrl: dappUrl)
+        let subscriptionAuthWrapper = try await createJWTWrapper(
+            dappPubKey: DIDKey(did: peerPublicKey.did),
+            subscriptionAccount: account,
+            dappUrl: dappUrl
+        )
         let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
         logger.debug("NotifySubscribeRequester: subscribing to response topic: \(responseTopic)")
@@ -74,17 +75,6 @@ class NotifySubscribeRequester {
         return subscriptionAuthWrapper
     }
 
-    private func resolvePublicKey(dappUrl: String) async throws -> AgreementPublicKey {
-        logger.debug("NotifySubscribeRequester: Resolving DIDDoc for: \(dappUrl)")
-        let didDoc = try await webDidResolver.resolveDidDoc(domainUrl: dappUrl)
-        guard let keyAgreement = didDoc.keyAgreement.first else { throw Errors.didDocDoesNotContainKeyAgreement }
-        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == keyAgreement }) else { throw Errors.noVerificationMethodForKey }
-        guard verificationMethod.publicKeyJwk.crv == .X25519 else { throw Errors.unsupportedCurve}
-        let pubKeyBase64Url = verificationMethod.publicKeyJwk.x
-        return try AgreementPublicKey(base64url: pubKeyBase64Url)
-    }
-
-
     private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> AgreementKeys {
         let selfPubKey = try kms.createX25519KeyPair()
 
@@ -92,10 +82,10 @@ class NotifySubscribeRequester {
         return keys
     }
 
-    private func createJWTWrapper(subscriptionAccount: Account, dappUrl: String) async throws -> NotifySubscriptionPayload.Wrapper {
+    private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, dappUrl: String) async throws -> NotifySubscriptionPayload.Wrapper {
         let types = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
         let scope = types.map{$0.name}.joined(separator: " ")
-        let jwtPayload = NotifySubscriptionPayload(keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
+        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

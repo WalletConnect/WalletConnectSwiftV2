@@ -79,6 +79,8 @@ final class NotifySyncService {
 
         try subscriptionsStore.setInStore(objects: subscriptions, for: account)
 
+        print("Received history subscriptions: \(subscriptions)")
+
         for subscription in subscriptions {
             let symmetricKey = try SymmetricKey(hex: subscription.symKey)
             try kms.setSymmetricKey(symmetricKey, for: subscription.topic)
@@ -103,6 +105,8 @@ final class NotifySyncService {
                     publishedAt: Date()
                 )
             }
+
+            print("Received history messages: \(messageRecords)")
 
             messagesStore.set(elements: messageRecords, for: subscription.topic)
         }

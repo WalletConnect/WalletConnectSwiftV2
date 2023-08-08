@@ -22,12 +22,13 @@ public final class Web3Inbox {
         bip44: BIP44Provider,
         config: [ConfigParam: Bool] = [:],
         environment: APNSEnvironment,
+        crypto: CryptoProvider,
         onSign: @escaping SigningCallback
     ) {
         Web3Inbox.account = account
         Web3Inbox.config = config
         Web3Inbox.onSign = onSign
         Chat.configure(bip44: bip44)
-        Notify.configure(environment: environment)
+        Notify.configure(environment: environment, crypto: crypto)
     }
 }
