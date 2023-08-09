@@ -1,5 +1,9 @@
 import UIKit
-
+import Sentry
+enum LoginError: Error {
+    case wrongUser(id: String)
+    case wrongPassword
+}
 final class MainViewController: UITabBarController {
 
     private let presenter: MainPresenter
@@ -11,8 +15,10 @@ final class MainViewController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         setupTabs()
+
+
+        SentrySDK.capture(error: LoginError.wrongUser(id: "12345678"))
     }
 
     private func setupTabs() {
