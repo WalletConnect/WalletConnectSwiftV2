@@ -20,7 +20,7 @@ public class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
-    public var logsPublisher: AnyPublisher<[String], Never> {
+    public var logsPublisher: AnyPublisher<Log, Never> {
         logger.logsPublisher.eraseToAnyPublisher()
     }
 
