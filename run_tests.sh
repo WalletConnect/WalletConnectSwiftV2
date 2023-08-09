@@ -74,7 +74,7 @@ if [ -z "$XCTESTRUN" ]; then
         -resultBundlePath "test_results/$SCHEME.xcresult" \
         test \
         | tee ./test_results/xcodebuild.log \
-        | xcbeautify --renderer github-actions --report junit  --junit-report-filename report.junit --report-path ./test_results
+        | xcbeautify --report junit --junit-report-filename report.junit --report-path ./test_results
     )
 else
 
@@ -98,7 +98,7 @@ else
         -resultBundlePath "test_results/$SCHEME.xcresult" \
         test-without-building \
         | tee ./test_results/xcodebuild.log \
-        | xcbeautify --renderer github-actions --report junit  --junit-report-filename report.junit --report-path ./test_results
+        | xcbeautify --report junit --junit-report-filename report.junit --report-path ./test_results
     )
 fi  
 
