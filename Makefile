@@ -17,8 +17,29 @@ endif
 	@echo "All dependencies was installed"
 
 build_all:
-	set -o pipefail && xcodebuild -scheme "WalletConnect-Package" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' build-for-testing | xcpretty
-	set -o pipefail && xcodebuild -project "Example/ExampleApp.xcodeproj" -scheme "BuildAll" -destination "platform=iOS Simulator,name=iPhone 11" -derivedDataPath DerivedDataCache -clonedSourcePackagesDirPath ../SourcePackagesCache RELAY_HOST='$(RELAY_HOST)' PROJECT_ID='$(PROJECT_ID)' CAST_HOST='$(CAST_HOST)' build-for-testing | xcpretty
+	set -o pipefail && env NSUnbufferedIO=YES \
+		xcodebuild \
+		-scheme "WalletConnect-Package" \
+		-destination "platform=iOS Simulator,name=iPhone 14" \
+		-derivedDataPath DerivedDataCache \
+		-clonedSourcePackagesDirPath ../SourcePackagesCache \
+		RELAY_HOST='$(RELAY_HOST)' \
+		PROJECT_ID='$(PROJECT_ID)' \
+		build-for-testing \
+		| xcbeautify --renderer github-actions
+
+	set -o pipefail && env NSUnbufferedIO=YES \
+		xcodebuild \
+		-project "Example/ExampleApp.xcodeproj" \
+		-scheme "BuildAll" \
+		-destination "platform=iOS Simulator,name=iPhone 14" \
+		-derivedDataPath DerivedDataCache \
+		-clonedSourcePackagesDirPath ../SourcePackagesCache \
+		RELAY_HOST='$(RELAY_HOST)' \
+		PROJECT_ID='$(PROJECT_ID)' \
+		CAST_HOST='$(CAST_HOST)' \
+		build-for-testing \
+		| xcbeautify --renderer github-actions
 
 echo_ui_tests:
 	echo "EchoUITests disabled"
