@@ -32,14 +32,11 @@
         "value" : "$(PROJECT_ID)"
       }
     ],
-    "mainThreadCheckerEnabled" : false,
-    "maximumTestRepetitions" : 2,
     "targetForVariableExpansion" : {
       "containerPath" : "container:ExampleApp.xcodeproj",
       "identifier" : "A5E03DEC286464DB00888481",
       "name" : "IntegrationTests"
-    },
-    "testRepetitionMode" : "retryOnFailure"
+    }
   },
   "testTargets" : [
     {
