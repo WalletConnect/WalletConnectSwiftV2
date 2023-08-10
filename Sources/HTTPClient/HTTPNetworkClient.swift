@@ -2,7 +2,7 @@ import Foundation
 
 public actor HTTPNetworkClient: HTTPClient {
 
-    var host: String
+    private var host: String
 
     private let session: URLSession
 

@@ -34,18 +34,14 @@ actor EchoRegisterService {
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         logger.debug("APNS device token: \(token)")
         
-        do {
-            let response = try await httpClient.request(
-                EchoResponse.self,
-                at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
-            )
-            guard response.status == .success else {
-                throw Errors.registrationFailed
-            }
-            logger.debug("Successfully registered at Echo Server")
-        } catch {
-            throw error
+        let response = try await httpClient.request(
+            EchoResponse.self,
+            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
+        )
+        guard response.status == .success else {
+            throw Errors.registrationFailed
         }
+        logger.debug("Successfully registered at Echo Server")
     }
     
     func echoHostFallback() async {
