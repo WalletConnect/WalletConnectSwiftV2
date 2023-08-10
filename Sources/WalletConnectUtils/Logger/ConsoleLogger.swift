@@ -83,3 +83,18 @@ fileprivate func logFormattedDate(_ date: Date) -> String {
     dateFormatter.dateFormat = "HH:mm:ss.SSSS"
     return  dateFormatter.string(from: date)
 }
+
+
+#if DEBUG
+public struct ConsoleLoggerMock: ConsoleLogging {
+    public var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {
+        return PassthroughSubject<WalletConnectUtils.Log, Never>().eraseToAnyPublisher()
+    }
+    public init() {}
+    public func error(_ items: Any...) { }
+    public func debug(_ items: Any...) { }
+    public func info(_ items: Any...) { }
+    public func warn(_ items: Any...) { }
+    public func setLogging(level: LoggingLevel) { }
+}
+#endif
