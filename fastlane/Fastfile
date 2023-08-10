@@ -113,7 +113,6 @@ platform :ios do
       notify_external_testers: true,
       skip_waiting_for_build_processing: false,
       groups: [
-        "WalletConnect",
         "WalletConnect Users"
       ]
     )
