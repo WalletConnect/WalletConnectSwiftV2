@@ -9,8 +9,8 @@ struct InputConfig {
         return projectId
     }
 
-    static var sentryDns: String {
-        return config(for: "WALLETAPP_SENTRY_DNS")!
+    static var sentryDns: String? {
+        return config(for: "WALLETAPP_SENTRY_DNS")
     }
     
     private static func config(for key: String) -> String? {
