@@ -16,9 +16,6 @@ final class MainViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabs()
-
-
-        SentrySDK.capture(error: LoginError.wrongUser(id: "12345678"))
     }
 
     private func setupTabs() {
