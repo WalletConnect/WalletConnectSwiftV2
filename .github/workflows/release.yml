@@ -33,6 +33,6 @@ jobs:
         APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
         APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
         APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
-        WALLETAPP_SENTRY_DNS: ${{ secrets.WALLETAPP_SENTRY_DNS }}
+        WALLETAPP_SENTRY_DSN: ${{ secrets.WALLETAPP_SENTRY_DSN }}
       run: |
-        make release_all APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }} WALLETAPP_SENTRY_DNS=${{ secrets.WALLETAPP_SENTRY_DNS }}
+        make release_all APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }} WALLETAPP_SENTRY_DSN=${{ secrets.WALLETAPP_SENTRY_DSN }}
