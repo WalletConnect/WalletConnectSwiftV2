@@ -26,7 +26,7 @@ build_all:
 		RELAY_HOST='$(RELAY_HOST)' \
 		PROJECT_ID='$(PROJECT_ID)' \
 		build-for-testing \
-		| xcbeautify --renderer github-actions
+		| xcbeautify
 
 	set -o pipefail && env NSUnbufferedIO=YES \
 		xcodebuild \
@@ -39,7 +39,7 @@ build_all:
 		PROJECT_ID='$(PROJECT_ID)' \
 		CAST_HOST='$(CAST_HOST)' \
 		build-for-testing \
-		| xcbeautify --renderer github-actions
+		| xcbeautify
 
 echo_ui_tests:
 	echo "EchoUITests disabled"
