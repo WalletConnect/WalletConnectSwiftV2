@@ -1,11 +1,15 @@
 name: self_hosted_ci
 
 on:
+  push:
+    branches:
+      - E2E-tests
   pull_request_target:
     branches:
       - develop
       - main
   workflow_dispatch:
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.ref_name }}
