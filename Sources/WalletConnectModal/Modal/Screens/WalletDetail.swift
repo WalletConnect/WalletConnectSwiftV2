@@ -1,31 +1,64 @@
 import SwiftUI
 
 struct WalletDetail: View {
+    enum Platform: CustomStringConvertible, CaseIterable, Identifiable {
+        case native
+        case browser
+        
+        var id: Self { self }
+        
+        var description: String {
+
+            switch self {
+            case .native:
+                return "Native"
+            case .browser:
+                return "Browser"
+            }
+        }
+    }
+    
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
     @State var wallet: Listing
     @State var retryShown: Bool = false
+    
+    var showToggle: Bool { wallet.app.browser != nil && wallet.app.ios != nil }
+    @State var preferredPlatform: Platform = .native
     
     let deeplink: (Listing) -> Void
     var deeplinkUniversal: (Listing) -> Void
     var openAppStore: (Listing) -> Void
     
     var body: some View {
-        content()
-            .onAppear {
-                if verticalSizeClass == .compact {
-                    retryShown = true
-                } else {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        withAnimation {
-                            retryShown = true
+        VStack {
+            if showToggle {
+                Picker("Preferred platform", selection: $preferredPlatform) {
+                    ForEach(Platform.allCases) { option in
+                        Text(String(describing: option))
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding()
+            }
+            
+            content()
+                .onAppear {
+                    if verticalSizeClass == .compact {
+                        retryShown = true
+                    } else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            withAnimation {
+                                retryShown = true
+                            }
                         }
                     }
                 }
-            }
-            .onDisappear {
-                retryShown = false
-            }
+                .onDisappear {
+                    retryShown = false
+                }
+                .animation(.easeInOut, value: preferredPlatform)
+        }
     }
     
     @ViewBuilder
@@ -41,9 +74,10 @@ struct WalletDetail: View {
                         retrySection()
                     }
                     
-                    Divider()
-                    
-                    appStoreRow()
+                    if preferredPlatform == .native {
+                        Divider()
+                        appStoreRow()
+                    }
                 }
                 .padding(.horizontal, 20)
             }
@@ -56,12 +90,16 @@ struct WalletDetail: View {
                 VStack(spacing: 15) {
                     if retryShown {
                         retrySection()
+                            .frame(maxWidth: .infinity)
                             .padding(.top, 15)
                     }
                     
-                    Divider()
-                    
-                    appStoreRow()
+                    VStack {
+                        Divider()
+                        appStoreRow()
+                    }
+                    .frame(height: preferredPlatform != .native ? 0 : nil)
+                    .opacity(preferredPlatform != .native ? 0 : 1)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 40)

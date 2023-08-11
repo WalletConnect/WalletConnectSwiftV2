@@ -26,6 +26,7 @@ public extension HTTPService {
         var components = URLComponents()
         components.scheme = scheme
         components.host = host
+        components.port = 8787
         components.path = path
         if let query = queryParameters {
             components.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }

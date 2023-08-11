@@ -14,7 +14,7 @@ public struct ModalSheet: View {
             VStack(spacing: 0) {
                 contentHeader()
                 content()
-                    
+//                    .animation(.default, value: viewModel.destination)
             }
             .frame(maxWidth: .infinity)
             .background(Color.background1)
@@ -75,7 +75,7 @@ public struct ModalSheet: View {
                 EmptyView()
             }
         }
-        .animation(.default)
+        .animation(.default, value: viewModel.destination)
         .foregroundColor(.accent)
         .frame(height: 60)
         .overlay(
