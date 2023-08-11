@@ -1,11 +1,8 @@
 
 import WalletConnectPush
-import Combine
 import UIKit
 
 class PushRegisterer {
-
-    private var publishers = [AnyCancellable]()
 
     func getNotificationSettings() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
