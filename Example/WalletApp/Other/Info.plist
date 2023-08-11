@@ -26,6 +26,8 @@
 	</dict>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
+	<key>WALLETAPP_SENTRY_DSN</key>
+	<string>$(WALLETAPP_SENTRY_DSN)</string>
 	<key>SIMULATOR_IDENTIFIER</key>
 	<string>$(SIMULATOR_IDENTIFIER)</string>
 	<key>UIApplicationSceneManifest</key>

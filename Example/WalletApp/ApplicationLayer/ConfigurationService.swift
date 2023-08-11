@@ -24,5 +24,7 @@ final class ConfigurationService {
             environment: BuildConfiguration.shared.apnsEnvironment,
             onSign: importAccount.onSign
         )
+
+        LoggingService.instance.startLogging()
     }
 }
