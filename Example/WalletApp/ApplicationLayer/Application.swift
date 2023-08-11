@@ -11,3 +11,4 @@ final class Application {
     lazy var messageSigner = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
     lazy var configurationService = ConfigurationService()
 }
+

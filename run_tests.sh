@@ -74,7 +74,7 @@ if [ -z "$XCTESTRUN" ]; then
         -resultBundlePath "test_results/$SCHEME.xcresult" \
         test \
         | tee ./test_results/xcodebuild.log \
-        | xcpretty --report junit --output ./test_results/report.junit 
+        | xcbeautify --report junit --junit-report-filename report.junit --report-path ./test_results
     )
 else
 
@@ -85,6 +85,7 @@ else
     update_xctestrun --key "GM_DAPP_PROJECT_ID" --value "$GM_DAPP_PROJECT_ID" --target "$XCTESTRUN"
     update_xctestrun --key "GM_DAPP_PROJECT_SECRET" --value "$GM_DAPP_PROJECT_SECRET" --target "$XCTESTRUN"
     update_xctestrun --key "CAST_HOST" --value "$CAST_HOST" --target "$XCTESTRUN"
+    update_xctestrun --key "JS_CLIENT_API_HOST" --value "$JS_CLIENT_API_HOST" --target "$XCTESTRUN"
 
     (
     set -x
@@ -98,7 +99,7 @@ else
         -resultBundlePath "test_results/$SCHEME.xcresult" \
         test-without-building \
         | tee ./test_results/xcodebuild.log \
-        | xcpretty --report junit --output ./test_results/report.junit
+        | xcbeautify --report junit --junit-report-filename report.junit --report-path ./test_results
     )
 fi  
 

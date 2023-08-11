@@ -103,7 +103,7 @@ platform :ios do
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
-      xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}'"
+      xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}'"
     )
     upload_to_testflight(
       apple_id: ENV["APPLE_ID"],
@@ -113,7 +113,6 @@ platform :ios do
       notify_external_testers: true,
       skip_waiting_for_build_processing: false,
       groups: [
-        "WalletConnect",
         "WalletConnect Users"
       ]
     )

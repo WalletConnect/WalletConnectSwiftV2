@@ -11,11 +11,13 @@ on:
         description: 'WalletConnect project id'
         required: true
   push:
-    branches: [ main ]
+    branches: 
+      - main
 
 jobs:
   build:    
-    runs-on: macos-12
+    runs-on: 
+      group: apple-silicon
     timeout-minutes: 15
 
     steps:

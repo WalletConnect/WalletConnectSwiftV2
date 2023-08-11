@@ -20,17 +20,17 @@ extension Color {
         self.init(asset.rawValue, bundle: .module)
     }
     
-    static let foreground1 = Color(.foreground1)
-    static let foreground2 = Color(.foreground2)
-    static let foreground3 = Color(.foreground3)
-    static let foregroundInverse = Color(.foregroundInverse)
-    static let background1 = Color(.background1)
-    static let background2 = Color(.background2)
-    static let background3 = Color(.background3)
-    static let negative = Color(.negative)
-    static let thickOverlay = Color(.thickOverlay)
-    static let thinOverlay = Color(.thinOverlay)
-    static let accent = Color(.accent)
+    static let foreground1 = Color(AssetColor.foreground1)
+    static let foreground2 = Color(AssetColor.foreground2)
+    static let foreground3 = Color(AssetColor.foreground3)
+    static let foregroundInverse = Color(AssetColor.foregroundInverse)
+    static let background1 = Color(AssetColor.background1)
+    static let background2 = Color(AssetColor.background2)
+    static let background3 = Color(AssetColor.background3)
+    static let negative = Color(AssetColor.negative)
+    static let thickOverlay = Color(AssetColor.thickOverlay)
+    static let thinOverlay = Color(AssetColor.thinOverlay)
+    static let accent = Color(AssetColor.accent)
 }
 
 #if canImport(UIKit)

@@ -24,14 +24,13 @@ public struct EchoClientFactory {
         sessionConfiguration.timeoutIntervalForRequest = 5.0
         sessionConfiguration.timeoutIntervalForResource = 5.0
         let session = URLSession(configuration: sessionConfiguration)
-
+        
+        let logger = ConsoleLogger(suffix: "👂🏻", loggingLevel: .debug)
         let httpClient = HTTPNetworkClient(host: echoHost, session: session)
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
 
         let echoAuthenticator = EchoAuthenticator(clientIdStorage: clientIdStorage, echoHost: echoHost)
-
-        let logger = ConsoleLogger(loggingLevel: .debug)
 
         let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientIdStorage: clientIdStorage, echoAuthenticator: echoAuthenticator, logger: logger, environment: environment)
 

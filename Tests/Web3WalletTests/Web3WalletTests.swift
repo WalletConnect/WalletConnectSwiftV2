@@ -3,6 +3,7 @@ import Combine
 
 @testable import Auth
 @testable import Web3Wallet
+@testable import WalletConnectEcho
 
 final class Web3WalletTests: XCTestCase {
     var web3WalletClient: Web3WalletClient!

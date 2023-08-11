@@ -9,4 +9,9 @@ RELAY_HOST = relay.walletconnect.com
 // Uncomment next line and paste dapp's project secret to run all the notify tests
 // GM_DAPP_PROJECT_SECRET = GM_DAPP_PROJECT_SECRET
 
+// Uncomment next line and paste js client's api host to run x-platform tests
+// JS_CLIENT_API_HOST = JS_CLIENT_API_HOST
+
+// WALLETAPP_SENTRY_DSN = WALLETAPP_SENTRY_DSN
+
 CAST_HOST = cast.walletconnect.com
