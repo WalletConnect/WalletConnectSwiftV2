@@ -22,3 +22,14 @@ extension SessionNamespace {
         }
     }
 }
+
+extension AppMetadata {
+    static func stub() -> AppMetadata {
+        return AppMetadata(
+            name: "WalletConnectSwift",
+            description: "WalletConnectSwift",
+            url: "https://walletconnect.com",
+            icons: []
+        )
+    }
+}

@@ -20,6 +20,11 @@ public class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher.eraseToAnyPublisher()
+    }
+
+
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     public init(

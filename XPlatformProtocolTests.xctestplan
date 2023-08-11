@@ -1,0 +1,40 @@
+{
+  "configurations" : [
+    {
+      "id" : "39E198AA-2027-4FAD-8628-1C954F89CC54",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "JS_CLIENT_API_HOST",
+        "value" : "$(JS_CLIENT_API_HOST)"
+      },
+      {
+        "key" : "PROJECT_ID",
+        "value" : "$(PROJECT_ID)"
+      },
+      {
+        "key" : "RELAY_HOST",
+        "value" : "$(RELAY_HOST)"
+      }
+    ]
+  },
+  "testTargets" : [
+    {
+      "selectedTests" : [
+        "XPlatformW3WTests\/testSessionSettle()"
+      ],
+      "target" : {
+        "containerPath" : "container:ExampleApp.xcodeproj",
+        "identifier" : "A5E03DEC286464DB00888481",
+        "name" : "IntegrationTests"
+      }
+    }
+  ],
+  "version" : 1
+}
