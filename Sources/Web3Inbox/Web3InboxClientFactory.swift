@@ -11,6 +11,7 @@ final class Web3InboxClientFactory {
         onSign: @escaping SigningCallback
     ) -> Web3InboxClient {
         let url = buildUrl(account: account, config: config)
+
         let logger = ConsoleLogger(suffix: "📬", loggingLevel: .debug)
         let webviewSubscriber = WebViewRequestSubscriber(url: url, logger: logger)
         let webView = WebViewFactory(url: url, webviewSubscriber: webviewSubscriber).create()

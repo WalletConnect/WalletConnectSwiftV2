@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - main
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.number || github.ref_name }}
@@ -22,7 +23,8 @@ jobs:
 
   prepare:
     needs: authorize
-    runs-on: self-hosted
+    runs-on: 
+      group: apple-silicon
     steps:
       - uses: actions/checkout@v3
         with:
@@ -35,7 +37,8 @@ jobs:
 
   test:
     needs: prepare
-    runs-on: self-hosted
+    runs-on: 
+      group: apple-silicon
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -67,7 +70,7 @@ jobs:
     - name: Run integration tests
       if: matrix.type == 'integration-tests'
       shell: bash
-      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }} CAST_HOST=cast.walletconnect.com GM_DAPP_PROJECT_ID=${{ secrets.GM_DAPP_PROJECT_ID }} GM_DAPP_PROJECT_SECRET=${{ secrets.GM_DAPP_PROJECT_SECRET }}
+      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }} CAST_HOST=cast.walletconnect.com GM_DAPP_PROJECT_ID=${{ secrets.GM_DAPP_PROJECT_ID }} GM_DAPP_PROJECT_SECRET=${{ secrets.GM_DAPP_PROJECT_SECRET }} JS_CLIENT_API_HOST=test-automation-api.walletconnect.com
 
     # Relay Integration tests
     - name: Run Relay integration tests

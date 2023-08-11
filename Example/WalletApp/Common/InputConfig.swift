@@ -8,6 +8,10 @@ struct InputConfig {
         
         return projectId
     }
+
+    static var sentryDsn: String? {
+        return config(for: "WALLETAPP_SENTRY_DSN")
+    }
     
     private static func config(for key: String) -> String? {
         return Bundle.main.object(forInfoDictionaryKey: key) as? String

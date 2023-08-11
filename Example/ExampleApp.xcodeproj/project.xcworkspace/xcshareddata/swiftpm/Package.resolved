@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "Sentry",
+        "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
+        "state": {
+          "branch": null,
+          "revision": "04bee4ad86d74d4cb4d7101ff826d6e355301ba9",
+          "version": "8.9.4"
+        }
+      },
+      {
         "package": "SolanaSwift",
         "repositoryURL": "https://github.com/flypaper0/solana-swift",
         "state": {

@@ -3,7 +3,7 @@ import Foundation
 /**
  A representation of an active session connection.
  */
-public struct Session {
+public struct Session: Codable {
     public let topic: String
     public let pairingTopic: String
     public let peer: AppMetadata
