@@ -4,6 +4,7 @@ class DeleteNotifySubscriptionService {
     enum Errors: Error {
         case notifySubscriptionNotFound
     }
+    private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
     private let webDidResolver: WebDidResolver
@@ -12,6 +13,7 @@ class DeleteNotifySubscriptionService {
     private let notifyStorage: NotifyStorage
 
     init(
+        keyserver: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
         webDidResolver: WebDidResolver,
@@ -19,6 +21,7 @@ class DeleteNotifySubscriptionService {
         logger: ConsoleLogging,
         notifyStorage: NotifyStorage
     ) {
+        self.keyserver = keyserver
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
         self.webDidResolver = webDidResolver
@@ -40,7 +43,7 @@ class DeleteNotifySubscriptionService {
         let dappPubKey = try await webDidResolver.resolvePublicKey(dappUrl: subscription.metadata.url)
 
         let wrapper = try createJWTWrapper(
-            dappIdentityKey: DIDKey(did: dappPubKey.did),
+            dappPubKey: DIDKey(rawData: dappPubKey.rawRepresentation),
             reason: NotifyDeleteParams.userDisconnected.message,
             app: subscription.metadata.url,
             account: subscription.account
@@ -58,8 +61,8 @@ class DeleteNotifySubscriptionService {
 
 private extension DeleteNotifySubscriptionService {
 
-    func createJWTWrapper(dappIdentityKey: DIDKey, reason: String, app: String, account: Account) throws -> NotifyDeletePayload.Wrapper {
-        let jwtPayload = NotifyDeletePayload(dappIdentityKey: dappIdentityKey, reason: reason, app: app)
+    func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: String, account: Account) throws -> NotifyDeletePayload.Wrapper {
+        let jwtPayload = NotifyDeletePayload(keyserver: keyserver, dappPubKey: dappPubKey, reason: reason, app: app)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: account

@@ -7,12 +7,15 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         let iat: UInt64
         /// Timestamp when JWT must expire
         let exp: UInt64
+        /// Key server URL
+        let ksu: String
+        /// Action intent (must be `notify_receipt`)
+        let act: String
+
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
         let aud: String
-        /// Action intent (must be `notify_receipt`)
-        let act: String
         /// Hash of the stringified notify message object received
         let sub: String
         /// Dapp's domain url
@@ -31,22 +34,26 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         }
     }
 
-    let dappIdentityKey: DIDKey
+    let keyserver: URL
+    let dappPubKey: DIDKey
     let messageHash: String
     let app: String
 
     init(
-        dappIdentityKey: DIDKey,
+        keyserver: URL,
+        dappPubKey: DIDKey,
         messageHash: String,
         app: String
     ) {
-        self.dappIdentityKey = dappIdentityKey
+        self.keyserver = keyserver
+        self.dappPubKey = dappPubKey
         self.messageHash = messageHash
         self.app = app
     }
 
     init(claims: Claims) throws {
-        self.dappIdentityKey = try DIDKey(did: claims.aud)
+        self.keyserver = try claims.ksu.asURL()
+        self.dappPubKey = try DIDKey(did: claims.aud)
         self.messageHash = claims.sub
         self.app = claims.app
     }
@@ -55,9 +62,10 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            iss: iss,
-            aud: dappIdentityKey.did(variant: .ED25519),
+            ksu: keyserver.absoluteString,
             act: "notify_receipt",
+            iss: iss,
+            aud: dappPubKey.did(variant: .ED25519),
             sub: messageHash,
             app: app
         )

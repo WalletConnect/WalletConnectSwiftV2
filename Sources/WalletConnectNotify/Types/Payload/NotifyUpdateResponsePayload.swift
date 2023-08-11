@@ -1,6 +1,6 @@
 import Foundation
 
-struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
+struct NotifyUpdateResponsePayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// timestamp when jwt was issued
@@ -9,14 +9,14 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         let exp: UInt64
         /// Key server URL
         let ksu: String
-        /// Description of action intent. Must be equal to "notify_subscription_response"
+        /// Description of action intent. Must be equal to "notify_update_response"
         let act: String
 
-        /// `did:key` of an identity key. Allows for the resolution of which Notify server was used.
+        /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
         let iss: String
-        /// `did:key` of an identity key. Allows for the resolution of the attached blockchain account.
+        /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let aud: String
-        /// `did:key` of the public key used for key agreement on the Notify topic
+        /// Hash of the new subscription payload
         let sub: String
         /// Dapp's domain url
         let app: String
@@ -36,13 +36,13 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
 
     let keyserver: URL
     let selfPubKey: DIDKey
-    let publicKey: DIDKey
+    let subscriptionHash: String
     let app: String
 
     init(claims: Claims) throws {
         self.keyserver = try claims.ksu.asURL()
         self.selfPubKey = try DIDKey(did: claims.aud)
-        self.publicKey = try DIDKey(did: claims.sub)
+        self.subscriptionHash = claims.sub
         self.app = claims.app
     }
 
@@ -51,10 +51,10 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: "notify_subscription_response",
+            act: "notify_update_response",
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
-            sub: publicKey.did(variant: .X25519),
+            sub: subscriptionHash,
             app: app
         )
     }

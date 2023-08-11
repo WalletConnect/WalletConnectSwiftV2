@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 class NotifyMessageSubscriber {
+    private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
     private let notifyStorage: NotifyStorage
@@ -14,7 +15,8 @@ class NotifyMessageSubscriber {
         notifyMessagePublisherSubject.eraseToAnyPublisher()
     }
 
-    init(networkingInteractor: NetworkInteracting, identityClient: IdentityClient, notifyStorage: NotifyStorage, crypto: CryptoProvider, logger: ConsoleLogging) {
+    init(keyserver: URL, networkingInteractor: NetworkInteracting, identityClient: IdentityClient, notifyStorage: NotifyStorage, crypto: CryptoProvider, logger: ConsoleLogging) {
+        self.keyserver = keyserver
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
         self.notifyStorage = notifyStorage
@@ -33,7 +35,7 @@ class NotifyMessageSubscriber {
                 Task(priority: .high) {
                     do {
                         let (messagePayload, claims) = try NotifyMessagePayload.decodeAndVerify(from: payload.request)
-                        let dappIdentityKey = try DIDKey(did: claims.iss)
+                        let dappPubKey = try DIDKey(did: claims.iss)
                         let messageData = try JSONEncoder().encode(messagePayload.message)
 
                         let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
@@ -41,7 +43,7 @@ class NotifyMessageSubscriber {
                         notifyMessagePublisherSubject.send(record)
 
                         let receiptPayload = NotifyMessageReceiptPayload(
-                            dappIdentityKey: dappIdentityKey,
+                            keyserver: keyserver, dappPubKey: dappPubKey,
                             messageHash: crypto.keccak256(messageData).toHexString(),
                             app: messagePayload.app
                         )

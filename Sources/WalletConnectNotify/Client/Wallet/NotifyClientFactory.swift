@@ -45,9 +45,9 @@ public struct NotifyClientFactory {
         let coldStartStore = CodableStore<Date>(defaults: keyValueStorage, identifier: NotifyStorageIdntifiers.coldStartStore)
         let notifySyncService = NotifySyncService(syncClient: syncClient, logger: logger, historyClient: historyClient, subscriptionsStore: subscriptionStore, messagesStore: messagesStore, networkingInteractor: networkInteractor, kms: kms, coldStartStore: coldStartStore, groupKeychainStorage: groupKeychainStorage)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
-        let notifyMessageSubscriber = NotifyMessageSubscriber(networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
+        let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = WebDidResolver()
-        let deleteNotifySubscriptionService = DeleteNotifySubscriptionService(networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
+        let deleteNotifySubscriptionService = DeleteNotifySubscriptionService(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
         let resubscribeService = NotifyResubscribeService(networkInteractor: networkInteractor, notifyStorage: notifyStorage)
 
         let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: NotifyStorageIdntifiers.dappsMetadataStore)
@@ -57,7 +57,7 @@ public struct NotifyClientFactory {
 
         let notifySubscribeResponseSubscriber = NotifySubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, dappsMetadataStore: dappsMetadataStore, subscriptionScopeProvider: subscriptionScopeProvider)
 
-        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, webDidResolver: webDidResolver, identityClient: identityClient, networkingInteractor: networkInteractor, logger: logger, notifyStorage: notifyStorage)
+        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, webDidResolver: webDidResolver, identityClient: identityClient, networkingInteractor: networkInteractor, subscriptionScopeProvider: subscriptionScopeProvider, logger: logger, notifyStorage: notifyStorage)
 
         let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, subscriptionScopeProvider: subscriptionScopeProvider, notifyStorage: notifyStorage)
 

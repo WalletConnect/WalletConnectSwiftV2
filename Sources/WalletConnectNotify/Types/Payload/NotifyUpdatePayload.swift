@@ -1,6 +1,6 @@
 import Foundation
 
-struct NotifySubscriptionPayload: JWTClaimsCodable {
+struct NotifyUpdatePayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// Timestamp when JWT was issued
@@ -9,7 +9,7 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         let exp: UInt64
         /// Key server URL
         let ksu: String
-        /// Description of action intent. Must be equal to `notify_subscription`
+        /// Description of action intent. Must be equal to `notify_update`
         let act: String
 
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
@@ -25,14 +25,14 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
     }
 
     struct Wrapper: JWTWrapper {
-        let subscriptionAuth: String
+        let updateAuth: String
 
         init(jwtString: String) {
-            self.subscriptionAuth = jwtString
+            self.updateAuth = jwtString
         }
 
         var jwtString: String {
-            return subscriptionAuth
+            return updateAuth
         }
     }
 
@@ -63,7 +63,7 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
-            act: "notify_subscription",
+            act: "notify_update",
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: subscriptionAccount.did,
@@ -72,4 +72,3 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         )
     }
 }
-

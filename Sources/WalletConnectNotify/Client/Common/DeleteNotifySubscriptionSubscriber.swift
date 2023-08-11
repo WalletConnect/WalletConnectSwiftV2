@@ -33,6 +33,7 @@ class DeleteNotifySubscriptionSubscriber {
                 let topic = payload.topic
                 networkingInteractor.unsubscribe(topic: topic)
 
+                // TODO: Why two deletes? 
                 Task(priority: .high) {
                     try await notifyStorage.deleteSubscription(topic: topic)
                 }

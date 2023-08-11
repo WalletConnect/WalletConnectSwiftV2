@@ -7,12 +7,15 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         let iat: UInt64
         /// Timestamp when JWT must expire
         let exp: UInt64
+        /// Key server URL
+        let ksu: String
+        /// Description of action intent. Must be equal to `notify_delete_response`
+        let act: String
+
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used
         let iss: String
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let aud: String
-        /// Description of action intent. Must be equal to `notify_delete_response`
-        let act: String
         /// Hash of the existing subscription payload
         let sub: String
         /// Dapp's domain url
@@ -20,33 +23,37 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
     }
 
     struct Wrapper: JWTWrapper {
-        let deleteAuth: String
+        let responseAuth: String
 
         init(jwtString: String) {
-            self.deleteAuth = jwtString
+            self.responseAuth = jwtString
         }
 
         var jwtString: String {
-            return deleteAuth
+            return responseAuth
         }
     }
 
-    let accountIdentityKey: DIDKey
+    let keyserver: URL
+    let selfPubKey: DIDKey
     let subscriptionHash: String
     let app: String
 
     init(
-        accountIdentityKey: DIDKey,
+        keyserver: URL,
+        selfPubKey: DIDKey,
         subscriptionHash: String,
         app: String
     ) {
-        self.accountIdentityKey = accountIdentityKey
+        self.keyserver = keyserver
+        self.selfPubKey = selfPubKey
         self.subscriptionHash = subscriptionHash
         self.app = app
     }
 
     init(claims: Claims) throws {
-        self.accountIdentityKey = try DIDKey(did: claims.aud)
+        self.keyserver = try claims.ksu.asURL()
+        self.selfPubKey = try DIDKey(did: claims.aud)
         self.subscriptionHash = claims.sub
         self.app = claims.app
     }
@@ -55,9 +62,10 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            iss: iss,
-            aud: accountIdentityKey.did(variant: .ED25519),
+            ksu: keyserver.absoluteString,
             act: "notify_delete_response",
+            iss: iss,
+            aud: selfPubKey.did(variant: .ED25519),
             sub: subscriptionHash,
             app: app
         )

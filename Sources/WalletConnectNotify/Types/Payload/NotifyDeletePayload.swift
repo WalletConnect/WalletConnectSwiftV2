@@ -7,12 +7,15 @@ struct NotifyDeletePayload: JWTClaimsCodable {
         let iat: UInt64
         /// Timestamp when JWT must expire
         let exp: UInt64
+        /// Key server URL
+        let ksu: String
+        /// Description of action intent. Must be equal to `notify_delete`
+        let act: String
+
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
         let aud: String
-        /// Description of action intent. Must be equal to `notify_delete`
-        let act: String
         /// Reason for deleting the subscription
         let sub: String
         /// Dapp's domain url
@@ -31,22 +34,26 @@ struct NotifyDeletePayload: JWTClaimsCodable {
         }
     }
 
-    let dappIdentityKey: DIDKey
+    let keyserver: URL
+    let dappPubKey: DIDKey
     let reason: String
     let app: String
 
     init(
-        dappIdentityKey: DIDKey,
+        keyserver: URL,
+        dappPubKey: DIDKey,
         reason: String,
         app: String
     ) {
-        self.dappIdentityKey = dappIdentityKey
+        self.keyserver = keyserver
+        self.dappPubKey = dappPubKey
         self.reason = reason
         self.app = app
     }
 
     init(claims: Claims) throws {
-        self.dappIdentityKey = try DIDKey(did: claims.aud)
+        self.keyserver = try claims.ksu.asURL()
+        self.dappPubKey = try DIDKey(did: claims.aud)
         self.reason = claims.sub
         self.app = claims.app
     }
@@ -55,9 +62,10 @@ struct NotifyDeletePayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            iss: iss,
-            aud: dappIdentityKey.did(variant: .ED25519),
+            ksu: keyserver.absoluteString,
             act: "notify_delete",
+            iss: iss,
+            aud: dappPubKey.did(variant: .ED25519),
             sub: reason,
             app: app
         )

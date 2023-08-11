@@ -16,11 +16,16 @@ final class NotifyStorage: NotifyStoring {
     private let messagesStore: KeyedDatabase<NotifyMessageRecord>
 
     private let newSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
+    private let updateSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
     private let deleteSubscriptionSubject = PassthroughSubject<String, Never>()
 
     private let subscriptionStoreDelegate: NotifySubscriptionStoreDelegate
 
     var newSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
+        return newSubscriptionSubject.eraseToAnyPublisher()
+    }
+
+    var updateSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
         return newSubscriptionSubject.eraseToAnyPublisher()
     }
 
@@ -71,6 +76,13 @@ final class NotifyStorage: NotifyStoring {
     func deleteSubscription(topic: String) async throws {
         try await subscriptionStore.delete(id: topic)
         deleteSubscriptionSubject.send(topic)
+    }
+
+    func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) async throws {
+        let expiry = Date(timeIntervalSince1970: TimeInterval(expiry))
+        let updated = NotifySubscription(topic: subscription.topic, account: subscription.account, relay: subscription.relay, metadata: subscription.metadata, scope: scope, expiry: expiry, symKey: subscription.symKey)
+        try await setSubscription(updated)
+        updateSubscriptionSubject.send(updated)
     }
 
     // MARK: Messages
