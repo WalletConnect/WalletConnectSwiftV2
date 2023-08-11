@@ -433,7 +433,7 @@ final class SignClientTests: XCTestCase {
         let sessionProposal = Session.Proposal(
             id: "",
             pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: []),
+            proposer: AppMetadata.stub(),
             requiredNamespaces: requiredNamespaces,
             optionalNamespaces: optionalNamespaces,
             sessionProperties: nil,

@@ -35,6 +35,7 @@
 		847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E3298A806800076C90 /* NotificationsView.swift */; };
 		847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */; };
 		847CF3AF28E3141700F1D760 /* WalletConnectPush in Frameworks */ = {isa = PBXBuildFile; productRef = 847CF3AE28E3141700F1D760 /* WalletConnectPush */; settings = {ATTRIBUTES = (Required, ); }; };
+		847F08012A25DBFF00B2A5A4 /* XPlatformW3WTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */; };
 		8487A9442A836C2A0003D5AF /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8487A9432A836C2A0003D5AF /* Sentry */; };
 		8487A9462A836C3F0003D5AF /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8487A9452A836C3F0003D5AF /* Sentry */; };
 		8487A9482A83AD680003D5AF /* LoggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8487A9472A83AD680003D5AF /* LoggingService.swift */; };
@@ -389,6 +390,8 @@
 		847BD1E2298A806800076C90 /* NotificationsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsInteractor.swift; sourceTree = "<group>"; };
 		847BD1E3298A806800076C90 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsViewModel.swift; sourceTree = "<group>"; };
+		847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPlatformW3WTests.swift; sourceTree = "<group>"; };
+		8487A92E2A7BD2F30003D5AF /* XPlatformProtocolTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = XPlatformProtocolTests.xctestplan; path = ../XPlatformProtocolTests.xctestplan; sourceTree = "<group>"; };
 		8487A9472A83AD680003D5AF /* LoggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingService.swift; sourceTree = "<group>"; };
 		849A4F18298281E300E61ACE /* WalletAppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletAppRelease.entitlements; sourceTree = "<group>"; };
 		849A4F19298281F100E61ACE /* PNDecryptionServiceRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionServiceRelease.entitlements; sourceTree = "<group>"; };
@@ -738,6 +741,7 @@
 				845AA7D929BA1EBA00F33739 /* IntegrationTests.xctestplan */,
 				84A6E3C42A38A5A3008A0571 /* NotifyTests.xctestplan */,
 				845AA7DC29BB424800F33739 /* SmokeTests.xctestplan */,
+				8487A92E2A7BD2F30003D5AF /* XPlatformProtocolTests.xctestplan */,
 				A5A8E479293A1C4400FEB97D /* Shared */,
 				A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */,
 				84CE6453279FFE1100142511 /* Wallet.entitlements */,
@@ -847,6 +851,22 @@
 				847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		847F07FE2A25DBC700B2A5A4 /* XPlatform */ = {
+			isa = PBXGroup;
+			children = (
+				847F07FF2A25DBDB00B2A5A4 /* Web3Wallet */,
+			);
+			path = XPlatform;
+			sourceTree = "<group>";
+		};
+		847F07FF2A25DBDB00B2A5A4 /* Web3Wallet */ = {
+			isa = PBXGroup;
+			children = (
+				847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */,
+			);
+			path = Web3Wallet;
 			sourceTree = "<group>";
 		};
 		849D7A91292E2115006A2BD4 /* Push */ = {
@@ -1429,6 +1449,7 @@
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
 			isa = PBXGroup;
 			children = (
+				847F07FE2A25DBC700B2A5A4 /* XPlatform */,
 				A5321C292A25035A006CADC3 /* History */,
 				A561C80129DFCCD300DF540D /* Sync */,
 				849D7A91292E2115006A2BD4 /* Push */,
@@ -2266,6 +2287,7 @@
 				A518B31428E33A6500A2CE93 /* InputConfig.swift in Sources */,
 				A541959E2934BFEF0035AD19 /* CacaoSignerTests.swift in Sources */,
 				A59CF4F6292F83D50031A42F /* DefaultSignerFactory.swift in Sources */,
+				847F08012A25DBFF00B2A5A4 /* XPlatformW3WTests.swift in Sources */,
 				A5E03E03286466F400888481 /* ChatTests.swift in Sources */,
 				849D7A93292E2169006A2BD4 /* PushTests.swift in Sources */,
 				845B8D8C2934B36C0084A966 /* Account.swift in Sources */,

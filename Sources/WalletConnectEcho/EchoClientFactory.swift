@@ -19,13 +19,13 @@ public struct EchoClientFactory {
                        keychainStorage: KeychainStorageProtocol,
                        environment: APNSEnvironment) -> EchoClient {
 
+        let logger = ConsoleLogger(suffix: "👂🏻", loggingLevel: .debug)
+
         let httpClient = HTTPNetworkClient(host: echoHost)
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
 
         let echoAuthenticator = EchoAuthenticator(clientIdStorage: clientIdStorage, echoHost: echoHost)
-
-        let logger = ConsoleLogger(loggingLevel: .debug)
 
         let registerService = EchoRegisterService(httpClient: httpClient, projectId: projectId, clientIdStorage: clientIdStorage, echoAuthenticator: echoAuthenticator, logger: logger, environment: environment)
 
