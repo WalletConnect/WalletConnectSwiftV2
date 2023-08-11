@@ -79,7 +79,6 @@ final class XPlatformW3WTests: XCTestCase {
 
         let expectation = expectation(description: "session settled")
 
-        print("js api host url \(javaScriptAutoTestsAPI.host)")
         w3wClient.sessionProposalPublisher
             .sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
@@ -122,7 +121,12 @@ final class XPlatformW3WTests: XCTestCase {
 
 
 class JavaScriptAutoTestsAPI {
-    let host = "https://\(InputConfig.jsClientApiHost)"
+    private let host: String
+
+    init() {
+        self.host = "https://\(InputConfig.jsClientApiHost)"
+        print(host)
+    }
 
     func quickConnect() async throws -> WalletConnectURI {
         let url = URL(string: "\(host)/quick_connect")!
