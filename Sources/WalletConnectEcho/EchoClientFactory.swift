@@ -21,8 +21,8 @@ public struct EchoClientFactory {
         environment: APNSEnvironment
     ) -> EchoClient {
         let sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.timeoutIntervalForRequest = 1.0
-        sessionConfiguration.timeoutIntervalForResource = 1.0
+        sessionConfiguration.timeoutIntervalForRequest = 5.0
+        sessionConfiguration.timeoutIntervalForResource = 5.0
         let session = URLSession(configuration: sessionConfiguration)
 
         let httpClient = HTTPNetworkClient(host: echoHost, session: session)
