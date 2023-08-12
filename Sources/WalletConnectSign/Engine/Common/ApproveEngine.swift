@@ -105,11 +105,6 @@ final class ApproveEngine {
         )
 
         _ = try await [proposeResponse, settleRequest]
-
-        pairingRegisterer.activate(
-            pairingTopic: payload.topic,
-            peerMetadata: payload.request.proposer.metadata
-        )
     }
 
     func reject(proposerPubKey: String, reason: SignReasonCode) async throws {
@@ -298,6 +293,11 @@ private extension ApproveEngine {
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
+        pairingRegisterer.activate(
+            pairingTopic: payload.topic,
+            peerMetadata: payload.request.proposer.metadata
+        )
+        
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
@@ -347,11 +347,6 @@ private extension ApproveEngine {
         let selfParticipant = Participant(
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
-        )
-
-        pairingRegisterer.activate(
-            pairingTopic: pairingTopic,
-            peerMetadata: params.controller.metadata
         )
 
         let session = WCSession(
