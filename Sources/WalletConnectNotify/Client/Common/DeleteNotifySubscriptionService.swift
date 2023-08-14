@@ -52,7 +52,10 @@ class DeleteNotifySubscriptionService {
         let request = RPCRequest(method: protocolMethod.method, params: wrapper)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
+        try await notifyStorage.deleteSubscription(topic: topic)
+
         networkingInteractor.unsubscribe(topic: topic)
+
         logger.debug("Subscription removed, topic: \(topic)")
 
         kms.deleteSymmetricKey(for: topic)
