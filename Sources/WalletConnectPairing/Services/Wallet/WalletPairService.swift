@@ -52,7 +52,7 @@ extension WalletPairService {
                 continuation.resume(returning: value)
             }
             
-            Task {
+            Task(priority: .high) {
                 await withTaskCancellationHandler {
                     cancellable.cancel()
                 } onCancel: { }
