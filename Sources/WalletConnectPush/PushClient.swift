@@ -20,7 +20,7 @@ public class PushClient: PushClientProtocol {
 
 
 #if DEBUG
-final class EchoClientMock: EchoClientProtocol {
+final class PushClientMock: PushClientProtocol {
     var registedCalled = false
 
     func register(deviceToken: Data) async throws {

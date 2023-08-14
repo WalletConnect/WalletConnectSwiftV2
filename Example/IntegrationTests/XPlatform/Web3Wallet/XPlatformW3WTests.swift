@@ -4,7 +4,7 @@ import Combine
 @testable import Web3Wallet
 @testable import Auth
 @testable import WalletConnectSign
-@testable import WalletConnectEcho
+@testable import WalletConnectPush
 
 final class XPlatformW3WTests: XCTestCase {
     var w3wClient: Web3WalletClient!
@@ -72,7 +72,7 @@ final class XPlatformW3WTests: XCTestCase {
             authClient: authClient,
             signClient: signClient,
             pairingClient: pairingClient,
-            echoClient: EchoClientMock())
+            pushClient: PushClientMock())
     }
 
     func testSessionSettle() async throws {
