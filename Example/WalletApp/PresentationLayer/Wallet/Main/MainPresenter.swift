@@ -35,7 +35,6 @@ final class MainPresenter {
 
 // MARK: - Private functions
 extension MainPresenter {
-
     private func setupInitialState() {
         configurationService.configure(importAccount: importAccount)
         pushRegisterer.registerForPushNotifications()
@@ -45,5 +44,25 @@ extension MainPresenter {
             .sink { [unowned self] request in
                 router.present(pushRequest: request)
             }.store(in: &disposeBag)
+        
+        interactor.sessionProposalPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] session in
+                router.present(proposal: session.proposal, importAccount: importAccount, context: session.context)
+            }
+            .store(in: &disposeBag)
+        
+        interactor.sessionRequestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] request, context in
+                router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
+            }.store(in: &disposeBag)
+        
+        interactor.requestPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] result in
+                router.present(request: result.request, importAccount: importAccount, context: result.context)
+            }
+            .store(in: &disposeBag)
     }
 }
