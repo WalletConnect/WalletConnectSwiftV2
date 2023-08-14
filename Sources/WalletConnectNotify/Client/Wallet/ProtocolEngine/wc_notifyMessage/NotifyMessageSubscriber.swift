@@ -33,38 +33,34 @@ class NotifyMessageSubscriber {
                 logger.debug("Received Notify Message")
 
                 Task(priority: .high) {
-                    do {
-                        let (messagePayload, claims) = try NotifyMessagePayload.decodeAndVerify(from: payload.request)
-                        let dappPubKey = try DIDKey(did: claims.iss)
-                        let messageData = try JSONEncoder().encode(messagePayload.message)
+                    let (messagePayload, claims) = try NotifyMessagePayload.decodeAndVerify(from: payload.request)
+                    let dappPubKey = try DIDKey(did: claims.iss)
+                    let messageData = try JSONEncoder().encode(messagePayload.message)
 
-                        let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
-                        notifyStorage.setMessage(record)
-                        notifyMessagePublisherSubject.send(record)
+                    let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
+                    notifyStorage.setMessage(record)
+                    notifyMessagePublisherSubject.send(record)
 
-                        let receiptPayload = NotifyMessageReceiptPayload(
-                            keyserver: keyserver, dappPubKey: dappPubKey,
-                            messageHash: crypto.keccak256(messageData).toHexString(),
-                            app: messagePayload.app
-                        )
+                    let receiptPayload = NotifyMessageReceiptPayload(
+                        keyserver: keyserver, dappPubKey: dappPubKey,
+                        messageHash: crypto.keccak256(messageData).toHexString(),
+                        app: messagePayload.app
+                    )
 
-                        let wrapper = try identityClient.signAndCreateWrapper(
-                            payload: receiptPayload,
-                            account: messagePayload.account
-                        )
+                    let wrapper = try identityClient.signAndCreateWrapper(
+                        payload: receiptPayload,
+                        account: messagePayload.account
+                    )
 
-                        let response = RPCResponse(id: payload.id, result: wrapper)
+                    let response = RPCResponse(id: payload.id, result: wrapper)
 
-                        try await networkingInteractor.respond(
-                            topic: payload.topic,
-                            response: response,
-                            protocolMethod: NotifyMessageProtocolMethod()
-                        )
+                    try await networkingInteractor.respond(
+                        topic: payload.topic,
+                        response: response,
+                        protocolMethod: NotifyMessageProtocolMethod()
+                    )
 
-                        logger.debug("Sent Notify Receipt Response")
-                    } catch {
-                        fatalError() /* TODO: Handle error */
-                    }
+                    logger.debug("Sent Notify Receipt Response")
                 }
 
             }.store(in: &publishers)

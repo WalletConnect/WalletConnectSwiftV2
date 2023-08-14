@@ -108,8 +108,6 @@ private extension SyncStore {
 
             guard record.store == name else { return }
 
-            print("Received sync object: \(update)")
-
             switch update {
             case .set(let set):
                 let object = try! JSONDecoder().decode(Object.self, from: Data(set.value.utf8))
