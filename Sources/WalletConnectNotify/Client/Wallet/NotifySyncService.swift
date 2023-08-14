@@ -104,6 +104,8 @@ final class NotifySyncService {
                 )
             }
 
+            print("Received history messages: \(messageRecords)")
+
             messagesStore.set(elements: messageRecords, for: subscription.topic)
         }
 

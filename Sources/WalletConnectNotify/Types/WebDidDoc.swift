@@ -24,7 +24,8 @@ extension WebDidDoc {
 
     struct PublicKeyJwk: Codable {
         enum Curve: String, Codable {
-            case X25519 = "X25519"
+            case X25519
+            case Ed25519
         }
         let kty: String
 

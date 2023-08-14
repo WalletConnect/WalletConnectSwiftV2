@@ -3,14 +3,24 @@ import Foundation
 struct NotifyMessagePayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
-        let iat: UInt64 // issued at
-        let exp: UInt64 // expiry
-        let iss: String // did:key of an identity key. Enables to resolve associated Dapp domain used. diddoc authentication key
-        let ksu: String // key server url
-        let aud: String // blockchain account (did:pkh)
-        let act: String // action intent (must be "notify_message")
-        let sub: String // subscriptionId (sha256 hash of subscriptionAuth)
-        let app: String // dapp domain url,
+        /// Timestamp when JWT was issued
+        let iat: UInt64
+        /// Timestamp when JWT must expire
+        let exp: UInt64
+        /// Key server URL
+        let ksu: String
+        /// Action intent (must be `notify_message`)
+        let act: String
+
+        /// `did:key` of an identity key. Enables to resolve associated Dapp domain used. diddoc authentication key
+        let iss: String
+        /// Blockchain account `did:pkh`
+        let aud: String
+        /// Subscription ID (sha256 hash of subscriptionAuth)
+        let sub: String
+        /// Dapp domain url
+        let app: String
+        /// Message object
         let msg: NotifyMessage
     }
 
@@ -62,10 +72,10 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            iss: castServerPubKey.multibase(variant: .ED25519),
             ksu: keyserver.absoluteString,
-            aud: account.did,
             act: "notify_message",
+            iss: castServerPubKey.multibase(variant: .ED25519),
+            aud: account.did,
             sub: subscriptionId,
             app: app,
             msg: message

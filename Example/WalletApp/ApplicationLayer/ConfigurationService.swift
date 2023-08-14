@@ -22,6 +22,7 @@ final class ConfigurationService {
             bip44: DefaultBIP44Provider(),
             config: [.chatEnabled: false, .settingsEnabled: false],
             environment: BuildConfiguration.shared.apnsEnvironment,
+            crypto: DefaultCryptoProvider(),
             onSign: importAccount.onSign
         )
 

@@ -23,14 +23,12 @@ class DeleteNotifySubscriptionSubscriber {
     private func subscribeForDeleteSubscription() {
         let protocolMethod = NotifyDeleteProtocolMethod()
         networkingInteractor.requestSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyDeleteParams>) in
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyDeleteResponsePayload.Wrapper>) in
+
+                guard let (_, _) = try? NotifyDeleteResponsePayload.decodeAndVerify(from: payload.request)
+                else { fatalError() /* TODO: Handle error */ }
+
                 logger.debug("Peer deleted subscription")
-                let topic = payload.topic
-                networkingInteractor.unsubscribe(topic: topic)
-                Task(priority: .high) {
-                    try await notifyStorage.deleteSubscription(topic: topic)
-                }
-                kms.deleteSymmetricKey(for: topic)
             }.store(in: &publishers)
     }
 }

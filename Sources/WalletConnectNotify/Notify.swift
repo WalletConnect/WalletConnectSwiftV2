@@ -11,7 +11,8 @@ public class Notify {
             pairingRegisterer: Pair.registerer,
             pushClient: Push.instance,
             syncClient: Sync.instance,
-            historyClient: History.instance
+            historyClient: History.instance,
+            crypto: config.crypto
         )
     }()
 
@@ -20,8 +21,8 @@ public class Notify {
     private init() { }
 
     /// Wallet's configuration method
-    static public func configure(pushHost: String = "echo.walletconnect.com", environment: APNSEnvironment) {
-        Notify.config = Notify.Config(pushHost: pushHost, environment: environment)
+    static public func configure(pushHost: String = "echo.walletconnect.com", environment: APNSEnvironment, crypto: CryptoProvider) {
+        Notify.config = Notify.Config(pushHost: pushHost, environment: environment, crypto: crypto)
     }
 
 }

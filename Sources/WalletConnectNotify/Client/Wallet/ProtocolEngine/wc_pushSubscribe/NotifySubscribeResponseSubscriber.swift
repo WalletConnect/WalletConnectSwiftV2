@@ -42,9 +42,13 @@ class NotifySubscribeResponseSubscriber {
     private func subscribeForSubscriptionResponse() {
         let protocolMethod = NotifySubscribeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink {[unowned self] (payload: ResponseSubscriptionPayload<SubscriptionJWTPayload.Wrapper, SubscribeResponseParams>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifySubscriptionPayload.Wrapper, NotifySubscriptionResponsePayload.Wrapper>) in
                 Task(priority: .high) {
                     logger.debug("NotifySubscribeResponseSubscriber: Received Notify Subscribe response")
+
+                    guard
+                        let (responsePayload, _) = try? NotifySubscriptionResponsePayload.decodeAndVerify(from: payload.response)
+                    else { fatalError() /* TODO: Handle error */ }
 
                     guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                         logger.debug("NotifySubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
@@ -53,14 +57,14 @@ class NotifySubscribeResponseSubscriber {
 
                     // get keypair Y
                     let pubKeyY = responseKeys.publicKey
-                    let peerPubKeyZ = payload.response.publicKey
+                    let peerPubKeyZ = responsePayload.publicKey.hexString
 
                     var account: Account!
                     var metadata: AppMetadata!
                     var notifySubscriptionTopic: String!
                     var subscribedTypes: Set<NotificationType>!
                     var agreementKeysP: AgreementKeys!
-                    let (subscriptionPayload, claims) = try SubscriptionJWTPayload.decodeAndVerify(from: payload.request)
+                    let (subscriptionPayload, claims) = try NotifySubscriptionPayload.decodeAndVerify(from: payload.request)
                     let subscribedScope = subscriptionPayload.scope
                         .components(separatedBy: " ")
                     do {
