@@ -24,6 +24,7 @@ public struct PairingClientFactory {
         let resubscribeService = PairingResubscribeService(networkInteractor: networkingClient, pairingStorage: pairingStore)
 
         return PairingClient(
+            pairingStorage: pairingStore,
             appPairService: appPairService,
             networkingInteractor: networkingClient,
             logger: logger,

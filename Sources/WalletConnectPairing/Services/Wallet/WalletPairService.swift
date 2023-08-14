@@ -19,7 +19,7 @@ actor WalletPairService {
     }
 
     func pair(_ uri: WalletConnectURI) async throws {
-        guard !hasActivePairing(for: uri.topic) else {
+        guard !hasPairing(for: uri.topic) else {
             throw Errors.pairingAlreadyExist(topic: uri.topic)
         }
         
@@ -39,9 +39,9 @@ actor WalletPairService {
 
 // MARK: - Private functions
 extension WalletPairService {
-    func hasActivePairing(for topic: String) -> Bool {
+    func hasPairing(for topic: String) -> Bool {
         if let pairing = pairingStorage.getPairing(forTopic: topic) {
-            return pairing.active
+            return pairing.requestReceived
         }
         return false
     }

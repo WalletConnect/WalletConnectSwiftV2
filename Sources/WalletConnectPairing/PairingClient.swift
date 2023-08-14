@@ -7,6 +7,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     }
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
+    private let pairingStorage: WCPairingStorage
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
     private let appPairActivateService: AppPairActivationService
@@ -22,20 +23,23 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
 
     private let cleanupService: PairingCleanupService
 
-    init(appPairService: AppPairService,
-         networkingInteractor: NetworkInteracting,
-         logger: ConsoleLogging,
-         walletPairService: WalletPairService,
-         deletePairingService: DeletePairingService,
-         resubscribeService: PairingResubscribeService,
-         expirationService: ExpirationService,
-         pairingRequestsSubscriber: PairingRequestsSubscriber,
-         appPairActivateService: AppPairActivationService,
-         cleanupService: PairingCleanupService,
-         pingService: PairingPingService,
-         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
-         pairingsProvider: PairingsProvider
+    init(
+        pairingStorage: WCPairingStorage,
+        appPairService: AppPairService,
+        networkingInteractor: NetworkInteracting,
+        logger: ConsoleLogging,
+        walletPairService: WalletPairService,
+        deletePairingService: DeletePairingService,
+        resubscribeService: PairingResubscribeService,
+        expirationService: ExpirationService,
+        pairingRequestsSubscriber: PairingRequestsSubscriber,
+        appPairActivateService: AppPairActivationService,
+        cleanupService: PairingCleanupService,
+        pingService: PairingPingService,
+        socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
+        pairingsProvider: PairingsProvider
     ) {
+        self.pairingStorage = pairingStorage
         self.appPairService = appPairService
         self.walletPairService = walletPairService
         self.networkingInteractor = networkingInteractor
@@ -80,6 +84,15 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
 
     public func activate(pairingTopic: String, peerMetadata: AppMetadata?) {
         appPairActivateService.activate(for: pairingTopic, peerMetadata: peerMetadata)
+    }
+    
+    public func setReceived(pairingTopic: String) {
+        guard var pairing = pairingStorage.getPairing(forTopic: pairingTopic) else {
+            return logger.error("Pairing not found for topic: \(pairingTopic)")
+        }
+
+        pairing.receivedRequest()
+        pairingStorage.setPairing(pairing)
     }
 
     public func getPairings() -> [Pairing] {
