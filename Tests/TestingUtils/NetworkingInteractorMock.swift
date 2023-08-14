@@ -25,7 +25,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     var onRespondError: ((Int) -> Void)?
 
     public let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
-    public let networkConnectionStatusPublisherSubject = PassthroughSubject<NetworkConnectionStatus, Never>()
+    public let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.connected)
     
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()

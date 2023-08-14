@@ -23,7 +23,7 @@ actor WalletPairService {
             throw Errors.pairingAlreadyExist(topic: uri.topic)
         }
         
-        var pairing = WCPairing(uri: uri)
+        let pairing = WCPairing(uri: uri)
         let symKey = try SymmetricKey(hex: uri.symKey)
         try kms.setSymmetricKey(symKey, for: pairing.topic)
         pairingStorage.setPairing(pairing)

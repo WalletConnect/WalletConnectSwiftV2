@@ -15,7 +15,7 @@ public final class NetworkMonitor: NetworkMonitoring {
     private let networkMonitor = NWPathMonitor()
     private let workerQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
     
-    private let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.notConnected)
+    private let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.connected)
     
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
         networkConnectionStatusPublisherSubject
