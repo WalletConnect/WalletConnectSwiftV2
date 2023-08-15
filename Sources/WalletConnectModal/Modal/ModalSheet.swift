@@ -14,7 +14,6 @@ public struct ModalSheet: View {
             VStack(spacing: 0) {
                 contentHeader()
                 content()
-//                    .animation(.default, value: viewModel.destination)
             }
             .frame(maxWidth: .infinity)
             .background(Color.background1)
@@ -81,7 +80,6 @@ public struct ModalSheet: View {
         .overlay(
             VStack {
                 if viewModel.destination.hasSearch {
-                    
                     HStack {
                         Image(systemName: "magnifyingglass")
                         TextField("Search", text: $viewModel.searchTerm, onEditingChanged: { editing in
@@ -128,7 +126,7 @@ public struct ModalSheet: View {
                 viewModel.destination
             }, set: { _ in }),
             navigateTo: viewModel.navigateTo(_:),
-            onListingTap: { viewModel.onListingTap($0, preferUniversal: false) }
+            onListingTap: { viewModel.onListingTap($0) }
         )
     }
     
@@ -144,7 +142,6 @@ public struct ModalSheet: View {
     
     @ViewBuilder
     private func content() -> some View {
-        
         switch viewModel.destination {
         case .welcome,
              .viewAll:
@@ -155,7 +152,7 @@ public struct ModalSheet: View {
         case .getWallet:
             GetAWalletView(
                 wallets: Array(viewModel.wallets.prefix(6)),
-                onWalletTap: viewModel.onGetWalletTap(_:),
+                onWalletTap: viewModel.openAppstore(wallet:),
                 navigateToExternalLink: viewModel.navigateToExternalLink(_:)
             )
             .frame(minHeight: verticalSizeClass == .compact ? 200 : 550)
@@ -163,10 +160,10 @@ public struct ModalSheet: View {
             
         case let .walletDetail(wallet):
             WalletDetail(
-                wallet: wallet,
-                deeplink: { viewModel.onListingTap($0, preferUniversal: false) },
-                deeplinkUniversal: { viewModel.onListingTap($0, preferUniversal: true) },
-                openAppStore: viewModel.onGetWalletTap(_:)
+                viewModel: .init(
+                    wallet: wallet,
+                    deeplinkHandler: viewModel
+                )
             )
         }
     }

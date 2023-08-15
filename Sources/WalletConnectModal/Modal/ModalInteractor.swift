@@ -17,8 +17,7 @@ final class DefaultModalSheetInteractor: ModalSheetInteractor {
     
     func getListings() async throws -> [Listing] {
         
-        let httpClient = HTTPNetworkClient(host: "127.0.0.1")
-//        let httpClient = HTTPNetworkClient(host: "explorer-api.walletconnect.com")
+        let httpClient = HTTPNetworkClient(host: "explorer-api.walletconnect.com")
         let response = try await httpClient.request(
             ListingsResponse.self,
             at: ExplorerAPI.getListings(

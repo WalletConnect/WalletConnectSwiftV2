@@ -118,23 +118,8 @@ final class ModalViewModel: ObservableObject {
         uiApplicationWrapper.openURL(url, nil)
     }
     
-    func onListingTap(_ listing: Listing, preferUniversal: Bool) {
+    func onListingTap(_ listing: Listing) {
         setLastTimeUsed(listing.id)
-        
-        navigateToDeepLink(
-            universalLink: listing.mobile.universal ?? "",
-            nativeLink: listing.mobile.native ?? "",
-            preferUniversal: preferUniversal
-        )
-    }
-    
-    func onGetWalletTap(_ listing: Listing) {
-        guard
-            let storeLinkString = listing.app.ios,
-            let storeLink = URL(string: storeLinkString)
-        else { return }
-        
-        uiApplicationWrapper.openURL(storeLink, nil)
     }
     
     func onBackButton() {
@@ -257,28 +242,29 @@ private extension ModalViewModel {
 
 // MARK: - Deeplinking
 
-private extension ModalViewModel {
-    enum DeeplinkErrors: LocalizedError {
-        case noWalletLinkFound
-        case uriNotCreated
-        case failedToOpen
-        
-        var errorDescription: String? {
-            switch self {
-            case .noWalletLinkFound:
-                return NSLocalizedString("No valid link for opening given wallet found", comment: "")
-            case .uriNotCreated:
-                return NSLocalizedString("Couldn't generate link due to missing connection URI", comment: "")
-            case .failedToOpen:
-                return NSLocalizedString("Given link couldn't be opened", comment: "")
-            }
-        }
-    }
+protocol WalletDeeplinkHandler {
+    func openAppstore(wallet: Listing)
+    func navigateToDeepLink(wallet: Listing, preferUniversal: Bool, preferBrowser: Bool)
+}
 
-    func navigateToDeepLink(universalLink: String, nativeLink: String, preferUniversal: Bool) {
+extension ModalViewModel: WalletDeeplinkHandler {
+ 
+    func openAppstore(wallet: Listing) {
+        guard
+            let storeLinkString = wallet.app.ios,
+            let storeLink = URL(string: storeLinkString)
+        else { return }
+        
+        uiApplicationWrapper.openURL(storeLink, nil)
+    }
+    
+    func navigateToDeepLink(wallet: Listing, preferUniversal: Bool, preferBrowser: Bool) {
         do {
-            let nativeUrlString = try formatNativeUrlString(nativeLink)
-            let universalUrlString = try formatUniversalUrlString(universalLink)
+            let nativeScheme = preferBrowser ? nil : wallet.mobile.native
+            let universalScheme = preferBrowser ? wallet.desktop.universal : wallet.mobile.universal
+            
+            let nativeUrlString = try formatNativeUrlString(nativeScheme)
+            let universalUrlString = try formatUniversalUrlString(universalScheme)
             
             if let nativeUrl = nativeUrlString?.toURL(), !preferUniversal {
                 uiApplicationWrapper.openURL(nativeUrl) { success in
@@ -299,13 +285,32 @@ private extension ModalViewModel {
             toast = Toast(style: .error, message: error.localizedDescription)
         }
     }
+}
+
+private extension ModalViewModel {
+    enum DeeplinkErrors: LocalizedError {
+        case noWalletLinkFound
+        case uriNotCreated
+        case failedToOpen
+        
+        var errorDescription: String? {
+            switch self {
+            case .noWalletLinkFound:
+                return NSLocalizedString("No valid link for opening given wallet found", comment: "")
+            case .uriNotCreated:
+                return NSLocalizedString("Couldn't generate link due to missing connection URI", comment: "")
+            case .failedToOpen:
+                return NSLocalizedString("Given link couldn't be opened", comment: "")
+            }
+        }
+    }
         
     func isHttpUrl(url: String) -> Bool {
         return url.hasPrefix("http://") || url.hasPrefix("https://")
     }
         
-    func formatNativeUrlString(_ string: String) throws -> String? {
-        if string.isEmpty { return nil }
+    func formatNativeUrlString(_ string: String?) throws -> String? {
+        guard let string = string, !string.isEmpty else { return nil }
             
         if isHttpUrl(url: string) {
             return try formatUniversalUrlString(string)
@@ -324,8 +329,8 @@ private extension ModalViewModel {
         return "\(safeAppUrl)wc?uri=\(deeplinkUri)"
     }
         
-    func formatUniversalUrlString(_ string: String) throws -> String? {
-        if string.isEmpty { return nil }
+    func formatUniversalUrlString(_ string: String?) throws -> String? {
+        guard let string = string, !string.isEmpty else { return nil }
             
         if !isHttpUrl(url: string) {
             return try formatNativeUrlString(string)
