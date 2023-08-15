@@ -30,7 +30,7 @@ extension Color {
     static let negative = Color(AssetColor.negative)
     static let thickOverlay = Color(AssetColor.thickOverlay)
     static let thinOverlay = Color(AssetColor.thinOverlay)
-    static let accent = Color(AssetColor.accent)
+    static var accent = Color(AssetColor.accent)
 }
 
 #if canImport(UIKit)
