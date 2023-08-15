@@ -42,7 +42,7 @@ enum ExplorerAPI: HTTPService {
     }
 
     var scheme: String {
-        return "http"
+        return "https"
     }
 
     var additionalHeaderFields: [String: String]? {
