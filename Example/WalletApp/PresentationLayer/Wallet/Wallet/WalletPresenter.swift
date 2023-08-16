@@ -135,10 +135,6 @@ extension WalletPresenter {
     
     private func removePairingIndicator() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            if self.showPairingLoading {
-                self.errorMessage = "WalletConnect - Pairing timeout error"
-                self.showError.toggle()
-            }
             self.showPairingLoading = false
         }
     }

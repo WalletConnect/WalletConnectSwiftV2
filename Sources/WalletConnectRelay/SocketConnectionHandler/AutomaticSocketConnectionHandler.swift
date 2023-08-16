@@ -45,10 +45,12 @@ class AutomaticSocketConnectionHandler {
     }
 
     private func setUpNetworkMonitoring() {
-        networkMonitor.onSatisfied = { [weak self] in
-            self?.reconnectIfNeeded()
+        networkMonitor.networkConnectionStatusPublisher.sink { [weak self] networkConnectionStatus in
+            if networkConnectionStatus == .connected {
+                self?.reconnectIfNeeded()
+            }
         }
-        networkMonitor.startMonitoring()
+        .store(in: &publishers)
     }
 
     private func registerBackgroundTask() {

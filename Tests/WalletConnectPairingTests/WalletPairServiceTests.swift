@@ -18,16 +18,20 @@ final class WalletPairServiceTestsTests: XCTestCase {
         cryptoMock = KeyManagementServiceMock()
         service = WalletPairService(networkingInteractor: networkingInteractor, kms: cryptoMock, pairingStorage: storageMock)
     }
-
-    func testPairMultipleTimesOnSameURIThrows() async {
+    
+    func testPairWhenNetworkNotConnectedThrows() async {
         let uri = WalletConnectURI.stub()
-        for i in 1...10 {
-            if i == 1 {
-                await XCTAssertNoThrowAsync(try await service.pair(uri))
-            } else {
-                await XCTAssertThrowsErrorAsync(try await service.pair(uri))
-            }
-        }
+        networkingInteractor.networkConnectionStatusPublisherSubject.send(.notConnected)
+        await XCTAssertThrowsErrorAsync(try await service.pair(uri))
+    }
+
+    func testPairOnSameURIWhenRequestReceivedThrows() async {
+        let uri = WalletConnectURI.stub()
+        try! await service.pair(uri)
+        var pairing = storageMock.getPairing(forTopic: uri.topic)
+        pairing?.receivedRequest()
+        storageMock.setPairing(pairing!)
+        await XCTAssertThrowsErrorAsync(try await service.pair(uri))
     }
 
     func testPair() async {
