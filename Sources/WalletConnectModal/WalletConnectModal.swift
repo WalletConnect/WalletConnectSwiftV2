@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 #if canImport(UIKit)
 import UIKit
@@ -53,7 +54,8 @@ public class WalletConnectModal {
         metadata: AppMetadata,
         sessionParams: SessionParams = .default,
         recommendedWalletIds: [String] = [],
-        excludedWalletIds: [String] = []
+        excludedWalletIds: [String] = [],
+        accentColor: Color? = nil
     ) {
         Pair.configure(metadata: metadata)
         WalletConnectModal.config = WalletConnectModal.Config(
@@ -63,6 +65,10 @@ public class WalletConnectModal {
             recommendedWalletIds: recommendedWalletIds,
             excludedWalletIds: excludedWalletIds
         )
+        
+        if let accentColor {
+            Color.accent = accentColor
+        }
     }
     
     public static func set(sessionParams: SessionParams) {
