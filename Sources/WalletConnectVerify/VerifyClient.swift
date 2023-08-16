@@ -16,9 +16,6 @@ public actor VerifyClient: VerifyClientProtocol {
     let appAttestationRegistrer: AppAttestationRegistrer
     
     private let verifyHost: String
-    /// The property is used to determine whether verify.walletconnect.org will be used
-    /// in case verify.walletconnect.com doesn't respond for some reason (most likely due to being blocked in the user's location).
-    private var fallback = false
 
     init(
         verifyHost: String,
@@ -37,16 +34,7 @@ public actor VerifyClient: VerifyClientProtocol {
     }
 
     public func verifyOrigin(assertionId: String) async throws -> String {
-        do {
-            return try await originVerifier.verifyOrigin(assertionId: assertionId)
-        } catch {
-            if (error as? HTTPError) == .couldNotConnect && !fallback {
-                fallback = true
-                originVerifier.verifyHostFallback()
-                return try await verifyOrigin(assertionId: assertionId)
-            }
-            throw error
-        }
+        return try await originVerifier.verifyOrigin(assertionId: assertionId)
     }
     
     nonisolated public func createVerifyContext(origin: String?, domain: String) -> VerifyContext {
