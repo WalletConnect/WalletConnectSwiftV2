@@ -7,7 +7,10 @@ actor EchoRegisterService {
     private let environment: APNSEnvironment
     private let echoAuthenticator: EchoAuthenticating
     private let clientIdStorage: ClientIdStoring
-
+    /// The property is used to determine whether echo.walletconnect.org will be used
+    /// in case echo.walletconnect.com doesn't respond for some reason (most likely due to being blocked in the user's location).
+    private var fallback = false
+    
     enum Errors: Error {
         case registrationFailed
     }
@@ -33,14 +36,28 @@ actor EchoRegisterService {
         let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
         logger.debug("APNS device token: \(token)")
-        let response = try await httpClient.request(
-            EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
-        )
-        guard response.status == .success else {
-            throw Errors.registrationFailed
+        
+        do {
+            let response = try await httpClient.request(
+                EchoResponse.self,
+                at: EchoAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: echoAuthToken)
+            )
+            guard response.status == .success else {
+                throw Errors.registrationFailed
+            }
+            logger.debug("Successfully registered at Echo Server")
+        } catch {
+            if (error as? HTTPError) == .couldNotConnect && !fallback {
+                fallback = true
+                await echoHostFallback()
+                try await register(deviceToken: deviceToken)
+            }
+            throw error
         }
-        logger.debug("Successfully registered at Echo Server")
+    }
+    
+    func echoHostFallback() async {
+        await httpClient.updateHost(host: "echo.walletconnect.org")
     }
 
 #if DEBUG
@@ -48,14 +65,24 @@ actor EchoRegisterService {
         let echoAuthToken = try echoAuthenticator.createAuthToken()
         let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
-        let response = try await httpClient.request(
-            EchoResponse.self,
-            at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: echoAuthToken)
-        )
-        guard response.status == .success else {
-            throw Errors.registrationFailed
+        
+        do {
+            let response = try await httpClient.request(
+                EchoResponse.self,
+                at: EchoAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: echoAuthToken)
+            )
+            guard response.status == .success else {
+                throw Errors.registrationFailed
+            }
+            logger.debug("Successfully registered at Echo Server")
+        } catch {
+            if (error as? HTTPError) == .couldNotConnect && !fallback {
+                fallback = true
+                await echoHostFallback()
+                try await register(deviceToken: deviceToken)
+            }
+            throw error
         }
-        logger.debug("Successfully registered at Echo Server")
     }
 #endif
 }

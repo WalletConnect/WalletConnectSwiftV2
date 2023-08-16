@@ -2,7 +2,6 @@ import Foundation
 @testable import HTTPClient
 
 public final class HTTPClientMock<T: Decodable>: HTTPClient {
-
     private let object: T
 
     public init(object: T) {
@@ -15,5 +14,9 @@ public final class HTTPClientMock<T: Decodable>: HTTPClient {
 
     public func request(service: HTTPService) async throws {
 
+    }
+    
+    public func updateHost(host: String) async {
+        
     }
 }
