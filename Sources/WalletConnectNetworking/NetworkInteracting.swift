@@ -13,7 +13,8 @@ public protocol NetworkInteracting {
     func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws
     func respondSuccess(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws
     func respondError(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws
-
+    func handleHistoryRequest(topic: String, request: RPCRequest)
+        
     func requestSubscription<Request: Codable>(
         on request: ProtocolMethod
     ) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never>

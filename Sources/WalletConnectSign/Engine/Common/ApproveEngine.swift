@@ -300,6 +300,11 @@ private extension ApproveEngine {
         
         pairingRegisterer.setReceived(pairingTopic: payload.topic)
         
+        if let verifyContext = try? verifyContextStore.get(key: proposal.proposer.publicKey) {
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            return
+        }
+        
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
