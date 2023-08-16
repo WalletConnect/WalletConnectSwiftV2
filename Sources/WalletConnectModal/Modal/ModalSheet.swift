@@ -37,6 +37,14 @@ public struct ModalSheet: View {
                 await viewModel.fetchWallets()
                 await viewModel.createURI()
             }
+            
+            #if DEBUG
+                viewModel.toast = .init(
+                    style: .warning,
+                    message: "WalletConnectModal package was migrated to WalletConnect/modal-swift repo and will be eventually removed from WalletConnectSwiftV2 in next releases",
+                    duration: 10
+                )
+            #endif
         }
     }
     

@@ -49,6 +49,7 @@ public class WalletConnectModal {
     /// Wallet instance wallet config method.
     /// - Parameters:
     ///   - metadata: App metadata
+    @available(*, deprecated, message: "WalletConnectModal package was migrated to https://github.com/WalletConnect/modal-swift repo and will be eventually removed from WalletConnectSwiftV2")
     public static func configure(
         projectId: String,
         metadata: AppMetadata,
@@ -80,6 +81,7 @@ public class WalletConnectModal {
 
 extension WalletConnectModal {
     
+    @available(*, deprecated, message: "WalletConnectModal package was migrated to https://github.com/WalletConnect/modal-swift repo and will be eventually removed from WalletConnectSwiftV2")
     public static func present(from presentingViewController: UIViewController? = nil) {
         guard let vc = presentingViewController ?? topViewController() else {
             assertionFailure("No controller found for presenting modal")
@@ -123,6 +125,7 @@ import AppKit
 
 extension WalletConnectModal {
     
+    @available(*, deprecated, message: "WalletConnectModal package was migrated to https://github.com/WalletConnect/modal-swift repo and will be eventually removed from WalletConnectSwiftV2")
     public static func present(from presentingViewController: NSViewController? = nil) {
         
         let modal = WalletConnectModalSheetController()
