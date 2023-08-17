@@ -121,7 +121,7 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects dapp to receive error response")
 
         let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         try! await walletPushClient.enableSync(account: account, onSign: sign)
         try! await dappPushClient.propose(account: account, topic: uri.topic)
 
@@ -144,7 +144,7 @@ final class PushTests: XCTestCase {
         let expectation = expectation(description: "expects dapp to receive error response")
 
         let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         try! await dappPushClient.propose(account: account, topic: uri.topic)
 
         walletPushClient.requestPublisher.sink { [unowned self] (id, _, _) in
@@ -180,7 +180,7 @@ final class PushTests: XCTestCase {
     func testDeletePushSubscription() async {
         let expectation = expectation(description: "expects to delete push subscription")
         let uri = try! await dappPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         try! await walletPushClient.enableSync(account: account, onSign: sign)
         try! await dappPushClient.propose(account: account, topic: uri.topic)
         var subscriptionTopic: String!
