@@ -14,4 +14,4 @@ RELAY_HOST = relay.walletconnect.com
 
 // WALLETAPP_SENTRY_DSN = WALLETAPP_SENTRY_DSN
 
-CAST_HOST = cast.walletconnect.com
+CAST_HOST = notify.walletconnect.com
