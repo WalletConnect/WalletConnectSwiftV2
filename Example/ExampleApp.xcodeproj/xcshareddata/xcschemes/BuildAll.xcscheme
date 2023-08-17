@@ -83,6 +83,9 @@
          <TestPlanReference
             reference = "container:../NotifyTests.xctestplan">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:../XPlatformProtocolTests.xctestplan">
+         </TestPlanReference>
       </TestPlans>
    </TestAction>
    <LaunchAction

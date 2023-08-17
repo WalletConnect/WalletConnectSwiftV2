@@ -24,7 +24,7 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     func testConnectsOnConnectionSatisfied() {
         webSocketSession.disconnect()
         XCTAssertFalse(webSocketSession.isConnected)
-        networkMonitor.onSatisfied?()
+        networkMonitor.networkConnectionStatusPublisherSubject.send(.connected)
         XCTAssertTrue(webSocketSession.isConnected)
     }
 

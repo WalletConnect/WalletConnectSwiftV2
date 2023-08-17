@@ -98,29 +98,6 @@ final class WalletPresenter: ObservableObject {
 // MARK: - Private functions
 extension WalletPresenter {
     private func setupInitialState() {
-        interactor.sessionProposalPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] session in
-                showPairingLoading = false
-                router.present(proposal: session.proposal, importAccount: importAccount, context: session.context)
-            }
-            .store(in: &disposeBag)
-        
-        interactor.sessionRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] request, context in
-                showPairingLoading = false
-                router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
-            }.store(in: &disposeBag)
-        
-        interactor.requestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] result in
-                showPairingLoading = false
-                router.present(request: result.request, importAccount: importAccount, context: result.context)
-            }
-            .store(in: &disposeBag)
-
         interactor.sessionsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessions in
@@ -158,10 +135,6 @@ extension WalletPresenter {
     
     private func removePairingIndicator() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            if self.showPairingLoading {
-                self.errorMessage = "WalletConnect - Pairing timeout error"
-                self.showError.toggle()
-            }
             self.showPairingLoading = false
         }
     }

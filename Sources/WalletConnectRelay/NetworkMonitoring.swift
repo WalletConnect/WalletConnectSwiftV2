@@ -1,27 +1,32 @@
 import Foundation
+import Combine
 import Network
 
-protocol NetworkMonitoring: AnyObject {
-    var onSatisfied: (() -> Void)? {get set}
-    var onUnsatisfied: (() -> Void)? {get set}
-    func startMonitoring()
+public enum NetworkConnectionStatus {
+    case connected
+    case notConnected
 }
 
-class NetworkMonitor: NetworkMonitoring {
-    var onSatisfied: (() -> Void)?
-    var onUnsatisfied: (() -> Void)?
+public protocol NetworkMonitoring: AnyObject {
+    var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> { get }
+}
 
-    private let monitor = NWPathMonitor()
-    private let monitorQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
-
-    func startMonitoring() {
-        monitor.pathUpdateHandler = { [weak self] path in
-            if path.status == .satisfied {
-                self?.onSatisfied?()
-            } else {
-                self?.onUnsatisfied?()
-            }
+public final class NetworkMonitor: NetworkMonitoring {
+    private let networkMonitor = NWPathMonitor()
+    private let workerQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
+    
+    private let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.connected)
+    
+    public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
+        networkConnectionStatusPublisherSubject
+            .share()
+            .eraseToAnyPublisher()
+    }
+    
+    public init() {
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            self?.networkConnectionStatusPublisherSubject.send((path.status == .satisfied) ? .connected : .notConnected)
         }
-        monitor.start(queue: monitorQueue)
+        networkMonitor.start(queue: workerQueue)
     }
 }

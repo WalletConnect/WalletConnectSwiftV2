@@ -2,7 +2,7 @@ import Foundation
 
 public actor HTTPNetworkClient: HTTPClient {
 
-    let host: String
+    private var host: String
 
     private let session: URLSession
 
@@ -30,6 +30,10 @@ public actor HTTPNetworkClient: HTTPClient {
                 continuation.resume(with: result)
             }
         }
+    }
+    
+    public func updateHost(host: String) async {
+        self.host = host
     }
 
     private func request<T: Decodable>(_ type: T.Type, at service: HTTPService, completion: @escaping (Result<T, Error>) -> Void) {
@@ -67,6 +71,9 @@ public actor HTTPNetworkClient: HTTPClient {
     }
 
     private static func validate(_ urlResponse: URLResponse?, _ error: Error?) throws {
+        if let error = (error as? NSError), error.code == -1004 {
+            throw HTTPError.couldNotConnect
+        }
         if let error = error {
             throw HTTPError.dataTaskError(error)
         }

@@ -11,6 +11,7 @@ public struct WCPairing: SequenceObject {
     public private (set) var peerMetadata: AppMetadata?
     public private (set) var expiryDate: Date
     public private (set) var active: Bool
+    public private (set) var requestReceived: Bool
 
     #if DEBUG
     public static var dateInitializer: () -> Date = Date.init
@@ -26,11 +27,12 @@ public struct WCPairing: SequenceObject {
         30 * .day
     }
 
-    public init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, expiryDate: Date) {
+    public init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, requestReceived: Bool = false, expiryDate: Date) {
         self.topic = topic
         self.relay = relay
         self.peerMetadata = peerMetadata
         self.active = isActive
+        self.requestReceived = requestReceived
         self.expiryDate = expiryDate
     }
 
@@ -38,6 +40,7 @@ public struct WCPairing: SequenceObject {
         self.topic = topic
         self.relay = RelayProtocolOptions(protocol: "irn", data: nil)
         self.active = false
+        self.requestReceived = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
 
@@ -45,12 +48,17 @@ public struct WCPairing: SequenceObject {
         self.topic = uri.topic
         self.relay = uri.relay
         self.active = false
+        self.requestReceived = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
     }
 
     public mutating func activate() {
         active = true
         try? updateExpiry()
+    }
+    
+    public mutating func receivedRequest() {
+        requestReceived = true
     }
 
     public mutating func updatePeerMetadata(_ metadata: AppMetadata?) {

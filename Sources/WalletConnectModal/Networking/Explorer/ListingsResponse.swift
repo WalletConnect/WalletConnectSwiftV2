@@ -11,8 +11,9 @@ struct Listing: Codable, Hashable, Identifiable {
     let order: Int?
     let imageId: String
     let app: App
-    let mobile: Mobile
-    var lastTimeUsed: Date? 
+    let mobile: Links
+    let desktop: Links
+    var lastTimeUsed: Date?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -22,16 +23,16 @@ struct Listing: Codable, Hashable, Identifiable {
         case imageId = "image_id"
         case app
         case mobile
+        case desktop
         case lastTimeUsed
     }
 
     struct App: Codable, Hashable {
         let ios: String?
-        let mac: String?
-        let safari: String?
+        let browser: String?
     }
     
-    struct Mobile: Codable, Hashable {
+    struct Links: Codable, Hashable {
         let native: String?
         let universal: String?
     }
