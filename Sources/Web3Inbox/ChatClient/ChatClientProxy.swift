@@ -5,7 +5,7 @@ final class ChatClientProxy {
     private let client: ChatClient
 
     var onSign: SigningCallback
-    var onResponse: ((RPCResponse) async throws -> Void)?
+    var onResponse: ((RPCResponse, RPCRequest) async throws -> Void)?
 
     init(client: ChatClient, onSign: @escaping SigningCallback) {
         self.client = client
@@ -119,6 +119,6 @@ private extension ChatClientProxy {
 
     func respond<Object: Codable>(with object: Object = Blob(), request: RPCRequest) async throws {
         let response = RPCResponse(matchingRequest: request, result: object)
-        try await onResponse?(response)
+        try await onResponse?(response, request)
     }
 }

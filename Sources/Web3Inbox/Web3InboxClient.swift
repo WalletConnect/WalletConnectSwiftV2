@@ -6,16 +6,16 @@ public final class Web3InboxClient {
     private let webView: WKWebView
     private var account: Account
     private let logger: ConsoleLogging
-    private let pushClient: WalletPushClient
+    private let notifyClient: NotifyClient
 
     private let chatClientProxy: ChatClientProxy
     private let chatClientSubscriber: ChatClientRequestSubscriber
 
-    private let pushClientProxy: PushClientProxy
-    private let pushClientSubscriber: PushClientRequestSubscriber
+    private let notifyClientProxy: NotifyClientProxy
+    private let notifyClientSubscriber: NotifyClientRequestSubscriber
 
     private let chatWebviewProxy: WebViewProxy
-    private let pushWebviewProxy: WebViewProxy
+    private let notifyWebviewProxy: WebViewProxy
 
     private let webviewSubscriber: WebViewRequestSubscriber
 
@@ -26,11 +26,11 @@ public final class Web3InboxClient {
         chatClientProxy: ChatClientProxy,
         clientSubscriber: ChatClientRequestSubscriber,
         chatWebviewProxy: WebViewProxy,
-        pushWebviewProxy: WebViewProxy,
+        notifyWebviewProxy: WebViewProxy,
         webviewSubscriber: WebViewRequestSubscriber,
-        pushClientProxy: PushClientProxy,
-        pushClientSubscriber: PushClientRequestSubscriber,
-        pushClient: WalletPushClient
+        notifyClientProxy: NotifyClientProxy,
+        notifyClientSubscriber: NotifyClientRequestSubscriber,
+        notifyClient: NotifyClient
     ) {
         self.webView = webView
         self.account = account
@@ -38,11 +38,11 @@ public final class Web3InboxClient {
         self.chatClientProxy = chatClientProxy
         self.chatClientSubscriber = clientSubscriber
         self.chatWebviewProxy = chatWebviewProxy
-        self.pushWebviewProxy = pushWebviewProxy
+        self.notifyWebviewProxy = notifyWebviewProxy
         self.webviewSubscriber = webviewSubscriber
-        self.pushClientProxy = pushClientProxy
-        self.pushClientSubscriber = pushClientSubscriber
-        self.pushClient = pushClient
+        self.notifyClientProxy = notifyClientProxy
+        self.notifyClientSubscriber = notifyClientSubscriber
+        self.notifyClient = notifyClient
         setupSubscriptions()
     }
 
@@ -59,7 +59,7 @@ public final class Web3InboxClient {
     }
 
     public func register(deviceToken: Data) async throws {
-        try await pushClient.register(deviceToken: deviceToken)
+        try await notifyClient.register(deviceToken: deviceToken)
     }
 }
 
@@ -71,8 +71,8 @@ private extension Web3InboxClient {
 
         // Chat
         
-        chatClientProxy.onResponse = { [unowned self] response in
-            try await self.chatWebviewProxy.respond(response)
+        chatClientProxy.onResponse = { [unowned self] response, request in
+            try await self.chatWebviewProxy.respond(response, request)
         }
 
         chatClientSubscriber.onRequest = { [unowned self] request in
@@ -84,19 +84,19 @@ private extension Web3InboxClient {
             try await self.chatClientProxy.request(request)
         }
 
-        // Push
+        // Notify
 
-        pushClientProxy.onResponse = { [unowned self] response in
-            try await self.pushWebviewProxy.respond(response)
+        notifyClientProxy.onResponse = { [unowned self] response, request in
+            try await self.notifyWebviewProxy.respond(response, request)
         }
 
-        pushClientSubscriber.onRequest = { [unowned self] request in
-            try await self.pushWebviewProxy.request(request)
+        notifyClientSubscriber.onRequest = { [unowned self] request in
+            try await self.notifyWebviewProxy.request(request)
         }
 
-        webviewSubscriber.onPushRequest = { [unowned self] request in
-            logger.debug("w3i: push method \(request.method) requested")
-            try await self.pushClientProxy.request(request)
+        webviewSubscriber.onNotifyRequest = { [unowned self] request in
+            logger.debug("w3i: notify method \(request.method) requested")
+            try await self.notifyClientProxy.request(request)
         }
     }
 

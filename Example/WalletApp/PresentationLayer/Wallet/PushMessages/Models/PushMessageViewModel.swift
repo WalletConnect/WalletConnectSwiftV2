@@ -1,10 +1,9 @@
-
 import Foundation
-import WalletConnectPush
+import WalletConnectNotify
 
 struct PushMessageViewModel: Identifiable {
 
-    let pushMessageRecord: WalletConnectPush.PushMessageRecord
+    let pushMessageRecord: NotifyMessageRecord
 
     var id: String {
         return pushMessageRecord.id

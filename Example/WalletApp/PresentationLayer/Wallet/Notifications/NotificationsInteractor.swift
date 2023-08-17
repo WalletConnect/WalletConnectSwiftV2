@@ -1,20 +1,20 @@
-import WalletConnectPush
+import WalletConnectNotify
 import Combine
 
 final class NotificationsInteractor {
 
-    var subscriptionsPublisher: AnyPublisher<[PushSubscription], Never> {
-        return Push.wallet.subscriptionsPublisher
+    var subscriptionsPublisher: AnyPublisher<[NotifySubscription], Never> {
+        return Notify.wallet.subscriptionsPublisher
     }
 
-    func getSubscriptions() -> [PushSubscription] {
-        let subs = Push.wallet.getActiveSubscriptions()
+    func getSubscriptions() -> [NotifySubscription] {
+        let subs = Notify.wallet.getActiveSubscriptions()
         return subs
     }
 
-    func removeSubscription(_ subscription: PushSubscription) async {
+    func removeSubscription(_ subscription: NotifySubscription) async {
         do {
-            try await Push.wallet.deleteSubscription(topic: subscription.topic)
+            try await Notify.wallet.deleteSubscription(topic: subscription.topic)
         } catch {
             print(error)
         }

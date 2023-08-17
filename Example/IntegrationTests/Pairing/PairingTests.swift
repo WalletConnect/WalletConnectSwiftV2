@@ -5,7 +5,7 @@ import XCTest
 import WalletConnectRelay
 import Combine
 import WalletConnectNetworking
-import WalletConnectEcho
+import WalletConnectPush
 @testable import Auth
 @testable import WalletConnectPairing
 @testable import WalletConnectSync
@@ -59,14 +59,14 @@ final class PairingTests: XCTestCase {
     func makeDappClients() {
         let prefix = "🤖 Dapp: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
-        let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
+        let notifyLogger = ConsoleLogger(suffix: prefix + " [Notify]", loggingLevel: .debug)
         appPairingClient = pairingClient
         
         appAuthClient = AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
-            logger: pushLogger,
+            logger: notifyLogger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             networkingClient: networkingInteractor,
@@ -77,7 +77,7 @@ final class PairingTests: XCTestCase {
     func makeWalletClients() {
         let prefix = "🐶 Wallet: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
-        let pushLogger = ConsoleLogger(suffix: prefix + " [Push]", loggingLevel: .debug)
+        let notifyLogger = ConsoleLogger(suffix: prefix + " [Notify]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let historyClient = HistoryClientFactory.create(
             historyUrl: "https://history.walletconnect.com",
@@ -88,7 +88,7 @@ final class PairingTests: XCTestCase {
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
-            logger: pushLogger,
+            logger: notifyLogger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             networkingClient: networkingInteractor,

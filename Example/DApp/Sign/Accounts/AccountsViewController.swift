@@ -1,6 +1,6 @@
 import UIKit
 import WalletConnectSign
-import WalletConnectPush
+import WalletConnectNotify
 import Combine
 
 struct AccountDetails {
@@ -14,7 +14,7 @@ final class AccountsViewController: UIViewController, UITableViewDataSource, UIT
     let session: Session
     var accountsDetails: [AccountDetails] = []
     var onDisconnect: (() -> Void)?
-    var pushSubscription: PushSubscription?
+    var notifySubscription: NotifySubscription?
 
     private var publishers = [AnyCancellable]()
     private let accountsView: AccountsView = {
