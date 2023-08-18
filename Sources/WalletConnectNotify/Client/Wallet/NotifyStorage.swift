@@ -51,11 +51,12 @@ final class NotifyStorage: NotifyStoring {
     // MARK: Configuration
 
     func initialize(account: Account) async throws {
-        try await subscriptionStore.initialize(for: account)
+        try await subscriptionStore.create(for: account)
+        try subscriptionStore.setupDatabaseSubscriptions(account: account)
     }
 
-    func setupSubscriptions(account: Account) async throws {
-        try subscriptionStore.setupSubscriptions(account: account)
+    func subscribe(account: Account) async throws {
+        try await subscriptionStore.subscribe(for: account)
     }
 
     // MARK: Subscriptions

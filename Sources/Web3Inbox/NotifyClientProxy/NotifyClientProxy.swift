@@ -44,7 +44,11 @@ final class NotifyClientProxy {
             try await respond(request: request)
         case .enableSync:
             let params = try parse(EnableSyncRequest.self, params: request.params)
-            try await client.enableSync(account: params.account, onSign: onSign)
+            try await client.enableSync(account: params.account)
+            try await respond(request: request)
+        case .register:
+            let params = try parse(EnableSyncRequest.self, params: request.params)
+            try await client.register(account: params.account, onSign: onSign)
             try await respond(request: request)
         }
     }

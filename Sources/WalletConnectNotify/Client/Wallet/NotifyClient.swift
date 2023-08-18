@@ -76,11 +76,13 @@ public class NotifyClient {
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
     }
 
-    // TODO: Add docs
-    public func enableSync(account: Account, onSign: @escaping SigningCallback) async throws {
+    public func register(account: Account, onSign: @escaping SigningCallback) async throws {
         try await notifySyncService.registerSyncIfNeeded(account: account, onSign: onSign)
         try await notifyStorage.initialize(account: account)
-        try await notifyStorage.setupSubscriptions(account: account)
+    }
+
+    public func enableSync(account: Account) async throws {
+        try await notifyStorage.subscribe(account: account)
         try await notifySyncService.fetchHistoryIfNeeded(account: account)
     }
 

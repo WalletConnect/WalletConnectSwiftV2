@@ -106,7 +106,8 @@ final class NotifyTests: XCTestCase {
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create notify subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
-        try! await walletNotifyClient.enableSync(account: account, onSign: sign)
+        try! await walletNotifyClient.register(account: account, onSign: sign)
+        try! await walletNotifyClient.enableSync(account: account)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletNotifyClient.subscriptionsPublisher
             .first()
@@ -122,7 +123,8 @@ final class NotifyTests: XCTestCase {
         let expectation = expectation(description: "expects to create and update notify subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         let updateScope: Set<String> = ["alerts"]
-        try! await walletNotifyClient.enableSync(account: account, onSign: sign)
+        try! await walletNotifyClient.register(account: account, onSign: sign)
+        try! await walletNotifyClient.enableSync(account: account)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletNotifyClient.subscriptionsPublisher
             .first()
@@ -150,7 +152,8 @@ final class NotifyTests: XCTestCase {
         let notifyMessage = NotifyMessage.stub()
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
-        try! await walletNotifyClient.enableSync(account: account, onSign: sign)
+        try! await walletNotifyClient.register(account: account, onSign: sign)
+        try! await walletNotifyClient.enableSync(account: account)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         var subscription: NotifySubscription!
         walletNotifyClient.subscriptionsPublisher
