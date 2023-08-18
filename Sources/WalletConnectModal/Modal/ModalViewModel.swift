@@ -38,6 +38,7 @@ final class ModalViewModel: ObservableObject {
     var isShown: Binding<Bool>
     let interactor: ModalSheetInteractor
     let uiApplicationWrapper: UIApplicationWrapper
+    let recentWalletStorage: RecentWalletsStorage
     
     @Published private(set) var destinationStack: [Destination] = [.welcome]
     @Published private(set) var uri: String?
@@ -52,11 +53,11 @@ final class ModalViewModel: ObservableObject {
     }
     
     var filteredWallets: [Listing] {
-        if searchTerm.isEmpty { return sortByRecent(wallets) }
-        
-        return sortByRecent(
-            wallets.filter { $0.name.lowercased().contains(searchTerm.lowercased()) }
-        )
+        wallets
+            .sortByOrder()
+            .sortByInstalled()
+            .sortByRecent()
+            .filter(searchTerm: searchTerm)
     }
     
     private var disposeBag = Set<AnyCancellable>()
@@ -65,11 +66,13 @@ final class ModalViewModel: ObservableObject {
     init(
         isShown: Binding<Bool>,
         interactor: ModalSheetInteractor,
-        uiApplicationWrapper: UIApplicationWrapper = .live
+        uiApplicationWrapper: UIApplicationWrapper = .live,
+        recentWalletStorage: RecentWalletsStorage = RecentWalletsStorage()
     ) {
         self.isShown = isShown
         self.interactor = interactor
         self.uiApplicationWrapper = uiApplicationWrapper
+        self.recentWalletStorage = recentWalletStorage
             
         interactor.sessionSettlePublisher
             .receive(on: DispatchQueue.main)
@@ -119,7 +122,7 @@ final class ModalViewModel: ObservableObject {
     }
     
     func onListingTap(_ listing: Listing) {
-        setLastTimeUsed(listing)
+        setLastTimeUsed(listing.id)
     }
     
     func onBackButton() {
@@ -167,17 +170,7 @@ final class ModalViewModel: ObservableObject {
             // Small deliberate delay to ensure animations execute properly
             try await Task.sleep(nanoseconds: 500_000_000)
                 
-            self.wallets = wallets.sorted {
-                guard let lhs = $0.order else {
-                    return false
-                }
-                    
-                guard let rhs = $1.order else {
-                    return true
-                }
-                
-                return lhs < rhs
-            }
+            self.wallets = wallets
             
             checkInstalledWallets()
             loadRecentWallets()
@@ -187,13 +180,26 @@ final class ModalViewModel: ObservableObject {
     }
 }
 
-// MARK: - Recent & Installed Wallets
+// MARK: - Sorting and filtering
 
-private extension ModalViewModel {
+private extension Array where Element: Listing {
     
-    func sortByRecent(_ input: [Listing]) -> [Listing] {
-        input.sorted { lhs, rhs in
+    func sortByOrder() -> [Listing] {
+        self.sorted {
+            guard let lhs = $0.order else {
+                return false
+            }
             
+            guard let rhs = $1.order else {
+                return true
+            }
+            
+            return lhs < rhs
+        }
+    }
+    
+    func sortByInstalled() -> [Listing] {
+        self.sorted { lhs, rhs in
             if lhs.installed, !rhs.installed {
                 return true
             }
@@ -202,6 +208,12 @@ private extension ModalViewModel {
                 return false
             }
             
+            return false
+        }
+    }
+    
+    func sortByRecent() -> [Listing] {
+        self.sorted { lhs, rhs in
             guard let lhsLastTimeUsed = lhs.lastTimeUsed else {
                 return false
             }
@@ -213,6 +225,19 @@ private extension ModalViewModel {
             return lhsLastTimeUsed > rhsLastTimeUsed
         }
     }
+    
+    func filter(searchTerm: String) -> [Listing] {
+        if searchTerm.isEmpty { return self }
+        
+        return self.filter {
+            $0.name.lowercased().contains(searchTerm.lowercased())
+        }
+    }
+}
+
+// MARK: - Recent & Installed Wallets
+
+private extension ModalViewModel {
     
     func checkInstalledWallets() {
         
@@ -232,34 +257,17 @@ private extension ModalViewModel {
     }
     
     func loadRecentWallets() {
-        RecentWalletsStorage().recentWallets.forEach { wallet in
-            
-            guard let lastTimeUsed = wallet.lastTimeUsed else {
-                return
-            }
-            
-            // Consider Recent only for 3 days
-            if abs(lastTimeUsed.timeIntervalSinceNow) > (24 * 60 * 60 * 3) {
-                return
-            }
-            
-            setLastTimeUsed(wallet, date: lastTimeUsed)
+        recentWalletStorage.recentWallets.forEach { wallet in
+            guard let lastTimeUsed = wallet.lastTimeUsed else { return }
+            setLastTimeUsed(wallet.id, date: lastTimeUsed)
         }
     }
     
-    func saveRecentWallets() {
-        RecentWalletsStorage().recentWallets = Array(wallets.filter {
-            $0.lastTimeUsed != nil
-        }.prefix(5))
-    }
-    
-    func setLastTimeUsed(_ wallet: Listing, date: Date = Date()) {
-        
+    func setLastTimeUsed(_ id: String, date: Date = Date()) {
         wallets.first {
-            $0.id == wallet.id
+            $0.id == id
         }?.lastTimeUsed = date
-        
-        saveRecentWallets()
+        recentWalletStorage.recentWallets = wallets
     }
 }
 
