@@ -107,7 +107,6 @@ final class NotifyTests: XCTestCase {
         let expectation = expectation(description: "expects to create notify subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.enableSync(account: account)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletNotifyClient.subscriptionsPublisher
             .first()
@@ -124,7 +123,6 @@ final class NotifyTests: XCTestCase {
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         let updateScope: Set<String> = ["alerts"]
         try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.enableSync(account: account)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         walletNotifyClient.subscriptionsPublisher
             .first()
@@ -153,7 +151,6 @@ final class NotifyTests: XCTestCase {
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.enableSync(account: account)
         try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
         var subscription: NotifySubscription!
         walletNotifyClient.subscriptionsPublisher

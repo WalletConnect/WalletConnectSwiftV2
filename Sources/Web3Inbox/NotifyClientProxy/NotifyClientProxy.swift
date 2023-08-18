@@ -42,12 +42,8 @@ final class NotifyClientProxy {
             let params = try parse(DeleteNotifyMessageRequest.self, params: request.params)
             client.deleteNotifyMessage(id: params.id.string)
             try await respond(request: request)
-        case .enableSync:
-            let params = try parse(EnableSyncRequest.self, params: request.params)
-            try await client.enableSync(account: params.account)
-            try await respond(request: request)
         case .register:
-            let params = try parse(EnableSyncRequest.self, params: request.params)
+            let params = try parse(RegisterRequest.self, params: request.params)
             try await client.register(account: params.account, onSign: onSign)
             try await respond(request: request)
         }
@@ -93,7 +89,7 @@ private extension NotifyClientProxy {
         let id: RPCID
     }
 
-    struct EnableSyncRequest: Codable {
+    struct RegisterRequest: Codable {
         let account: Account
     }
 
