@@ -51,9 +51,6 @@ class NotifySubscribeRequester {
         dappsMetadataStore.set(metadata, forKey: responseTopic)
 
         try kms.setSymmetricKey(keysY.sharedKey, for: subscribeTopic)
-
-        _ = try await identityClient.register(account: account, onSign: onSign)
-
         try kms.setAgreementSecret(keysY, topic: responseTopic)
 
         logger.debug("setting symm key for response topic \(responseTopic)")

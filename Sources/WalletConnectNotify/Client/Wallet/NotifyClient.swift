@@ -78,6 +78,7 @@ public class NotifyClient {
 
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {
         try await notifySyncService.registerSyncIfNeeded(account: account, onSign: onSign)
+        try await notifySyncService.registerIdentity(account: account, onSign: onSign)
         try await notifyStorage.initialize(account: account)
         try await notifyStorage.subscribe(account: account)
         try await notifySyncService.fetchHistoryIfNeeded(account: account)
