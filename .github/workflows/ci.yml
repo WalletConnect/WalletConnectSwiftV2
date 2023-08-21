@@ -78,6 +78,11 @@ jobs:
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
+      with:
+        verbose: true
+        directory: ./test_results
+        swift: true
+        flags: ${{ matrix.type }}
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
