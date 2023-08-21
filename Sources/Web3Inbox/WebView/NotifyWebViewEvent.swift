@@ -7,5 +7,5 @@ enum NotifyWebViewEvent: String {
     case getMessageHistory
     case deleteSubscription
     case deleteNotifyMessage
-    case enableSync
+    case register
 }

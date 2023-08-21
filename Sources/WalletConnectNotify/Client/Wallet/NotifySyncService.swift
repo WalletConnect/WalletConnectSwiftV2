@@ -4,6 +4,7 @@ final class NotifySyncService {
 
     private let syncClient: SyncClient
     private let historyClient: HistoryClient
+    private let identityClient: IdentityClient
     private let logger: ConsoleLogging
     private let subscriptionsStore: SyncStore<NotifySubscription>
     private let messagesStore: KeyedDatabase<NotifyMessageRecord>
@@ -16,6 +17,7 @@ final class NotifySyncService {
         syncClient: SyncClient,
         logger: ConsoleLogging,
         historyClient: HistoryClient,
+        identityClient: IdentityClient,
         subscriptionsStore: SyncStore<NotifySubscription>,
         messagesStore: KeyedDatabase<NotifyMessageRecord>,
         networkingInteractor: NetworkInteracting,
@@ -26,12 +28,17 @@ final class NotifySyncService {
         self.syncClient = syncClient
         self.logger = logger
         self.historyClient = historyClient
+        self.identityClient = identityClient
         self.subscriptionsStore = subscriptionsStore
         self.messagesStore = messagesStore
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.coldStartStore = coldStartStore
         self.groupKeychainStorage = groupKeychainStorage
+    }
+
+    func registerIdentity(account: Account, onSign: @escaping SigningCallback) async throws {
+        _ = try await identityClient.register(account: account, onSign: onSign)
     }
 
     func registerSyncIfNeeded(account: Account, onSign: @escaping SigningCallback) async throws {
@@ -76,6 +83,8 @@ final class NotifySyncService {
         }
 
         let subscriptions = inserts.filter { !deletions.contains( $0.databaseId ) }
+
+        logger.debug("Received object from history: \(subscriptions)")
 
         try subscriptionsStore.setInStore(objects: subscriptions, for: account)
 

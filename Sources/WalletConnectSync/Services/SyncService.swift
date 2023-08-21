@@ -31,6 +31,22 @@ final class SyncService {
         setupSubscriptions()
     }
 
+    func create(account: Account, store: String) async throws {
+        if let _ = try? indexStore.getRecord(account: account, name: store) {
+            return
+        }
+
+        let topic = try derivationService.deriveTopic(account: account, store: store)
+        indexStore.set(topic: topic, name: store, account: account)
+    }
+
+    func subscribe(account: Account, store: String) async throws {
+        guard let record = try? indexStore.getRecord(account: account, name: store) else {
+            throw Errors.recordNotFoundForAccount
+        }
+        try await networkInteractor.subscribe(topic: record.topic)
+    }
+
     func set<Object: DatabaseObject>(account: Account, store: String, object: Object) async throws {
         let protocolMethod = SyncSetMethod()
         let params = StoreSet(key: object.databaseId, value: try object.json())
@@ -57,11 +73,6 @@ final class SyncService {
 
         logger.debug("Did delete value for \(store). Sent on: \(record.topic). Key: \n\(key)\n")
     }
-
-    func create(account: Account, store: String) async throws {
-        let topic = try getTopic(for: account, store: store)
-        try await networkInteractor.subscribe(topic: topic)
-    }
 }
 
 private extension SyncService {
@@ -86,15 +97,5 @@ private extension SyncService {
                 }
             }
             .store(in: &publishers)
-    }
-
-    func getTopic(for account: Account, store: String) throws -> String {
-        if let record = try? indexStore.getRecord(account: account, name: store) {
-            return record.topic
-        }
-
-        let topic = try derivationService.deriveTopic(account: account, store: store)
-        indexStore.set(topic: topic, name: store, account: account)
-        return topic
     }
 }

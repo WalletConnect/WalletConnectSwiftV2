@@ -39,11 +39,15 @@ public final class SyncStore<Object: DatabaseObject> {
         setupSubscriptions()
     }
 
-    public func initialize(for account: Account) async throws {
+    public func create(for account: Account) async throws {
         try await syncClient.create(account: account, store: name)
     }
 
-    public func setupSubscriptions(account: Account) throws {
+    public func subscribe(for account: Account) async throws {
+        try await syncClient.subscribe(account: account, store: name)
+    }
+
+    public func setupDatabaseSubscriptions(account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
 
         objectStore.onUpdate = { [unowned self] in
