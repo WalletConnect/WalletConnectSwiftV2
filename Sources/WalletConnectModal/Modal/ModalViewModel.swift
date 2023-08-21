@@ -54,8 +54,6 @@ final class ModalViewModel: ObservableObject {
     
     var filteredWallets: [Listing] {
         wallets
-            .sortByOrder()
-            .sortByInstalled()
             .sortByRecent()
             .filter(searchTerm: searchTerm)
     }
@@ -85,7 +83,7 @@ final class ModalViewModel: ObservableObject {
         
         interactor.sessionRejectionPublisher
             .receive(on: DispatchQueue.main)
-            .sink { (proposal, reason) in
+            .sink { _, reason in
                 
                 print(reason)
                 self.toast = Toast(style: .error, message: reason.message)
@@ -138,7 +136,6 @@ final class ModalViewModel: ObservableObject {
     }
         
     func onCopyButton() {
-        
         guard let uri else {
             toast = Toast(style: .error, message: "No uri found")
             return
@@ -170,10 +167,12 @@ final class ModalViewModel: ObservableObject {
             // Small deliberate delay to ensure animations execute properly
             try await Task.sleep(nanoseconds: 500_000_000)
                 
-            self.wallets = wallets
-            
-            checkInstalledWallets()
             loadRecentWallets()
+            checkWhetherInstalled(wallets: wallets)
+            
+            self.wallets = wallets
+                .sortByOrder()
+                .sortByInstalled()
         } catch {
             toast = Toast(style: .error, message: error.localizedDescription)
         }
@@ -183,9 +182,8 @@ final class ModalViewModel: ObservableObject {
 // MARK: - Sorting and filtering
 
 private extension Array where Element: Listing {
-    
     func sortByOrder() -> [Listing] {
-        self.sorted {
+        sorted {
             guard let lhs = $0.order else {
                 return false
             }
@@ -199,7 +197,7 @@ private extension Array where Element: Listing {
     }
     
     func sortByInstalled() -> [Listing] {
-        self.sorted { lhs, rhs in
+        sorted { lhs, rhs in
             if lhs.installed, !rhs.installed {
                 return true
             }
@@ -213,7 +211,7 @@ private extension Array where Element: Listing {
     }
     
     func sortByRecent() -> [Listing] {
-        self.sorted { lhs, rhs in
+        sorted { lhs, rhs in
             guard let lhsLastTimeUsed = lhs.lastTimeUsed else {
                 return false
             }
@@ -229,7 +227,7 @@ private extension Array where Element: Listing {
     func filter(searchTerm: String) -> [Listing] {
         if searchTerm.isEmpty { return self }
         
-        return self.filter {
+        return filter {
             $0.name.lowercased().contains(searchTerm.lowercased())
         }
     }
@@ -238,9 +236,7 @@ private extension Array where Element: Listing {
 // MARK: - Recent & Installed Wallets
 
 private extension ModalViewModel {
-    
-    func checkInstalledWallets() {
-        
+    func checkWhetherInstalled(wallets: [Listing]) {
         guard let schemes = Bundle.main.object(forInfoDictionaryKey: "LSApplicationQueriesSchemes") as? [String] else {
             return
         }
@@ -279,7 +275,6 @@ protocol WalletDeeplinkHandler {
 }
 
 extension ModalViewModel: WalletDeeplinkHandler {
- 
     func openAppstore(wallet: Listing) {
         guard
             let storeLinkString = wallet.app.ios,
@@ -308,7 +303,7 @@ extension ModalViewModel: WalletDeeplinkHandler {
                     if !success {
                         self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
                     }
-               }
+                }
             } else {
                 throw DeeplinkErrors.noWalletLinkFound
             }
