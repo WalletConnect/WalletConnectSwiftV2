@@ -22,10 +22,6 @@ final class NotifyClientRequestSubscriber {
             handle(event: .notifyMessage, params: record.message)
         }.store(in: &publishers)
 
-        client.deleteSubscriptionPublisher.sink { [unowned self] record in
-            handle(event: .notifyDelete, params: record)
-        }.store(in: &publishers)
-
         client.newSubscriptionPublisher.sink { [unowned self] subscription in
             handle(event: .notifySubscription, params: subscription)
         }.store(in: &publishers)
