@@ -1,42 +1,31 @@
 import Foundation
 import Combine
 
-/// Logging Protocol
-
-import Combine
-
 public protocol ConsoleLogging {
     var logsPublisher: AnyPublisher<Log, Never> { get }
-
-    func debug(_ items: Any...)
-    func info(_ items: Any...)
-    func warn(_ items: Any...)
-    func error(_ items: Any...)
-
-    func _debug(_ items: Any..., file: String, function: String, line: Int)
-    func _info(_ items: Any..., file: String, function: String, line: Int)
-    func _warn(_ items: Any..., file: String, function: String, line: Int)
-    func _error(_ items: Any..., file: String, function: String, line: Int)
-
+    func debug(_ items: Any..., file: String, function: String, line: Int)
+    func info(_ items: Any..., file: String, function: String, line: Int)
+    func warn(_ items: Any..., file: String, function: String, line: Int)
+    func error(_ items: Any..., file: String, function: String, line: Int)
     func setLogging(level: LoggingLevel)
 }
 
 public extension ConsoleLogging {
     func debug(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _debug(items, file: file, function: function, line: line)
+        debug(items, file: file, function: function, line: line)
     }
     func info(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _info(items, file: file, function: function, line: line)
+        info(items, file: file, function: function, line: line)
     }
     func warn(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _warn(items, file: file, function: function, line: line)
+        warn(items, file: file, function: function, line: line)
     }
     func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _error(items, file: file, function: function, line: line)
+        error(items, file: file, function: function, line: line)
     }
 }
 
-public class ConsoleLogger: ConsoleLogging {
+public class ConsoleLogger {
     private var loggingLevel: LoggingLevel
     private var suffix: String
     private var logsPublisherSubject = PassthroughSubject<Log, Never>()
@@ -77,43 +66,6 @@ public class ConsoleLogger: ConsoleLogging {
         }
     }
 
-    public func debug(_ items: Any...) {
-        fatalError()
-    }
-    public func info(_ items: Any...) {
-        fatalError()
-    }
-    public func warn(_ items: Any...) {
-        fatalError()
-    }
-    public func error(_ items: Any...) {
-        fatalError()
-    }
-
-    public func _debug(_ items: Any..., file: String, function: String, line: Int) {
-        if loggingLevel >= .debug {
-            logMessage(items, logType: .debug, file: file, function: function, line: line)
-        }
-    }
-
-    public func _info(_ items: Any..., file: String, function: String, line: Int) {
-        if loggingLevel >= .info {
-            logMessage(items, logType: .info, file: file, function: function, line: line)
-        }
-    }
-
-    public func _warn(_ items: Any..., file: String, function: String, line: Int) {
-        if loggingLevel >= .warn {
-            logMessage(items, logType: .warn, file: file, function: function, line: line)
-        }
-    }
-
-    public func _error(_ items: Any..., file: String, function: String, line: Int) {
-        if loggingLevel >= .error {
-            logMessage(items, logType: .error, file: file, function: function, line: line)
-        }
-    }
-
     private func logFormattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -122,22 +74,31 @@ public class ConsoleLogger: ConsoleLogging {
 }
 
 
-public extension ConsoleLogger {
-    func debug(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _debug(items, file: file, function: function, line: line)
+extension ConsoleLogger: ConsoleLogging {
+    public func debug(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .debug {
+            logMessage(items, logType: .debug, file: file, function: function, line: line)
+        }
     }
 
-    func info(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _info(items, file: file, function: function, line: line)
+    public func info(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .info {
+            logMessage(items, logType: .info, file: file, function: function, line: line)
+        }
     }
 
-    func warn(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _warn(items, file: file, function: function, line: line)
+    public func warn(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .warn {
+            logMessage(items, logType: .warn, file: file, function: function, line: line)
+        }
     }
 
-    func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _error(items, file: file, function: function, line: line)
+    public func error(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .error {
+            logMessage(items, logType: .error, file: file, function: function, line: line)
+        }
     }
+
 }
 
 
@@ -148,45 +109,13 @@ public struct ConsoleLoggerMock: ConsoleLogging {
     }
 
     public init() {}
-    public func debug(_ items: Any...) {
-        fatalError()
-    }
-    public func info(_ items: Any...) {
-        fatalError()
-    }
-    public func warn(_ items: Any...) {
-        fatalError()
-    }
-    public func error(_ items: Any...) {
-        fatalError()
-    }
 
-    public func _debug(_ items: Any..., file: String, function: String, line: Int) { }
-    public func _info(_ items: Any..., file: String, function: String, line: Int) { }
-    public func _warn(_ items: Any..., file: String, function: String, line: Int) { }
-    public func _error(_ items: Any..., file: String, function: String, line: Int) { }
+    public func debug(_ items: Any..., file: String, function: String, line: Int) { }
+    public func info(_ items: Any..., file: String, function: String, line: Int) { }
+    public func warn(_ items: Any..., file: String, function: String, line: Int) { }
+    public func error(_ items: Any..., file: String, function: String, line: Int) { }
 
     public func setLogging(level: LoggingLevel) { }
 }
 #endif
 
-
-#if DEBUG
-extension ConsoleLoggerMock {
-    func debug(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _debug(items, file: file, function: function, line: line)
-    }
-
-    func info(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _info(items, file: file, function: function, line: line)
-    }
-
-    func warn(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _warn(items, file: file, function: function, line: line)
-    }
-
-    func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
-        _error(items, file: file, function: function, line: line)
-    }
-}
-#endif
