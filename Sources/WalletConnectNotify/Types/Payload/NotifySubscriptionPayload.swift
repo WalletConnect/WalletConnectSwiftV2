@@ -22,6 +22,10 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         let scp: String
         /// Dapp's domain url
         let app: String
+
+        static var action: String {
+            return "notify_subscription"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -34,10 +38,6 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         var jwtString: String {
             return subscriptionAuth
         }
-    }
-
-    static var act: String {
-        return "notify_subscription"
     }
 
     let dappPubKey: DIDKey
@@ -67,7 +67,7 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
-            act: Self.act,
+            act: Claims.action,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: subscriptionAccount.did,

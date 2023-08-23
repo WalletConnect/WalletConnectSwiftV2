@@ -14,6 +14,10 @@ struct MessagePayload: JWTClaimsCodable {
         
         // TODO: Media not implemented
         // public let xma: Media?
+
+        static var action: String {
+            return "chat_message"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -26,10 +30,6 @@ struct MessagePayload: JWTClaimsCodable {
         var jwtString: String {
             return messageAuth
         }
-    }
-
-    static var act: String {
-        return "chat_message"
     }
 
     let keyserver: URL
@@ -56,7 +56,7 @@ struct MessagePayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             aud: DIDPKH(account: recipientAccount).string,
             sub: message,
-            act: Self.act
+            act: Claims.action
         )
     }
 }

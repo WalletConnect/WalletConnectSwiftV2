@@ -20,6 +20,10 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         let sub: String
         /// Dapp's domain url
         let app: String
+
+        static var action: String {
+            return "notify_receipt"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -32,10 +36,6 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         var jwtString: String {
             return receiptAuth
         }
-    }
-
-    static var act: String {
-        return "notify_receipt"
     }
 
     let keyserver: URL
@@ -67,7 +67,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: Self.act,
+            act: Claims.action,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: messageHash,

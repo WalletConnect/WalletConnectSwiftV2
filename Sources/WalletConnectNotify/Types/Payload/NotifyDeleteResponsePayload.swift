@@ -20,6 +20,10 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         let sub: String
         /// Dapp's domain url
         let app: String
+
+        static var action: String {
+            return "notify_delete_response"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -32,10 +36,6 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         var jwtString: String {
             return responseAuth
         }
-    }
-
-    static var act: String {
-        return "notify_delete_response"
     }
 
     let keyserver: URL
@@ -67,7 +67,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: Self.act,
+            act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
             sub: subscriptionHash,

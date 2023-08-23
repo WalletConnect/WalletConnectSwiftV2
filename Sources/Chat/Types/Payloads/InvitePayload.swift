@@ -24,10 +24,10 @@ struct InvitePayload: JWTClaimsCodable {
         let sub: String // opening message included in the invite
         let pke: String // proposer/inviter public key (did:key)
         let act: String // description of action intent
-    }
 
-    static var act: String {
-        return "invite_proposal"
+        static var action: String {
+            return "invite_proposal"
+        }
     }
 
     let keyserver: URL
@@ -58,7 +58,7 @@ struct InvitePayload: JWTClaimsCodable {
             aud: inviteeAccount.did,
             sub: message,
             pke: inviterPublicKey.did(variant: .X25519),
-            act: Self.act
+            act: Claims.action
         )
     }
 }

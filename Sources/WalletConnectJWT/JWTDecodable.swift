@@ -10,7 +10,9 @@ public protocol JWTClaims: JWTEncodable {
     var iss: String { get }
     var iat: UInt64 { get }
     var exp: UInt64 { get }
-    var act: String { get }
+    var act: String? { get }
+
+    static var action: String? { get }
 }
 
 public protocol JWTClaimsCodable {
@@ -18,8 +20,6 @@ public protocol JWTClaimsCodable {
     associatedtype Wrapper: JWTWrapper
 
     init(claims: Claims) throws
-
-    static var act: String { get } 
 
     func encode(iss: String) throws -> Claims
 }
@@ -35,7 +35,7 @@ extension JWTClaimsCodable {
         guard try JWTValidator(jwtString: wrapper.jwtString).isValid(publicKey: signingPublicKey)
         else { throw JWTError.signatureVerificationFailed }
 
-        guard Self.act == jwt.claims.act
+        guard Claims.action == jwt.claims.act
         else { throw JWTError.actMismatch }
 
         return (try Self.init(claims: jwt.claims), jwt.claims)

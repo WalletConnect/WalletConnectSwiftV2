@@ -22,6 +22,10 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         let app: String
         /// Message object
         let msg: NotifyMessage
+
+        static var action: String {
+            return "notify_message"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -34,10 +38,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         var jwtString: String {
             return messageAuth
         }
-    }
-
-    static var act: String {
-        return "notify_message"
     }
 
     let castServerPubKey: DIDKey
@@ -77,7 +77,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: Self.act,
+            act: Claims.action,
             iss: castServerPubKey.multibase(variant: .ED25519),
             aud: account.did,
             sub: subscriptionId,

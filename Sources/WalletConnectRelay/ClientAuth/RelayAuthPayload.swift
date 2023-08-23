@@ -13,40 +13,9 @@ struct RelayAuthPayload: JWTClaimsCodable {
         let iat: UInt64
         let exp: UInt64
 
-        /// Note: - Mock
-        /// Not encodint into json object
-        let act: String
+        let act: String?
 
-        enum CodingKeys: String, CodingKey {
-            case iss
-            case sub
-            case aud
-            case iat
-            case exp
-        }
-
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(iss, forKey: .iss)
-            try container.encode(sub, forKey: .sub)
-            try container.encode(aud, forKey: .aud)
-            try container.encode(iat, forKey: .iat)
-            try container.encode(exp, forKey: .exp)
-        }
-
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            self.iss = try container.decode(String.self, forKey: .iss)
-            self.sub = try container.decode(String.self, forKey: .sub)
-            self.aud = try container.decode(String.self, forKey: .aud)
-            self.iat = try container.decode(UInt64.self, forKey: .iat)
-            self.exp = try container.decode(UInt64.self, forKey: .exp)
-            self.act = RelayAuthPayload.act
-        }
-    }
-
-    static var act: String {
-        return "fake_act"
+        static var action: String? { nil }
     }
 
     let subject: String
@@ -69,7 +38,7 @@ struct RelayAuthPayload: JWTClaimsCodable {
             aud: audience,
             iat: defaultIat(),
             exp: expiry(days: 1),
-            act: Self.act
+            act: Claims.action
         )
     }
 }
