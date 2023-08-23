@@ -19,6 +19,9 @@ public class Serializer: Serializing {
     private let kms: KeyManagementServiceProtocol
     private let codec: Codec
     private let logger: ConsoleLogging
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher.eraseToAnyPublisher()
+    }
 
     init(kms: KeyManagementServiceProtocol, codec: Codec = ChaChaPolyCodec(), logger: ConsoleLogging) {
         self.kms = kms

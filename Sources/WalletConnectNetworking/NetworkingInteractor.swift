@@ -20,7 +20,9 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
-        logger.logsPublisher.eraseToAnyPublisher()
+        logger.logsPublisher
+            .merge(with: serializer.logsPublisher)
+            .eraseToAnyPublisher()
     }
 
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
