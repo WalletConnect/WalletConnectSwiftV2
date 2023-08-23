@@ -51,6 +51,11 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         return (value.key, element)
     }
 
+    public func exists(for key: String, id: String) -> Bool {
+        let element = getElement(for: key, id: id)
+        return element != nil
+    }
+
     @discardableResult
     public func set(elements: [Element], for key: String) -> Bool {
         var map = index[key] ?? [:]

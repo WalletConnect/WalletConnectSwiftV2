@@ -285,7 +285,7 @@ private extension ChatStorage {
     func setupSyncSubscriptions() {
         sentInviteStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
-            case .set(let object):
+            case .set(let object), .update(let object):
                 self.sentInviteStoreDelegate.onUpdate(object)
             case .delete(let object):
                 self.sentInviteStoreDelegate.onDelete(object)
@@ -294,7 +294,7 @@ private extension ChatStorage {
 
         threadStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
-            case .set(let object):
+            case .set(let object), .update(let object):
                 self.threadStoreDelegate.onUpdate(object, storage: self)
             case .delete(let object):
                 self.threadStoreDelegate.onDelete(object)
@@ -303,7 +303,7 @@ private extension ChatStorage {
 
         inviteKeyStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
-            case .set(let object):
+            case .set(let object), .update(let object):
                 self.inviteKeyDelegate.onUpdate(object, account: account)
             case .delete(let object):
                 self.inviteKeyDelegate.onDelete(object)
@@ -312,7 +312,7 @@ private extension ChatStorage {
 
         receivedInviteStatusStore.syncUpdatePublisher.sink { [unowned self] topic, account, update in
             switch update {
-            case .set(let object):
+            case .set(let object), .update(let object):
                 self.receiviedInviteStatusDelegate.onUpdate(object, storage: self, account: account)
             case .delete(let object):
                 self.receiviedInviteStatusDelegate.onDelete(object)

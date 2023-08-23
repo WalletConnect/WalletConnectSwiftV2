@@ -118,6 +118,8 @@ private extension NotifyStorage {
             case .delete(let object):
                 subscriptionStoreDelegate.onDelete(object, notifyStorage: self)
                 deleteSubscriptionSubject.send(object.topic)
+            case .update(let subscription):
+                newSubscriptionSubject.send(subscription)
             }
         }.store(in: &publishers)
     }
