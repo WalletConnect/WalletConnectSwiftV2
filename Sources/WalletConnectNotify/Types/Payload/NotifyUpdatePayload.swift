@@ -36,6 +36,10 @@ struct NotifyUpdatePayload: JWTClaimsCodable {
         }
     }
 
+    static var act: String {
+        return "notify_update"
+    }
+
     let dappPubKey: DIDKey
     let keyserver: URL
     let subscriptionAccount: Account
@@ -63,7 +67,7 @@ struct NotifyUpdatePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
-            act: "notify_update",
+            act: Self.act,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: subscriptionAccount.did,

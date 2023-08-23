@@ -34,6 +34,10 @@ struct NotifyDeletePayload: JWTClaimsCodable {
         }
     }
 
+    static var act: String {
+        return "notify_delete"
+    }
+
     let keyserver: URL
     let dappPubKey: DIDKey
     let reason: String
@@ -63,7 +67,7 @@ struct NotifyDeletePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: "notify_delete",
+            act: Self.act,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: reason,

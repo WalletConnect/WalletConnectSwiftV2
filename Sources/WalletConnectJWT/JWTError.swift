@@ -7,4 +7,5 @@ enum JWTError: Error {
     case noSignature
     case invalidJWTString
     case signatureVerificationFailed
+    case actMismatch
 }

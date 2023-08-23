@@ -25,6 +25,10 @@ struct ReceiptPayload: JWTClaimsCodable {
         }
     }
 
+    static var act: String {
+        return "chat_receipt"
+    }
+
     let keyserver: URL
     let messageHash: String
     let senderAccount: Account
@@ -49,7 +53,7 @@ struct ReceiptPayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             sub: messageHash,
             aud: DIDPKH(account: senderAccount).string,
-            act: "chat_receipt"
+            act: Self.act
         )
     }
 }

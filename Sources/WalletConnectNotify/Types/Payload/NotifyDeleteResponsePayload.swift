@@ -34,6 +34,10 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         }
     }
 
+    static var act: String {
+        return "notify_delete_response"
+    }
+
     let keyserver: URL
     let selfPubKey: DIDKey
     let subscriptionHash: String
@@ -63,7 +67,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: "notify_delete_response",
+            act: Self.act,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
             sub: subscriptionHash,

@@ -25,6 +25,10 @@ struct AcceptPayload: JWTClaimsCodable {
         }
     }
 
+    static var act: String {
+        return "invite_approval"
+    }
+
     let keyserver: URL
     let inviterAccount: Account
     let inviteePublicKey: DIDKey
@@ -49,7 +53,7 @@ struct AcceptPayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             aud: inviterAccount.did,
             sub: inviteePublicKey.did(variant: .X25519),
-            act: "invite_approval"
+            act: Self.act
         )
     }
 }

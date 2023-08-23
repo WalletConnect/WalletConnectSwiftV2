@@ -34,6 +34,10 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
         }
     }
 
+    static var act: String {
+        return "notify_update_response"
+    }
+
     let keyserver: URL
     let selfPubKey: DIDKey
     let subscriptionHash: String
@@ -51,7 +55,7 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: "notify_update_response",
+            act: Self.act,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
             sub: subscriptionHash,
