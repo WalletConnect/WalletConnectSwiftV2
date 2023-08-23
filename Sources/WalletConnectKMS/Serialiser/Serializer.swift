@@ -42,7 +42,7 @@ public class Serializer: Serializing {
         let messageJson = try encodable.json()
         guard let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) else {
             let error = Errors.symmetricKeyForTopicNotFound(topic)
-            logger.error("Serializer.serialize() \(error)")
+            logger.error("\(error)")
             throw error
         }
         let sealbox = try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
@@ -69,16 +69,16 @@ public class Serializer: Serializing {
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
             do {
                 let decoded: (T, Data) = try decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
-                logger.debug("Serializer.handleType0Envelope() - decoded: \(decoded.0)")
+                logger.debug("Decoded: \(decoded.0)")
                 return decoded
             }
             catch {
-                logger.error("Serializer.handleType0Envelope() \(error)")
+                logger.error("\(error)")
                 throw error
             }
         } else {
             let error = Errors.symmetricKeyForTopicNotFound(topic)
-            logger.error("Serializer.handleType0Envelope() \(error)")
+            logger.error("\(error)")
             throw error
         }
     }
@@ -86,8 +86,9 @@ public class Serializer: Serializing {
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, Data) {
         guard let selfPubKey = kms.getPublicKey(for: topic)
         else {
-            logger.error("Serializer.")
-            throw Errors.publicKeyForTopicNotFound
+            let error = Errors.publicKeyForTopicNotFound
+            logger.error("\(error)")
+            throw error
         }
 
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.toHexString())
@@ -103,7 +104,7 @@ public class Serializer: Serializing {
             let decodedType = try JSONDecoder().decode(T.self, from: decryptedData)
             return (decodedType, decryptedData)
         } catch {
-            logger.error("Serializer.decod() - Failed to decode with error: \(error)")
+            logger.error("Failed to decode with error: \(error)")
             throw error
         }
     }

@@ -45,7 +45,7 @@ public class ConsoleLogger {
     private func logMessage(_ items: Any..., logType: LoggingLevel, file: String = #file, function: String = #function, line: Int = #line) {
         let fileName = (file as NSString).lastPathComponent
         items.forEach {
-            var log = "\(prefix) [\(fileName) - \(function) - line: \(line)] \($0) - \(logFormattedDate(Date()))"
+            var log = "\(prefix) [\(fileName)]: \($0) - \(function) - line: \(line) - \(logFormattedDate(Date()))"
 
             switch logType {
             case .debug:
