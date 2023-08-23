@@ -10,14 +10,14 @@ final class PushMessagesInteractor {
     }
 
     var notifyMessagePublisher: AnyPublisher<NotifyMessageRecord, Never> {
-        return Notify.wallet.notifyMessagePublisher
+        return Notify.instance.notifyMessagePublisher
     }
     
     func getPushMessages() -> [NotifyMessageRecord] {
-        return Notify.wallet.getMessageHistory(topic: subscription.topic)
+        return Notify.instance.getMessageHistory(topic: subscription.topic)
     }
 
     func deletePushMessage(id: String) {
-        Notify.wallet.deleteNotifyMessage(id: id)
+        Notify.instance.deleteNotifyMessage(id: id)
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
 
 public class Notify {
-    public static var wallet: NotifyClient = {
+    public static var instance: NotifyClient = {
         guard let config = Notify.config else {
             fatalError("Error - you must call Notify.configure(_:) before accessing the shared wallet instance.")
         }
