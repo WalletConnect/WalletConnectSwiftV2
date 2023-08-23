@@ -13,7 +13,7 @@ public class NotifyDecryptionService {
     public init() {
         let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
         let kms = KeyManagementService(keychain: keychainStorage)
-        self.serializer = Serializer(kms: kms, logger: ConsoleLogger(suffix: "🔐", loggingLevel: .debug))
+        self.serializer = Serializer(kms: kms, logger: ConsoleLogger(prefix: "🔐", loggingLevel: .debug))
     }
 
     public func decryptMessage(topic: String, ciphertext: String) throws -> NotifyMessage {

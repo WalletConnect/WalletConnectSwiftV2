@@ -27,7 +27,7 @@ public extension ConsoleLogging {
 
 public class ConsoleLogger {
     private var loggingLevel: LoggingLevel
-    private var suffix: String
+    private var prefix: String
     private var logsPublisherSubject = PassthroughSubject<Log, Never>()
     public var logsPublisher: AnyPublisher<Log, Never> {
         return logsPublisherSubject.eraseToAnyPublisher()
@@ -37,15 +37,15 @@ public class ConsoleLogger {
         self.loggingLevel = level
     }
 
-    public init(suffix: String? = nil, loggingLevel: LoggingLevel = .warn) {
-        self.suffix = suffix ?? ""
+    public init(prefix: String? = nil, loggingLevel: LoggingLevel = .warn) {
+        self.prefix = prefix ?? ""
         self.loggingLevel = loggingLevel
     }
 
     private func logMessage(_ items: Any..., logType: LoggingLevel, file: String = #file, function: String = #function, line: Int = #line) {
         let fileName = (file as NSString).lastPathComponent
         items.forEach {
-            var log = "\(suffix) [\(fileName) - \(function) - line: \(line)] \($0) - \(logFormattedDate(Date()))"
+            var log = "\(prefix) [\(fileName) - \(function) - line: \(line)] \($0) - \(logFormattedDate(Date()))"
 
             switch logType {
             case .debug:
@@ -53,10 +53,10 @@ public class ConsoleLogger {
             case .info:
                 logsPublisherSubject.send(.info(log))
             case .warn:
-                log = "\(suffix) ⚠️ \(log)"
+                log = "\(prefix) ⚠️ \(log)"
                 logsPublisherSubject.send(.warn(log))
             case .error:
-                log = "\(suffix) ‼️ \(log)"
+                log = "\(prefix) ‼️ \(log)"
                 logsPublisherSubject.send(.error(log))
             case .off:
                 return

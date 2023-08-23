@@ -28,7 +28,7 @@ public struct ChatClientFactory {
         historyClient: HistoryClient
     ) -> ChatClient {
         let kms = KeyManagementService(keychain: keychain)
-        let serializer = Serializer(kms: kms, logger: ConsoleLogger(suffix: "🔐", loggingLevel: .debug))
+        let serializer = Serializer(kms: kms, logger: ConsoleLogger(prefix: "🔐", loggingLevel: .debug))
         let historyService = HistoryService(historyClient: historyClient, seiralizer: serializer)
         let messageStore = KeyedDatabase<Message>(storage: storage, identifier: ChatStorageIdentifiers.messages.rawValue)
         let receivedInviteStore = KeyedDatabase<ReceivedInvite>(storage: storage, identifier: ChatStorageIdentifiers.receivedInvites.rawValue)
