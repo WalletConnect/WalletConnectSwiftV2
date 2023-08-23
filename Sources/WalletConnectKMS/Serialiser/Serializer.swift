@@ -2,22 +2,34 @@ import Foundation
 
 public class Serializer: Serializing {
 
-    enum Errors: String, Error {
-        case symmetricKeyForTopicNotFound
+    enum Errors: Error, CustomStringConvertible {
+        case symmetricKeyForTopicNotFound(String)
         case publicKeyForTopicNotFound
+
+        var description: String {
+            switch self {
+            case .symmetricKeyForTopicNotFound(let topic):
+                return "Error: Symmetric key for topic '\(topic)' was not found."
+            case .publicKeyForTopicNotFound:
+                return "Error: Public key for topic was not found."
+            }
+        }
     }
 
     private let kms: KeyManagementServiceProtocol
     private let codec: Codec
+    private let logger: ConsoleLogging
 
-    init(kms: KeyManagementServiceProtocol, codec: Codec = ChaChaPolyCodec()) {
+    init(kms: KeyManagementServiceProtocol, codec: Codec = ChaChaPolyCodec(), logger: ConsoleLogging) {
         self.kms = kms
         self.codec = codec
+        self.logger = logger
     }
 
-    public init(kms: KeyManagementServiceProtocol) {
+    public init(kms: KeyManagementServiceProtocol, logger: ConsoleLogging) {
         self.kms = kms
         self.codec = ChaChaPolyCodec()
+        self.logger = logger
     }
 
     /// Encrypts and serializes an object
@@ -29,7 +41,9 @@ public class Serializer: Serializing {
     public func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
         let messageJson = try encodable.json()
         guard let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) else {
-            throw Errors.symmetricKeyForTopicNotFound
+            let error = Errors.symmetricKeyForTopicNotFound(topic)
+            logger.error("Serializer.serialize() \(error)")
+            throw error
         }
         let sealbox = try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
         return Envelope(type: envelopeType, sealbox: sealbox).serialised()
@@ -53,16 +67,28 @@ public class Serializer: Serializing {
 
     private func handleType0Envelope<T: Codable>(_ topic: String, _ envelope: Envelope) throws -> (T, Data) {
         if let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) {
-            let decoded: (T, Data) = try decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
-            return decoded
+            do {
+                let decoded: (T, Data) = try decode(sealbox: envelope.sealbox, symmetricKey: symmetricKey)
+                logger.debug("Serializer.handleType0Envelope() - decoded: \(decoded.0)")
+                return decoded
+            }
+            catch {
+                logger.error("Serializer.handleType0Envelope() \(error)")
+                throw error
+            }
         } else {
-            throw Errors.symmetricKeyForTopicNotFound
+            let error = Errors.symmetricKeyForTopicNotFound(topic)
+            logger.error("Serializer.handleType0Envelope() \(error)")
+            throw error
         }
     }
     
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, Data) {
         guard let selfPubKey = kms.getPublicKey(for: topic)
-        else { throw Errors.publicKeyForTopicNotFound }
+        else {
+            logger.error("Serializer.")
+            throw Errors.publicKeyForTopicNotFound
+        }
 
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.toHexString())
         let decodedType: (object: T, data: Data) = try decode(sealbox: sealbox, symmetricKey: agreementKeys.sharedKey.rawRepresentation)
@@ -72,8 +98,13 @@ public class Serializer: Serializing {
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> (T, Data) {
-        let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
-        let decoded = try JSONDecoder().decode(T.self, from: decryptedData)
-        return (decoded, decryptedData)
+        do {
+            let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
+            let decodedType = try JSONDecoder().decode(T.self, from: decryptedData)
+            return (decodedType, decryptedData)
+        } catch {
+            logger.error("Serializer.decod() - Failed to decode with error: \(error)")
+            throw error
+        }
     }
 }
