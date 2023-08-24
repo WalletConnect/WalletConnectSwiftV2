@@ -169,7 +169,7 @@ final class NotifyTests: XCTestCase {
                 messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+        wait(for: [subscribeExpectation, messageExpectation], timeout: 200)
         try await walletNotifyClient.deleteSubscription(topic: subscription.topic)
     }
 
