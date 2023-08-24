@@ -12,10 +12,10 @@ final class SerializerTests: XCTestCase {
 
     override func setUp() {
         self.myKms = KeyManagementServiceMock()
-        self.mySerializer = Serializer(kms: myKms)
+        self.mySerializer = Serializer(kms: myKms, logger: ConsoleLoggerMock())
 
         self.peerKms = KeyManagementServiceMock()
-        self.peerSerializer = Serializer(kms: peerKms)
+        self.peerSerializer = Serializer(kms: peerKms, logger: ConsoleLoggerMock())
     }
 
     func testSerializeDeserializeType0Envelope() {
