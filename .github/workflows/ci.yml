@@ -69,7 +69,7 @@ jobs:
     - name: Run integration tests
       if: matrix.type == 'integration-tests'
       shell: bash
-      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }} CAST_HOST=cast.walletconnect.com GM_DAPP_PROJECT_ID=${{ secrets.GM_DAPP_PROJECT_ID }} GM_DAPP_PROJECT_SECRET=${{ secrets.GM_DAPP_PROJECT_SECRET }} JS_CLIENT_API_HOST=test-automation-api.walletconnect.com
+      run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }} CAST_HOST=notify.walletconnect.com GM_DAPP_PROJECT_ID=${{ secrets.GM_DAPP_PROJECT_ID }} GM_DAPP_PROJECT_SECRET=${{ secrets.GM_DAPP_PROJECT_SECRET }} JS_CLIENT_API_HOST=test-automation-api.walletconnect.com
 
     # Relay Integration tests
     - name: Run Relay integration tests
