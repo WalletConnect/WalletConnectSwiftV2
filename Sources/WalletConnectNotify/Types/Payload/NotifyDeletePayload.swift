@@ -10,7 +10,7 @@ struct NotifyDeletePayload: JWTClaimsCodable {
         /// Key server URL
         let ksu: String
         /// Description of action intent. Must be equal to `notify_delete`
-        let act: String
+        let act: String?
 
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
@@ -20,6 +20,10 @@ struct NotifyDeletePayload: JWTClaimsCodable {
         let sub: String
         /// Dapp's domain url
         let app: String
+
+        static var action: String? {
+            return "notify_delete"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -63,7 +67,7 @@ struct NotifyDeletePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: "notify_delete",
+            act: Claims.action,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: reason,

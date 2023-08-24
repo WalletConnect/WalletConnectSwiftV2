@@ -10,7 +10,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         /// Key server URL
         let ksu: String
         /// Description of action intent. Must be equal to `notify_delete_response`
-        let act: String
+        let act: String?
 
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used
         let iss: String
@@ -20,6 +20,10 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         let sub: String
         /// Dapp's domain url
         let app: String
+
+        static var action: String? {
+            return "notify_delete_response"
+        }
     }
 
     struct Wrapper: JWTWrapper {
@@ -63,7 +67,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             ksu: keyserver.absoluteString,
-            act: "notify_delete_response",
+            act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
             sub: subscriptionHash,

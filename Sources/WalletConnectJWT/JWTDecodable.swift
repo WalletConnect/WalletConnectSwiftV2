@@ -10,6 +10,9 @@ public protocol JWTClaims: JWTEncodable {
     var iss: String { get }
     var iat: UInt64 { get }
     var exp: UInt64 { get }
+    var act: String? { get }
+
+    static var action: String? { get }
 }
 
 public protocol JWTClaimsCodable {
@@ -31,6 +34,9 @@ extension JWTClaimsCodable {
 
         guard try JWTValidator(jwtString: wrapper.jwtString).isValid(publicKey: signingPublicKey)
         else { throw JWTError.signatureVerificationFailed }
+
+        guard Claims.action == jwt.claims.act
+        else { throw JWTError.actMismatch }
 
         return (try Self.init(claims: jwt.claims), jwt.claims)
     }
