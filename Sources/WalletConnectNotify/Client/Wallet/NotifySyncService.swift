@@ -86,7 +86,7 @@ final class NotifySyncService {
 
         logger.debug("Received object from history: \(subscriptions)")
 
-        try subscriptionsStore.setInStore(objects: subscriptions, for: account)
+        try subscriptionsStore.replaceInStore(objects: subscriptions, for: account)
 
         for subscription in subscriptions {
             let symmetricKey = try SymmetricKey(hex: subscription.symKey)

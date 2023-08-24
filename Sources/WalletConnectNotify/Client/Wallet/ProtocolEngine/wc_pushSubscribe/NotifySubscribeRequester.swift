@@ -46,7 +46,7 @@ class NotifySubscribeRequester {
 
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
-        let responseTopic  = keysY.derivedTopic()
+        let responseTopic = keysY.derivedTopic()
         
         dappsMetadataStore.set(metadata, forKey: responseTopic)
 
