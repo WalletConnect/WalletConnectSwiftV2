@@ -5,5 +5,5 @@ struct NotifyMessageProtocolMethod: ProtocolMethod {
 
     let requestConfig: RelayConfig = RelayConfig(tag: 4002, prompt: true, ttl: 2592000)
 
-    let responseConfig: RelayConfig = RelayConfig(tag: 4003, prompt: true, ttl: 2592000)
+    let responseConfig: RelayConfig = RelayConfig(tag: 4003, prompt: false, ttl: 2592000)
 }
