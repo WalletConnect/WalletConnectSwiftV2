@@ -27,8 +27,9 @@ final class ConfigurationService {
             onSign: importAccount.onSign
         )
 
-        let clientId = try! Networking.interactor.getClientId()
-        LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
+        if let clientId = try? Networking.interactor.getClientId() {
+            LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
+        }
         LoggingService.instance.startLogging()
     }
 }
