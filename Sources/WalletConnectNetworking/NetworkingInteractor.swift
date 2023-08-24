@@ -53,6 +53,12 @@ public class NetworkingInteractor: NetworkInteracting {
             }.store(in: &publishers)
     }
 
+    public func setLogging(_ level: LoggingLevel) {
+        logger.setLogging(level: level)
+        serializer.setLogging(level: level)
+    }
+
+
     public func subscribe(topic: String) async throws {
         try await relayClient.subscribe(topic: topic)
     }

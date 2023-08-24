@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 public class Serializer: Serializing {
 
@@ -33,6 +34,10 @@ public class Serializer: Serializing {
         self.kms = kms
         self.codec = ChaChaPolyCodec()
         self.logger = logger
+    }
+
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
     }
 
     /// Encrypts and serializes an object
