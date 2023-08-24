@@ -23,9 +23,9 @@ struct InvitePayload: JWTClaimsCodable {
         let aud: String // responder/invitee blockchain account (did:pkh)
         let sub: String // opening message included in the invite
         let pke: String // proposer/inviter public key (did:key)
-        let act: String // description of action intent
+        let act: String? // description of action intent
 
-        static var action: String {
+        static var action: String? {
             return "invite_proposal"
         }
     }

@@ -10,7 +10,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         /// Key server URL
         let ksu: String
         /// Action intent (must be `notify_message`)
-        let act: String
+        let act: String?
 
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used. diddoc authentication key
         let iss: String
@@ -23,7 +23,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         /// Message object
         let msg: NotifyMessage
 
-        static var action: String {
+        static var action: String? {
             return "notify_message"
         }
     }

@@ -10,7 +10,7 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         /// Key server URL
         let ksu: String
         /// Description of action intent. Must be equal to "notify_subscription_response"
-        let act: String
+        let act: String?
 
         /// `did:key` of an identity key. Allows for the resolution of which Notify server was used.
         let iss: String
@@ -21,7 +21,7 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         /// Dapp's domain url
         let app: String
 
-        static var action: String {
+        static var action: String? {
             return "notify_subscription_response"
         }
     }

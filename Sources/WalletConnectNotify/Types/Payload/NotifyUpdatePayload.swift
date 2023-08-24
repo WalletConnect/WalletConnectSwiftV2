@@ -10,7 +10,7 @@ struct NotifyUpdatePayload: JWTClaimsCodable {
         /// Key server URL
         let ksu: String
         /// Description of action intent. Must be equal to `notify_update`
-        let act: String
+        let act: String?
 
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
@@ -23,7 +23,7 @@ struct NotifyUpdatePayload: JWTClaimsCodable {
         /// Dapp's domain url
         let app: String
 
-        static var action: String {
+        static var action: String? {
             return "notify_update"
         }
     }

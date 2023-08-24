@@ -10,7 +10,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         /// Key server URL
         let ksu: String
         /// Description of action intent. Must be equal to `notify_delete_response`
-        let act: String
+        let act: String?
 
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used
         let iss: String
@@ -21,7 +21,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         /// Dapp's domain url
         let app: String
 
-        static var action: String {
+        static var action: String? {
             return "notify_delete_response"
         }
     }

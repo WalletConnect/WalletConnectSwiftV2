@@ -10,9 +10,9 @@ struct ReceiptPayload: JWTClaimsCodable {
 
         let sub: String // hash of the message received
         let aud: String // sender blockchain account (did:pkh)
-        let act: String // description of action intent
+        let act: String? // description of action intent
 
-        static var action: String {
+        static var action: String? {
             return "chat_receipt"
         }
     }

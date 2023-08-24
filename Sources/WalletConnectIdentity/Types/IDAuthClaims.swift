@@ -7,7 +7,7 @@ protocol IDAuthClaims: JWTClaims {
     var iat: UInt64 { get }
     var exp: UInt64 { get }
     var pkh: String { get }
-    var act: String { get }
+    var act: String? { get }
 
-    init(iss: String, sub: String, aud: String, iat: UInt64, exp: UInt64, pkh: String, act: String)
+    init(iss: String, sub: String, aud: String, iat: UInt64, exp: UInt64, pkh: String, act: String?)
 }
