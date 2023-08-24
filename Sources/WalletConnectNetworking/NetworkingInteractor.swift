@@ -53,9 +53,10 @@ public class NetworkingInteractor: NetworkInteracting {
             }.store(in: &publishers)
     }
 
-    public func setLogging(_ level: LoggingLevel) {
+    public func setLogging(level: LoggingLevel) {
         logger.setLogging(level: level)
         serializer.setLogging(level: level)
+        relayClient.setLogging(level: level)
     }
 
 

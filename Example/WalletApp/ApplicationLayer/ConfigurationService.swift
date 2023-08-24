@@ -7,7 +7,7 @@ final class ConfigurationService {
 
     func configure(importAccount: ImportAccount) {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
-        Networking.instance.setLogging(.debug)
+        Networking.instance.setLogging(level: .debug)
 
         let metadata = AppMetadata(
             name: "Example Wallet",

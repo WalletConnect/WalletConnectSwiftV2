@@ -25,7 +25,7 @@ public struct PushClientFactory {
         sessionConfiguration.timeoutIntervalForResource = 5.0
         let session = URLSession(configuration: sessionConfiguration)
 
-        let logger = ConsoleLogger(prefix: "👂🏻", loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: "👂🏻", loggingLevel: .off)
         let httpClient = HTTPNetworkClient(host: pushHost, session: session)
 
         let clientIdStorage = ClientIdStorage(keychain: keychainStorage)

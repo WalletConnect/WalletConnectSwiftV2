@@ -63,6 +63,10 @@ public final class RelayClient {
         }
     }
 
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+    }
+
     /// Connects web socket
     ///
     /// Use this method for manual socket connection only
