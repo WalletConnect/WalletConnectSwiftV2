@@ -3,7 +3,7 @@ import Foundation
 public struct NotifyClientFactory {
 
     public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, syncClient: SyncClient, historyClient: HistoryClient, crypto: CryptoProvider) -> NotifyClient {
-        let logger = ConsoleLogger(suffix: "🔔",loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")

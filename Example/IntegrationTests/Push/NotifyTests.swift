@@ -40,9 +40,9 @@ final class NotifyTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
-        let relayLogger = ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(suffix: prefix + " [Pairing]", loggingLevel: .debug)
-        let networkingLogger = ConsoleLogger(suffix: prefix + " [Networking]", loggingLevel: .debug)
+        let relayLogger = ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug)
+        let pairingLogger = ConsoleLogger(prefix: prefix + " [Pairing]", loggingLevel: .debug)
+        let networkingLogger = ConsoleLogger(prefix: prefix + " [Networking]", loggingLevel: .debug)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
@@ -74,7 +74,7 @@ final class NotifyTests: XCTestCase {
     func makeWalletClients() {
         let prefix = "🦋 Wallet: "
         let (pairingClient, networkingInteractor, syncClient, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
-        let notifyLogger = ConsoleLogger(suffix: prefix + " [Notify]", loggingLevel: .debug)
+        let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
         walletPairingClient = pairingClient
         let pushClient = PushClientFactory.create(projectId: "",
                                                   pushHost: "echo.walletconnect.com",
