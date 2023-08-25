@@ -1,4 +1,5 @@
 import Foundation
+import OrderedCollections
 import SwiftUI
 
 #if canImport(UIKit)
@@ -146,7 +147,7 @@ public struct SessionParams {
     public static let `default`: Self = {
         let methods: Set<String> = ["eth_sendTransaction", "personal_sign", "eth_signTypedData"]
         let events: Set<String> = ["chainChanged", "accountsChanged"]
-        let blockchains: Set<Blockchain> = [Blockchain("eip155:1")!]
+        let blockchains: OrderedSet<Blockchain> = [Blockchain("eip155:1")!]
         let namespaces: [String: ProposalNamespace] = [
             "eip155": ProposalNamespace(
                 chains: blockchains,

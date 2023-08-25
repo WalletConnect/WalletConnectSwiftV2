@@ -1,3 +1,5 @@
+import OrderedCollections
+
 public enum AutoNamespacesError: Error {
     case requiredChainsNotSatisfied
     case requiredAccountsNotSatisfied
@@ -7,11 +9,11 @@ public enum AutoNamespacesError: Error {
 
 public struct ProposalNamespace: Equatable, Codable {
 
-    public let chains: Set<Blockchain>?
+    public let chains: OrderedSet<Blockchain>?
     public let methods: Set<String>
     public let events: Set<String>
 
-    public init(chains: Set<Blockchain>? = nil, methods: Set<String>, events: Set<String>) {
+    public init(chains: OrderedSet<Blockchain>? = nil, methods: Set<String>, events: Set<String>) {
         self.chains = chains
         self.methods = methods
         self.events = events
@@ -19,19 +21,19 @@ public struct ProposalNamespace: Equatable, Codable {
 }
 
 public struct SessionNamespace: Equatable, Codable {
-    public var chains: Set<Blockchain>?
-    public var accounts: Set<Account>
+    public var chains: OrderedSet<Blockchain>?
+    public var accounts: OrderedSet<Account>
     public var methods: Set<String>
     public var events: Set<String>
 
-    public init(chains: Set<Blockchain>? = nil, accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
+    public init(chains: OrderedSet<Blockchain>? = nil, accounts: OrderedSet<Account>, methods: Set<String>, events: Set<String>) {
         self.chains = chains
         self.accounts = accounts
         self.methods = methods
         self.events = events
     }
 
-    static func accountsAreCompliant(_ accounts: Set<Account>, toChains chains: Set<Blockchain>) -> Bool {
+    static func accountsAreCompliant(_ accounts: OrderedSet<Account>, toChains chains: OrderedSet<Blockchain>) -> Bool {
         for chain in chains {
             guard accounts.contains(where: { $0.blockchain == chain }) else {
                 return false
@@ -186,8 +188,8 @@ public enum AutoNamespaces {
                 }
 
                 let sessionNamespace = SessionNamespace(
-                    chains: sessionChains,
-                    accounts: Set(accounts).filter { sessionChains.contains($0.blockchain) },
+                    chains: OrderedSet(sessionChains),
+                    accounts: OrderedSet(accounts.filter { sessionChains.contains($0.blockchain) }),
                     methods: sessionMethods,
                     events: sessionEvents
                 )
@@ -229,8 +231,8 @@ public enum AutoNamespaces {
                     }
 
                     let sessionNamespace = SessionNamespace(
-                        chains: Set([Blockchain(namespace: network, reference: chain)!]),
-                        accounts: Set(accounts).filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
+                        chains: OrderedSet([Blockchain(namespace: network, reference: chain)!]),
+                        accounts: OrderedSet(accounts.filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! }),
                         methods: sessionMethods,
                         events: sessionEvents
                     )
@@ -269,8 +271,8 @@ public enum AutoNamespaces {
                 let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
 
                 let sessionNamespace = SessionNamespace(
-                    chains: sessionChains,
-                    accounts: Set(accounts).filter { sessionChains.contains($0.blockchain) },
+                    chains: OrderedSet(sessionChains),
+                    accounts: OrderedSet(accounts.filter { sessionChains.contains($0.blockchain) }),
                     methods: sessionMethods,
                     events: sessionEvents
                 )
@@ -304,8 +306,8 @@ public enum AutoNamespaces {
                     let sessionEvents = Set(proposalNamespace.events).intersection(Set(events))
                     
                     let sessionNamespace = SessionNamespace(
-                        chains: Set([Blockchain(namespace: network, reference: chain)!]),
-                        accounts: Set(accounts).filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
+                        chains: OrderedSet([Blockchain(namespace: network, reference: chain)!]),
+                        accounts: OrderedSet(accounts.filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! }),
                         methods: sessionMethods,
                         events: sessionEvents
                     )

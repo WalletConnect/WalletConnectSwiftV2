@@ -56,12 +56,13 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
-        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
+        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1"),
+        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.0.4")),
     ],
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectPairing", "WalletConnectVerify"],
+            dependencies: ["WalletConnectPairing", "WalletConnectVerify", .product(name: "OrderedCollections", package: "swift-collections")],
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
