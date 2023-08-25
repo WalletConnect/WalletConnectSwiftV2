@@ -7,6 +7,7 @@ final class ConfigurationService {
 
     func configure(importAccount: ImportAccount) {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.instance.setLogging(level: .debug)
 
         let metadata = AppMetadata(
             name: "Example Wallet",
@@ -22,9 +23,13 @@ final class ConfigurationService {
             bip44: DefaultBIP44Provider(),
             config: [.chatEnabled: false, .settingsEnabled: false],
             environment: BuildConfiguration.shared.apnsEnvironment,
+            crypto: DefaultCryptoProvider(),
             onSign: importAccount.onSign
         )
 
+        if let clientId = try? Networking.interactor.getClientId() {
+            LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
+        }
         LoggingService.instance.startLogging()
     }
 }

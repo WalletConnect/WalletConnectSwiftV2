@@ -9,23 +9,44 @@ final class RecentWalletsStorage {
 
     var recentWallets: [Listing] {
         get {
-            guard
-                let data = defaults.data(forKey: "recentWallets"),
-                let wallets = try? JSONDecoder().decode([Listing].self, from: data)
-            else {
-                return []
-            }
-            
-            return wallets
+            loadRecentWallets()
         }
         set {
-            guard
-                let walletsData = try? JSONEncoder().encode(newValue)
-            else {
-                return
+            saveRecentWallets(newValue)
+        }
+    }
+    
+    func loadRecentWallets() -> [Listing] {
+        guard
+            let data = defaults.data(forKey: "recentWallets"),
+            let wallets = try? JSONDecoder().decode([Listing].self, from: data)
+        else {
+            return []
+        }
+        
+        return wallets.filter { listing in
+            guard let lastTimeUsed = listing.lastTimeUsed else {
+                assertionFailure("Shouldn't happen we stored wallet without `lastTimeUsed`")
+                return false
             }
             
-            defaults.set(walletsData, forKey: "recentWallets")
+            // Consider Recent only for 3 days
+            return abs(lastTimeUsed.timeIntervalSinceNow) > (24 * 60 * 60 * 3)
         }
+    }
+    
+    func saveRecentWallets(_ listings: [Listing])  {
+        
+        let subset = Array(listings.filter {
+            $0.lastTimeUsed != nil
+        }.prefix(5))
+        
+        guard
+            let walletsData = try? JSONEncoder().encode(subset)
+        else {
+            return
+        }
+        
+        defaults.set(walletsData, forKey: "recentWallets")
     }
 }

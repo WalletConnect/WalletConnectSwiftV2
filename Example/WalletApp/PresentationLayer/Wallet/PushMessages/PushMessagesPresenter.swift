@@ -1,6 +1,6 @@
 import UIKit
 import Combine
-import WalletConnectPush
+import WalletConnectNotify
 
 final class PushMessagesPresenter: ObservableObject {
 
@@ -50,7 +50,7 @@ private extension PushMessagesPresenter {
                 PushMessageViewModel(pushMessageRecord: pushMessageRecord)
             }
         
-        interactor.pushMessagePublisher
+        interactor.notifyMessagePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] newPushMessage in
                 let newMessageViewModel = PushMessageViewModel(pushMessageRecord: newPushMessage)

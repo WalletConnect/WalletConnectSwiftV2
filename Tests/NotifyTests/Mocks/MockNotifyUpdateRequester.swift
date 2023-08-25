@@ -1,6 +1,6 @@
 
 import Foundation
-@testable import WalletConnectPush
+@testable import WalletConnectNotify
 
 
 class MockNotifyUpdateRequester: NotifyUpdateRequesting {

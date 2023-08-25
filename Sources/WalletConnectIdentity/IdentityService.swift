@@ -48,7 +48,7 @@ actor IdentityService {
 
         let inviteKey = try kms.createX25519KeyPair()
         let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
-        let idAuth = try makeIDAuth(account: account, issuer: invitePublicKey, kind: .registerInvite)
+        let idAuth = try makeIDAuth(account: account, issuer: invitePublicKey, claims: RegisterInviteClaims.self)
         try await networkService.registerInvite(idAuth: idAuth)
 
         return try storage.saveInviteKey(inviteKey, for: account)
@@ -57,7 +57,7 @@ actor IdentityService {
     func unregister(account: Account, onSign: SigningCallback) async throws {
         let identityKey = try storage.getIdentityKey(for: account)
         let identityPublicKey = DIDKey(rawData: identityKey.publicKey.rawRepresentation)
-        let idAuth = try makeIDAuth(account: account, issuer: identityPublicKey, kind: .unregisterIdentity)
+        let idAuth = try makeIDAuth(account: account, issuer: identityPublicKey, claims: UnregisterIdentityClaims.self)
         try await networkService.removeIdentity(idAuth: idAuth)
         try storage.removeIdentityKey(for: account)
     }
@@ -65,7 +65,7 @@ actor IdentityService {
     func goPrivate(account: Account) async throws -> AgreementPublicKey {
         let inviteKey = try storage.getInviteKey(for: account)
         let invitePublicKey = DIDKey(rawData: inviteKey.rawRepresentation)
-        let idAuth = try makeIDAuth(account: account, issuer: invitePublicKey, kind: .unregisterInvite)
+        let idAuth = try makeIDAuth(account: account, issuer: invitePublicKey, claims: UnregisterInviteClaims.self)
         try await networkService.removeInvite(idAuth: idAuth)
         try storage.removeInviteKey(for: account)
 
@@ -113,11 +113,10 @@ private extension IdentityService {
         }
     }
 
-    func makeIDAuth(account: Account, issuer: DIDKey, kind: IDAuthPayload.Kind) throws -> String {
+    func makeIDAuth<Claims: IDAuthClaims>(account: Account, issuer: DIDKey, claims: Claims.Type) throws -> String {
         let identityKey = try storage.getIdentityKey(for: account)
 
-        let payload = IDAuthPayload(
-            kind: kind,
+        let payload = IDAuthPayload<Claims>(
             keyserver: keyserverURL,
             account: account,
             invitePublicKey: issuer

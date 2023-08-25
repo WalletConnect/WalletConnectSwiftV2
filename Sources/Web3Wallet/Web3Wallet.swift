@@ -27,7 +27,7 @@ public class Web3Wallet {
             authClient: Auth.instance,
             signClient: Sign.instance,
             pairingClient: Pair.instance as! PairingClient,
-            echoClient: Echo.instance
+            pushClient: Push.instance
         )
     }()
     
@@ -42,12 +42,12 @@ public class Web3Wallet {
     static public func configure(
         metadata: AppMetadata,
         crypto: CryptoProvider,
-        echoHost: String = "echo.walletconnect.com",
+        pushHost: String = "echo.walletconnect.com",
         environment: APNSEnvironment = .production
     ) {
         Pair.configure(metadata: metadata)
         Auth.configure(crypto: crypto)
-        Echo.configure(echoHost: echoHost, environment: environment)
+        Push.configure(pushHost: pushHost, environment: environment)
         Web3Wallet.config = Web3Wallet.Config(crypto: crypto)
     }
 }

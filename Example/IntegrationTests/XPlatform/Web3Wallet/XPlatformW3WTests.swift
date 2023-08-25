@@ -4,7 +4,7 @@ import Combine
 @testable import Web3Wallet
 @testable import Auth
 @testable import WalletConnectSign
-@testable import WalletConnectEcho
+@testable import WalletConnectPush
 
 final class XPlatformW3WTests: XCTestCase {
     var w3wClient: Web3WalletClient!
@@ -20,12 +20,12 @@ final class XPlatformW3WTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
-        let relayLogger = ConsoleLogger(suffix: "🚄" + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(suffix: "👩‍❤️‍💋‍👩" + " [Pairing]", loggingLevel: .debug)
-        let networkingLogger = ConsoleLogger(suffix: "🕸️" + " [Networking]", loggingLevel: .debug)
-        let authLogger = ConsoleLogger(suffix: "🪪", loggingLevel: .debug)
+        let relayLogger = ConsoleLogger(prefix: "🚄" + " [Relay]", loggingLevel: .debug)
+        let pairingLogger = ConsoleLogger(prefix: "👩‍❤️‍💋‍👩" + " [Pairing]", loggingLevel: .debug)
+        let networkingLogger = ConsoleLogger(prefix: "🕸️" + " [Networking]", loggingLevel: .debug)
+        let authLogger = ConsoleLogger(prefix: "🪪", loggingLevel: .debug)
 
-        let signLogger = ConsoleLogger(suffix: "✍🏿", loggingLevel: .debug)
+        let signLogger = ConsoleLogger(prefix: "✍🏿", loggingLevel: .debug)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
@@ -72,7 +72,7 @@ final class XPlatformW3WTests: XCTestCase {
             authClient: authClient,
             signClient: signClient,
             pairingClient: pairingClient,
-            echoClient: EchoClientMock())
+            pushClient: PushClientMock())
     }
 
     func testSessionSettle() async throws {

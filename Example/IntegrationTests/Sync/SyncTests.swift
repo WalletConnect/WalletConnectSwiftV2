@@ -56,7 +56,7 @@ final class SyncTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let kms = KeyManagementService(keychain: keychain)
         let derivationService = SyncDerivationService(syncStorage: syncSignatureStore, bip44: DefaultBIP44Provider(), kms: kms)
-        let logger = ConsoleLogger(suffix: suffix, loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: suffix, loggingLevel: .debug)
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,
@@ -88,8 +88,10 @@ final class SyncTests: XCTestCase {
     func testSync() async throws {
         let setExpectation = expectation(description: "syncSetTest")
         let delExpectation = expectation(description: "syncDelTest")
+        let uptExpectation = expectation(description: "syncUptTest")
 
         let object = TestObject(id: "id-1", value: "value-1")
+        let updated = TestObject(id: "id-1", value: "value-2")
 
         syncStore1.syncUpdatePublisher.sink { (_, _, update) in
             switch update {
@@ -97,6 +99,8 @@ final class SyncTests: XCTestCase {
                 XCTFail()
             case .delete:
                 delExpectation.fulfill()
+            case .update:
+                XCTFail()
             }
         }.store(in: &publishers)
 
@@ -106,6 +110,8 @@ final class SyncTests: XCTestCase {
                 setExpectation.fulfill()
             case .delete:
                 XCTFail()
+            case .update:
+                uptExpectation.fulfill()
             }
         }.store(in: &publishers)
 
@@ -122,6 +128,15 @@ final class SyncTests: XCTestCase {
 
         XCTAssertEqual(try syncStore1.getAll(for: account), [object])
         XCTAssertEqual(try syncStore2.getAll(for: account), [object])
+
+        // Testing SyncStore `update`
+
+        try await syncStore1.set(object: updated, for: account)
+
+        wait(for: [uptExpectation], timeout: InputConfig.defaultTimeout)
+
+        XCTAssertEqual(try syncStore1.getAll(for: account), [updated])
+        XCTAssertEqual(try syncStore2.getAll(for: account), [updated])
 
         // Testing SyncStore `delete`
 
@@ -140,5 +155,6 @@ final class SyncTests: XCTestCase {
 
         try await client.register(account: account, signature: signature)
         try await client.create(account: account, store: storeName)
+        try await client.subscribe(account: account, store: storeName)
     }
 }

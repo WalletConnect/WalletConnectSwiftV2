@@ -1,27 +1,33 @@
 import Foundation
 import Combine
 
-/// Logging Protocol
 public protocol ConsoleLogging {
     var logsPublisher: AnyPublisher<Log, Never> { get }
-    /// Writes a debug message to the log.
-    func debug(_ items: Any...)
-
-    /// Writes an informative message to the log.
-    func info(_ items: Any...)
-
-    /// Writes information about a warning to the log.
-    func warn(_ items: Any...)
-
-    /// Writes information about an error to the log.
-    func error(_ items: Any...)
-
+    func debug(_ items: Any..., file: String, function: String, line: Int)
+    func info(_ items: Any..., file: String, function: String, line: Int)
+    func warn(_ items: Any..., file: String, function: String, line: Int)
+    func error(_ items: Any..., file: String, function: String, line: Int)
     func setLogging(level: LoggingLevel)
 }
 
-public class ConsoleLogger: ConsoleLogging {
+public extension ConsoleLogging {
+    func debug(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
+        debug(items, file: file, function: function, line: line)
+    }
+    func info(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
+        info(items, file: file, function: function, line: line)
+    }
+    func warn(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
+        warn(items, file: file, function: function, line: line)
+    }
+    func error(_ items: Any..., file: String = #file, function: String = #function, line: Int = #line) {
+        error(items, file: file, function: function, line: line)
+    }
+}
+
+public class ConsoleLogger {
     private var loggingLevel: LoggingLevel
-    private var suffix: String
+    private var prefix: String
     private var logsPublisherSubject = PassthroughSubject<Log, Never>()
     public var logsPublisher: AnyPublisher<Log, Never> {
         return logsPublisherSubject.eraseToAnyPublisher()
@@ -31,57 +37,70 @@ public class ConsoleLogger: ConsoleLogging {
         self.loggingLevel = level
     }
 
-    public init(suffix: String? = nil, loggingLevel: LoggingLevel = .warn) {
-        self.suffix = suffix ?? ""
+    public init(prefix: String? = nil, loggingLevel: LoggingLevel = .warn) {
+        self.prefix = prefix ?? ""
         self.loggingLevel = loggingLevel
     }
 
-    public func debug(_ items: Any...) {
-        if loggingLevel >= .debug {
-            items.forEach {
-                let log = "\(suffix) \($0) - \(logFormattedDate(Date()))"
-                Swift.print(log)
+    private func logMessage(_ items: Any..., logType: LoggingLevel, file: String = #file, function: String = #function, line: Int = #line) {
+        let fileName = (file as NSString).lastPathComponent
+        items.forEach {
+            var log = "[\(fileName)]: \($0) - \(function) - line: \(line) - \(logFormattedDate(Date()))"
+
+            switch logType {
+            case .debug:
+                log = "\(prefix) \(log)"
                 logsPublisherSubject.send(.debug(log))
-            }
-        }
-    }
-
-    public func info(_ items: Any...) {
-        if loggingLevel >= .info {
-            items.forEach {
-                let log = "\(suffix) \($0) - \(logFormattedDate(Date()))"
-                Swift.print(log)
-                logsPublisherSubject.send(.info(log))            }
-        }
-    }
-
-    public func warn(_ items: Any...) {
-        if loggingLevel >= .warn {
-            items.forEach {
-                let log = "\(suffix) ⚠️ \($0) - \(logFormattedDate(Date()))"
-                Swift.print(log)
+            case .info:
+                log = "\(prefix) ℹ️ \(log)"
+                logsPublisherSubject.send(.info(log))
+            case .warn:
+                log = "\(prefix) ⚠️ \(log)"
                 logsPublisherSubject.send(.warn(log))
+            case .error:
+                log = "\(prefix) ‼️ \(log)"
+                logsPublisherSubject.send(.error(log))
+            case .off:
+                return
             }
+
+            Swift.print(log)
         }
     }
 
-    public func error(_ items: Any...) {
-        if loggingLevel >= .error {
-            items.forEach {
-                let log = "\(suffix) ‼️ \($0) - \(logFormattedDate(Date()))"
-                Swift.print(log)
-                logsPublisherSubject.send(.error(log))
-            }
-        }
+    private func logFormattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.string(from: date)
     }
 }
 
 
-fileprivate func logFormattedDate(_ date: Date) -> String {
-    let dateFormatter = DateFormatter()
-    dateFormatter.locale = NSLocale.current
-    dateFormatter.dateFormat = "HH:mm:ss.SSSS"
-    return  dateFormatter.string(from: date)
+extension ConsoleLogger: ConsoleLogging {
+    public func debug(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .debug {
+            logMessage(items, logType: .debug, file: file, function: function, line: line)
+        }
+    }
+
+    public func info(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .info {
+            logMessage(items, logType: .info, file: file, function: function, line: line)
+        }
+    }
+
+    public func warn(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .warn {
+            logMessage(items, logType: .warn, file: file, function: function, line: line)
+        }
+    }
+
+    public func error(_ items: Any..., file: String, function: String, line: Int) {
+        if loggingLevel >= .error {
+            logMessage(items, logType: .error, file: file, function: function, line: line)
+        }
+    }
+
 }
 
 
@@ -90,11 +109,15 @@ public struct ConsoleLoggerMock: ConsoleLogging {
     public var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {
         return PassthroughSubject<WalletConnectUtils.Log, Never>().eraseToAnyPublisher()
     }
+
     public init() {}
-    public func error(_ items: Any...) { }
-    public func debug(_ items: Any...) { }
-    public func info(_ items: Any...) { }
-    public func warn(_ items: Any...) { }
+
+    public func debug(_ items: Any..., file: String, function: String, line: Int) { }
+    public func info(_ items: Any..., file: String, function: String, line: Int) { }
+    public func warn(_ items: Any..., file: String, function: String, line: Int) { }
+    public func error(_ items: Any..., file: String, function: String, line: Int) { }
+
     public func setLogging(level: LoggingLevel) { }
 }
 #endif
+

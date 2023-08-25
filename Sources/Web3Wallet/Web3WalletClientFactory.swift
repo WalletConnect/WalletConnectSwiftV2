@@ -5,13 +5,13 @@ public struct Web3WalletClientFactory {
         authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
         pairingClient: PairingClientProtocol,
-        echoClient: EchoClientProtocol
+        pushClient: PushClientProtocol
     ) -> Web3WalletClient {
         return Web3WalletClient(
             authClient: authClient,
             signClient: signClient,
             pairingClient: pairingClient,
-            echoClient: echoClient
+            pushClient: pushClient
         )
     }
 }
