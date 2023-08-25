@@ -160,7 +160,7 @@ final class NotifyTests: XCTestCase {
                 subscribeExpectation.fulfill()
                 subscription = subscriptions.first!
                 let notifier = Publisher()
-                sleep(1)
+                sleep(5)
                 Task(priority: .high) { try await notifier.notify(topic: subscriptions.first!.topic, account: subscriptions.first!.account, message: notifyMessage) }
             }.store(in: &publishers)
         walletNotifyClient.notifyMessagePublisher
@@ -169,7 +169,7 @@ final class NotifyTests: XCTestCase {
                 messageExpectation.fulfill()
         }.store(in: &publishers)
 
-        wait(for: [subscribeExpectation, messageExpectation], timeout: 200)
+        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
         try await walletNotifyClient.deleteSubscription(topic: subscription.topic)
     }
 
