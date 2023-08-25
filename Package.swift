@@ -47,13 +47,11 @@ let package = Package(
             name: "WalletConnectHistory",
             targets: ["WalletConnectHistory"]),
         .library(
-            name: "WalletConnectModal",
-            targets: ["WalletConnectModal"]),
-
+            name: "Web3Inbox",
+            targets: ["Web3Inbox"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
-        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
     ],
     targets: [
         .target(
@@ -126,15 +124,6 @@ let package = Package(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
-            name: "WalletConnectModal",
-            dependencies: ["QRCode", "WalletConnectSign"],
-            exclude: ["Secrets/secrets.json.sample"],
-            resources: [
-                .copy("Secrets/secrets.json"),
-                .copy("Resources/Assets.xcassets")
-            ]
-        ),
-        .target(
             name: "WalletConnectSync",
             dependencies: ["WalletConnectSigner"]),
         .testTarget(
@@ -177,9 +166,6 @@ let package = Package(
         .testTarget(
             name: "CommonsTests",
             dependencies: ["Commons", "TestingUtils"]),
-        .testTarget(
-            name: "WalletConnectModalTests",
-            dependencies: ["WalletConnectModal", "TestingUtils"])
     ],
     swiftLanguageVersions: [.v5]
 )
