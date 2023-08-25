@@ -56,7 +56,7 @@ final class SyncTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let kms = KeyManagementService(keychain: keychain)
         let derivationService = SyncDerivationService(syncStorage: syncSignatureStore, bip44: DefaultBIP44Provider(), kms: kms)
-        let logger = ConsoleLogger(suffix: suffix, loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: suffix, loggingLevel: .debug)
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,

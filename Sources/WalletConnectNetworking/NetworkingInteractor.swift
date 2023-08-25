@@ -20,7 +20,9 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
-        logger.logsPublisher.eraseToAnyPublisher()
+        logger.logsPublisher
+            .merge(with: serializer.logsPublisher)
+            .eraseToAnyPublisher()
     }
 
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
@@ -50,6 +52,13 @@ public class NetworkingInteractor: NetworkInteracting {
                 manageSubscription(topic, message, publishedAt)
             }.store(in: &publishers)
     }
+
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+        serializer.setLogging(level: level)
+        relayClient.setLogging(level: level)
+    }
+
 
     public func subscribe(topic: String) async throws {
         try await relayClient.subscribe(topic: topic)

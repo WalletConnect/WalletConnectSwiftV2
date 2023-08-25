@@ -31,7 +31,7 @@ final class AuthTests: XCTestCase {
     }
 
     func makeClients(prefix: String, iatProvider: IATProvider) -> (PairingClient, AuthClient) {
-        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
         let keyValueStorage = RuntimeKeyValueStorage()
         let keychain = KeychainStorageMock()
         let relayClient = RelayClientFactory.create(

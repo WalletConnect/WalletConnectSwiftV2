@@ -15,7 +15,7 @@ public struct RelayClientFactory {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
 
-        let logger = ConsoleLogger(suffix: "🚄" ,loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: "🚄" ,loggingLevel: .off)
 
         return RelayClientFactory.create(
             relayHost: relayHost,

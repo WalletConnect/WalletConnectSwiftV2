@@ -13,6 +13,13 @@ final class LoggingService {
     private var isLogging = false
     private let queue = DispatchQueue(label: "com.walletApp.loggingService")
 
+    func setUpUser(account: String, clientId: String) {
+        let user = User()
+        user.userId = clientId
+        user.data = ["account": account]
+        SentrySDK.setUser(user)
+    }
+
     func startLogging() {
         queue.sync {
             guard isLogging == false else { return }

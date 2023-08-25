@@ -20,12 +20,12 @@ final class XPlatformW3WTests: XCTestCase {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
-        let relayLogger = ConsoleLogger(suffix: "🚄" + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(suffix: "👩‍❤️‍💋‍👩" + " [Pairing]", loggingLevel: .debug)
-        let networkingLogger = ConsoleLogger(suffix: "🕸️" + " [Networking]", loggingLevel: .debug)
-        let authLogger = ConsoleLogger(suffix: "🪪", loggingLevel: .debug)
+        let relayLogger = ConsoleLogger(prefix: "🚄" + " [Relay]", loggingLevel: .debug)
+        let pairingLogger = ConsoleLogger(prefix: "👩‍❤️‍💋‍👩" + " [Pairing]", loggingLevel: .debug)
+        let networkingLogger = ConsoleLogger(prefix: "🕸️" + " [Networking]", loggingLevel: .debug)
+        let authLogger = ConsoleLogger(prefix: "🪪", loggingLevel: .debug)
 
-        let signLogger = ConsoleLogger(suffix: "✍🏿", loggingLevel: .debug)
+        let signLogger = ConsoleLogger(prefix: "✍🏿", loggingLevel: .debug)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
