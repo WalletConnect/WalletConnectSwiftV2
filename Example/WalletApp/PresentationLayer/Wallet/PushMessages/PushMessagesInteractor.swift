@@ -1,23 +1,23 @@
-import WalletConnectPush
+import WalletConnectNotify
 import Combine
 
 final class PushMessagesInteractor {
 
-    let subscription: PushSubscription
+    let subscription: NotifySubscription
 
-    init(subscription: PushSubscription) {
+    init(subscription: NotifySubscription) {
         self.subscription = subscription
     }
 
-    var pushMessagePublisher: AnyPublisher<PushMessageRecord, Never> {
-        return Push.wallet.pushMessagePublisher
+    var notifyMessagePublisher: AnyPublisher<NotifyMessageRecord, Never> {
+        return Notify.instance.notifyMessagePublisher
     }
     
-    func getPushMessages() -> [PushMessageRecord] {
-        return Push.wallet.getMessageHistory(topic: subscription.topic)
+    func getPushMessages() -> [NotifyMessageRecord] {
+        return Notify.instance.getMessageHistory(topic: subscription.topic)
     }
 
     func deletePushMessage(id: String) {
-        Push.wallet.deletePushMessage(id: id)
+        Notify.instance.deleteNotifyMessage(id: id)
     }
 }

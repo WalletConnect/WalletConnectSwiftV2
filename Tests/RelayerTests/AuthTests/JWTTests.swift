@@ -36,6 +36,6 @@ extension RelayAuthPayload.Claims {
         let aud = "wss://relay.walletconnect.com"
         let expDate = Calendar.current.date(byAdding: components, to: iatDate)!
         let exp = UInt64(expDate.timeIntervalSince1970)
-        return RelayAuthPayload.Claims(iss: iss, sub: sub, aud: aud, iat: iat, exp: exp)
+        return RelayAuthPayload.Claims(iss: iss, sub: sub, aud: aud, iat: iat, exp: exp, act: nil)
     }
 }

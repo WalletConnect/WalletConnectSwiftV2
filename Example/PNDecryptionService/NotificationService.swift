@@ -1,5 +1,5 @@
 import UserNotifications
-import WalletConnectPush
+import WalletConnectNotify
 import os
 
 class NotificationService: UNNotificationServiceExtension {
@@ -13,9 +13,9 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent = bestAttemptContent {
             let topic = bestAttemptContent.userInfo["topic"] as! String
             let ciphertext = bestAttemptContent.userInfo["blob"] as! String
-            NSLog("echo decryption, topic=%@", topic)
+            NSLog("Push decryption, topic=%@", topic)
             do {
-                let service = PushDecryptionService()
+                let service = NotifyDecryptionService()
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 bestAttemptContent.title = pushMessage.title
                 bestAttemptContent.body = pushMessage.body
@@ -23,7 +23,7 @@ class NotificationService: UNNotificationServiceExtension {
                 return
             }
             catch {
-                NSLog("echo decryption, error=%@", error.localizedDescription)
+                NSLog("Push decryption, error=%@", error.localizedDescription)
                 bestAttemptContent.title = ""
                 bestAttemptContent.body = "content not set"
             }

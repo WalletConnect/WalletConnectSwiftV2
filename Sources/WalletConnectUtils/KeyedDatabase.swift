@@ -51,6 +51,11 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         return (value.key, element)
     }
 
+    public func exists(for key: String, id: String) -> Bool {
+        let element = getElement(for: key, id: id)
+        return element != nil
+    }
+
     @discardableResult
     public func set(elements: [Element], for key: String) -> Bool {
         var map = index[key] ?? [:]
@@ -71,7 +76,7 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         var map = index[key] ?? [:]
 
         guard
-            map[element.databaseId] == nil else { return false }
+            map[element.databaseId] == nil || map[element.databaseId] != element else { return false }
             map[element.databaseId] = element
 
         index[key] = map
@@ -94,8 +99,6 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
 
     @discardableResult
     public func deleteAll(for key: String) -> Bool {
-        var map = index[key]
-
         guard index[key] != nil else { return false }
 
         index[key] = nil

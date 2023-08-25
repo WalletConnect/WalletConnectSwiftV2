@@ -12,6 +12,10 @@ struct RelayAuthPayload: JWTClaimsCodable {
         let aud: String
         let iat: UInt64
         let exp: UInt64
+
+        let act: String?
+
+        static var action: String? { nil }
     }
 
     let subject: String
@@ -33,7 +37,8 @@ struct RelayAuthPayload: JWTClaimsCodable {
             sub: subject,
             aud: audience,
             iat: defaultIat(),
-            exp: expiry(days: 1)
+            exp: expiry(days: 1),
+            act: Claims.action
         )
     }
 }

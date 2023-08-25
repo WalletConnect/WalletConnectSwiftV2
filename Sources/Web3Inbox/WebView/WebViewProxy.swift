@@ -17,9 +17,9 @@ actor WebViewProxy {
     }
 
     @MainActor
-    func respond(_ response: RPCResponse) async throws {
+    func respond(_ response: RPCResponse, _ request: RPCRequest) async throws {
         let body = try response.json(dateEncodingStrategy: .millisecondsSince1970)
-        logger.debug("resonding to w3i with \(body)")
+        logger.debug("resonding to w3i request \(request.method) with \(body)")
         let script = scriptFormatter.formatScript(body: body)
         webView.evaluateJavaScript(script, completionHandler: nil)
     }
@@ -44,8 +44,8 @@ class ChatWebViewScriptFormatter: WebViewScriptFormatter {
     }
 }
 
-class PushWebViewScriptFormatter: WebViewScriptFormatter {
+class NotifyWebViewScriptFormatter: WebViewScriptFormatter {
     func formatScript(body: String) -> String {
-        return "window.web3inbox.push.postMessage(\(body))"
+        return "window.web3inbox.notify.postMessage(\(body))"
     }
 }
