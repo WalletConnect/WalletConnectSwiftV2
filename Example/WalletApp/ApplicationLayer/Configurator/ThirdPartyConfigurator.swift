@@ -1,5 +1,6 @@
 import Foundation
 import Sentry
+import Mixpanel
 
 struct ThirdPartyConfigurator: Configurator {
 
@@ -7,7 +8,7 @@ struct ThirdPartyConfigurator: Configurator {
         configureLogging()
     }
 
-    func configureLogging() {
+    private func configureLogging() {
         guard let sentryDsn = InputConfig.sentryDsn, !sentryDsn.isEmpty  else { return }
         SentrySDK.start { options in
             options.dsn = "https://\(sentryDsn)"
@@ -15,5 +16,10 @@ struct ThirdPartyConfigurator: Configurator {
             // We recommend adjusting this value in production.
             options.tracesSampleRate = 1.0
         }
+    }
+
+    private func configureProfiling() {
+        Mixpanel.initialize(token: "", trackAutomaticEvents: true)
+
     }
 }

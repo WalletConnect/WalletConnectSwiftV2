@@ -29,6 +29,7 @@ final class ConfigurationService {
 
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
+            ProfilingService.instance.setUpProfiling(account: importAccount.account.absoluteString, clientId: clientId)
         }
         LoggingService.instance.startLogging()
     }
