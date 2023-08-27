@@ -1,11 +1,9 @@
 import Foundation
 import Sentry
-import Mixpanel
 
 struct ThirdPartyConfigurator: Configurator {
 
     func configure() {
-        configureLogging()
     }
 
     private func configureLogging() {
@@ -16,10 +14,5 @@ struct ThirdPartyConfigurator: Configurator {
             // We recommend adjusting this value in production.
             options.tracesSampleRate = 1.0
         }
-    }
-
-    private func configureProfiling() {
-        Mixpanel.initialize(token: "", trackAutomaticEvents: true)
-
     }
 }
