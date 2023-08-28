@@ -1,5 +1,6 @@
 import Foundation
 import WebKit
+import Combine
 
 public final class Web3InboxClient {
 
@@ -18,6 +19,11 @@ public final class Web3InboxClient {
     private let notifyWebviewProxy: WebViewProxy
 
     private let webviewSubscriber: WebViewRequestSubscriber
+
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher
+            .eraseToAnyPublisher()
+    }
 
     init(
         webView: WKWebView,

@@ -2,6 +2,7 @@ import Foundation
 import Mixpanel
 import WalletConnectNetworking
 import Combine
+import Web3Inbox
 
 final class ProfilingService {
     public static var instance = ProfilingService()
@@ -38,6 +39,23 @@ final class ProfilingService {
                 }
             }
             .store(in: &publishers)
+        
+        Web3Inbox.instance.logsPublisher
+            .sink { [unowned self] log in
+                self.queue.sync {
+                    switch log {
+                    case .error(let log):
+                        send(event: log)
+                    case .warn(let log):
+                        send(event: log)
+                    case .debug(let log):
+                        send(event: log)
+                    default:
+                        return
+                    }
+                }
+            }
+        .store(in: &publishers)
     }
 
     func send(event: String) {
