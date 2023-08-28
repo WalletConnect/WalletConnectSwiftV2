@@ -42,6 +42,11 @@ public final class RelayClient {
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", attributes: .concurrent)
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher
+            .eraseToAnyPublisher()
+    }
+
     // MARK: - Initialization
 
     init(

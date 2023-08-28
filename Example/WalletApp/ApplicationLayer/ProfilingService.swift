@@ -6,7 +6,7 @@ import Combine
 final class ProfilingService {
     public static var instance = ProfilingService()
 
-    private let queue = DispatchQueue(label: "com.walletApp.loggingService")
+    private let queue = DispatchQueue(label: "com.walletApp.profilingService")
     private var publishers = [AnyCancellable]()
     private var isProfiling = false
 
@@ -16,6 +16,7 @@ final class ProfilingService {
             isProfiling = true
         }
         guard let token = InputConfig.mixpanelToken, !token.isEmpty  else { return }
+
         Mixpanel.initialize(token: token, trackAutomaticEvents: true)
         Mixpanel.mainInstance().identify(distinctId: clientId)
         Mixpanel.mainInstance().people.set(properties: [ "account": account])
