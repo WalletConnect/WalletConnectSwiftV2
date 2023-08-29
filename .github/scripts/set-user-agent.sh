@@ -6,6 +6,8 @@ printf '\nset user agent\n\n'
 
 FILE=Sources/WalletConnectRelay/PackageConfig.json
 
+echo committed? > new.txt
+
 if [ -f "$FILE" ];
 then
     printf '\ncurrent user agent:\n'
