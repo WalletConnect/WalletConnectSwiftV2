@@ -37,4 +37,14 @@ final class KeyedDatabaseTests: XCTestCase {
 
         XCTAssertEqual(value, updated)
     }
+
+    func testOnUpdate() {
+        let new = Object(key: "key1", value: "value1")
+
+        var onUpdateCalled = false
+        sut.onUpdate = { onUpdateCalled = true }
+        sut.set(element: new, for: storageKey)
+
+        XCTAssertTrue(onUpdateCalled)
+    }
 }

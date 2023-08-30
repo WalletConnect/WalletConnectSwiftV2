@@ -23,7 +23,7 @@ public class NotifyClient {
     }
 
     public var notifyMessagePublisher: AnyPublisher<NotifyMessageRecord, Never> {
-        notifyMessageSubscriber.notifyMessagePublisher
+        return notifyMessageSubscriber.notifyMessagePublisher
     }
 
     public var updateSubscriptionPublisher: AnyPublisher<Result<NotifySubscription, Error>, Never> {
@@ -118,6 +118,10 @@ public class NotifyClient {
 
     public func isSyncRegistered(account: Account) -> Bool {
         return notifySyncService.isSyncRegistered(account: account)
+    }
+
+    public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
+        return notifyStorage.messagesPublisher(topic: topic)
     }
 }
 
