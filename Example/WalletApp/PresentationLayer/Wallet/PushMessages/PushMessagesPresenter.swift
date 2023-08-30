@@ -24,13 +24,14 @@ final class PushMessagesPresenter: ObservableObject {
     }
 
     private func setUpMessagesRefresh() {
-        Timer.publish(every: 60.0, on: .main, in: .default)
+        Timer.publish(every: 10.0, on: .main, in: .default)
             .autoconnect()
-            .sink { [weak self] _ in
-                self?.reloadPushMessages()
-            }
-            .store(in: &disposeBag)
+            .sink(receiveValue: { [weak self] _ in
+                guard let self = self else { return }
+                self.pushMessages = self.interactor.getPushMessages()
+            }).store(in: &disposeBag)
     }
+
     
     func deletePushMessage(at indexSet: IndexSet) {
         if let index = indexSet.first {
@@ -60,8 +61,9 @@ private extension PushMessagesPresenter {
 
         interactor.messagesPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] messages in
-                pushMessages = interactor.getPushMessages()
+            .sink { [weak self] messages in
+                guard let self = self else { return }
+                self.pushMessages = self.interactor.getPushMessages()
             }
             .store(in: &disposeBag)
     }
