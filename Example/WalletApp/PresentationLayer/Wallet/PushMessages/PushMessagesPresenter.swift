@@ -8,10 +8,16 @@ final class PushMessagesPresenter: ObservableObject {
     private let router: PushMessagesRouter
     private var disposeBag = Set<AnyCancellable>()
     
-    @Published var pushMessages: [PushMessageViewModel] = []
+    @Published private var pushMessages: [NotifyMessageRecord] = []
+
+    var messages: [PushMessageViewModel] {
+        return pushMessages
+            .sorted { $0.publishedAt > $1.publishedAt }
+            .map { PushMessageViewModel(pushMessageRecord: $0) }
+    }
 
     init(interactor: PushMessagesInteractor, router: PushMessagesRouter) {
-        defer { reloadPushMessages() }
+        defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
     }
@@ -20,7 +26,6 @@ final class PushMessagesPresenter: ObservableObject {
         if let index = indexSet.first {
             interactor.deletePushMessage(id: pushMessages[index].id)
         }
-        reloadPushMessages()
     }
 }
 
@@ -40,27 +45,13 @@ extension PushMessagesPresenter: SceneViewModel {
 
 private extension PushMessagesPresenter {
 
-    func reloadPushMessages() {
-        self.pushMessages = interactor.getPushMessages()
-            .sorted {
-                // Most recent first
-                $0.publishedAt > $1.publishedAt
-            }
-            .map { pushMessageRecord in
-                PushMessageViewModel(pushMessageRecord: pushMessageRecord)
-            }
-        
-        interactor.notifyMessagePublisher
+    func setupInitialState() {
+        pushMessages = interactor.getPushMessages()
+
+        interactor.messagesPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] newPushMessage in
-                let newMessageViewModel = PushMessageViewModel(pushMessageRecord: newPushMessage)
-                guard let index = self?.pushMessages.firstIndex(
-                    where: { $0.pushMessageRecord.publishedAt > newPushMessage.publishedAt }
-                ) else {
-                    self?.pushMessages.append(newMessageViewModel)
-                    return
-                }
-                self?.pushMessages.insert(newMessageViewModel, at: index)
+            .sink { [unowned self] messages in
+                pushMessages = interactor.getPushMessages()
             }
             .store(in: &disposeBag)
     }
