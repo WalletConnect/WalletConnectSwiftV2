@@ -18,6 +18,7 @@ final class NotifyStorage: NotifyStoring {
     private let newSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
     private let updateSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
     private let deleteSubscriptionSubject = PassthroughSubject<String, Never>()
+    private let messagesSubject = PassthroughSubject<[NotifyMessageRecord], Never>()
 
     private let subscriptionStoreDelegate: NotifySubscriptionStoreDelegate
 
@@ -26,7 +27,7 @@ final class NotifyStorage: NotifyStoring {
     }
 
     var updateSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
-        return newSubscriptionSubject.eraseToAnyPublisher()
+        return updateSubscriptionSubject.eraseToAnyPublisher()
     }
 
     var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
@@ -35,6 +36,10 @@ final class NotifyStorage: NotifyStoring {
 
     var subscriptionsPublisher: AnyPublisher<[NotifySubscription], Never> {
         return subscriptionStore.dataUpdatePublisher
+    }
+
+    var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
+        return messagesSubject.eraseToAnyPublisher()
     }
 
     init(
@@ -88,6 +93,12 @@ final class NotifyStorage: NotifyStoring {
 
     // MARK: Messages
 
+    func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
+        return messagesPublisher
+            .map { $0.filter { $0.topic == topic } }
+            .eraseToAnyPublisher()
+    }
+
     func getMessages(topic: String) -> [NotifyMessageRecord] {
         return messagesStore.getAll(for: topic)
             .sorted{$0.publishedAt > $1.publishedAt}
@@ -110,6 +121,10 @@ final class NotifyStorage: NotifyStoring {
 private extension NotifyStorage {
 
     func setupSubscriptions() {
+        messagesStore.onUpdate = { [unowned self] in
+            messagesSubject.send(messagesStore.getAll())
+        }
+
         subscriptionStore.syncUpdatePublisher.sink { [unowned self] (_, _, update) in
             switch update {
             case .set(let subscription):
