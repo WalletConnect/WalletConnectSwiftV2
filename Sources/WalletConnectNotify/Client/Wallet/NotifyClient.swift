@@ -111,6 +111,14 @@ public class NotifyClient {
     public func register(deviceToken: Data) async throws {
         try await pushClient.register(deviceToken: deviceToken)
     }
+
+    public func isIdentityRegistered(account: Account) -> Bool {
+        return notifySyncService.isIdentityRegistered(account: account)
+    }
+
+    public func isSyncRegistered(account: Account) -> Bool {
+        return notifySyncService.isSyncRegistered(account: account)
+    }
 }
 
 #if targetEnvironment(simulator)

@@ -118,6 +118,14 @@ final class NotifySyncService {
 
         coldStartStore.set(Date(), forKey: account.absoluteString)
     }
+
+    func isIdentityRegistered(account: Account) -> Bool {
+        return identityClient.isIdentityRegistered(account: account)
+    }
+
+    func isSyncRegistered(account: Account) -> Bool {
+        return syncClient.isRegistered(account: account)
+    }
 }
 
 private extension NotifySyncService {
