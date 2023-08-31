@@ -8,6 +8,8 @@ public class NetworkingInteractor: NetworkInteracting {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
+    private let errorPublisherSubject = PassthroughSubject<Error, Never>()
+
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
 
@@ -17,6 +19,10 @@ public class NetworkingInteractor: NetworkInteracting {
 
     private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
+    }
+
+    public var errorPublisher: AnyPublisher<Error, Never> {
+        return errorPublisherSubject.eraseToAnyPublisher()
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
@@ -82,6 +88,41 @@ public class NetworkingInteractor: NetworkInteracting {
     public func batchUnsubscribe(topics: [String]) async throws {
         try await relayClient.batchUnsubscribe(topics: topics)
         rpcHistory.deleteAll(forTopics: topics)
+    }
+
+    public func subscribeOnRequest<RequestParams: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: RequestParams.Type,
+        subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
+    ) {
+        requestSubscription(on: protocolMethod)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<RequestParams>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorPublisherSubject.send(error)
+                    }
+                }
+            }.store(in: &publishers)
+    }
+
+    public func subscribeOnResponse<Request: Codable, Response: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
+    ) {
+        responseSubscription(on: protocolMethod)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Request, Response>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorPublisherSubject.send(error)
+                    }
+                }
+            }.store(in: &publishers)
     }
 
     public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
