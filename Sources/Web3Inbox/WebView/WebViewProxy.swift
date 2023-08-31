@@ -19,7 +19,9 @@ actor WebViewProxy {
     @MainActor
     func respond(_ response: RPCResponse, _ request: RPCRequest) async throws {
         let body = try response.json(dateEncodingStrategy: .millisecondsSince1970)
-        logger.debug("resonding to w3i request \(request.method) with \(body)")
+        let logProperties: [String: String] = ["method": request.method, "requestId": "\(request.id!)", "response": body]
+        print(logProperties)
+        logger.debug("resonding to w3i request \(request.method) with \(body)", properties: logProperties)
         let script = scriptFormatter.formatScript(body: body)
         webView.evaluateJavaScript(script, completionHandler: nil)
     }
@@ -27,7 +29,8 @@ actor WebViewProxy {
     @MainActor
     func request(_ request: RPCRequest) async throws {
         let body = try request.json(dateEncodingStrategy: .millisecondsSince1970)
-        logger.debug("requesting w3i with \(body)")
+        let logProperties = ["method": request.method, "requestId": "\(request.id!)"]
+        logger.debug("requesting w3i with \(body)", properties: logProperties)
         let script = scriptFormatter.formatScript(body: body)
         webView.evaluateJavaScript(script, completionHandler: nil)
     }

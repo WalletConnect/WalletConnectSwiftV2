@@ -19,6 +19,7 @@ final class ProfilingService {
         guard let token = InputConfig.mixpanelToken, !token.isEmpty  else { return }
 
         Mixpanel.initialize(token: token, trackAutomaticEvents: true)
+        Mixpanel.mainInstance().alias = "Bartek"
         Mixpanel.mainInstance().identify(distinctId: clientId)
         Mixpanel.mainInstance().people.set(properties: [ "account": account])
 
@@ -27,12 +28,12 @@ final class ProfilingService {
             .sink { [unowned self] log in
                 self.queue.sync {
                     switch log {
-                    case .error(let log):
-                        send(event: log)
-                    case .warn(let log):
-                        send(event: log)
-                    case .debug(let log):
-                        send(event: log)
+                    case .error(let logMessage):
+                        send(logMessage: logMessage)
+                    case .warn(let logMessage):
+                        send(logMessage: logMessage)
+                    case .debug(let logMessage):
+                        send(logMessage: logMessage)
                     default:
                         return
                     }
@@ -44,12 +45,12 @@ final class ProfilingService {
             .sink { [unowned self] log in
                 self.queue.sync {
                     switch log {
-                    case .error(let log):
-                        send(event: log)
-                    case .warn(let log):
-                        send(event: log)
-                    case .debug(let log):
-                        send(event: log)
+                    case .error(let logMessage):
+                        send(logMessage: logMessage)
+                    case .warn(let logMessage):
+                        send(logMessage: logMessage)
+                    case .debug(let logMessage):
+                        send(logMessage: logMessage)
                     default:
                         return
                     }
@@ -58,9 +59,7 @@ final class ProfilingService {
         .store(in: &publishers)
     }
 
-    func send(event: String) {
-        Mixpanel.mainInstance().track(event: event)
+    func send(logMessage: LogMessage) {
+        Mixpanel.mainInstance().track(event: logMessage.message, properties: logMessage.properties)
     }
-
-
 }

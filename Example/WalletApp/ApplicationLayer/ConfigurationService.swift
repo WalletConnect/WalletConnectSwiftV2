@@ -26,6 +26,7 @@ final class ConfigurationService {
             crypto: DefaultCryptoProvider(),
             onSign: importAccount.onSign
         )
+        Web3Inbox.instance.setLogging(level: .debug)
 
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)

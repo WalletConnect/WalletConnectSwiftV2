@@ -52,6 +52,12 @@ public final class Web3InboxClient {
         setupSubscriptions()
     }
 
+
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+        notifyClient.setLogging(level: .debug)
+    }
+
     public func getWebView() -> WKWebView {
         return webView
     }

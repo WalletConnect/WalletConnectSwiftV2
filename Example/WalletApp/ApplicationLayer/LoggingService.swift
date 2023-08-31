@@ -31,9 +31,9 @@ final class LoggingService {
                 self.queue.sync {
                     switch log {
                     case .error(let log):
-                        SentrySDK.capture(error: LoggingError.networking(log))
+                        SentrySDK.capture(error: LoggingError.networking(log.aggregated))
                     case .warn(let log):
-                        SentrySDK.capture(message: log)
+                        SentrySDK.capture(message: log.aggregated)
                     default:
                         return
                     }

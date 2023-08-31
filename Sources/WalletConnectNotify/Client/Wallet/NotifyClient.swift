@@ -30,6 +30,11 @@ public class NotifyClient {
         return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
     }
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher
+            .eraseToAnyPublisher()
+    }
+
     private let deleteNotifySubscriptionService: DeleteNotifySubscriptionService
     private let notifySubscribeRequester: NotifySubscribeRequester
 
@@ -82,6 +87,10 @@ public class NotifyClient {
         try await notifyStorage.initialize(account: account)
         try await notifyStorage.subscribe(account: account)
         try await notifySyncService.fetchHistoryIfNeeded(account: account)
+    }
+
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
