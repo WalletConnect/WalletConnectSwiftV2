@@ -22,6 +22,7 @@ public final class Web3InboxClient {
 
     public var logsPublisher: AnyPublisher<Log, Never> {
         logger.logsPublisher
+            .merge(with: notifyClient.logsPublisher)
             .eraseToAnyPublisher()
     }
 
