@@ -10,8 +10,6 @@ public class Notify {
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
             pushClient: Push.instance,
-            syncClient: Sync.instance,
-            historyClient: History.instance,
             crypto: config.crypto
         )
     }()
