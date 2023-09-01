@@ -14,16 +14,6 @@ final class PushMessagesPresenter: ObservableObject {
         defer { reloadPushMessages() }
         self.interactor = interactor
         self.router = router
-        setUpMessagesRefresh()
-    }
-
-    private func setUpMessagesRefresh() {
-        Timer.publish(every: 60.0, on: .main, in: .default)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.reloadPushMessages()
-            }
-            .store(in: &disposeBag)
     }
     
     func deletePushMessage(at indexSet: IndexSet) {
