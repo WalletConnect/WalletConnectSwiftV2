@@ -19,10 +19,10 @@ final class ProfilingService {
         guard let token = InputConfig.mixpanelToken, !token.isEmpty  else { return }
 
         Mixpanel.initialize(token: token, trackAutomaticEvents: true)
-        Mixpanel.mainInstance().alias = "Bartek"
-        Mixpanel.mainInstance().identify(distinctId: clientId)
-        Mixpanel.mainInstance().people.set(properties: [ "account": account])
-
+        let mixpanel = Mixpanel.mainInstance()
+        mixpanel.alias = account
+        mixpanel.identify(distinctId: clientId)
+        mixpanel.people.set(properties: ["$name": account, "account": account])
 
         Networking.instance.logsPublisher
             .sink { [unowned self] log in
