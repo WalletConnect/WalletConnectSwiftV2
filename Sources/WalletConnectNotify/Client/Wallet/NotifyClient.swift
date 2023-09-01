@@ -78,7 +78,6 @@ public class NotifyClient {
 
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {
         _ = try await identityClient.register(account: account, onSign: onSign)
-
     }
 
     public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
