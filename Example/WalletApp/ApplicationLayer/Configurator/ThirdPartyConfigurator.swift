@@ -1,5 +1,4 @@
 import Foundation
-import Sentry
 
 struct ThirdPartyConfigurator: Configurator {
 
