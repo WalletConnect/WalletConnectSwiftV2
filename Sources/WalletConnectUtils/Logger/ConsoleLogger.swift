@@ -115,7 +115,7 @@ public struct ConsoleLoggerMock: ConsoleLogging {
 
     public init() {}
 
-    public func debug(_ items: Any..., file: String, function: String, line: Int) { }
+    public func debug(_ items: Any..., file: String, function: String, line: Int, properties: [String: String]?) { }
     public func info(_ items: Any..., file: String, function: String, line: Int) { }
     public func warn(_ items: Any..., file: String, function: String, line: Int) { }
     public func error(_ items: Any..., file: String, function: String, line: Int) { }
