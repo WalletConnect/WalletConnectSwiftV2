@@ -9,13 +9,20 @@ final class ProfilingService {
 
     private let queue = DispatchQueue(label: "com.walletApp.profilingService")
     private var publishers = [AnyCancellable]()
-    private var isProfiling = false
+    private var isProfiling: Bool {
+        get {
+            return queue.sync { _isProfiling }
+        }
+        set {
+            queue.sync { _isProfiling = newValue }
+        }
+    }
+    private var _isProfiling = false
 
     func setUpProfiling(account: String, clientId: String) {
-        queue.sync {
-            guard isProfiling == false else { return }
-            isProfiling = true
-        }
+        guard !isProfiling else { return }
+        isProfiling = true
+
         guard let token = InputConfig.mixpanelToken, !token.isEmpty  else { return }
 
         Mixpanel.initialize(token: token, trackAutomaticEvents: true)
@@ -24,39 +31,25 @@ final class ProfilingService {
         mixpanel.identify(distinctId: clientId)
         mixpanel.people.set(properties: ["$name": account, "account": account])
 
-        Networking.instance.logsPublisher
+        handleLogs(from: Networking.instance.logsPublisher)
+        handleLogs(from: Web3Inbox.instance.logsPublisher)
+    }
+
+    private func handleLogs(from publisher: AnyPublisher<Log, Never>) {
+        publisher
             .sink { [unowned self] log in
                 self.queue.sync {
                     switch log {
-                    case .error(let logMessage):
-                        send(logMessage: logMessage)
-                    case .warn(let logMessage):
-                        send(logMessage: logMessage)
-                    case .debug(let logMessage):
-                        send(logMessage: logMessage)
+                    case .error(let logMessage),
+                         .warn(let logMessage),
+                         .debug(let logMessage):
+                        self.send(logMessage: logMessage)
                     default:
                         return
                     }
                 }
             }
             .store(in: &publishers)
-        
-        Web3Inbox.instance.logsPublisher
-            .sink { [unowned self] log in
-                self.queue.sync {
-                    switch log {
-                    case .error(let logMessage):
-                        send(logMessage: logMessage)
-                    case .warn(let logMessage):
-                        send(logMessage: logMessage)
-                    case .debug(let logMessage):
-                        send(logMessage: logMessage)
-                    default:
-                        return
-                    }
-                }
-            }
-        .store(in: &publishers)
     }
 
     func send(logMessage: LogMessage) {
