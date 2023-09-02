@@ -22,6 +22,7 @@ public class NetworkingInteractor: NetworkInteracting {
     public var logsPublisher: AnyPublisher<Log, Never> {
         logger.logsPublisher
             .merge(with: serializer.logsPublisher)
+            .merge(with: relayClient.logsPublisher)
             .eraseToAnyPublisher()
     }
 

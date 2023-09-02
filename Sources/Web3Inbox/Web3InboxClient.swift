@@ -1,5 +1,6 @@
 import Foundation
 import WebKit
+import Combine
 
 public final class Web3InboxClient {
 
@@ -18,6 +19,12 @@ public final class Web3InboxClient {
     private let notifyWebviewProxy: WebViewProxy
 
     private let webviewSubscriber: WebViewRequestSubscriber
+
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher
+            .merge(with: notifyClient.logsPublisher)
+            .eraseToAnyPublisher()
+    }
 
     init(
         webView: WKWebView,
@@ -44,6 +51,12 @@ public final class Web3InboxClient {
         self.notifyClientSubscriber = notifyClientSubscriber
         self.notifyClient = notifyClient
         setupSubscriptions()
+    }
+
+
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+        notifyClient.setLogging(level: .debug)
     }
 
     public func getWebView() -> WKWebView {

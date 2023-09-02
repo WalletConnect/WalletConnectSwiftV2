@@ -12,6 +12,10 @@ struct InputConfig {
     static var sentryDsn: String? {
         return config(for: "WALLETAPP_SENTRY_DSN")
     }
+
+    static var mixpanelToken: String? {
+        return config(for: "MIXPANEL_TOKEN")
+    }
     
     private static func config(for key: String) -> String? {
         return Bundle.main.object(forInfoDictionaryKey: key) as? String

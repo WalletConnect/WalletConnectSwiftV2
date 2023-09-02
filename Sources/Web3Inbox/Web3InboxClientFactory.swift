@@ -12,7 +12,7 @@ final class Web3InboxClientFactory {
     ) -> Web3InboxClient {
         let url = buildUrl(account: account, config: config)
 
-        let logger = ConsoleLogger(prefix: "📬", loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: "📬", loggingLevel: .off)
         let webviewSubscriber = WebViewRequestSubscriber(url: url, logger: logger)
         let webView = WebViewFactory(url: url, webviewSubscriber: webviewSubscriber).create()
         let chatWebViewProxy = WebViewProxy(webView: webView, scriptFormatter: ChatWebViewScriptFormatter(), logger: logger)
