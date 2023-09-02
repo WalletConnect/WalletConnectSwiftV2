@@ -26,8 +26,8 @@ public class NotifyClient {
         return notifyMessageSubscriber.notifyMessagePublisher
     }
 
-    public var updateSubscriptionPublisher: AnyPublisher<Result<NotifySubscription, Error>, Never> {
-        return notifyUpdateResponseSubscriber.updateSubscriptionPublisher
+    public var updateSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
+        return notifyStorage.updateSubscriptionPublisher
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
@@ -41,8 +41,8 @@ public class NotifyClient {
     public let logger: ConsoleLogging
 
     private let pushClient: PushClient
+    private let identityClient: IdentityClient
     private let notifyStorage: NotifyStorage
-    private let notifySyncService: NotifySyncService
     private let notifyMessageSubscriber: NotifyMessageSubscriber
     private let resubscribeService: NotifyResubscribeService
     private let notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber
@@ -53,10 +53,10 @@ public class NotifyClient {
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
+         identityClient: IdentityClient,
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
-         notifySyncService: NotifySyncService,
          deleteNotifySubscriptionService: DeleteNotifySubscriptionService,
          resubscribeService: NotifyResubscribeService,
          notifySubscribeRequester: NotifySubscribeRequester,
@@ -68,9 +68,9 @@ public class NotifyClient {
     ) {
         self.logger = logger
         self.pushClient = pushClient
+        self.identityClient = identityClient
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
-        self.notifySyncService = notifySyncService
         self.deleteNotifySubscriptionService = deleteNotifySubscriptionService
         self.resubscribeService = resubscribeService
         self.notifySubscribeRequester = notifySubscribeRequester
@@ -82,11 +82,7 @@ public class NotifyClient {
     }
 
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {
-        try await notifySyncService.registerSyncIfNeeded(account: account, onSign: onSign)
-        try await notifySyncService.registerIdentity(account: account, onSign: onSign)
-        try await notifyStorage.initialize(account: account)
-        try await notifyStorage.subscribe(account: account)
-        try await notifySyncService.fetchHistoryIfNeeded(account: account)
+        _ = try await identityClient.register(account: account, onSign: onSign)
     }
 
     public func setLogging(level: LoggingLevel) {
@@ -122,11 +118,7 @@ public class NotifyClient {
     }
 
     public func isIdentityRegistered(account: Account) -> Bool {
-        return notifySyncService.isIdentityRegistered(account: account)
-    }
-
-    public func isSyncRegistered(account: Account) -> Bool {
-        return notifySyncService.isSyncRegistered(account: account)
+        return identityClient.isIdentityRegistered(account: account)
     }
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {

@@ -30,14 +30,8 @@ final class NotifyClientRequestSubscriber {
             handle(event: .notifyDelete, params: topic)
         }.store(in: &publishers)
 
-        client.updateSubscriptionPublisher.sink { [unowned self] record in
-            switch record {
-            case .success(let subscription):
-                handle(event: .notifyUpdate, params: subscription)
-            case .failure:
-                //TODO - handle error
-                break
-            }
+        client.updateSubscriptionPublisher.sink { [unowned self] subscription in
+            handle(event: .notifyUpdate, params: subscription)
         }.store(in: &publishers)
     }
 }

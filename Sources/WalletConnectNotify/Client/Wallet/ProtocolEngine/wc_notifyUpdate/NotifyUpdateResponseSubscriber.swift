@@ -7,10 +7,6 @@ class NotifyUpdateResponseSubscriber {
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
     private let subscriptionScopeProvider: SubscriptionScopeProvider
-    private var subscriptionPublisherSubject = PassthroughSubject<Result<NotifySubscription, Error>, Never>()
-    var updateSubscriptionPublisher: AnyPublisher<Result<NotifySubscription, Error>, Never> {
-        return subscriptionPublisherSubject.eraseToAnyPublisher()
-    }
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -49,16 +45,10 @@ private extension NotifyUpdateResponseSubscriber {
 
                     guard let oldSubscription = notifyStorage.getSubscription(topic: subscriptionTopic) else {
                         logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
-                        subscriptionPublisherSubject.send(.failure(Errors.subscriptionDoesNotExist))
                         return
                     }
-                    let expiry = Date(timeIntervalSince1970: TimeInterval(requestClaims.exp))
 
-                    let updatedSubscription = NotifySubscription(topic: subscriptionTopic, account: oldSubscription.account, relay: oldSubscription.relay, metadata: oldSubscription.metadata, scope: scope, expiry: expiry, symKey: oldSubscription.symKey)
-
-                    try await notifyStorage.setSubscription(updatedSubscription)
-
-                    subscriptionPublisherSubject.send(.success(updatedSubscription))
+                    notifyStorage.updateSubscription(oldSubscription, scope: scope, expiry: requestClaims.exp)
 
                     logger.debug("Updated Subscription")
                 }

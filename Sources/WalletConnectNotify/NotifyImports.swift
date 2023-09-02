@@ -2,6 +2,5 @@
 @_exported import WalletConnectPairing
 @_exported import WalletConnectPush
 @_exported import WalletConnectIdentity
-@_exported import WalletConnectSync
-@_exported import WalletConnectHistory
+@_exported import WalletConnectSigner
 #endif

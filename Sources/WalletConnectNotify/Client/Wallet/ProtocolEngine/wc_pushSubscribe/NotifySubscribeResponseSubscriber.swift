@@ -93,7 +93,7 @@ class NotifySubscribeResponseSubscriber {
                     let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let notifySubscription = NotifySubscription(topic: notifySubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry, symKey: agreementKeysP.sharedKey.hexRepresentation)
 
-                    try await notifyStorage.setSubscription(notifySubscription)
+                    notifyStorage.setSubscription(notifySubscription)
 
                     logger.debug("Unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
