@@ -44,14 +44,14 @@ class NotifySubscribeResponseSubscriber {
         networkingInteractor.responseSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifySubscriptionPayload.Wrapper, NotifySubscriptionResponsePayload.Wrapper>) in
                 Task(priority: .high) {
-                    logger.debug("NotifySubscribeResponseSubscriber: Received Notify Subscribe response")
+                    logger.debug("Received Notify Subscribe response")
 
                     guard
                         let (responsePayload, _) = try? NotifySubscriptionResponsePayload.decodeAndVerify(from: payload.response)
                     else { fatalError() /* TODO: Handle error */ }
 
                     guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
-                        logger.debug("NotifySubscribeResponseSubscriber: no symmetric key for topic \(payload.topic)")
+                        logger.debug("No symmetric key for topic \(payload.topic)")
                         return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
                     }
 
@@ -77,15 +77,15 @@ class NotifySubscribeResponseSubscriber {
                         metadata = try dappsMetadataStore.get(key: payload.topic)
                         let availableTypes = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
                         subscribedTypes = availableTypes.filter{subscribedScope.contains($0.name)}
-                        logger.debug("NotifySubscribeResponseSubscriber: subscribing notify subscription topic: \(notifySubscriptionTopic!)")
+                        logger.debug("subscribing notify subscription topic: \(notifySubscriptionTopic!)")
                         try await networkingInteractor.subscribe(topic: notifySubscriptionTopic)
                     } catch {
-                        logger.debug("NotifySubscribeResponseSubscriber: error: \(error)")
+                        logger.debug("error: \(error)")
                         return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
                     }
 
                     guard let metadata = metadata else {
-                        logger.debug("NotifySubscribeResponseSubscriber: no metadata for topic: \(notifySubscriptionTopic!)")
+                        logger.debug("No metadata for topic: \(notifySubscriptionTopic!)")
                         return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
                     }
                     dappsMetadataStore.delete(forKey: payload.topic)
@@ -93,9 +93,9 @@ class NotifySubscribeResponseSubscriber {
                     let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                     let notifySubscription = NotifySubscription(topic: notifySubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry, symKey: agreementKeysP.sharedKey.hexRepresentation)
 
-                    try await notifyStorage.setSubscription(notifySubscription)
+                    notifyStorage.setSubscription(notifySubscription)
 
-                    logger.debug("NotifySubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
+                    logger.debug("Unsubscribing response topic: \(payload.topic)")
                     networkingInteractor.unsubscribe(topic: payload.topic)
                 }
             }.store(in: &publishers)

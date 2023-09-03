@@ -30,10 +30,11 @@ class NotifyMessageSubscriber {
         networkingInteractor.requestSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<NotifyMessagePayload.Wrapper>) in
 
-                logger.debug("Received Notify Message")
+                logger.debug("Received Notify Message on topic: \(payload.topic)", properties: ["topic": payload.topic])
 
                 Task(priority: .high) {
                     let (messagePayload, claims) = try NotifyMessagePayload.decodeAndVerify(from: payload.request)
+                    logger.debug("Decoded Notify Message: \(payload.topic)", properties: ["topic": payload.topic, "messageBody": messagePayload.message.body, "messageTitle": messagePayload.message.title, "publishedAt": payload.publishedAt.description, "id": payload.id.string])
                     let dappPubKey = try DIDKey(did: claims.iss)
                     let messageData = try JSONEncoder().encode(messagePayload.message)
 
@@ -60,7 +61,7 @@ class NotifyMessageSubscriber {
                         protocolMethod: NotifyMessageProtocolMethod()
                     )
 
-                    logger.debug("Sent Notify Receipt Response")
+                    logger.debug("Sent Notify Message Response on topic: \(payload.topic)", properties: ["topic" : payload.topic, "messageBody": messagePayload.message.body, "messageTitle": messagePayload.message.title, "id": payload.id.string, "result": wrapper.jwtString])
                 }
 
             }.store(in: &publishers)

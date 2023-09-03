@@ -36,9 +36,6 @@ class DeleteNotifySubscriptionService {
         guard let subscription = notifyStorage.getSubscription(topic: topic)
         else { throw Errors.notifySubscriptionNotFound}
 
-        try await notifyStorage.deleteSubscription(topic: topic)
-        notifyStorage.deleteMessages(topic: topic)
-
         let protocolMethod = NotifyDeleteProtocolMethod()
         let dappPubKey = try await webDidResolver.resolvePublicKey(dappUrl: subscription.metadata.url)
 
@@ -52,7 +49,8 @@ class DeleteNotifySubscriptionService {
         let request = RPCRequest(method: protocolMethod.method, params: wrapper)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
-        try await notifyStorage.deleteSubscription(topic: topic)
+        try notifyStorage.deleteSubscription(topic: topic)
+        notifyStorage.deleteMessages(topic: topic)
 
         networkingInteractor.unsubscribe(topic: topic)
 

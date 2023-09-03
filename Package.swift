@@ -77,7 +77,7 @@ let package = Package(
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectNotify",
-            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
+            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSigner"],
             path: "Sources/WalletConnectNotify"),
         .target(
             name: "WalletConnectPush",

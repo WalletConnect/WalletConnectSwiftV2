@@ -12,21 +12,21 @@ final class NotifyStorage: NotifyStoring {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let subscriptionStore: SyncStore<NotifySubscription>
+    private let subscriptionStore: KeyedDatabase<NotifySubscription>
     private let messagesStore: KeyedDatabase<NotifyMessageRecord>
 
     private let newSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
     private let updateSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
     private let deleteSubscriptionSubject = PassthroughSubject<String, Never>()
-
-    private let subscriptionStoreDelegate: NotifySubscriptionStoreDelegate
+    private let subscriptionsSubject = PassthroughSubject<[NotifySubscription], Never>()
+    private let messagesSubject = PassthroughSubject<[NotifyMessageRecord], Never>()
 
     var newSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
         return newSubscriptionSubject.eraseToAnyPublisher()
     }
 
     var updateSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
-        return newSubscriptionSubject.eraseToAnyPublisher()
+        return updateSubscriptionSubject.eraseToAnyPublisher()
     }
 
     var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
@@ -34,29 +34,18 @@ final class NotifyStorage: NotifyStoring {
     }
 
     var subscriptionsPublisher: AnyPublisher<[NotifySubscription], Never> {
-        return subscriptionStore.dataUpdatePublisher
+        return subscriptionsSubject.eraseToAnyPublisher()
     }
 
-    init(
-        subscriptionStore: SyncStore<NotifySubscription>,
-        messagesStore: KeyedDatabase<NotifyMessageRecord>,
-        subscriptionStoreDelegate: NotifySubscriptionStoreDelegate
-    ) {
+    var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
+        return messagesSubject.eraseToAnyPublisher()
+    }
+
+    init(subscriptionStore: KeyedDatabase<NotifySubscription>, messagesStore: KeyedDatabase<NotifyMessageRecord>) {
         self.subscriptionStore = subscriptionStore
         self.messagesStore = messagesStore
-        self.subscriptionStoreDelegate = subscriptionStoreDelegate
+
         setupSubscriptions()
-    }
-
-    // MARK: Configuration
-
-    func initialize(account: Account) async throws {
-        try await subscriptionStore.create(for: account)
-        try subscriptionStore.setupDatabaseSubscriptions(account: account)
-    }
-
-    func subscribe(account: Account) async throws {
-        try await subscriptionStore.subscribe(for: account)
     }
 
     // MARK: Subscriptions
@@ -66,27 +55,36 @@ final class NotifyStorage: NotifyStoring {
     }
 
     func getSubscription(topic: String) -> NotifySubscription? {
-        return subscriptionStore.get(for: topic)
+        return subscriptionStore.getAll().first(where: { $0.topic == topic })
     }
 
-    func setSubscription(_ subscription: NotifySubscription) async throws {
-        try await subscriptionStore.set(object: subscription, for: subscription.account)
+    func setSubscription(_ subscription: NotifySubscription) {
+        subscriptionStore.set(element: subscription, for: subscription.account.absoluteString)
         newSubscriptionSubject.send(subscription)
     }
 
-    func deleteSubscription(topic: String) async throws {
-        try await subscriptionStore.delete(id: topic)
+    func deleteSubscription(topic: String) throws {
+        guard let subscription = getSubscription(topic: topic) else {
+            throw Errors.subscriptionNotFound
+        }
+        subscriptionStore.delete(id: topic, for: subscription.account.absoluteString)
         deleteSubscriptionSubject.send(topic)
     }
 
-    func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) async throws {
+    func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) {
         let expiry = Date(timeIntervalSince1970: TimeInterval(expiry))
         let updated = NotifySubscription(topic: subscription.topic, account: subscription.account, relay: subscription.relay, metadata: subscription.metadata, scope: scope, expiry: expiry, symKey: subscription.symKey)
-        try await setSubscription(updated)
+        subscriptionStore.set(element: updated, for: updated.account.absoluteString)
         updateSubscriptionSubject.send(updated)
     }
 
     // MARK: Messages
+
+    func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
+        return messagesPublisher
+            .map { $0.filter { $0.topic == topic } }
+            .eraseToAnyPublisher()
+    }
 
     func getMessages(topic: String) -> [NotifyMessageRecord] {
         return messagesStore.getAll(for: topic)
@@ -109,18 +107,17 @@ final class NotifyStorage: NotifyStoring {
 
 private extension NotifyStorage {
 
+    enum Errors: Error {
+        case subscriptionNotFound
+    }
+
     func setupSubscriptions() {
-        subscriptionStore.syncUpdatePublisher.sink { [unowned self] (_, _, update) in
-            switch update {
-            case .set(let subscription):
-                subscriptionStoreDelegate.onUpdate(subscription)
-                newSubscriptionSubject.send(subscription)
-            case .delete(let object):
-                subscriptionStoreDelegate.onDelete(object, notifyStorage: self)
-                deleteSubscriptionSubject.send(object.topic)
-            case .update(let subscription):
-                newSubscriptionSubject.send(subscription)
-            }
-        }.store(in: &publishers)
+        messagesStore.onUpdate = { [unowned self] in
+            messagesSubject.send(messagesStore.getAll())
+        }
+
+        subscriptionStore.onUpdate = { [unowned self] in
+            subscriptionsSubject.send(subscriptionStore.getAll())
+        }
     }
 }

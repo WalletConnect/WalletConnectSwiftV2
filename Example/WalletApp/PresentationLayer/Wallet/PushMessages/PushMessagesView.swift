@@ -11,7 +11,7 @@ struct PushMessagesView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 ZStack {
-                    if presenter.pushMessages.isEmpty {
+                    if presenter.messages.isEmpty {
                         VStack(spacing: 10) {
                             Image(systemName: "bell.badge.fill")
                                 .resizable()
@@ -29,9 +29,9 @@ struct PushMessagesView: View {
                     }
 
                     VStack {
-                        if !presenter.pushMessages.isEmpty {
+                        if !presenter.messages.isEmpty {
                             List {
-                                ForEach(presenter.pushMessages, id: \.id) { pm in
+                                ForEach(presenter.messages, id: \.id) { pm in
                                     notificationView(pushMessage: pm)
                                         .listRowSeparator(.hidden)
                                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
