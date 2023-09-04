@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "Mixpanel",
+        "repositoryURL": "https://github.com/mixpanel/mixpanel-swift",
+        "state": {
+          "branch": "master",
+          "revision": "1ce27d937009d5ecce74dad97d69898ffea49c75",
+          "version": null
+        }
+      },
+      {
         "package": "PromiseKit",
         "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
         "state": {

@@ -26,11 +26,11 @@ let package = Package(
             name: "WalletConnectPairing",
             targets: ["WalletConnectPairing"]),
         .library(
+            name: "WalletConnectNotify",
+            targets: ["WalletConnectNotify"]),
+        .library(
             name: "WalletConnectPush",
             targets: ["WalletConnectPush"]),
-        .library(
-            name: "WalletConnectEcho",
-            targets: ["WalletConnectEcho"]),
         .library(
             name: "WalletConnectRouter",
             targets: ["WalletConnectRouter"]),
@@ -73,16 +73,16 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
-            dependencies: ["Auth", "WalletConnectSign", "WalletConnectEcho", "WalletConnectVerify"],
+            dependencies: ["Auth", "WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
             path: "Sources/Web3Wallet"),
         .target(
-            name: "WalletConnectPush",
-            dependencies: ["WalletConnectPairing", "WalletConnectEcho", "WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
-            path: "Sources/WalletConnectPush"),
+            name: "WalletConnectNotify",
+            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSigner"],
+            path: "Sources/WalletConnectNotify"),
         .target(
-            name: "WalletConnectEcho",
+            name: "WalletConnectPush",
             dependencies: ["WalletConnectNetworking", "WalletConnectJWT"],
-            path: "Sources/WalletConnectEcho"),
+            path: "Sources/WalletConnectPush"),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectJWT"],
@@ -100,7 +100,7 @@ let package = Package(
             dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "Web3Inbox",
-            dependencies: ["WalletConnectChat", "WalletConnectPush"]),
+            dependencies: ["WalletConnectChat", "WalletConnectNotify"]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
@@ -157,7 +157,7 @@ let package = Package(
             dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "NotifyTests",
-            dependencies: ["WalletConnectPush", "TestingUtils"]),
+            dependencies: ["WalletConnectNotify", "TestingUtils"]),
         .testTarget(
             name: "AuthTests",
             dependencies: ["Auth", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),

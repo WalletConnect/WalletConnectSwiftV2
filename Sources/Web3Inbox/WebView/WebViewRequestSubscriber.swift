@@ -4,10 +4,10 @@ import WebKit
 final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
 
     static let chat = "web3inboxChat"
-    static let push = "web3inboxPush"
+    static let notify = "web3inboxNotify"
 
     var onChatRequest: ((RPCRequest) async throws -> Void)?
-    var onPushRequest: ((RPCRequest) async throws -> Void)?
+    var onNotifyRequest: ((RPCRequest) async throws -> Void)?
 
     private let url: URL
     private let logger: ConsoleLogging
@@ -35,8 +35,8 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
                 switch name {
                 case Self.chat:
                     try await onChatRequest?(request)
-                case Self.push:
-                    try await onPushRequest?(request)
+                case Self.notify:
+                    try await onNotifyRequest?(request)
                 default:
                     break
                 }

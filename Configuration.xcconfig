@@ -14,4 +14,6 @@ RELAY_HOST = relay.walletconnect.com
 
 // WALLETAPP_SENTRY_DSN = WALLETAPP_SENTRY_DSN
 
-CAST_HOST = cast.walletconnect.com
+// MIXPANEL_TOKEN = MIXPANEL_TOKEN
+
+CAST_HOST = notify.walletconnect.com

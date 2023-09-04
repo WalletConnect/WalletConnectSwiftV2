@@ -30,6 +30,8 @@
 	<string>$(WALLETAPP_SENTRY_DSN)</string>
 	<key>SIMULATOR_IDENTIFIER</key>
 	<string>$(SIMULATOR_IDENTIFIER)</string>
+	<key>MIXPANEL_TOKEN</key>
+	<string>$(MIXPANEL_TOKEN)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

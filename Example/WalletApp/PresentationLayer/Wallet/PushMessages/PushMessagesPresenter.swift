@@ -1,6 +1,6 @@
 import UIKit
 import Combine
-import WalletConnectPush
+import WalletConnectNotify
 
 final class PushMessagesPresenter: ObservableObject {
 
@@ -8,19 +8,35 @@ final class PushMessagesPresenter: ObservableObject {
     private let router: PushMessagesRouter
     private var disposeBag = Set<AnyCancellable>()
     
-    @Published var pushMessages: [PushMessageViewModel] = []
+    @Published private var pushMessages: [NotifyMessageRecord] = []
+
+    var messages: [PushMessageViewModel] {
+        return pushMessages
+            .sorted { $0.publishedAt > $1.publishedAt }
+            .map { PushMessageViewModel(pushMessageRecord: $0) }
+    }
 
     init(interactor: PushMessagesInteractor, router: PushMessagesRouter) {
-        defer { reloadPushMessages() }
+        defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
+        setUpMessagesRefresh()
     }
+
+    private func setUpMessagesRefresh() {
+        Timer.publish(every: 10.0, on: .main, in: .default)
+            .autoconnect()
+            .sink(receiveValue: { [weak self] _ in
+                guard let self = self else { return }
+                self.pushMessages = self.interactor.getPushMessages()
+            }).store(in: &disposeBag)
+    }
+
     
     func deletePushMessage(at indexSet: IndexSet) {
         if let index = indexSet.first {
             interactor.deletePushMessage(id: pushMessages[index].id)
         }
-        reloadPushMessages()
     }
 }
 
@@ -40,27 +56,14 @@ extension PushMessagesPresenter: SceneViewModel {
 
 private extension PushMessagesPresenter {
 
-    func reloadPushMessages() {
-        self.pushMessages = interactor.getPushMessages()
-            .sorted {
-                // Most recent first
-                $0.publishedAt > $1.publishedAt
-            }
-            .map { pushMessageRecord in
-                PushMessageViewModel(pushMessageRecord: pushMessageRecord)
-            }
-        
-        interactor.pushMessagePublisher
+    func setupInitialState() {
+        pushMessages = interactor.getPushMessages()
+
+        interactor.messagesPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] newPushMessage in
-                let newMessageViewModel = PushMessageViewModel(pushMessageRecord: newPushMessage)
-                guard let index = self?.pushMessages.firstIndex(
-                    where: { $0.pushMessageRecord.publishedAt > newPushMessage.publishedAt }
-                ) else {
-                    self?.pushMessages.append(newMessageViewModel)
-                    return
-                }
-                self?.pushMessages.insert(newMessageViewModel, at: index)
+            .sink { [weak self] messages in
+                guard let self = self else { return }
+                self.pushMessages = self.interactor.getPushMessages()
             }
             .store(in: &disposeBag)
     }

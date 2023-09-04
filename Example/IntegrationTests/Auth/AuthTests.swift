@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import WalletConnectUtils
+@testable import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
@@ -31,7 +31,7 @@ final class AuthTests: XCTestCase {
     }
 
     func makeClients(prefix: String, iatProvider: IATProvider) -> (PairingClient, AuthClient) {
-        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
         let keyValueStorage = RuntimeKeyValueStorage()
         let keychain = KeychainStorageMock()
         let relayClient = RelayClientFactory.create(
@@ -205,11 +205,5 @@ final class AuthTests: XCTestCase {
         }
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
-    }
-}
-
-private struct IATProviderMock: IATProvider {
-    var iat: String {
-        return "2022-10-10T23:03:35.700Z"
     }
 }

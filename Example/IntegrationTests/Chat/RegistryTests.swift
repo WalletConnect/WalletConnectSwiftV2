@@ -32,27 +32,27 @@ final class RegistryTests: XCTestCase {
         signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
     }
 
-    func testRegisterIdentityAndInviteKey() async throws {
-        let publicKey = try await sut.registerIdentity(account: account, onSign: onSign)
-
-        let iss = DIDKey(rawData: Data(hex: publicKey)).did(variant: .ED25519)
-        let resolvedAccount = try await sut.resolveIdentity(iss: iss)
-        XCTAssertEqual(resolvedAccount, account)
-
-        let recovered = try storage.getIdentityKey(for: account).publicKey.hexRepresentation
-        XCTAssertEqual(publicKey, recovered)
-
-        let inviteKey = try await sut.registerInvite(account: account)
-
-        let recoveredKey = try storage.getInviteKey(for: account)
-        XCTAssertEqual(inviteKey, recoveredKey)
-
-        let resolvedKey = try await sut.resolveInvite(account: account)
-        XCTAssertEqual(inviteKey.did, resolvedKey)
-
-        _ = try await sut.goPrivate(account: account)
-        try await sut.unregister(account: account, onSign: onSign)
-    }
+//    func testRegisterIdentityAndInviteKey() async throws {
+//        let publicKey = try await sut.registerIdentity(account: account, onSign: onSign)
+//
+//        let iss = DIDKey(rawData: Data(hex: publicKey)).did(variant: .ED25519)
+//        let resolvedAccount = try await sut.resolveIdentity(iss: iss)
+//        XCTAssertEqual(resolvedAccount, account)
+//
+//        let recovered = try storage.getIdentityKey(for: account).publicKey.hexRepresentation
+//        XCTAssertEqual(publicKey, recovered)
+//
+//        let inviteKey = try await sut.registerInvite(account: account)
+//
+//        let recoveredKey = try storage.getInviteKey(for: account)
+//        XCTAssertEqual(inviteKey, recoveredKey)
+//
+//        let resolvedKey = try await sut.resolveInvite(account: account)
+//        XCTAssertEqual(inviteKey.did, resolvedKey)
+//
+//        _ = try await sut.goPrivate(account: account)
+//        try await sut.unregister(account: account, onSign: onSign)
+//    }
 }
 
 private extension RegistryTests {

@@ -1,6 +1,9 @@
 import Foundation
+import Combine
 
 public protocol Serializing {
+    var logsPublisher: AnyPublisher<Log, Never> {get}
+    func setLogging(level: LoggingLevel) 
     func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String
     /// - derivedTopic: topic derived from symmetric key as a result of key exchange if peers has sent envelope(type1) prefixed with it's public key
     func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?, decryptedPayload: Data)
