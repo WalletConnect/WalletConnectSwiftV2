@@ -20,18 +20,14 @@ final class SessionProposalInteractor {
         let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let supportedAccounts = [Account(blockchain: Blockchain("eip155:1")!, address: ETHSigner.address)!, Account(blockchain: Blockchain("eip155:137")!, address: ETHSigner.address)!]
         */
-        do {
-            let sessionNamespaces = try AutoNamespaces.build(
-                sessionProposal: proposal,
-                chains: Array(supportedChains),
-                methods: Array(supportedMethods),
-                events: Array(supportedEvents),
-                accounts: supportedAccounts
-            )
-            try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
-        } catch {
-            print(error)
-        }
+        let sessionNamespaces = try AutoNamespaces.build(
+            sessionProposal: proposal,
+            chains: Array(supportedChains),
+            methods: Array(supportedMethods),
+            events: Array(supportedEvents),
+            accounts: supportedAccounts
+        )
+        try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
     }
 
     func reject(proposal: Session.Proposal) async throws {
