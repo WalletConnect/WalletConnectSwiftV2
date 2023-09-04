@@ -6,12 +6,6 @@ class NotifySubscribeResponseSubscriber {
         case couldNotCreateSubscription
     }
 
-    private let subscriptionErrorSubject = PassthroughSubject<Error, Never>()
-
-    var subscriptionErrorPublisher: AnyPublisher<Error, Never> {
-        return subscriptionErrorSubject.eraseToAnyPublisher()
-    }
-
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -53,7 +47,7 @@ class NotifySubscribeResponseSubscriber {
 
                 guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                     logger.debug("No symmetric key for topic \(payload.topic)")
-                    return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
+                    throw Errors.couldNotCreateSubscription
                 }
 
                 // get keypair Y
@@ -82,19 +76,19 @@ class NotifySubscribeResponseSubscriber {
                     try await networkingInteractor.subscribe(topic: notifySubscriptionTopic)
                 } catch {
                     logger.debug("NotifySubscribeResponseSubscriber: error: \(error)")
-                    return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
+                    throw Errors.couldNotCreateSubscription
                 }
 
                 guard let metadata = metadata else {
                     logger.debug("NotifySubscribeResponseSubscriber: no metadata for topic: \(notifySubscriptionTopic!)")
-                    return subscriptionErrorSubject.send(Errors.couldNotCreateSubscription)
+                    throw Errors.couldNotCreateSubscription
                 }
                 dappsMetadataStore.delete(forKey: payload.topic)
                 let expiry = Date(timeIntervalSince1970: TimeInterval(claims.exp))
                 let scope: [String: ScopeValue] = subscribedTypes.reduce(into: [:]) { $0[$1.name] = ScopeValue(description: $1.description, enabled: true) }
                 let notifySubscription = NotifySubscription(topic: notifySubscriptionTopic, account: account, relay: RelayProtocolOptions(protocol: "irn", data: nil), metadata: metadata, scope: scope, expiry: expiry, symKey: agreementKeysP.sharedKey.hexRepresentation)
 
-                try await notifyStorage.setSubscription(notifySubscription)
+                notifyStorage.setSubscription(notifySubscription)
 
                 logger.debug("NotifySubscribeResponseSubscriber: unsubscribing response topic: \(payload.topic)")
                 networkingInteractor.unsubscribe(topic: payload.topic)
