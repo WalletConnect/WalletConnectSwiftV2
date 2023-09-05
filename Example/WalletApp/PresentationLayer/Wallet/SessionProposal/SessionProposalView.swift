@@ -146,6 +146,9 @@ struct SessionProposalView: View {
                 Spacer()
             }
         }
+        .alert(presenter.errorMessage, isPresented: $presenter.showError) {
+            Button("OK", role: .cancel) {}
+        }
         .edgesIgnoringSafeArea(.all)
     }
     //private func sessionProposalView(chain: String) -> some View {

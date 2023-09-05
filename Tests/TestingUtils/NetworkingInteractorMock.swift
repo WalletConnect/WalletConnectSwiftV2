@@ -15,6 +15,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     private(set) var didRespondError = false
     private(set) var didCallSubscribe = false
     private(set) var didCallUnsubscribe = false
+    private(set) var didCallHandleHistoryRequest = false
     private(set) var didRespondOnTopic: String?
     private(set) var lastErrorCode = -1
 
@@ -89,6 +90,10 @@ public class NetworkingInteractorMock: NetworkInteracting {
         defer { onSubscribeCalled?() }
         subscriptions.append(topic)
         didCallSubscribe = true
+    }
+    
+    public func handleHistoryRequest(topic: String, request: JSONRPC.RPCRequest) {
+        didCallHandleHistoryRequest = true
     }
 
     func didSubscribe(to topic: String) -> Bool {

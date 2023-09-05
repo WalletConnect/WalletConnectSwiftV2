@@ -9,6 +9,7 @@ final class ApproveEngine {
         case pairingNotFound
         case sessionNotFound
         case agreementMissingOrInvalid
+        case networkNotConnected
     }
 
     var onSessionProposal: ((Session.Proposal, VerifyContext?) -> Void)?
@@ -62,6 +63,11 @@ final class ApproveEngine {
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
+        }
+        
+        let networkConnectionStatus = await resolveNetworkConnectionStatus()
+        guard networkConnectionStatus == .connected else {
+            throw Errors.networkNotConnected
         }
 
         let proposal = payload.request
@@ -300,6 +306,11 @@ private extension ApproveEngine {
         
         pairingRegisterer.setReceived(pairingTopic: payload.topic)
         
+        if let verifyContext = try? verifyContextStore.get(key: proposal.proposer.publicKey) {
+            onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
+            return
+        }
+        
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
@@ -372,5 +383,29 @@ private extension ApproveEngine {
             try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onSessionSettle?(session.publicRepresentation())
+    }
+    
+    func resolveNetworkConnectionStatus() async -> NetworkConnectionStatus {
+        return await withCheckedContinuation { continuation in
+            let cancellable = networkingInteractor.networkConnectionStatusPublisher.sink { value in
+                continuation.resume(returning: value)
+            }
+            
+            Task(priority: .high) {
+                await withTaskCancellationHandler {
+                    cancellable.cancel()
+                } onCancel: { }
+            }
+        }
+    }
+}
+
+// MARK: - LocalizedError
+extension ApproveEngine.Errors: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .networkNotConnected:  return "Action failed. You seem to be offline"
+        default:                    return ""
+        }
     }
 }

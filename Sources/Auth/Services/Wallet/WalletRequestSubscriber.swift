@@ -37,10 +37,7 @@ class WalletRequestSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 
-                pairingRegisterer.activate(
-                    pairingTopic: payload.topic,
-                    peerMetadata: payload.request.requester.metadata
-                )
+                pairingRegisterer.setReceived(pairingTopic: payload.topic)
                 
                 let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
                 

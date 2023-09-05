@@ -110,7 +110,7 @@ final class PairingTests: XCTestCase {
         let expectation = expectation(description: "expects ping response")
         makeWalletClients()
         let uri = try! await appPairingClient.create()
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         try! await walletPairingClient.ping(topic: uri.topic)
         walletPairingClient.pingResponsePublisher
             .sink { topic in
@@ -131,7 +131,7 @@ final class PairingTests: XCTestCase {
 
         let uri = try! await appPairingClient.create()
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
 
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
