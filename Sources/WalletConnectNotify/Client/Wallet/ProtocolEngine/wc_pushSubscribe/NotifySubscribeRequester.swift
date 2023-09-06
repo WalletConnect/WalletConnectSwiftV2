@@ -39,9 +39,9 @@ class NotifySubscribeRequester {
 
         let dappUrl = metadata.url
 
-        logger.debug("Subscribing for Notify")
+        logger.debug("Subscribing for Notify, dappUrl: \(dappUrl)")
 
-        let peerPublicKey = try await webDidResolver.resolvePublicKey(dappUrl: metadata.url)
+        let peerPublicKey = try await webDidResolver.resolveAgreementKey(domain: metadata.url)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
@@ -64,7 +64,7 @@ class NotifySubscribeRequester {
         )
         let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
-        logger.debug("NotifySubscribeRequester: subscribing to response topic: \(responseTopic)")
+        logger.debug("Subscribing to response topic: \(responseTopic)")
 
         try await networkingInteractor.subscribe(topic: responseTopic)
 

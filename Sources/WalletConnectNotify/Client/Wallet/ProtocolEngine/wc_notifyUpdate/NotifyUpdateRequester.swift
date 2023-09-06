@@ -40,10 +40,10 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
 
         guard let subscription = notifyStorage.getSubscription(topic: topic) else { throw Errors.noSubscriptionForGivenTopic }
 
-        let dappPubKey = try await webDidResolver.resolvePublicKey(dappUrl: subscription.metadata.url)
+        let dappAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: subscription.metadata.url)
 
         let request = try createJWTRequest(
-            dappPubKey: DIDKey(rawData: dappPubKey.rawRepresentation),
+            dappPubKey: DIDKey(rawData: dappAuthenticationKey),
             subscriptionAccount: subscription.account,
             dappUrl: subscription.metadata.url, scope: scope
         )
