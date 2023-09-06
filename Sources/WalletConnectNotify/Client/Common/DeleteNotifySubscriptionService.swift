@@ -37,10 +37,10 @@ class DeleteNotifySubscriptionService {
         else { throw Errors.notifySubscriptionNotFound}
 
         let protocolMethod = NotifyDeleteProtocolMethod()
-        let dappPubKey = try await webDidResolver.resolvePublicKey(dappUrl: subscription.metadata.url)
+        let dappAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: subscription.metadata.url)
 
         let wrapper = try createJWTWrapper(
-            dappPubKey: DIDKey(rawData: dappPubKey.rawRepresentation),
+            dappPubKey: DIDKey(rawData: dappAuthenticationKey),
             reason: NotifyDeleteParams.userDisconnected.message,
             app: subscription.metadata.url,
             account: subscription.account
@@ -58,6 +58,10 @@ class DeleteNotifySubscriptionService {
 
         kms.deleteSymmetricKey(for: topic)
     }
+
+
+
+    
 }
 
 private extension DeleteNotifySubscriptionService {
