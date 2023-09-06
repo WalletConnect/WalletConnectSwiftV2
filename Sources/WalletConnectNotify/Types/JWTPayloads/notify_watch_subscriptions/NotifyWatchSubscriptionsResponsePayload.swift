@@ -14,7 +14,7 @@ class NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
         /// `did:key` of an identity key.
         let aud: String
         /// array of Notify Subscriptions
-        let sbs: [NotifySubscription]
+        let sbs: [NotifyServerSubscription]
 
         static var action: String? {
             return "notify_watch_subscriptions"
@@ -33,7 +33,7 @@ class NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
         }
     }
 
-    let subscriptions: [NotifySubscription]
+    let subscriptions: [NotifyServerSubscription]
     let selfIdentityKey: DIDKey
 
     required init(claims: Claims) throws {

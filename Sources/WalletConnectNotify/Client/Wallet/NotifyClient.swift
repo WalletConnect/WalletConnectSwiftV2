@@ -46,6 +46,8 @@ public class NotifyClient {
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
+    private let notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester
+    private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -60,7 +62,9 @@ public class NotifyClient {
          deleteNotifySubscriptionSubscriber: DeleteNotifySubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
-         subscriptionsAutoUpdater: SubscriptionsAutoUpdater
+         subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
+         notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester,
+         notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
     ) {
         self.logger = logger
         self.pushClient = pushClient
@@ -75,6 +79,8 @@ public class NotifyClient {
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
+        self.notifyWatchSubscriptionsRequester = notifyWatchSubscriptionsRequester
+        self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
     }
 
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {

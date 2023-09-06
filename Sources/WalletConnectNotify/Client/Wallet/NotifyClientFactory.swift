@@ -58,6 +58,9 @@ public struct NotifyClientFactory {
 
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
 
+        let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver)
+        let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, subscriptionScopeProvider: subscriptionScopeProvider)
+
         return NotifyClient(
             logger: logger,
             kms: kms,
@@ -72,7 +75,9 @@ public struct NotifyClientFactory {
             deleteNotifySubscriptionSubscriber: deleteNotifySubscriptionSubscriber,
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
-            subscriptionsAutoUpdater: subscriptionsAutoUpdater
+            subscriptionsAutoUpdater: subscriptionsAutoUpdater,
+            notifyWatchSubscriptionsRequester: notifyWatchSubscriptionsRequester,
+            notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber
         )
     }
 }
