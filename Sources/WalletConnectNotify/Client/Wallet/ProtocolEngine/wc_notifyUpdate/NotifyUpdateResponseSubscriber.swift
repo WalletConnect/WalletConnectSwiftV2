@@ -33,7 +33,8 @@ private extension NotifyUpdateResponseSubscriber {
         networkingInteractor.subscribeOnResponse(
             protocolMethod: NotifyUpdateProtocolMethod(),
             requestOfType: NotifyUpdatePayload.Wrapper.self,
-            responseOfType: NotifyUpdateResponsePayload.Wrapper.self
+            responseOfType: NotifyUpdateResponsePayload.Wrapper.self,
+            errorHandler: logger
         ) { [unowned self] payload in
             logger.debug("Received Notify Update response")
 

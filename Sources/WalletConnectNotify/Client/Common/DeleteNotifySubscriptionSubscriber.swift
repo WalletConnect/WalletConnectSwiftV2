@@ -22,7 +22,8 @@ class DeleteNotifySubscriptionSubscriber {
     private func subscribeForDeleteSubscription() {
         networkingInteractor.subscribeOnRequest(
             protocolMethod: NotifyDeleteProtocolMethod(),
-            requestOfType: NotifyDeleteResponsePayload.Wrapper.self
+            requestOfType: NotifyDeleteResponsePayload.Wrapper.self,
+            errorHandler: logger
         ) { [unowned self] payload in
             let (_, _) = try NotifyDeleteResponsePayload.decodeAndVerify(from: payload.request)
             logger.debug("Peer deleted subscription")

@@ -30,6 +30,7 @@ public protocol NetworkInteracting {
     func subscribeOnRequest<RequestParams: Codable>(
         protocolMethod: ProtocolMethod,
         requestOfType: RequestParams.Type,
+        errorHandler: ErrorHandler?,
         subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
     )
 
@@ -37,6 +38,7 @@ public protocol NetworkInteracting {
         protocolMethod: ProtocolMethod,
         requestOfType: Request.Type,
         responseOfType: Response.Type,
+        errorHandler: ErrorHandler?,
         subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
     )
 

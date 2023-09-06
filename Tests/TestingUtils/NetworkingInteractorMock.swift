@@ -99,15 +99,16 @@ public class NetworkingInteractorMock: NetworkInteracting {
     public func subscribeOnRequest<RequestParams: Codable>(
         protocolMethod: ProtocolMethod,
         requestOfType: RequestParams.Type,
+        errorHandler: ErrorHandler?,
         subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
     ) {
         requestSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<RequestParams>) in
+            .sink { (payload: RequestSubscriptionPayload<RequestParams>) in
                 Task(priority: .high) {
                     do {
                         try await subscription(payload)
                     } catch {
-                        errorPublisherSubject.send(error)
+                        errorHandler?.handle(error: error)
                     }
                 }
             }.store(in: &publishers)
@@ -118,15 +119,16 @@ public class NetworkingInteractorMock: NetworkInteracting {
         protocolMethod: ProtocolMethod,
         requestOfType: Request.Type,
         responseOfType: Response.Type,
+        errorHandler: ErrorHandler?,
         subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
     ) {
         responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Request, Response>) in
+            .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
                 Task(priority: .high) {
                     do {
                         try await subscription(payload)
                     } catch {
-                        errorPublisherSubject.send(error)
+                        errorHandler?.handle(error: error)
                     }
                 }
             }.store(in: &publishers)

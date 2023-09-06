@@ -37,7 +37,8 @@ class NotifySubscribeResponseSubscriber {
         networkingInteractor.subscribeOnResponse(
             protocolMethod: NotifySubscribeProtocolMethod(),
             requestOfType: NotifySubscriptionPayload.Wrapper.self,
-            responseOfType: NotifySubscriptionResponsePayload.Wrapper.self
+            responseOfType: NotifySubscriptionResponsePayload.Wrapper.self,
+            errorHandler: logger
         ) { [unowned self] payload in
                 logger.debug("Received Notify Subscribe response")
 

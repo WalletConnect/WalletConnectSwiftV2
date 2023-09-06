@@ -27,7 +27,8 @@ class NotifyMessageSubscriber {
     private func subscribeForNotifyMessages() {
         networkingInteractor.subscribeOnRequest(
             protocolMethod: NotifyMessageProtocolMethod(),
-            requestOfType: NotifyMessagePayload.Wrapper.self
+            requestOfType: NotifyMessagePayload.Wrapper.self,
+            errorHandler: logger
         ) { [unowned self] payload in
             logger.debug("Received Notify Message on topic: \(payload.topic)", properties: ["topic": payload.topic])
 
