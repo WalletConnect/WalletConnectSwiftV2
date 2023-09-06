@@ -28,11 +28,11 @@ class NotifyWatchSubscriptionsResponseSubscriber {
 
         let protocolMethod = NotifySubscribeProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifySubscriptionPayload.Wrapper, NotifySubscriptionResponsePayload.Wrapper>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifyWatchSubscriptionsPayload.Wrapper, NotifySubscriptionResponsePayload.Wrapper>) in
                 Task(priority: .high) {
                     logger.debug("Received Notify watch Subscription response")
 
-                    
+
                 }
             }.store(in: &publishers)
     }

@@ -13,7 +13,7 @@ class NotifyWatchSubscriptionsPayload: JWTClaimsCodable {
 
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
-        /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
+        /// `did:key` of an identity key.
         let aud: String
         /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
