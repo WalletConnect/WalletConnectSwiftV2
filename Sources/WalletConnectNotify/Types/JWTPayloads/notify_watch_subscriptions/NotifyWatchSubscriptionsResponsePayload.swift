@@ -1,6 +1,6 @@
 import Foundation
 
-class NotifyWatchSubscriptionsRersponsePayload: JWTClaimsCodable {
+class NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
     struct Claims: JWTClaims {
         /// Timestamp when JWT was issued
         let iat: UInt64
