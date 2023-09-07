@@ -1,6 +1,6 @@
 import Foundation
 
-class NotifyWatchSubscriptionsPayload: JWTClaimsCodable {
+struct NotifyWatchSubscriptionsPayload: JWTClaimsCodable {
     struct Claims: JWTClaims {
         /// Timestamp when JWT was issued
         let iat: UInt64
@@ -24,14 +24,14 @@ class NotifyWatchSubscriptionsPayload: JWTClaimsCodable {
     }
 
     struct Wrapper: JWTWrapper {
-        let subscriptionAuth: String
+        let watchSubscriptionsAuth: String
 
         init(jwtString: String) {
-            self.subscriptionAuth = jwtString
+            self.watchSubscriptionsAuth = jwtString
         }
 
         var jwtString: String {
-            return subscriptionAuth
+            return watchSubscriptionsAuth
         }
     }
 
@@ -45,7 +45,7 @@ class NotifyWatchSubscriptionsPayload: JWTClaimsCodable {
         self.subscriptionAccount = subscriptionAccount
     }
 
-    required init(claims: Claims) throws {
+    init(claims: Claims) throws {
         self.notifyServerIdentityKey = try DIDKey(did: claims.aud)
         self.keyserver = try claims.ksu.asURL()
         self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
