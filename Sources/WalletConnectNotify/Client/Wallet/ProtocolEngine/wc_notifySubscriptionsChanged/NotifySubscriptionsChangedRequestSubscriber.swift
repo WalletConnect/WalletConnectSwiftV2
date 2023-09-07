@@ -28,5 +28,8 @@ class NotifySubscriptionsChangedRequestSubscriber {
     private func subscribeForNofifyChangedRequests() {
         let protocolMethod =  NotifySubscriptionsChangedRequest()
 
+        networkingInteractor.requestSubscription(on: protocolMethod).sink { [unowned self]  (payload: RequestSubscriptionPayload<NotifySubscriptionsChangedRequestPayload.Wrapper>) in
+            <#code#>
+        }
     }
 }

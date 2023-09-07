@@ -38,14 +38,14 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         }
     }
 
-    let castServerPubKey: DIDKey
+    let dappAuthenticationKey: DIDKey
     let account: Account
     let subscriptionId: String
     let app: String
     let message: NotifyMessage
 
     init(claims: Claims) throws {
-        self.castServerPubKey = try DIDKey(did: claims.iss)
+        self.dappAuthenticationKey = try DIDKey(did: claims.iss)
         self.account = try DIDPKH(did: claims.aud).account
         self.subscriptionId = claims.sub
         self.app = claims.app
@@ -57,7 +57,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             act: Claims.action,
-            iss: castServerPubKey.multibase(variant: .ED25519),
+            iss: dappAuthenticationKey.multibase(variant: .ED25519),
             aud: account.did,
             sub: subscriptionId,
             app: app,
