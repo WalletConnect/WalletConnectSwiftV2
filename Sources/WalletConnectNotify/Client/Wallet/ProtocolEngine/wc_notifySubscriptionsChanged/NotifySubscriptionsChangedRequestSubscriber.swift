@@ -10,14 +10,17 @@ class NotifySubscriptionsChangedRequestSubscriber {
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
     private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
-
-    init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
-         identityClient: IdentityClient,
-         logger: ConsoleLogging,
-         notifyStorage: NotifyStorage,
-         notifySubscriptionsBuilder: NotifySubscriptionsBuilder
+    
+    init(
+        keyserver: URL,
+        networkingInteractor: NetworkInteracting,
+        kms: KeyManagementServiceProtocol,
+        identityClient: IdentityClient,
+        logger: ConsoleLogging,
+        notifyStorage: NotifyStorage,
+        notifySubscriptionsBuilder: NotifySubscriptionsBuilder
     ) {
+        self.keyserver = keyserver
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
@@ -47,7 +50,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 notifyStorage.replaceAllSubscriptions(subscriptions)
 
-                var logProperties = [String: String]()
+                var logProperties = ["rpcId": payload.id.string]
                 for (index, subscription) in subscriptions.enumerated() {
                     let key = "subscription_\(index + 1)"
                     logProperties[key] = subscription.topic
@@ -55,16 +58,16 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 logger.debug("Updated Subscriptions by Subscriptions Changed Request", properties: logProperties)
 
-                try await respond(topic: payload.topic, account: jwtPayload.account, rpcId: payload.id)
+                try await respond(topic: payload.topic, account: jwtPayload.account, rpcId: payload.id, notifyServerAuthenticationKey: jwtPayload.notifyServerAuthenticationKey)
 
             }
 
         }.store(in: &publishers)
     }
 
-    private func respond(topic: String, account: Account, rpcId: RPCID) async throws {
+    private func respond(topic: String, account: Account, rpcId: RPCID, notifyServerAuthenticationKey: DIDKey) async throws {
 
-        let receiptPayload = NotifySubscriptionsChangedResponsePayload(keyserver: keyserver)
+        let receiptPayload = NotifySubscriptionsChangedResponsePayload(keyserver: keyserver, notifyServerAuthenticationKey: notifyServerAuthenticationKey)
 
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: receiptPayload,
@@ -77,6 +80,9 @@ class NotifySubscriptionsChangedRequestSubscriber {
             response: response,
             protocolMethod: NotifySubscriptionsChangedProtocolMethod()
         )
+
+        let logProperties = ["rpcId": rpcId.string]
+        logger.debug("Responded for Subscriptions Changed Request", properties: logProperties)
     }
 
 }

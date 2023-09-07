@@ -1,6 +1,6 @@
 import Foundation
 
-class NotifyServerSubscription: Codable, Equatable {
+struct NotifyServerSubscription: Codable, Equatable {
     let dappUrl: String
     let account: Account
     let scope: [String]

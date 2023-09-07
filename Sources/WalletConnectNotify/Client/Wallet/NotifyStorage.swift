@@ -65,7 +65,7 @@ final class NotifyStorage: NotifyStoring {
 
     func replaceAllSubscriptions(_ subscriptions: [NotifySubscription]) {
         fatalError("how it works?")
-        subscriptionStore.deleteAll(for: <#T##String#>)
+//        subscriptionStore.deleteAll(for: <#T##String#>)
 
         //delete messages for removed subscriptions
         //messages for new subscriptions are not required
