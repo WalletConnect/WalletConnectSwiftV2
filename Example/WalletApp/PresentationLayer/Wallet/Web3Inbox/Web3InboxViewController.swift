@@ -31,7 +31,7 @@ final class Web3InboxViewController: UIViewController {
     }
 
     @objc func refreshTapped() {
-        webView?.reload()
+        Web3Inbox.instance.reload()
     }
 
     @objc func getUrlPressed(_ sender: UIBarItem) {

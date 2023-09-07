@@ -57,7 +57,7 @@ class WalletRequestSubscriberTests: XCTestCase {
         pairingRegisterer.subject.send(payload)
 
         wait(for: [messageExpectation], timeout: defaultTimeout)
-        XCTAssertTrue(pairingRegisterer.isActivateCalled)
+        XCTAssertTrue(pairingRegisterer.isReceivedCalled)
         XCTAssertEqual(requestPayload, expectedPayload)
         XCTAssertEqual(requestId, expectedRequestId)
     }

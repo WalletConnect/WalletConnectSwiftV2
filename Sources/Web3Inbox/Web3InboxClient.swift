@@ -74,6 +74,10 @@ public final class Web3InboxClient {
     public func register(deviceToken: Data) async throws {
         try await notifyClient.register(deviceToken: deviceToken)
     }
+
+    public func reload() {
+        webviewSubscriber.reload(webView)
+    }
 }
 
 // MARK: - Privates

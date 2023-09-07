@@ -162,6 +162,10 @@ public class NetworkingInteractor: NetworkInteracting {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
     }
+    
+    public func handleHistoryRequest(topic: String, request: RPCRequest) {
+        requestPublisherSubject.send((topic, request, Data(), Date(), nil))
+    }
 
     private func handleRequest(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?) {
         do {

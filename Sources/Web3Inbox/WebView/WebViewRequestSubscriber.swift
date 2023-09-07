@@ -45,6 +45,10 @@ final class WebViewRequestSubscriber: NSObject, WKScriptMessageHandler {
             }
         }
     }
+
+    func reload(_ webView: WKWebView) {
+        webView.load(URLRequest(url: url))
+    }
 }
 
 extension WebViewRequestSubscriber: WKUIDelegate {
@@ -55,7 +59,7 @@ extension WebViewRequestSubscriber: WKUIDelegate {
     func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
         decisionHandler(.grant)
     }
-    
+
     #endif
 }
 
@@ -63,17 +67,10 @@ extension WebViewRequestSubscriber: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
 
-        guard
-            let from = webView.url,
-            let to = navigationAction.request.url
-        else { return decisionHandler(.cancel) }
-
-        if from.absoluteString.contains("/login") || to.absoluteString.contains("/login") {
-            decisionHandler(.cancel)
-            webView.load(URLRequest(url: url))
-        } else {
+        if navigationAction.request.url == url {
             decisionHandler(.allow)
+        } else {
+            decisionHandler(.cancel)
         }
     }
 }
-
