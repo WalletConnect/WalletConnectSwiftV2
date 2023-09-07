@@ -1,6 +1,6 @@
 import Foundation
 
-class DeleteNotifySubscriptionService {
+class DeleteNotifySubscriptionRequester {
     enum Errors: Error {
         case notifySubscriptionNotFound
     }
