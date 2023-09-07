@@ -1,7 +1,7 @@
 
 import Foundation
 
-class SubscriptionScopeProvider {
+actor SubscriptionScopeProvider {
     enum Errors: Error {
         case invalidUrl
     }
@@ -24,10 +24,6 @@ class SubscriptionScopeProvider {
         guard let notifyConfigUrl = URL(string: "\(dappUrl)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: notifyConfigUrl)
         let config = try JSONDecoder().decode(NotificationConfig.self, from: data)
-
-        fatalError("  Can we add metadata to config?")
-
-        
         return config.metadata
     }
 }

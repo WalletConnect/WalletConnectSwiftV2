@@ -31,7 +31,7 @@ public class NotifyClient {
             .eraseToAnyPublisher()
     }
 
-    private let deleteNotifySubscriptionService: DeleteNotifySubscriptionService
+    private let deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester
     private let notifySubscribeRequester: NotifySubscribeRequester
 
     public let logger: ConsoleLogging
@@ -55,7 +55,7 @@ public class NotifyClient {
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
-         deleteNotifySubscriptionService: DeleteNotifySubscriptionService,
+         deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester,
          resubscribeService: NotifyResubscribeService,
          notifySubscribeRequester: NotifySubscribeRequester,
          notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber,
@@ -71,7 +71,7 @@ public class NotifyClient {
         self.identityClient = identityClient
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
-        self.deleteNotifySubscriptionService = deleteNotifySubscriptionService
+        self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
         self.resubscribeService = resubscribeService
         self.notifySubscribeRequester = notifySubscribeRequester
         self.notifySubscribeResponseSubscriber = notifySubscribeResponseSubscriber
@@ -108,7 +108,7 @@ public class NotifyClient {
     }
 
     public func deleteSubscription(topic: String) async throws {
-        try await deleteNotifySubscriptionService.delete(topic: topic)
+        try await deleteNotifySubscriptionRequester.delete(topic: topic)
     }
 
     public func deleteNotifyMessage(id: String) {

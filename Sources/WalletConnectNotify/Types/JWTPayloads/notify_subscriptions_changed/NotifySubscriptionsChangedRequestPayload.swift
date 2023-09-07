@@ -37,9 +37,6 @@ struct NotifySubscriptionsChangedRequestPayload: JWTClaimsCodable {
     let subscriptions: [NotifyServerSubscription]
     let account: Account
 
-
-
-
     init(claims: Claims) throws {
         self.notifyServerAuthenticationKey = try DIDKey(did: claims.iss)
         self.subscriptions = claims.sbs

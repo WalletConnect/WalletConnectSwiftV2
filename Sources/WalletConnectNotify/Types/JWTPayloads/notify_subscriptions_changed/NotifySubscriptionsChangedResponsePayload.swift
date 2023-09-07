@@ -33,11 +33,12 @@ struct NotifySubscriptionsChangedResponsePayload: JWTClaimsCodable {
         }
     }
 
-    init(keyserver: URL) {
+    init(keyserver: URL, notifyServerAuthenticationKey: DIDKey) {
         self.keyserver = keyserver
+        self.notifyServerAuthenticationKey = notifyServerAuthenticationKey
     }
 
-    let selfIdentityKey: DIDKey
+    let notifyServerAuthenticationKey: DIDKey
     let keyserver: URL
 
     init(claims: Claims) throws {
@@ -51,7 +52,7 @@ struct NotifySubscriptionsChangedResponsePayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             act: Claims.action,
             iss: iss,
-            aud: selfIdentityKey.did(variant: .ED25519)
+            aud: notifyServerAuthenticationKey.did(variant: .ED25519)
         )
     }
 

@@ -40,7 +40,7 @@ public struct NotifyClientFactory {
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = WebDidResolver()
-        let deleteNotifySubscriptionService = DeleteNotifySubscriptionService(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
+        let deleteNotifySubscriptionRequester = DeleteNotifySubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
         let resubscribeService = NotifyResubscribeService(networkInteractor: networkInteractor, notifyStorage: notifyStorage, logger: logger)
 
         let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: NotifyStorageIdntifiers.dappsMetadataStore)
@@ -59,7 +59,8 @@ public struct NotifyClientFactory {
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
 
         let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver)
-        let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, subscriptionScopeProvider: subscriptionScopeProvider)
+        let notifySubscriptionsBuilder = NotifySubscriptionsBuilder(subscriptionScopeProvider: subscriptionScopeProvider)
+        let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
 
         return NotifyClient(
             logger: logger,
@@ -68,7 +69,7 @@ public struct NotifyClientFactory {
             pushClient: pushClient,
             notifyMessageSubscriber: notifyMessageSubscriber,
             notifyStorage: notifyStorage,
-            deleteNotifySubscriptionService: deleteNotifySubscriptionService,
+            deleteNotifySubscriptionRequester: deleteNotifySubscriptionRequester,
             resubscribeService: resubscribeService,
             notifySubscribeRequester: notifySubscribeRequester,
             notifySubscribeResponseSubscriber: notifySubscribeResponseSubscriber,

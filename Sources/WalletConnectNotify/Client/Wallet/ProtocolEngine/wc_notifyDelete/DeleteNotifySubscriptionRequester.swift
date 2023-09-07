@@ -64,7 +64,7 @@ class DeleteNotifySubscriptionRequester {
     
 }
 
-private extension DeleteNotifySubscriptionService {
+private extension DeleteNotifySubscriptionRequester {
 
     func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: String, account: Account) throws -> NotifyDeletePayload.Wrapper {
         let jwtPayload = NotifyDeletePayload(keyserver: keyserver, dappPubKey: dappPubKey, reason: reason, app: app)
