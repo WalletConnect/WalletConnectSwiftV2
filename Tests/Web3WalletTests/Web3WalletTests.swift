@@ -3,13 +3,14 @@ import Combine
 
 @testable import Auth
 @testable import Web3Wallet
+@testable import WalletConnectPush
 
 final class Web3WalletTests: XCTestCase {
     var web3WalletClient: Web3WalletClient!
     var authClient: AuthClientMock!
     var signClient: SignClientMock!
     var pairingClient: PairingClientMock!
-    var echoClient: EchoClientMock!
+    var pushClient: PushClientMock!
 
     private var disposeBag = Set<AnyCancellable>()
     
@@ -17,13 +18,13 @@ final class Web3WalletTests: XCTestCase {
         authClient = AuthClientMock()
         signClient = SignClientMock()
         pairingClient = PairingClientMock()
-        echoClient = EchoClientMock()
+        pushClient = PushClientMock()
         
         web3WalletClient = Web3WalletClientFactory.create(
             authClient: authClient,
             signClient: signClient,
             pairingClient: pairingClient,
-            echoClient: echoClient
+            pushClient: pushClient
         )
     }
     
@@ -267,11 +268,11 @@ final class Web3WalletTests: XCTestCase {
         XCTAssertEqual(1, web3WalletClient.getPairings().count)
     }
     
-    func testEchoClientRegisterCalled() async {
-        try! await echoClient.register(deviceToken: Data())
-        XCTAssertTrue(echoClient.registedCalled)
-        echoClient.registedCalled = false
-        try! await echoClient.register(deviceToken: "")
-        XCTAssertTrue(echoClient.registedCalled)
+    func testPushClientRegisterCalled() async {
+        try! await pushClient.register(deviceToken: Data())
+        XCTAssertTrue(pushClient.registedCalled)
+        pushClient.registedCalled = false
+        try! await pushClient.register(deviceToken: "")
+        XCTAssertTrue(pushClient.registedCalled)
     }
 }

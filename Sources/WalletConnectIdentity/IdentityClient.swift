@@ -72,4 +72,9 @@ public final class IdentityClient {
     public func getInviteKey(for account: Account) throws -> AgreementPublicKey {
         return try identityStorage.getInviteKey(for: account)
     }
+
+    public func isIdentityRegistered(account: Account) -> Bool {
+        let key = try? identityStorage.getIdentityKey(for: account)
+        return key != nil
+    }
 }

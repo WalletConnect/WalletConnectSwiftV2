@@ -3,7 +3,7 @@ import Foundation
 /**
  A representation of an active session connection.
  */
-public struct Session {
+public struct Session: Codable {
     public let topic: String
     public let pairingTopic: String
     public let peer: AppMetadata
@@ -28,6 +28,24 @@ extension Session {
 
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal
+        
+        init(
+            id: String,
+            pairingTopic: String,
+            proposer: AppMetadata,
+            requiredNamespaces: [String: ProposalNamespace],
+            optionalNamespaces: [String: ProposalNamespace]?,
+            sessionProperties: [String: String]?,
+            proposal: SessionProposal
+        ) {
+            self.id = id
+            self.pairingTopic = pairingTopic
+            self.proposer = proposer
+            self.requiredNamespaces = requiredNamespaces
+            self.optionalNamespaces = optionalNamespaces
+            self.sessionProperties = sessionProperties
+            self.proposal = proposal
+        }
     }
 
     public struct Event: Equatable, Hashable {

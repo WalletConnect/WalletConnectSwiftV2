@@ -7,5 +7,6 @@ public protocol PairingRegisterer {
     ) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never>
 
     func activate(pairingTopic: String, peerMetadata: AppMetadata?)
+    func setReceived(pairingTopic: String)
     func validatePairingExistance(_ topic: String) throws
 }

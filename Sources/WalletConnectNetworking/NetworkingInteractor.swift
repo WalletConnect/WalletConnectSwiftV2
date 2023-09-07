@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-
 public class NetworkingInteractor: NetworkInteracting {
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
@@ -20,7 +19,17 @@ public class NetworkingInteractor: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        logger.logsPublisher
+            .merge(with: serializer.logsPublisher)
+            .merge(with: relayClient.logsPublisher)
+            .eraseToAnyPublisher()
+    }
+
+    public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    
+    private let networkMonitor: NetworkMonitoring
 
     public init(
         relayClient: RelayClient,
@@ -33,6 +42,8 @@ public class NetworkingInteractor: NetworkInteracting {
         self.rpcHistory = rpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
+        self.networkMonitor = NetworkMonitor()
+        self.networkConnectionStatusPublisher = networkMonitor.networkConnectionStatusPublisher
         setupRelaySubscribtion()
     }
 
@@ -42,6 +53,13 @@ public class NetworkingInteractor: NetworkInteracting {
                 manageSubscription(topic, message, publishedAt)
             }.store(in: &publishers)
     }
+
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+        serializer.setLogging(level: level)
+        relayClient.setLogging(level: level)
+    }
+
 
     public func subscribe(topic: String) async throws {
         try await relayClient.subscribe(topic: topic)
@@ -143,6 +161,10 @@ public class NetworkingInteractor: NetworkInteracting {
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
+    }
+    
+    public func handleHistoryRequest(topic: String, request: RPCRequest) {
+        requestPublisherSubject.send((topic, request, Data(), Date(), nil))
     }
 
     private func handleRequest(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?) {

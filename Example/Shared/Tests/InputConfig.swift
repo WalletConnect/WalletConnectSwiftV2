@@ -18,6 +18,10 @@ struct InputConfig {
         return config(for: "GM_DAPP_PROJECT_SECRET")!
     }
 
+    static var jsClientApiHost: String {
+        return config(for: "JS_CLIENT_API_HOST")!
+    }
+
     static var relayUrl: String {
         return "wss://\(relayHost)"
     }

@@ -9,6 +9,8 @@ class WalletRequestSubscriber {
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
     private let verifyClient: VerifyClientProtocol
+    private let verifyContextStore: CodableStore<VerifyContext>
+
     var onRequest: (((request: AuthRequest, context: VerifyContext?)) -> Void)?
     
     init(
@@ -17,7 +19,8 @@ class WalletRequestSubscriber {
         kms: KeyManagementServiceProtocol,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
-        verifyClient: VerifyClientProtocol
+        verifyClient: VerifyClientProtocol,
+        verifyContextStore: CodableStore<VerifyContext>
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -25,6 +28,7 @@ class WalletRequestSubscriber {
         self.walletErrorResponder = walletErrorResponder
         self.pairingRegisterer = pairingRegisterer
         self.verifyClient = verifyClient
+        self.verifyContextStore = verifyContextStore
         subscribeForRequest()
     }
     
@@ -33,10 +37,7 @@ class WalletRequestSubscriber {
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 
-                pairingRegisterer.activate(
-                    pairingTopic: payload.topic,
-                    peerMetadata: payload.request.requester.metadata
-                )
+                pairingRegisterer.setReceived(pairingTopic: payload.topic)
                 
                 let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
                 
@@ -45,9 +46,11 @@ class WalletRequestSubscriber {
                     do {
                         let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
                         let verifyContext = verifyClient.createVerifyContext(origin: origin, domain: payload.request.payloadParams.domain)
+                        verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                     } catch {
                         let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.payloadParams.domain)
+                        verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                         return
                     }

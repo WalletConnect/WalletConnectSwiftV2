@@ -4,6 +4,7 @@ import Combine
 public enum SyncUpdate<Object: DatabaseObject> {
     case set(object: Object)
     case delete(object: Object)
+    case update(object: Object)
 }
 
 public final class SyncStore<Object: DatabaseObject> {
@@ -39,11 +40,15 @@ public final class SyncStore<Object: DatabaseObject> {
         setupSubscriptions()
     }
 
-    public func initialize(for account: Account) async throws {
+    public func create(for account: Account) async throws {
         try await syncClient.create(account: account, store: name)
     }
 
-    public func setupSubscriptions(account: Account) throws {
+    public func subscribe(for account: Account) async throws {
+        try await syncClient.subscribe(account: account, store: name)
+    }
+
+    public func setupDatabaseSubscriptions(account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
 
         objectStore.onUpdate = { [unowned self] in
@@ -93,8 +98,9 @@ public final class SyncStore<Object: DatabaseObject> {
         return record.topic
     }
 
-    public func setInStore(objects: [Object], for account: Account) throws {
+    public func replaceInStore(objects: [Object], for account: Account) throws {
         let record = try indexStore.getRecord(account: account, name: name)
+        objectStore.deleteAll(for: record.topic)
         objectStore.set(elements: objects, for: record.topic)
     }
 }
@@ -111,8 +117,10 @@ private extension SyncStore {
             switch update {
             case .set(let set):
                 let object = try! JSONDecoder().decode(Object.self, from: Data(set.value.utf8))
+                let exists = objectStore.exists(for: record.topic, id: object.databaseId)
                 if try! setInStore(object: object, for: record.account) {
-                    syncUpdateSubject.send((topic, record.account, .set(object: object)))
+                    let update: SyncUpdate = exists ? .update(object: object) : .set(object: object)
+                    syncUpdateSubject.send((topic, record.account, update))
                 }
             case .delete(let delete):
                 if let object = get(for: delete.key), try! deleteInStore(id: delete.key, for: record.account) {

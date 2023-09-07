@@ -1,9 +1,14 @@
 import Foundation
+import Combine
+
 @testable import WalletConnectRelay
 
 class NetworkMonitoringMock: NetworkMonitoring {
-    var onSatisfied: (() -> Void)?
-    var onUnsatisfied: (() -> Void)?
-
-    func startMonitoring() { }
+    var networkConnectionStatusPublisher: AnyPublisher<WalletConnectRelay.NetworkConnectionStatus, Never> {
+        networkConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+    
+    let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.connected)
+    
+    public init() { }
 }

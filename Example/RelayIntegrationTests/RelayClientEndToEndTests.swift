@@ -40,10 +40,9 @@ final class RelayClientEndToEndTests: XCTestCase {
             projectId: InputConfig.projectId,
             socketAuthenticator: socketAuthenticator
         )
-        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
-        let socket = WebSocketClient(url: urlFactory.create(fallback: false), logger: ConsoleLogger(suffix: prefix, loggingLevel: .debug))
+        let socket = WebSocket(url: urlFactory.create(fallback: false))
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
-        
+        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,

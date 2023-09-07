@@ -67,7 +67,7 @@ public class Web3WalletClient {
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
     private let pairingClient: PairingClientProtocol
-    private let echoClient: EchoClientProtocol
+    private let pushClient: PushClientProtocol
     
     private var account: Account?
 
@@ -75,12 +75,12 @@ public class Web3WalletClient {
         authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
         pairingClient: PairingClientProtocol,
-        echoClient: EchoClientProtocol
+        pushClient: PushClientProtocol
     ) {
         self.authClient = authClient
         self.signClient = signClient
         self.pairingClient = pairingClient
-        self.echoClient = echoClient
+        self.pushClient = pushClient
     }
     
     /// For a wallet to approve a session proposal.
@@ -190,24 +190,30 @@ public class Web3WalletClient {
     /// Query pending requests
     /// - Returns: Pending requests received from peer with `wc_sessionRequest` protocol method
     /// - Parameter topic: topic representing session for which you want to get pending requests. If nil, you will receive pending requests for all active sessions.
-    public func getPendingRequests(topic: String? = nil) -> [Request] {
+    public func getPendingRequests(topic: String? = nil) -> [(request: Request, context: VerifyContext?)] {
         signClient.getPendingRequests(topic: topic)
+    }
+    
+    /// Query pending proposals
+    /// - Returns: Pending proposals received from peer with `wc_sessionPropose` protocol method
+    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
+        signClient.getPendingProposals(topic: topic)
     }
     
     /// - Parameter id: id of a wc_sessionRequest jsonrpc request
     /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> Request? {
+    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         signClient.getSessionRequestRecord(id: id)
     }
     
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests() throws -> [AuthRequest] {
+    public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
         try authClient.getPendingRequests()
     }
     
-    public func registerEchoClient(deviceToken: Data) async throws {
-        try await echoClient.register(deviceToken: deviceToken)
+    public func registerPushClient(deviceToken: Data) async throws {
+        try await pushClient.register(deviceToken: deviceToken)
     }
     
     /// Delete all stored data such as: pairings, sessions, keys
@@ -224,8 +230,8 @@ public class Web3WalletClient {
 
 #if DEBUG
 extension Web3WalletClient {
-    public func registerEchoClient(deviceToken: String) async throws {
-        try await echoClient.register(deviceToken: deviceToken)
+    public func registerPushClient(deviceToken: String) async throws {
+        try await pushClient.register(deviceToken: deviceToken)
     }
 }
 #endif

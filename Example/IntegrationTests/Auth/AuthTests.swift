@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import WalletConnectUtils
+@testable import WalletConnectUtils
 @testable import WalletConnectKMS
 import WalletConnectRelay
 import Combine
@@ -31,7 +31,7 @@ final class AuthTests: XCTestCase {
     }
 
     func makeClients(prefix: String, iatProvider: IATProvider) -> (PairingClient, AuthClient) {
-        let logger = ConsoleLogger(suffix: prefix, loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
         let keyValueStorage = RuntimeKeyValueStorage()
         let keychain = KeychainStorageMock()
         let relayClient = RelayClientFactory.create(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, logger: logger)
@@ -70,7 +70,7 @@ final class AuthTests: XCTestCase {
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { _ in
             requestExpectation.fulfill()
         }.store(in: &publishers)
@@ -82,7 +82,7 @@ final class AuthTests: XCTestCase {
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
@@ -120,7 +120,7 @@ final class AuthTests: XCTestCase {
             resources: nil
         ), topic: uri.topic)
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
@@ -141,7 +141,7 @@ final class AuthTests: XCTestCase {
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
@@ -162,7 +162,7 @@ final class AuthTests: XCTestCase {
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 try! await walletAuthClient.reject(requestId: request.0.id)
@@ -183,7 +183,7 @@ final class AuthTests: XCTestCase {
         let uri = try! await appPairingClient.create()
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
-        try! await walletPairingClient.pair(uri: uri)
+        try? await walletPairingClient.pair(uri: uri)
         walletAuthClient.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
@@ -199,11 +199,5 @@ final class AuthTests: XCTestCase {
         }
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
-    }
-}
-
-private struct IATProviderMock: IATProvider {
-    var iat: String {
-        return "2022-10-10T23:03:35.700Z"
     }
 }

@@ -40,6 +40,11 @@ public final class SyncClient {
         try await syncService.create(account: account, store: store)
     }
 
+    /// Subscribe for sync topic
+    public func subscribe(account: Account, store: String) async throws {
+        try await syncService.subscribe(account: account, store: store)
+    }
+
     // Set value to store
     public func set<Object: DatabaseObject>(
         account: Account,

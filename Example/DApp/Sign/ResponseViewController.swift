@@ -26,10 +26,10 @@ class ResponseViewController: UIViewController {
         let record = Sign.instance.getSessionRequestRecord(id: response.id)!
         switch response.result {
         case  .response(let response):
-            responseView.nameLabel.text = "Received Response\n\(record.method)"
+            responseView.nameLabel.text = "Received Response\n\(record.request.method)"
             responseView.descriptionLabel.text = try! response.get(String.self).description
         case .error(let error):
-            responseView.nameLabel.text = "Received Error\n\(record.method)"
+            responseView.nameLabel.text = "Received Error\n\(record.request.method)"
             responseView.descriptionLabel.text = error.message
         }
         responseView.dismissButton.addTarget(self, action: #selector(dismissSelf), for: .touchUpInside)

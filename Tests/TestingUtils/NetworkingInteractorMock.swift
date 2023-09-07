@@ -15,6 +15,7 @@ public class NetworkingInteractorMock: NetworkInteracting {
     private(set) var didRespondError = false
     private(set) var didCallSubscribe = false
     private(set) var didCallUnsubscribe = false
+    private(set) var didCallHandleHistoryRequest = false
     private(set) var didRespondOnTopic: String?
     private(set) var lastErrorCode = -1
 
@@ -25,8 +26,13 @@ public class NetworkingInteractorMock: NetworkInteracting {
     var onRespondError: ((Int) -> Void)?
 
     public let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+    public let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.connected)
+    
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+    public var networkConnectionStatusPublisher: AnyPublisher<WalletConnectRelay.NetworkConnectionStatus, Never> {
+        networkConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
     public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
@@ -84,6 +90,10 @@ public class NetworkingInteractorMock: NetworkInteracting {
         defer { onSubscribeCalled?() }
         subscriptions.append(topic)
         didCallSubscribe = true
+    }
+    
+    public func handleHistoryRequest(topic: String, request: JSONRPC.RPCRequest) {
+        didCallHandleHistoryRequest = true
     }
 
     func didSubscribe(to topic: String) -> Bool {

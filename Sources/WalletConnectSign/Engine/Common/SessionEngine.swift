@@ -17,6 +17,7 @@ final class SessionEngine {
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let historyService: HistoryService
+    private let verifyContextStore: CodableStore<VerifyContext>
     private let verifyClient: VerifyClientProtocol
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
@@ -25,6 +26,7 @@ final class SessionEngine {
     init(
         networkingInteractor: NetworkInteracting,
         historyService: HistoryService,
+        verifyContextStore: CodableStore<VerifyContext>,
         verifyClient: VerifyClientProtocol,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
@@ -32,6 +34,7 @@ final class SessionEngine {
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService
+        self.verifyContextStore = verifyContextStore
         self.verifyClient = verifyClient
         self.kms = kms
         self.sessionStore = sessionStore
@@ -82,6 +85,7 @@ final class SessionEngine {
                 protocolMethod: protocolMethod,
                 reason: SignReasonCode.sessionRequestExpired
             )
+            verifyContextStore.delete(forKey: requestId.string)
             throw Errors.sessionRequestExpired
         }
 
@@ -90,6 +94,7 @@ final class SessionEngine {
             response: RPCResponse(id: requestId, outcome: response),
             protocolMethod: protocolMethod
         )
+        verifyContextStore.delete(forKey: requestId.string)
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -185,7 +190,7 @@ private extension SessionEngine {
     }
 
     func sessionRequestNotExpired(requestId: RPCID) -> Bool {
-        guard let request = historyService.getSessionRequest(id: requestId)
+        guard let request = historyService.getSessionRequest(id: requestId)?.request
         else { return false }
 
         return !request.isExpired()
@@ -243,9 +248,11 @@ private extension SessionEngine {
             do {
                 let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
                 let verifyContext = verifyClient.createVerifyContext(origin: origin, domain: session.peerParticipant.metadata.url)
+                verifyContextStore.set(verifyContext, forKey: request.id.string)
                 onSessionRequest?(request, verifyContext)
             } catch {
                 let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: session.peerParticipant.metadata.url)
+                verifyContextStore.set(verifyContext, forKey: request.id.string)
                 onSessionRequest?(request, verifyContext)
                 return
             }

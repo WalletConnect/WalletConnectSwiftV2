@@ -11,6 +11,9 @@ final class SessionProposalPresenter: ObservableObject {
     let sessionProposal: Session.Proposal
     let verified: Bool?
     
+    @Published var showError = false
+    @Published var errorMessage = "Error"
+    
     private var disposeBag = Set<AnyCancellable>()
 
     init(
@@ -30,14 +33,24 @@ final class SessionProposalPresenter: ObservableObject {
     
     @MainActor
     func onApprove() async throws {
-        try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
-        router.dismiss()
+        do {
+            try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
+            router.dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            showError.toggle()
+        }
     }
 
     @MainActor
     func onReject() async throws {
-        try await interactor.reject(proposal: sessionProposal)
-        router.dismiss()
+        do {
+            try await interactor.reject(proposal: sessionProposal)
+            router.dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            showError.toggle()
+        }
     }
 }
 

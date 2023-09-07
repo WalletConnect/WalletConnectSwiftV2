@@ -11,23 +11,34 @@ final class WalletPairServiceTestsTests: XCTestCase {
     var networkingInteractor: NetworkingInteractorMock!
     var storageMock: WCPairingStorageMock!
     var cryptoMock: KeyManagementServiceMock!
+    var rpcHistory: RPCHistory!
 
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
-        service = WalletPairService(networkingInteractor: networkingInteractor, kms: cryptoMock, pairingStorage: storageMock)
+        rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
+        service = WalletPairService(networkingInteractor: networkingInteractor, kms: cryptoMock, pairingStorage: storageMock, history: rpcHistory)
+    }
+    
+    func testPairWhenNetworkNotConnectedThrows() async {
+        let uri = WalletConnectURI.stub()
+        networkingInteractor.networkConnectionStatusPublisherSubject.send(.notConnected)
+        await XCTAssertThrowsErrorAsync(try await service.pair(uri))
     }
 
-    func testPairMultipleTimesOnSameURIThrows() async {
+    func testPairOnSameUriPresentsRequest() async {
+        let rpcRequest = RPCRequest(method: "session_propose", id: 1234)
+        
         let uri = WalletConnectURI.stub()
-        for i in 1...10 {
-            if i == 1 {
-                await XCTAssertNoThrowAsync(try await service.pair(uri))
-            } else {
-                await XCTAssertThrowsErrorAsync(try await service.pair(uri))
-            }
-        }
+        try! await service.pair(uri)
+        var pairing = storageMock.getPairing(forTopic: uri.topic)
+        pairing?.receivedRequest()
+        storageMock.setPairing(pairing!)
+        try! rpcHistory.set(rpcRequest, forTopic: uri.topic, emmitedBy: .local)
+        
+        try! await service.pair(uri)
+        XCTAssertTrue(networkingInteractor.didCallHandleHistoryRequest)
     }
 
     func testPair() async {

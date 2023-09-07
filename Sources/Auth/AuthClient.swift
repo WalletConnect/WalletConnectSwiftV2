@@ -89,7 +89,7 @@ public class AuthClient: AuthClientProtocol {
 
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests() throws -> [AuthRequest] {
+    public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
         return try pendingRequestsProvider.getPendingRequests()
     }
 

@@ -24,9 +24,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         WalletConnectModal.configure(
             projectId: InputConfig.projectId, 
-            metadata: metadata
+            metadata: metadata,
+            accentColor: .green
         )
-
+        
         setupWindow(scene: scene)
     }
 

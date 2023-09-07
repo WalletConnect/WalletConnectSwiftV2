@@ -1,7 +1,6 @@
 import Foundation
 
 public struct AuthClientFactory {
-
     public static func create(
         metadata: AppMetadata,
         projectId: String,
@@ -9,7 +8,6 @@ public struct AuthClientFactory {
         networkingClient: NetworkingInteractor,
         pairingRegisterer: PairingRegisterer
     ) -> AuthClient {
-
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
@@ -39,19 +37,19 @@ public struct AuthClientFactory {
         pairingRegisterer: PairingRegisterer,
         iatProvider: IATProvider
     ) -> AuthClient {
-
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let messageFormatter = SIWECacaoFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
         let verifyClient = VerifyClientFactory.create()
+        let verifyContextStore = CodableStore<VerifyContext>(defaults: keyValueStorage, identifier: VerifyStorageIdentifiers.context.rawValue)
         let messageVerifierFactory = MessageVerifierFactory(crypto: crypto)
         let signatureVerifier = messageVerifierFactory.create(projectId: projectId)
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: signatureVerifier, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer, verifyClient: verifyClient)
-        let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, walletErrorResponder: walletErrorResponder)
-        let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer, verifyClient: verifyClient, verifyContextStore: verifyContextStore)
+        let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
+        let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history, verifyContextStore: verifyContextStore)
 
         return AuthClient(
             appRequestService: appRequestService,

@@ -4,7 +4,6 @@ struct RelayUrlFactory {
     private let relayHost: String
     private let projectId: String
     private let socketAuthenticator: ClientIdAuthenticating
-    private var fallback = false
 
     init(
         relayHost: String,

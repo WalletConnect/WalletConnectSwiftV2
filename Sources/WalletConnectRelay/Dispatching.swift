@@ -20,6 +20,9 @@ final class Dispatcher: NSObject, Dispatching {
     private let logger: ConsoleLogging
     
     private let defaultTimeout: Int = 5
+
+    /// The property is used to determine whether relay.walletconnect.org will be used
+    /// in case relay.walletconnect.com doesn't respond for some reason (most likely due to being blocked in the user's location).
     private var fallback = false
     
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
@@ -73,10 +76,7 @@ final class Dispatcher: NSObject, Dispatching {
             .filter { $0 == .connected }
             .setFailureType(to: NetworkError.self)
             .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .webSocketNotConnected })
-            .sink(receiveCompletion: { [weak self] result in
-                guard let self else {
-                    return
-                }
+            .sink(receiveCompletion: { [unowned self] result in
                 switch result {
                 case .failure(let error):
                     cancellable?.cancel()
@@ -141,7 +141,9 @@ extension Dispatcher {
             logger.debug("[WebSocket] - Fallback to \(NetworkConstants.fallbackUrl)")
             fallback = true
             socket.request.url = relayUrlFactory.create(fallback: fallback)
-            socket.connect()
+            Task(priority: .high) {
+                await self.socketConnectionHandler.handleDisconnection()
+            }
         }
     }
 }

@@ -29,7 +29,8 @@ final class HistoryTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
-            logger: ConsoleLogger(suffix: prefix + " [Relay]", loggingLevel: .debug))
+            socketFactory: DefaultSocketFactory(),
+            logger: ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug))
     }
 
     private func makeHistoryClient(keychain: KeychainStorageProtocol) -> HistoryNetworkService {

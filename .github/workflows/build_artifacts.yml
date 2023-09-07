@@ -11,11 +11,13 @@ on:
         description: 'WalletConnect project id'
         required: true
   push:
-    branches: [ main ]
+    branches: 
+      - main
 
 jobs:
   build:    
-    runs-on: macos-12
+    runs-on: 
+      group: apple-silicon
     timeout-minutes: 15
 
     steps:
@@ -45,3 +47,14 @@ jobs:
       with:
         name: main-derivedData
         path: products.tar
+        if-no-files-found: error
+    
+    # Slack notification for failing smoke and relay tests
+    - name: Slack Notification for Failure
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: CI pipeline for preparing arifacts failed to build main branch or failed to upload artifact. Check the logs for more details.
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

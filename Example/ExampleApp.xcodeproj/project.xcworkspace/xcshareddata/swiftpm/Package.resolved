@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "Mixpanel",
+        "repositoryURL": "https://github.com/mixpanel/mixpanel-swift",
+        "state": {
+          "branch": "master",
+          "revision": "1ce27d937009d5ecce74dad97d69898ffea49c75",
+          "version": null
+        }
+      },
+      {
         "package": "PromiseKit",
         "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
         "state": {
@@ -53,6 +62,15 @@
           "branch": null,
           "revision": "cd187c632fb812fd93711a9f7e644adb7e5f97f0",
           "version": "0.1.7"
+        }
+      },
+      {
+        "package": "Sentry",
+        "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
+        "state": {
+          "branch": null,
+          "revision": "12998398eb51e2e8ff7098163fa97d305eee6d87",
+          "version": "8.11.0"
         }
       },
       {
