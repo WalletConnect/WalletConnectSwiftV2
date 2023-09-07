@@ -26,6 +26,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
 
     private func subscribeForNofifyChangedRequests() {
+        let protocolMethod =  NotifySubscriptionsChangedRequest()
 
     }
 }
