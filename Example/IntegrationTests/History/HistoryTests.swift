@@ -18,9 +18,11 @@ final class HistoryTests: XCTestCase {
     override func setUp() {
         let keychain1 = KeychainStorageMock()
         let keychain2 = KeychainStorageMock()
+        let logger1 = ConsoleLoggerMock()
+        let defaults1 = RuntimeKeyValueStorage()
         relayClient1 = makeRelayClient(prefix: "🐄", keychain: keychain1)
         relayClient2 = makeRelayClient(prefix: "🐫", keychain: keychain2)
-        historyClient = makeHistoryClient(keychain: keychain1)
+        historyClient = makeHistoryClient(defaults: defaults1, keychain: keychain1, logger: logger1)
     }
 
     private func makeRelayClient(prefix: String, keychain: KeychainStorageProtocol) -> RelayClient {
@@ -33,8 +35,8 @@ final class HistoryTests: XCTestCase {
             logger: ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug))
     }
 
-    private func makeHistoryClient(keychain: KeychainStorageProtocol) -> HistoryNetworkService {
-        let clientIdStorage = ClientIdStorage(keychain: keychain)
+    private func makeHistoryClient(defaults: KeyValueStorage, keychain: KeychainStorageProtocol, logger: ConsoleLogging) -> HistoryNetworkService {
+        let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychain, logger: logger)
         return HistoryNetworkService(clientIdStorage: clientIdStorage)
     }
 

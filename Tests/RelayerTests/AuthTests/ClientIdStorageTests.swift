@@ -11,7 +11,7 @@ final class ClientIdStorageTests: XCTestCase {
 
     override func setUp() {
         keychain = KeychainStorageMock()
-        sut = ClientIdStorage(keychain: keychain)
+        sut = ClientIdStorage(defaults: RuntimeKeyValueStorage(), keychain: keychain, logger: ConsoleLoggerMock())
     }
 
     func testGetOrCreate() throws {

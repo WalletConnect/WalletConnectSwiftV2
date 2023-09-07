@@ -70,6 +70,7 @@ final class NotifyTests: XCTestCase {
         let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
         let pushClient = PushClientFactory.create(projectId: "",
                                                   pushHost: "echo.walletconnect.com",
+                                                  keyValueStorage: keyValueStorage,
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
