@@ -89,7 +89,7 @@ public class NotifyClient {
 
     public func register(account: Account, onSign: @escaping SigningCallback) async throws {
         _ = try await identityClient.register(account: account, onSign: onSign)
-        notifyWatchSubscriptionsRequester.watchSubscriptions(account: account)
+        try await notifyWatchSubscriptionsRequester.watchSubscriptions(account: account)
     }
 
     public func setLogging(level: LoggingLevel) {
