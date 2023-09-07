@@ -6,20 +6,24 @@ enum WebSocketClientError: Error {
 
 struct WebSocketClientFactory: WebSocketFactory {
     func create(with url: URL) -> WebSocketConnecting {
-        return WebSocketClient(url: url, logger: ConsoleLogger(loggingLevel: .debug))
+        return WCWebSocketClient(url: url, logger: ConsoleLogger(loggingLevel: .debug))
     }
 }
 
-final class WebSocketClient: NSObject, WebSocketConnecting {
+final class WCWebSocketClient: NSObject, WebSocketConnecting {
     private var socket: URLSessionWebSocketTask? = nil
     private var url: URL
     private let logger: ConsoleLogging
     
+    private var _request: URLRequest
+    private var _isConnected = false
+    
+    private let lock = UnfairLock()
+    
     init(url: URL, logger: ConsoleLogging) {
         self.url = url
         self.logger = logger
-        self.isConnected = false
-        self.request = URLRequest(url: url)
+        self._request = URLRequest(url: url)
         super.init()
     }
     
@@ -34,38 +38,61 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
     }
     
     // MARK: - WebSocketConnecting
-    var isConnected: Bool
-    var onConnect: (() -> Void)?
-    var onDisconnect: ((Error?) -> Void)?
-    var receive: ((String) -> Void)?
+    var isConnected: Bool {
+        get { lock.withLock { _isConnected } }
+        set { lock.withLock { _isConnected = newValue } }
+    }
+    
     var request: URLRequest {
-        didSet {
-            if let url = request.url {
-                let configuration = URLSessionConfiguration.default
-                
-                let urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
-                let urlRequest = URLRequest(url: url)
-                socket = urlSession.webSocketTask(with: urlRequest)
-
-                isConnected = false
-                self.url = url
+        get { lock.withLock { _request } }
+        set {
+            lock.withLock {
+                _request = newValue
+                if let url = request.url {
+                    let configuration = URLSessionConfiguration.default
+                    
+                    let urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
+                    let urlRequest = URLRequest(url: url)
+                    socket = urlSession.webSocketTask(with: urlRequest)
+                    
+                    isConnected = false
+                    self.url = url
+                }
             }
         }
     }
     
+    var onConnect: (() -> Void)?
+    var onDisconnect: ((Error?) -> Void)?
+    var onText: ((String) -> Void)?
+    
     func connect() {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
         logger.debug("[WebSocketClient]: Connect called 🔗 \(url.host ?? "nil")")
         socket?.resume()
     }
     
     func disconnect() {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        
         logger.debug("[WebSocketClient]: Disconnect called")
         socket?.cancel()
         isConnected = false
     }
     
-    func send(message: String, completion: (() -> Void)?) {
-        let message = URLSessionWebSocketTask.Message.string(message)
+    func write(string: String, completion: (() -> Void)?) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        
+        let message = URLSessionWebSocketTask.Message.string(string)
         socket?.send(message) { _ in
             completion?()
         }
@@ -73,7 +100,7 @@ final class WebSocketClient: NSObject, WebSocketConnecting {
 }
 
 // MARK: - URLSessionWebSocketDelegate
-extension WebSocketClient: URLSessionWebSocketDelegate {
+extension WCWebSocketClient: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         isConnected = true
         logger.debug("[WebSocketClient]: Connected")
@@ -82,9 +109,11 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
     }
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        isConnected = false
-        logger.debug("[WebSocketClient]: Did close with code: \(closeCode)")
-        onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
+        if isConnected {
+            isConnected = false
+            logger.debug("[WebSocketClient]: Did close with code: \(closeCode)")
+            onDisconnect?(WebSocketClientError.errorWithCode(closeCode))
+        }
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -101,19 +130,21 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
                 self.logger.debug("[WebSocketClient]: Error receiving: \(error)")
                 let nsError = error as NSError
                 if nsError.code == 57 && nsError.domain == "NSPOSIXErrorDomain" {
-                    self.isConnected = false
-                    self.reconnect()
+                    if self.isConnected {
+                        self.isConnected = false
+                        self.reconnect()
+                    }
                 }
                     
             case .success(let message):
                 switch message {
                 case .string(let messageString):
                     self.logger.debug("[WebSocketClient]: Received message:  \(messageString)")
-                    self.receive?(messageString)
+                    self.onText?(messageString)
                             
                 case .data(let data):
                     self.logger.debug("[WebSocketClient]: Received data: \(data.description)")
-                    self.receive?(data.description)
+                    self.onText?(data.description)
                             
                 default:
                     self.logger.debug("[WebSocketClient]: Received unknown data")

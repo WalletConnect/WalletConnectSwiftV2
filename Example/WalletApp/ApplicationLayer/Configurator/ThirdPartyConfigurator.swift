@@ -6,7 +6,7 @@ import Web3Wallet
 struct ThirdPartyConfigurator: Configurator {
 
     func configure() {
-        Networking.configure(projectId: InputConfig.projectId)
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
 
         let metadata = AppMetadata(
             name: "Example Wallet",

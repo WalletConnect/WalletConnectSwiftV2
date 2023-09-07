@@ -65,6 +65,15 @@
         }
       },
       {
+        "package": "Starscream",
+        "repositoryURL": "https://github.com/daltoniam/Starscream",
+        "state": {
+          "branch": null,
+          "revision": "a063fda2b8145a231953c20e7a646be254365396",
+          "version": "3.1.2"
+        }
+      },
+      {
         "package": "SwiftDocCPlugin",
         "repositoryURL": "https://github.com/apple/swift-docc-plugin",
         "state": {

@@ -58,7 +58,7 @@ final class Dispatcher: NSObject, Dispatching {
             completion(NetworkError.webSocketNotConnected)
             return
         }
-        socket.send(message: message) {
+        socket.write(string: message) {
             completion(nil)
         }
     }
@@ -114,7 +114,7 @@ final class Dispatcher: NSObject, Dispatching {
 // MARK: - Private functions
 extension Dispatcher {
     private func setUpWebSocketSession() {
-        socket.receive = { [unowned self] in
+        socket.onText = { [unowned self] in
             self.onMessage?($0)
         }
     }

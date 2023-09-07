@@ -210,6 +210,8 @@
 		A74D32BA2A1E25AD00CB8536 /* QueryParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74D32B92A1E25AD00CB8536 /* QueryParameters.swift */; };
 		C5133A78294125CC00A8314C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = C5133A77294125CC00A8314C /* Web3 */; };
 		C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
+		C5506B4C2AA8DBCB0077AD54 /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */; };
+		C5506B4D2AA8DBCB0077AD54 /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */; };
 		C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347A295DD7140004314A /* AuthRequestModule.swift */; };
 		C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347B295DD7140004314A /* AuthRequestPresenter.swift */; };
 		C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347C295DD7140004314A /* AuthRequestRouter.swift */; };
@@ -275,6 +277,7 @@
 		C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C1279582D200D0A289 /* Signer.swift */; };
 		C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5B2F7042970573D000DBA0E /* SolanaSwift */; };
 		C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
+		C5CFBECC2AA99D5D00378D41 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C5CFBECB2AA99D5D00378D41 /* Starscream */; };
 		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 		C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */; };
 		C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2D2954814A00A6476E /* ConnectionDetailsRouter.swift */; };
@@ -537,6 +540,7 @@
 		A5E776B929F4362D00172091 /* AlertError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertError.swift; sourceTree = "<group>"; };
 		A5F48A0528E43D3F0034CBFB /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Configuration.xcconfig; path = ../Configuration.xcconfig; sourceTree = "<group>"; };
 		A74D32B92A1E25AD00CB8536 /* QueryParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryParameters.swift; sourceTree = "<group>"; };
+		C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultSocketFactory.swift; sourceTree = "<group>"; };
 		C55D347A295DD7140004314A /* AuthRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestModule.swift; sourceTree = "<group>"; };
 		C55D347B295DD7140004314A /* AuthRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestPresenter.swift; sourceTree = "<group>"; };
 		C55D347C295DD7140004314A /* AuthRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestRouter.swift; sourceTree = "<group>"; };
@@ -628,6 +632,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5CFBECC2AA99D5D00378D41 /* Starscream in Frameworks */,
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
 				CF25F28B2A432488009C7E49 /* WalletConnectModal in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
@@ -1330,6 +1335,7 @@
 				A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */,
 				A5417BBD299BFC3E00B469F3 /* ImportAccount.swift */,
 				A5C20228287EB34C007E3188 /* AccountStorage.swift */,
+				C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -1797,6 +1803,7 @@
 				84E6B8642981720400428BAF /* WalletConnectPush */,
 				A573C53829EC365000E3CBFD /* HDWalletKit */,
 				CF25F28A2A432488009C7E49 /* WalletConnectModal */,
+				C5CFBECB2AA99D5D00378D41 /* Starscream */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -1992,6 +1999,7 @@
 				A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */,
 				A58EC60F299D57B800F3452A /* XCRemoteSwiftPackageReference "swiftui-async-button" */,
 				A561C7FE29DF32CE00DF540D /* XCRemoteSwiftPackageReference "HDWallet" */,
+				C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -2138,6 +2146,7 @@
 				A5629ABE2876CBC000094373 /* ChatListPresenter.swift in Sources */,
 				A58E7D0E2872A45B0082D443 /* MainRouter.swift in Sources */,
 				A58E7D432872EE320082D443 /* MessageView.swift in Sources */,
+				C5506B4C2AA8DBCB0077AD54 /* DefaultSocketFactory.swift in Sources */,
 				A58E7D3F2872E99A0082D443 /* TabPage.swift in Sources */,
 				A58EC616299D5C6400F3452A /* PlainButton.swift in Sources */,
 				A58E7D3C2872D55F0082D443 /* ChatPresenter.swift in Sources */,
@@ -2271,6 +2280,7 @@
 				C56EE241293F566D004840D1 /* WalletModule.swift in Sources */,
 				C58099352A543CD000AB58F5 /* BlinkAnimation.swift in Sources */,
 				C56EE245293F566D004840D1 /* WalletPresenter.swift in Sources */,
+				C5506B4D2AA8DBCB0077AD54 /* DefaultSocketFactory.swift in Sources */,
 				C56EE240293F566D004840D1 /* ScanQRView.swift in Sources */,
 				A51606FB2A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				C56EE250293F566D004840D1 /* ScanTargetView.swift in Sources */,
@@ -3095,6 +3105,14 @@
 				version = 1.0.2;
 			};
 		};
+		C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daltoniam/Starscream";
+			requirement = {
+				kind = exactVersion;
+				version = 3.1.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3223,6 +3241,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */;
 			productName = SolanaSwift;
+		};
+		C5CFBECB2AA99D5D00378D41 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
 		};
 		C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;
