@@ -6,26 +6,83 @@ public protocol ClientIdStoring {
 }
 
 public struct ClientIdStorage: ClientIdStoring {
-    private let key = "com.walletconnect.iridium.client_id"
-    private let keychain: KeychainStorageProtocol
+    private let oldStorageKey = "com.walletconnect.iridium.client_id"
+    private let publicStorageKey = "com.walletconnect.iridium.client_id.public"
 
-    public init(keychain: KeychainStorageProtocol) {
+    private let defaults: KeyValueStorage
+    private let keychain: KeychainStorageProtocol
+    private let logger: ConsoleLogging
+
+    public init(defaults: KeyValueStorage, keychain: KeychainStorageProtocol, logger: ConsoleLogging) {
+        self.defaults = defaults
         self.keychain = keychain
+        self.logger = logger
+
+        migrateIfNeeded()
     }
 
     public func getOrCreateKeyPair() throws -> SigningPrivateKey {
         do {
-            return try keychain.read(key: key)
+            let publicPart = try getPublicPart()
+            return try getPrivatePart(for: publicPart)
         } catch {
             let privateKey = SigningPrivateKey()
-            try keychain.add(privateKey, forKey: key)
+            try setPrivatePart(privateKey)
+            setPublicPart(privateKey.publicKey)
             return privateKey
         }
     }
 
     public func getClientId() throws -> String {
-        let privateKey: SigningPrivateKey = try keychain.read(key: key)
-        let pubKey = privateKey.publicKey.rawRepresentation
-        return DIDKey(rawData: pubKey).did(variant: .ED25519)
+        let pubKey = try getPublicPart()
+        return DIDKey(rawData: pubKey.rawRepresentation).did(variant: .ED25519)
+    }
+}
+
+private extension ClientIdStorage {
+
+    enum Errors: Error {
+        case publicPartNotFound
+    }
+
+    func migrateIfNeeded() {
+        guard let privateKey: SigningPrivateKey = try? keychain.read(key: oldStorageKey) else {
+            return
+        }
+
+        do {
+            try setPrivatePart(privateKey)
+            setPublicPart(privateKey.publicKey)
+            try keychain.delete(key: oldStorageKey)
+            logger.debug("ClientID migrated")
+        } catch {
+            logger.debug("ClientID migration failed with: \(error.localizedDescription)")
+        }
+    }
+
+    func getPublicPart() throws -> SigningPublicKey {
+        guard let data = defaults.data(forKey: publicStorageKey) else {
+            throw Errors.publicPartNotFound
+        }
+        return try SigningPublicKey(rawRepresentation: data)
+    }
+
+    func setPublicPart(_ newValue: SigningPublicKey) {
+        defaults.set(newValue.rawRepresentation, forKey: publicStorageKey)
+    }
+
+    func getPrivatePart(for publicPart: SigningPublicKey) throws -> SigningPrivateKey {
+        return try keychain.read(key: publicPart.storageId)
+    }
+
+    func setPrivatePart(_ newValue: SigningPrivateKey) throws {
+        try keychain.add(newValue, forKey: newValue.publicKey.storageId)
+    }
+}
+
+private extension SigningPublicKey {
+
+    var storageId: String {
+        return rawRepresentation.sha256().toHexString()
     }
 }

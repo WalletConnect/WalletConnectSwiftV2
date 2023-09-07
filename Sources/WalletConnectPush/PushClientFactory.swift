@@ -6,10 +6,12 @@ public struct PushClientFactory {
                               environment: APNSEnvironment) -> PushClient {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let keyValueStorage = UserDefaults.standard
 
         return PushClientFactory.create(
             projectId: projectId,
             pushHost: pushHost,
+            keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
             environment: environment)
     }
@@ -17,6 +19,7 @@ public struct PushClientFactory {
     public static func create(
         projectId: String,
         pushHost: String,
+        keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
         environment: APNSEnvironment
     ) -> PushClient {
@@ -28,7 +31,7 @@ public struct PushClientFactory {
         let logger = ConsoleLogger(prefix: "👂🏻", loggingLevel: .off)
         let httpClient = HTTPNetworkClient(host: pushHost, session: session)
 
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
+        let clientIdStorage = ClientIdStorage(defaults: keyValueStorage, keychain: keychainStorage, logger: logger)
 
         let pushAuthenticator = PushAuthenticator(clientIdStorage: clientIdStorage, pushHost: pushHost)
 
