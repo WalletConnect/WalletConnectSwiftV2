@@ -7,8 +7,6 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         let iat: UInt64
         /// timestamp when jwt must expire
         let exp: UInt64
-        /// Key server URL
-        let ksu: String
         /// Description of action intent. Must be equal to "notify_subscription_response"
         let act: String?
 
@@ -38,13 +36,11 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         }
     }
 
-    let keyserver: URL
     let selfPubKey: DIDKey
     let publicKey: DIDKey
     let app: String
 
     init(claims: Claims) throws {
-        self.keyserver = try claims.ksu.asURL()
         self.selfPubKey = try DIDKey(did: claims.aud)
         self.publicKey = try DIDKey(did: claims.sub)
         self.app = claims.app
@@ -54,7 +50,6 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            ksu: keyserver.absoluteString,
             act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),

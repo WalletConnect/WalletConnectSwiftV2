@@ -7,8 +7,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         let iat: UInt64
         /// Timestamp when JWT must expire
         let exp: UInt64
-        /// Key server URL
-        let ksu: String
         /// Action intent (must be `notify_message`)
         let act: String?
 
@@ -41,31 +39,13 @@ struct NotifyMessagePayload: JWTClaimsCodable {
     }
 
     let castServerPubKey: DIDKey
-    let keyserver: URL
     let account: Account
     let subscriptionId: String
     let app: String
     let message: NotifyMessage
 
-    init(
-        castServerPubKey: DIDKey,
-        keyserver: URL,
-        account: Account,
-        subscriptionId: String,
-        app: String,
-        message: NotifyMessage
-    ) {
-        self.castServerPubKey = castServerPubKey
-        self.keyserver = keyserver
-        self.account = account
-        self.subscriptionId = subscriptionId
-        self.app = app
-        self.message = message
-    }
-
     init(claims: Claims) throws {
         self.castServerPubKey = try DIDKey(did: claims.iss)
-        self.keyserver = try claims.ksu.asURL()
         self.account = try DIDPKH(did: claims.aud).account
         self.subscriptionId = claims.sub
         self.app = claims.app
@@ -76,7 +56,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            ksu: keyserver.absoluteString,
             act: Claims.action,
             iss: castServerPubKey.multibase(variant: .ED25519),
             aud: account.did,
