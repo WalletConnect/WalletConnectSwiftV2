@@ -35,11 +35,15 @@ struct NotifySubscriptionsChangedRequestPayload: JWTClaimsCodable {
 
     let notifyServerAuthenticationKey: DIDKey
     let subscriptions: [NotifyServerSubscription]
+    let account: Account
+
+
 
 
     init(claims: Claims) throws {
         self.notifyServerAuthenticationKey = try DIDKey(did: claims.iss)
         self.subscriptions = claims.sbs
+        self.account = try DIDPKH(did: claims.aud).account
     }
 
     func encode(iss: String) throws -> Claims {

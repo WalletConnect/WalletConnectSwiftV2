@@ -2,8 +2,9 @@ import Foundation
 import Combine
 
 class NotifySubscriptionsChangedRequestSubscriber {
-
+    private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
+    private let identityClient: IdentityClient
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
@@ -12,6 +13,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
+         identityClient: IdentityClient,
          logger: ConsoleLogging,
          notifyStorage: NotifyStorage,
          notifySubscriptionsBuilder: NotifySubscriptionsBuilder
@@ -19,6 +21,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
+        self.identityClient = identityClient
         self.notifyStorage = notifyStorage
         self.notifySubscriptionsBuilder = notifySubscriptionsBuilder
         subscribeForNofifyChangedRequests()
@@ -26,7 +29,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
 
     private func subscribeForNofifyChangedRequests() {
-        let protocolMethod =  NotifySubscriptionsChangedRequest()
+        let protocolMethod =  NotifySubscriptionsChangedProtocolMethod()
 
         networkingInteractor.requestSubscription(on: protocolMethod).sink { [unowned self]  (payload: RequestSubscriptionPayload<NotifySubscriptionsChangedRequestPayload.Wrapper>) in
 
@@ -35,12 +38,12 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 logger.debug("Received Subscriptions Changed Request")
 
                 guard
-                    let (responsePayload, _) = try? NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request)
+                    let (jwtPayload, _) = try? NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
 
                 // todo varify signature with notify server diddoc authentication key
 
-                let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
+                let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
 
                 notifyStorage.replaceAllSubscriptions(subscriptions)
 
@@ -52,9 +55,28 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 logger.debug("Updated Subscriptions by Subscriptions Changed Request", properties: logProperties)
 
+                try await respond(topic: payload.topic, account: jwtPayload.account, rpcId: payload.id)
+
             }
 
         }.store(in: &publishers)
+    }
+
+    private func respond(topic: String, account: Account, rpcId: RPCID) async throws {
+
+        let receiptPayload = NotifySubscriptionsChangedResponsePayload(keyserver: keyserver)
+
+        let wrapper = try identityClient.signAndCreateWrapper(
+            payload: receiptPayload,
+            account: account
+        )
+
+        let response = RPCResponse(id: rpcId, result: wrapper)
+        try await networkingInteractor.respond(
+            topic: topic,
+            response: response,
+            protocolMethod: NotifySubscriptionsChangedProtocolMethod()
+        )
     }
 
 }
