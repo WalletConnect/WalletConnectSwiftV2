@@ -26,17 +26,19 @@ class NotifyWatchSubscriptionsResponseSubscriber {
 
     private func subscribeForWatchSubscriptionsResponse() {
 
-        let protocolMethod = NotifySubscribeProtocolMethod()
+        let protocolMethod = NotifyWatchSubscriptionsProtocolMethod()
         networkingInteractor.responseSubscription(on: protocolMethod)
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifyWatchSubscriptionsPayload.Wrapper, NotifyWatchSubscriptionsResponsePayload.Wrapper>) in
                 Task(priority: .high) {
                     logger.debug("Received Notify Watch Subscriptions response")
 
+
                     guard
                         let (responsePayload, _) = try? NotifyWatchSubscriptionsResponsePayload.decodeAndVerify(from: payload.response),
-                        let account = responsePayload.subscriptions.first?.account
+                        let (watchSubscriptionPayloadRequest, _) = try? NotifyWatchSubscriptionsPayload.decodeAndVerify(from: payload.request)
                     else { fatalError() /* TODO: Handle error */ }
 
+                    let account = watchSubscriptionPayloadRequest.subscriptionAccount
                     // todo varify signature with notify server diddoc authentication key
 
                     let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
@@ -49,7 +51,7 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                         logProperties[key] = subscription.topic
                     }
 
-                    logger.debug("Updated Subscriptions by Watch Subscriptions Update", properties: logProperties)
+                    logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(subscriptions.count)", properties: logProperties)
 
                 }
             }.store(in: &publishers)
