@@ -17,7 +17,7 @@ struct NotifySubscriptionsChangedRequestPayload: JWTClaimsCodable {
         let sbs: [NotifyServerSubscription]
 
         static var action: String? {
-            return "subscriptionsChangedAuth"
+            return "notify_subscriptions_changed"
         }
     }
 

@@ -18,7 +18,7 @@ final class NotifyTests: XCTestCase {
 
     var walletNotifyClientA: NotifyClient!
 
-    let gmDappUrl = "https://notify.gm.walletconnect.com/"
+    let gmDappUrl = "https://dev.gm.walletconnect.com/"
 
     let pk = try! EthereumPrivateKey()
 
@@ -116,18 +116,15 @@ final class NotifyTests: XCTestCase {
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
-        try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await clientB.register(account: account, onSign: sign)
-        sleep(2)
-
-
-
         clientB.subscriptionsPublisher.sink { subscriptions in
             Task(priority: .high) {
                 print(subscriptions)
+                if !subscriptions.isEmpty {
+                    expectation.fulfill()
+                }
                 print("_________")
-//                try! await clientB.deleteSubscription(topic: subscriptions.first!.topic)
-//                expectation.fulfill()
+                //                try! await clientB.deleteSubscription(topic: subscriptions.first!.topic)
+                //                expectation.fulfill()
             }
         }.store(in: &publishers)
 
@@ -139,6 +136,12 @@ final class NotifyTests: XCTestCase {
                     print("_________")
                 }
             }.store(in: &publishers)
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await clientB.register(account: account, onSign: sign)
+        sleep(2)
+
+
+
 
         try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
 
