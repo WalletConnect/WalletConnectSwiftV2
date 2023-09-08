@@ -16,7 +16,7 @@ final class NotifyTests: XCTestCase {
 
     var walletPairingClient: PairingClient!
 
-    var walletNotifyClient: NotifyClient!
+    var walletNotifyClientA: NotifyClient!
 
     let gmDappUrl = "https://notify.gm.walletconnect.com/"
 
@@ -65,8 +65,7 @@ final class NotifyTests: XCTestCase {
         return (pairingClient, networkingClient, keychain, keyValueStorage)
     }
 
-    func makeWalletClients() {
-        let prefix = "🦋 Wallet: "
+    func makeWalletClient(prefix: String = "🦋 Wallet: ") -> NotifyClient {
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
         walletPairingClient = pairingClient
@@ -75,7 +74,7 @@ final class NotifyTests: XCTestCase {
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
-        walletNotifyClient = NotifyClientFactory.create(keyserverURL: keyserverURL,
+        let client = NotifyClientFactory.create(keyserverURL: keyserverURL,
                                                         logger: notifyLogger,
                                                         keyValueStorage: keyValueStorage,
                                                         keychainStorage: keychain,
@@ -84,50 +83,77 @@ final class NotifyTests: XCTestCase {
                                                         pairingRegisterer: pairingClient,
                                                         pushClient: pushClient,
                                                         crypto: DefaultCryptoProvider())
+        return client
     }
 
     override func setUp() {
-        makeWalletClients()
+        walletNotifyClientA = makeWalletClient()
     }
 
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create notify subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
-        walletNotifyClient.newSubscriptionPublisher
+        walletNotifyClientA.newSubscriptionPublisher
             .sink { [unowned self] subscription in
                 Task(priority: .high) {
-                    try! await walletNotifyClient.deleteSubscription(topic: subscription.topic)
+                    try! await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
                     expectation.fulfill()
                 }
             }.store(in: &publishers)
 
-        try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.subscribe(metadata: metadata, account: account)
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+
+    func testNotifyWatchSubscriptions() async throws {
+        let expectation = expectation(description: "expects client B to receive subscription created by client A")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
+
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
+
+        sleep(2)
+        let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
+        try! await clientB.register(account: account, onSign: sign)
+
+        clientB.subscriptionsPublisher.sink { subscriptions in
+            Task(priority: .high) {
+                try! await clientB.deleteSubscription(topic: subscriptions.first!.topic)
+                expectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+
+
     }
     
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         let updateScope: Set<String> = ["alerts"]
-        try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.subscribe(metadata: metadata, account: account)
-        walletNotifyClient.newSubscriptionPublisher
+
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account)
+
+        walletNotifyClientA.newSubscriptionPublisher
             .sink { [unowned self] subscription in
                 Task(priority: .high) {
-                    try! await walletNotifyClient.update(topic: subscription.topic, scope: updateScope)
+                    try! await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
                 }
             }
             .store(in: &publishers)
 
-        walletNotifyClient.updateSubscriptionPublisher
+        walletNotifyClientA.updateSubscriptionPublisher
             .sink { [unowned self] subscription in
                 let updatedScope = Set(subscription.scope.filter{ $0.value.enabled == true }.keys)
                 XCTAssertEqual(updatedScope, updateScope)
                 Task(priority: .high) {
-                    try! await walletNotifyClient.deleteSubscription(topic: subscription.topic)
+                    try! await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
                     expectation.fulfill()
                 }
             }.store(in: &publishers)
@@ -141,10 +167,11 @@ final class NotifyTests: XCTestCase {
         let notifyMessage = NotifyMessage.stub()
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
-        try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.subscribe(metadata: metadata, account: account)
 
-        walletNotifyClient.newSubscriptionPublisher
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account)
+
+        walletNotifyClientA.newSubscriptionPublisher
             .sink { subscription in
                 let notifier = Publisher()
                 Task(priority: .high) {
@@ -153,18 +180,19 @@ final class NotifyTests: XCTestCase {
                 }
             }.store(in: &publishers)
 
-        walletNotifyClient.notifyMessagePublisher
+        walletNotifyClientA.notifyMessagePublisher
             .sink { [unowned self] notifyMessageRecord in
                 XCTAssertEqual(notifyMessage, notifyMessageRecord.message)
 
                 Task(priority: .high) {
-                    try await walletNotifyClient.deleteSubscription(topic: notifyMessageRecord.topic)
+                    try await walletNotifyClientA.deleteSubscription(topic: notifyMessageRecord.topic)
                     messageExpectation.fulfill()
                 }
         }.store(in: &publishers)
 
         wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
     }
+
 }
 
 
