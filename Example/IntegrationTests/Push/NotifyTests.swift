@@ -39,7 +39,7 @@ final class NotifyTests: XCTestCase {
         let relayLogger = ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug)
         let pairingLogger = ConsoleLogger(prefix: prefix + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(prefix: prefix + " [Networking]", loggingLevel: .debug)
-        let kmsLogger = ConsoleLogger(prefix: prefix + " [KMS]", loggingLevel: .off)
+        let kmsLogger = ConsoleLogger(prefix: prefix + " [KMS]", loggingLevel: .debug)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
@@ -118,37 +118,20 @@ final class NotifyTests: XCTestCase {
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
             Task(priority: .high) {
-                print(subscriptions)
                 if !subscriptions.isEmpty {
                     expectation.fulfill()
                 }
-                print("_________")
-                //                try! await clientB.deleteSubscription(topic: subscriptions.first!.topic)
-                //                expectation.fulfill()
             }
         }.store(in: &publishers)
 
-
-        walletNotifyClientA.newSubscriptionPublisher
-            .sink { [unowned self] subscription in
-                Task(priority: .high) {
-                    print(subscription)
-                    print("_________")
-                }
-            }.store(in: &publishers)
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await clientB.register(account: account, onSign: sign)
-        sleep(2)
-
-
 
 
         try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
-
+        sleep(1)
+        try! await clientB.register(account: account, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-
-
     }
     
     func testWalletCreatesAndUpdatesSubscription() async {
