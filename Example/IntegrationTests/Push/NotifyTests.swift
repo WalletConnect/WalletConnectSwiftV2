@@ -39,6 +39,7 @@ final class NotifyTests: XCTestCase {
         let relayLogger = ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug)
         let pairingLogger = ConsoleLogger(prefix: prefix + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(prefix: prefix + " [Networking]", loggingLevel: .debug)
+        let kmsLogger = ConsoleLogger(prefix: prefix + " [KMS]", loggingLevel: .off)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
@@ -52,7 +53,8 @@ final class NotifyTests: XCTestCase {
             relayClient: relayClient,
             logger: networkingLogger,
             keychainStorage: keychain,
-            keyValueStorage: keyValueStorage)
+            keyValueStorage: keyValueStorage,
+            kmsLogger: kmsLogger)
 
         let pairingClient = PairingClientFactory.create(
             logger: pairingLogger,
@@ -113,19 +115,33 @@ final class NotifyTests: XCTestCase {
         let expectation = expectation(description: "expects client B to receive subscription created by client A")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
-        try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
-
-        sleep(2)
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
         try! await clientB.register(account: account, onSign: sign)
+        sleep(2)
+
+
 
         clientB.subscriptionsPublisher.sink { subscriptions in
             Task(priority: .high) {
-                try! await clientB.deleteSubscription(topic: subscriptions.first!.topic)
-                expectation.fulfill()
+                print(subscriptions)
+                print("_________")
+//                try! await clientB.deleteSubscription(topic: subscriptions.first!.topic)
+//                expectation.fulfill()
             }
         }.store(in: &publishers)
+
+
+        walletNotifyClientA.newSubscriptionPublisher
+            .sink { [unowned self] subscription in
+                Task(priority: .high) {
+                    print(subscription)
+                    print("_________")
+                }
+            }.store(in: &publishers)
+
+        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
+
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
 

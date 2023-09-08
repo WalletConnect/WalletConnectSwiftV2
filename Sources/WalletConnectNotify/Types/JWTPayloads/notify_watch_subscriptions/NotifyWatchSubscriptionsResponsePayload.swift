@@ -6,7 +6,7 @@ struct NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
         let iat: UInt64
         /// Timestamp when JWT must expire
         let exp: UInt64
-        /// Description of action intent. Must be equal to `notify_watch_subscriptions`
+        /// Description of action intent. Must be equal to `notify_watch_subscriptions_response`
         let act: String?
 
         /// `did:key` of Notify Server authentication key
@@ -17,7 +17,7 @@ struct NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
         let sbs: [NotifyServerSubscription]
 
         static var action: String? {
-            return "notify_watch_subscriptions"
+            return "notify_watch_subscriptions_response"
         }
     }
 
