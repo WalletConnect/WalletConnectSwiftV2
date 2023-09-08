@@ -85,8 +85,8 @@ public class NotifyClient {
         logger.setLogging(level: level)
     }
 
-    public func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws {
-        try await notifySubscribeRequester.subscribe(metadata: metadata, account: account, onSign: onSign)
+    public func subscribe(metadata: AppMetadata, account: Account) async throws {
+        try await notifySubscribeRequester.subscribe(metadata: metadata, account: account)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {
