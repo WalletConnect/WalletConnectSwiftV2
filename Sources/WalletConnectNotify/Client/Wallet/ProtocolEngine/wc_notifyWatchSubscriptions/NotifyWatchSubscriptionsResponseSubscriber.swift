@@ -33,14 +33,15 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                     logger.debug("Received Notify Watch Subscriptions response")
 
                     guard
-                        let (responsePayload, _) = try? NotifyWatchSubscriptionsResponsePayload.decodeAndVerify(from: payload.response)
+                        let (responsePayload, _) = try? NotifyWatchSubscriptionsResponsePayload.decodeAndVerify(from: payload.response),
+                        let account = responsePayload.subscriptions.first?.account
                     else { fatalError() /* TODO: Handle error */ }
 
                     // todo varify signature with notify server diddoc authentication key
 
                     let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
-                    notifyStorage.replaceAllSubscriptions(subscriptions)
+                    notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
 
                     var logProperties = [String: String]()
                     for (index, subscription) in subscriptions.enumerated() {
