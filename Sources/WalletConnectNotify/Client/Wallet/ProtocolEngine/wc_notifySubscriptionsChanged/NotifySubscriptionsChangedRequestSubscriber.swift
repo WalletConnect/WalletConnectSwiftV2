@@ -41,14 +41,15 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 logger.debug("Received Subscriptions Changed Request")
 
                 guard
-                    let (jwtPayload, _) = try? NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request)
+                    let (jwtPayload, _) = try? NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request),
+                    let account = jwtPayload.subscriptions.first?.account
                 else { fatalError() /* TODO: Handle error */ }
 
                 // todo varify signature with notify server diddoc authentication key
 
                 let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
 
-                notifyStorage.replaceAllSubscriptions(subscriptions)
+                notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
 
                 var logProperties = ["rpcId": payload.id.string]
                 for (index, subscription) in subscriptions.enumerated() {
