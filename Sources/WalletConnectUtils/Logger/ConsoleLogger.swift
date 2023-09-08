@@ -105,7 +105,7 @@ extension ConsoleLogger: ConsoleLogging {
     }
 
     public func handle(error: Error) {
-        debug(error.localizedDescription)
+        self.error(error.localizedDescription)
     }
 }
 
