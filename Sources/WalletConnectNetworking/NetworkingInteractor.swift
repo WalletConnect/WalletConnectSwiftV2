@@ -84,6 +84,43 @@ public class NetworkingInteractor: NetworkInteracting {
         rpcHistory.deleteAll(forTopics: topics)
     }
 
+    public func subscribeOnRequest<RequestParams: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: RequestParams.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
+    ) {
+        requestSubscription(on: protocolMethod)
+            .sink { (payload: RequestSubscriptionPayload<RequestParams>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorHandler?.handle(error: error)
+                    }
+                }
+            }.store(in: &publishers)
+    }
+
+    public func subscribeOnResponse<Request: Codable, Response: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
+    ) {
+        responseSubscription(on: protocolMethod)
+            .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorHandler?.handle(error: error)
+                    }
+                }
+            }.store(in: &publishers)
+    }
+
     public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         return requestPublisher
             .filter { rpcRequest in

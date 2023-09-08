@@ -10,10 +10,6 @@ public class NotifyClient {
         return notifyStorage.newSubscriptionPublisher
     }
 
-    public var subscriptionErrorPublisher: AnyPublisher<Error, Never> {
-        return notifySubscribeResponseSubscriber.subscriptionErrorPublisher
-    }
-
     public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
         return notifyStorage.deleteSubscriptionPublisher
     }
