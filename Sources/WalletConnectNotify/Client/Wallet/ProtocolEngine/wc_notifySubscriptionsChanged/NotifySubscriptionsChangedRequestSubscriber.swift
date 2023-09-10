@@ -41,9 +41,9 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 logger.debug("Received Subscriptions Changed Request")
 
                 guard
-                    let (jwtPayload, _) = try? NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request),
-                    let account = jwtPayload.subscriptions.first?.account
+                    let (jwtPayload, _) = try? NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request)
                 else { fatalError() /* TODO: Handle error */ }
+                let account = jwtPayload.account
 
                 // todo varify signature with notify server diddoc authentication key
 
