@@ -110,7 +110,6 @@ final class NotifyTests: XCTestCase {
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
-
     func testNotifyWatchSubscriptions() async throws {
         let expectation = expectation(description: "expects client B to receive subscription created by client A")
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
@@ -130,6 +129,28 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
         sleep(1)
         try! await clientB.register(account: account, onSign: sign)
+
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testNotifySubscriptionChanged() async throws {
+        let expectation = expectation(description: "expects client B to receive subscription after both clients are registered and client A creates one")
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
+
+        let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
+        clientB.subscriptionsPublisher.sink { subscriptions in
+            Task(priority: .high) {
+                if !subscriptions.isEmpty {
+                    expectation.fulfill()
+                }
+            }
+        }.store(in: &publishers)
+
+        try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await clientB.register(account: account, onSign: sign)
+
+        sleep(1)
+        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
