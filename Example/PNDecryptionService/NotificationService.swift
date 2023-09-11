@@ -15,7 +15,7 @@ class NotificationService: UNNotificationServiceExtension {
             let ciphertext = bestAttemptContent.userInfo["blob"] as! String
             NSLog("Push decryption, topic=%@", topic)
             do {
-                let service = NotifyDecryptionService()
+                let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 bestAttemptContent.title = pushMessage.title
                 bestAttemptContent.body = pushMessage.body
