@@ -9,7 +9,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         let exp: UInt64
         /// Key server URL
         let ksu: String
-        /// Action intent (must be `notify_receipt`)
+        /// Action intent (must be `notify_message_response`)
         let act: String?
 
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
@@ -22,7 +22,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         let app: String
 
         static var action: String? {
-            return "notify_receipt"
+            return "notify_message_response"
         }
     }
 
