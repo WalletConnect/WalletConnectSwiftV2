@@ -29,18 +29,14 @@ class NotifyWatchSubscriptionsRequester {
 
         logger.debug("Watching subscriptions")
 
-        let notifyServerAgreementKey = try await webDidResolver.resolveAgreementKey(domain: notifyServerUrl)
+        let notifyServerPublicKey = try await webDidResolver.resolveAgreementKey(domain: notifyServerUrl)
         let notifyServerAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: notifyServerUrl)
         let notifyServerAuthenticationDidKey = DIDKey(rawData: notifyServerAuthenticationKey)
-        let watchSubscriptionsTopic = notifyServerAgreementKey.rawRepresentation.sha256().toHexString()
+        let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
 
-        // todo - generate keypair only once
-        let keysY = try generateAgreementKeys(peerPublicKey: notifyServerAgreementKey)
+        let (responseTopic, selfPubKeyY) = try generateAgreementKeysIfNeeded(notifyServerPublicKey: notifyServerPublicKey, account: account)
 
-        let responseTopic = keysY.derivedTopic()
 
-        try kms.setSymmetricKey(keysY.sharedKey, for: watchSubscriptionsTopic)
-        try kms.setAgreementSecret(keysY, topic: responseTopic)
 
         logger.debug("setting symm key for response topic \(responseTopic)")
 
@@ -58,15 +54,34 @@ class NotifyWatchSubscriptionsRequester {
 
         try await networkingInteractor.subscribe(topic: responseTopic)
 
-        try await networkingInteractor.request(request, topic: watchSubscriptionsTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: keysY.publicKey.rawRepresentation))
+        try await networkingInteractor.request(request, topic: watchSubscriptionsTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY))
     }
 
 
-    private func generateAgreementKeys(peerPublicKey: AgreementPublicKey) throws -> AgreementKeys {
-        let selfPubKey = try kms.createX25519KeyPair()
+    private func generateAgreementKeysIfNeeded(notifyServerPublicKey: AgreementPublicKey, account: Account) throws -> (responseTopic: String, selfPubKeyY: Data) {
 
-        let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPublicKey.hexRepresentation)
-        return keys
+        let keyYStorageKey = "\(account)_\(notifyServerPublicKey.hexRepresentation)"
+
+        if let responseTopic = kms.getTopic(for: keyYStorageKey),
+           let selfPubKeyY = kms.getPublicKey(for: responseTopic) {
+            return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
+        } else {
+            let selfPubKeyY = try kms.createX25519KeyPair()
+
+            let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
+
+            let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: notifyServerPublicKey.hexRepresentation)
+
+            try kms.setSymmetricKey(agreementKeys.sharedKey, for: watchSubscriptionsTopic)
+            let responseTopic = agreementKeys.derivedTopic()
+
+            try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
+
+            // save for later under dapp's accout + pub key
+            try kms.setTopic(responseTopic, for: keyYStorageKey)
+
+            return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
+        }
     }
 
     private func createJWTWrapper(notifyServerAuthenticationDidKey: DIDKey, subscriptionAccount: Account) async throws -> NotifyWatchSubscriptionsPayload.Wrapper {
