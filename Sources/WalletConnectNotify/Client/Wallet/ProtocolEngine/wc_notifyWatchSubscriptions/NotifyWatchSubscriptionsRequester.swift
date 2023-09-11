@@ -7,7 +7,7 @@ class NotifyWatchSubscriptionsRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
-    private let webDidResolver: WebDidResolver
+    private let webDidResolver: NotifyWebDidResolver
     private let notifyServerUrl = "dev.notify.walletconnect.com"
 
     init(keyserverURL: URL,
@@ -15,7 +15,7 @@ class NotifyWatchSubscriptionsRequester {
          identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         webDidResolver: WebDidResolver
+         webDidResolver: NotifyWebDidResolver
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient

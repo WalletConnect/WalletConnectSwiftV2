@@ -12,7 +12,7 @@ class NotifySubscribeRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
-    private let webDidResolver: WebDidResolver
+    private let webDidResolver: NotifyWebDidResolver
     private let dappsMetadataStore: CodableStore<AppMetadata>
     private let notifyConfigProvider: NotifyConfigProvider
 
@@ -21,7 +21,7 @@ class NotifySubscribeRequester {
          identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         webDidResolver: WebDidResolver,
+         webDidResolver: NotifyWebDidResolver,
          notifyConfigProvider: NotifyConfigProvider,
          dappsMetadataStore: CodableStore<AppMetadata>
     ) {

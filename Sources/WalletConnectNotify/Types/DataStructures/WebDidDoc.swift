@@ -5,12 +5,10 @@ struct WebDidDoc: Codable {
     let context: [String]
     let id: String
     let verificationMethod: [VerificationMethod]
-    let authentication: [String]?
-    let keyAgreement: [String]
 
     enum CodingKeys: String, CodingKey {
         case context = "@context"
-        case id, verificationMethod, authentication, keyAgreement
+        case id, verificationMethod
     }
 }
 extension WebDidDoc {
