@@ -2,8 +2,9 @@
 import Foundation
 
 struct NotificationConfig: Codable {
-    let version: Int
-    let lastModified: TimeInterval
+    let schemaVersion: Int
+    let name: String
+    let description: String
+    let icons: [String]
     let types: [NotificationType]
-    let metadata: AppMetadata
 }

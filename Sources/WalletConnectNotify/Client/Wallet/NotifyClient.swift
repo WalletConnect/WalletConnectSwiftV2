@@ -95,8 +95,8 @@ public class NotifyClient {
         logger.setLogging(level: level)
     }
 
-    public func subscribe(dappUrl: String, account: Account) async throws {
-        try await notifySubscribeRequester.subscribe(dappUrl: dappUrl, account: account)
+    public func subscribe(appDomain: String, account: Account) async throws {
+        try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {
