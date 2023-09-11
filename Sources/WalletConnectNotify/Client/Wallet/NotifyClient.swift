@@ -37,7 +37,7 @@ public class NotifyClient {
     public let logger: ConsoleLogging
 
     private let pushClient: PushClient
-    private let identityClient: IdentityClient
+    private let identityService: NotifyIdentityService
     private let notifyStorage: NotifyStorage
     private let notifyMessageSubscriber: NotifyMessageSubscriber
     private let resubscribeService: NotifyResubscribeService
@@ -52,7 +52,7 @@ public class NotifyClient {
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         identityClient: IdentityClient,
+         identityService: NotifyIdentityService,
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
@@ -70,7 +70,7 @@ public class NotifyClient {
     ) {
         self.logger = logger
         self.pushClient = pushClient
-        self.identityClient = identityClient
+        self.identityService = identityService
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
         self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
@@ -86,8 +86,8 @@ public class NotifyClient {
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
     }
 
-    public func register(account: Account, onSign: @escaping SigningCallback) async throws {
-        _ = try await identityClient.register(account: account, onSign: onSign)
+    public func register(account: Account, domain: String, isLimited: Bool, onSign: @escaping SigningCallback) async throws {
+        try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
         try await notifyWatchSubscriptionsRequester.watchSubscriptions(account: account)
     }
 
@@ -124,7 +124,7 @@ public class NotifyClient {
     }
 
     public func isIdentityRegistered(account: Account) -> Bool {
-        return identityClient.isIdentityRegistered(account: account)
+        return identityService.isIdentityRegistered(account: account)
     }
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
