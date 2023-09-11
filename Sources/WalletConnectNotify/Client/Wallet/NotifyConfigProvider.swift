@@ -24,6 +24,6 @@ actor NotifyConfigProvider {
         guard let notifyConfigUrl = URL(string: "\(dappUrl)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: notifyConfigUrl)
         let config = try JSONDecoder().decode(NotificationConfig.self, from: data)
-        return config.metadata
+        return AppMetadata(name: config.name, description: config.description, url: dappUrl, icons: config.icons)
     }
 }
