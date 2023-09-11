@@ -13,7 +13,7 @@ class NotifySubscribeResponseSubscriber {
     private let notifyStorage: NotifyStorage
     private let groupKeychainStorage: KeychainStorageProtocol
     private let dappsMetadataStore: CodableStore<AppMetadata>
-    private let subscriptionScopeProvider: SubscriptionScopeProvider
+    private let notifyConfigProvider: NotifyConfigProvider
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
@@ -21,7 +21,7 @@ class NotifySubscribeResponseSubscriber {
          groupKeychainStorage: KeychainStorageProtocol,
          notifyStorage: NotifyStorage,
          dappsMetadataStore: CodableStore<AppMetadata>,
-         subscriptionScopeProvider: SubscriptionScopeProvider
+         notifyConfigProvider: NotifyConfigProvider
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
@@ -29,7 +29,7 @@ class NotifySubscribeResponseSubscriber {
         self.groupKeychainStorage = groupKeychainStorage
         self.notifyStorage = notifyStorage
         self.dappsMetadataStore = dappsMetadataStore
-        self.subscriptionScopeProvider = subscriptionScopeProvider
+        self.notifyConfigProvider = notifyConfigProvider
         subscribeForSubscriptionResponse()
     }
 
@@ -42,9 +42,7 @@ class NotifySubscribeResponseSubscriber {
         ) { [unowned self] payload in
                 logger.debug("Received Notify Subscribe response")
 
-                guard
-                    let (responsePayload, _) = try? NotifySubscriptionResponsePayload.decodeAndVerify(from: payload.response)
-                else { fatalError() /* TODO: Handle error */ }
+                let (responsePayload, _) = try NotifySubscriptionResponsePayload.decodeAndVerify(from: payload.response)
 
                 guard let responseKeys = kms.getAgreementSecret(for: payload.topic) else {
                     logger.debug("No symmetric key for topic \(payload.topic)")
@@ -71,7 +69,7 @@ class NotifySubscribeResponseSubscriber {
                     try groupKeychainStorage.add(agreementKeysP, forKey: notifySubscriptionTopic)
                     account = try Account(DIDPKHString: claims.sub)
                     metadata = try dappsMetadataStore.get(key: payload.topic)
-                    let availableTypes = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: metadata!.url)
+                    let availableTypes = try await notifyConfigProvider.getSubscriptionScope(dappUrl: metadata!.url)
                     subscribedTypes = availableTypes.filter{subscribedScope.contains($0.name)}
                     logger.debug("NotifySubscribeResponseSubscriber: subscribing notify subscription topic: \(notifySubscriptionTopic!)")
                     try await networkingInteractor.subscribe(topic: notifySubscriptionTopic)

@@ -94,7 +94,6 @@ final class NotifyTests: XCTestCase {
 
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create notify subscription")
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         walletNotifyClientA.newSubscriptionPublisher
             .sink { [unowned self] subscription in
@@ -105,7 +104,7 @@ final class NotifyTests: XCTestCase {
             }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account)
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -113,7 +112,6 @@ final class NotifyTests: XCTestCase {
     func testNotifyWatchSubscriptions() async throws {
         let expectation = expectation(description: "expects client B to receive subscription created by client A")
         expectation.assertForOverFulfill = false
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
@@ -127,7 +125,7 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.register(account: account, onSign: sign)
 
 
-        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account, onSign: sign)
         sleep(1)
         try! await clientB.register(account: account, onSign: sign)
 
@@ -137,7 +135,6 @@ final class NotifyTests: XCTestCase {
     func testNotifySubscriptionChanged() async throws {
         let expectation = expectation(description: "expects client B to receive subscription after both clients are registered and client A creates one")
         expectation.assertForOverFulfill = false
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
@@ -152,18 +149,17 @@ final class NotifyTests: XCTestCase {
         try! await clientB.register(account: account, onSign: sign)
 
         sleep(1)
-        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
     
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         let updateScope: Set<String> = ["alerts"]
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account)
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
 
         walletNotifyClientA.newSubscriptionPublisher
             .sink { [unowned self] subscription in
@@ -194,7 +190,7 @@ final class NotifyTests: XCTestCase {
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(metadata: metadata, account: account)
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account
 
         walletNotifyClientA.newSubscriptionPublisher
             .sink { subscription in

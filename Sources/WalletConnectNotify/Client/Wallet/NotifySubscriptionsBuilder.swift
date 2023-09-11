@@ -1,10 +1,10 @@
 import Foundation
 
 class NotifySubscriptionsBuilder {
-    private let subscriptionScopeProvider: SubscriptionScopeProvider
+    private let notifyConfigProvider: NotifyConfigProvider
 
-    init(subscriptionScopeProvider: SubscriptionScopeProvider) {
-        self.subscriptionScopeProvider = subscriptionScopeProvider
+    init(notifyConfigProvider: NotifyConfigProvider) {
+        self.notifyConfigProvider = notifyConfigProvider
     }
 
     func buildSubscriptions(_ notifyServerSubscriptions: [NotifyServerSubscription]) async throws -> [NotifySubscription] {
@@ -12,7 +12,7 @@ class NotifySubscriptionsBuilder {
 
         for subscription in notifyServerSubscriptions {
             let scope = try await buildScope(selectedScope: subscription.scope, dappUrl: subscription.dappUrl)
-            guard let metadata = try? await subscriptionScopeProvider.getMetadata(dappUrl: subscription.dappUrl),
+            guard let metadata = try? await notifyConfigProvider.getMetadata(dappUrl: subscription.dappUrl),
                   let topic = try? SymmetricKey(hex: subscription.symKey).derivedTopic() else { continue }
 
             let notifySubscription = NotifySubscription(topic: topic,
@@ -29,7 +29,7 @@ class NotifySubscriptionsBuilder {
     }
 
     private func buildScope(selectedScope: [String], dappUrl: String) async throws -> [String: ScopeValue] {
-        let availableScope = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
+        let availableScope = try await notifyConfigProvider.getSubscriptionScope(dappUrl: dappUrl)
         return availableScope.reduce(into: [:]) {
             $0[$1.name] = ScopeValue(description: $1.description, enabled: selectedScope.contains($1.name))
         }

@@ -1,7 +1,7 @@
 
 import Foundation
 
-actor SubscriptionScopeProvider {
+actor NotifyConfigProvider {
     enum Errors: Error {
         case invalidUrl
     }
