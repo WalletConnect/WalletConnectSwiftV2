@@ -127,7 +127,7 @@ final class NotifyTests: XCTestCase {
 
         sleep(1)
 
-        try! await clientB.register(account: account, onSign: sign)
+        try! await clientB.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -146,7 +146,7 @@ final class NotifyTests: XCTestCase {
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
-        try! await clientB.register(account: account, onSign: sign)
+        try! await clientB.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
 
         sleep(1)
 

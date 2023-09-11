@@ -37,7 +37,8 @@ actor IdentityService {
         }
 
         let identityKey = SigningPrivateKey()
-        let cacao = try await makeCacao(account: account, domain: domain, statement: statement, resources: resources, onSign: onSign)
+        let audience = identityKey.publicKey.did
+        let cacao = try await makeCacao(account: account, domain: domain, statement: statement, resources: resources, audience: audience, onSign: onSign)
         try await networkService.registerIdentity(cacao: cacao)
 
         return try storage.saveIdentityKey(identityKey, for: account).publicKey.hexRepresentation
@@ -92,6 +93,7 @@ private extension IdentityService {
         domain: String,
         statement: String,
         resources: [String],
+        audience: String,
         onSign: SigningCallback
     ) async throws -> Cacao {
 
@@ -99,7 +101,7 @@ private extension IdentityService {
         let cacaoPayload = CacaoPayload(
             iss: account.did,
             domain: domain,
-            aud: try getAudience(account: account),
+            aud: audience,
             version: getVersion(),
             nonce: getNonce(),
             iat: iatProvader.iat,
@@ -137,10 +139,5 @@ private extension IdentityService {
 
     private func getVersion() -> String {
         return "1"
-    }
-
-    private func getAudience(account: Account) throws -> String {
-        let identityKey = try storage.getIdentityKey(for: account)
-        return identityKey.publicKey.did
     }
 }
