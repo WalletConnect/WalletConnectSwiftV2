@@ -4,7 +4,6 @@ import Combine
 class NotifyWatchSubscriptionsResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
-    private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
     private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
@@ -25,36 +24,31 @@ class NotifyWatchSubscriptionsResponseSubscriber {
 
 
     private func subscribeForWatchSubscriptionsResponse() {
+        networkingInteractor.subscribeOnResponse(
+            protocolMethod: NotifyWatchSubscriptionsProtocolMethod(),
+            requestOfType: NotifyWatchSubscriptionsPayload.Wrapper.self,
+            responseOfType: NotifyWatchSubscriptionsResponsePayload.Wrapper.self,
+            errorHandler: logger) { [unowned self] payload in
+                logger.debug("Received Notify Watch Subscriptions response")
 
-        let protocolMethod = NotifyWatchSubscriptionsProtocolMethod()
-        networkingInteractor.responseSubscription(on: protocolMethod)
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<NotifyWatchSubscriptionsPayload.Wrapper, NotifyWatchSubscriptionsResponsePayload.Wrapper>) in
-                Task(priority: .high) {
-                    logger.debug("Received Notify Watch Subscriptions response")
+                let (responsePayload, _) = try NotifyWatchSubscriptionsResponsePayload.decodeAndVerify(from: payload.response)
+                let (watchSubscriptionPayloadRequest, _) = try NotifyWatchSubscriptionsPayload.decodeAndVerify(from: payload.request)
 
+                let account = watchSubscriptionPayloadRequest.subscriptionAccount
+                // todo varify signature with notify server diddoc authentication key
 
-                    guard
-                        let (responsePayload, _) = try? NotifyWatchSubscriptionsResponsePayload.decodeAndVerify(from: payload.response),
-                        let (watchSubscriptionPayloadRequest, _) = try? NotifyWatchSubscriptionsPayload.decodeAndVerify(from: payload.request)
-                    else { fatalError() /* TODO: Handle error */ }
+                let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
-                    let account = watchSubscriptionPayloadRequest.subscriptionAccount
-                    // todo varify signature with notify server diddoc authentication key
+                notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
 
-                    let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
-
-                    notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
-
-                    var logProperties = [String: String]()
-                    for (index, subscription) in subscriptions.enumerated() {
-                        let key = "subscription_\(index + 1)"
-                        logProperties[key] = subscription.topic
-                    }
-
-                    logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(subscriptions.count)", properties: logProperties)
-
+                var logProperties = [String: String]()
+                for (index, subscription) in subscriptions.enumerated() {
+                    let key = "subscription_\(index + 1)"
+                    logProperties[key] = subscription.topic
                 }
-            }.store(in: &publishers)
+
+                logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(subscriptions.count)", properties: logProperties)
+            }
     }
 
 }
