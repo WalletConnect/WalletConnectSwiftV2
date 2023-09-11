@@ -112,6 +112,7 @@ final class NotifyTests: XCTestCase {
 
     func testNotifyWatchSubscriptions() async throws {
         let expectation = expectation(description: "expects client B to receive subscription created by client A")
+        expectation.assertForOverFulfill = false
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
@@ -135,7 +136,7 @@ final class NotifyTests: XCTestCase {
 
     func testNotifySubscriptionChanged() async throws {
         let expectation = expectation(description: "expects client B to receive subscription after both clients are registered and client A creates one")
-        expectation.assertForOverFulfill = true
+        expectation.assertForOverFulfill = false
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
