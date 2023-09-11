@@ -12,7 +12,7 @@ actor NotifyConfigProvider {
         if let availableScope = cache[dappUrl] {
             return availableScope
         }
-        guard let notifyConfigUrl = URL(string: "\(dappUrl)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
+        guard let notifyConfigUrl = URL(string: "https://\(dappUrl)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: notifyConfigUrl)
         let config = try JSONDecoder().decode(NotificationConfig.self, from: data)
         let availableScope = Set(config.types)
@@ -20,10 +20,10 @@ actor NotifyConfigProvider {
         return availableScope
     }
 
-    func getMetadata(dappUrl: String) async throws -> AppMetadata {
-        guard let notifyConfigUrl = URL(string: "\(dappUrl)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
+    func getMetadata(appDomain: String) async throws -> AppMetadata {
+        guard let notifyConfigUrl = URL(string: "https://\(appDomain)/.well-known/wc-notify-config.json") else { throw Errors.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: notifyConfigUrl)
         let config = try JSONDecoder().decode(NotificationConfig.self, from: data)
-        return AppMetadata(name: config.name, description: config.description, url: dappUrl, icons: config.icons)
+        return AppMetadata(name: config.name, description: config.description, url: appDomain, icons: config.icons)
     }
 }

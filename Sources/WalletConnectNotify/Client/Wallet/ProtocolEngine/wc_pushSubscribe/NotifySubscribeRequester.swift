@@ -35,11 +35,11 @@ class NotifySubscribeRequester {
         self.notifyConfigProvider = notifyConfigProvider
     }
 
-    @discardableResult func subscribe(dappUrl: String, account: Account) async throws -> NotifySubscriptionPayload.Wrapper {
+    @discardableResult func subscribe(appDomain: String, account: Account) async throws -> NotifySubscriptionPayload.Wrapper {
 
-        logger.debug("Subscribing for Notify, dappUrl: \(dappUrl)")
+        logger.debug("Subscribing for Notify, dappUrl: \(appDomain)")
 
-        let metadata = try await notifyConfigProvider.getMetadata(dappUrl: dappUrl)
+        let metadata = try await notifyConfigProvider.getMetadata(appDomain: appDomain)
 
         let peerPublicKey = try await webDidResolver.resolveAgreementKey(domain: metadata.url)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
@@ -60,7 +60,7 @@ class NotifySubscribeRequester {
         let subscriptionAuthWrapper = try await createJWTWrapper(
             dappPubKey: DIDKey(did: peerPublicKey.did),
             subscriptionAccount: account,
-            dappUrl: dappUrl
+            dappUrl: appDomain
         )
         let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 

@@ -1,7 +1,7 @@
 import Foundation
 
 struct NotifyServerSubscription: Codable, Equatable {
-    let dappUrl: String
+    let appDomain: String
     let account: Account
     let scope: [String]
     let symKey: String

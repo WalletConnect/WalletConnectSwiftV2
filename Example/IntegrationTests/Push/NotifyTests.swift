@@ -18,7 +18,7 @@ final class NotifyTests: XCTestCase {
 
     var walletNotifyClientA: NotifyClient!
 
-    let gmDappUrl = "https://dev.gm.walletconnect.com/"
+    let gmDappDomain = "dev.gm.walletconnect.com"
 
     let pk = try! EthereumPrivateKey()
 
@@ -104,7 +104,7 @@ final class NotifyTests: XCTestCase {
             }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -123,7 +123,7 @@ final class NotifyTests: XCTestCase {
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         sleep(1)
 
@@ -150,7 +150,7 @@ final class NotifyTests: XCTestCase {
 
         sleep(1)
 
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -160,7 +160,7 @@ final class NotifyTests: XCTestCase {
         let updateScope: Set<String> = ["alerts"]
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         walletNotifyClientA.newSubscriptionPublisher
             .sink { [unowned self] subscription in
@@ -188,10 +188,10 @@ final class NotifyTests: XCTestCase {
         let messageExpectation = expectation(description: "receives a notify message")
         let notifyMessage = NotifyMessage.stub()
 
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
+        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappDomain, icons: [])
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         walletNotifyClientA.newSubscriptionPublisher
             .sink { subscription in
