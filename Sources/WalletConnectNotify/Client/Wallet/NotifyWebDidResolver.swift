@@ -7,7 +7,8 @@ final class NotifyWebDidResolver {
 
     func resolveAgreementKey(domain: String) async throws -> AgreementPublicKey {
         let didDoc = try await resolveDidDoc(domainUrl: domain)
-        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == Self.subscribeKey }) else { throw Errors.noVerificationMethodForKey }
+        let subscribeKeyPath = "\(didDoc.id)#\(Self.subscribeKey)"
+        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == subscribeKeyPath }) else { throw Errors.noVerificationMethodForKey }
         guard verificationMethod.publicKeyJwk.crv == .X25519 else { throw Errors.unsupportedCurve}
         let pubKeyBase64Url = verificationMethod.publicKeyJwk.x
         return try AgreementPublicKey(base64url: pubKeyBase64Url)
@@ -17,7 +18,8 @@ final class NotifyWebDidResolver {
 
     func resolveAuthenticationKey(domain: String) async throws -> Data {
         let didDoc = try await resolveDidDoc(domainUrl: domain)
-        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == Self.authenticationKey }) else { throw Errors.noVerificationMethodForKey }
+        let authenticationKeyPath = "\(didDoc.id)#\(Self.authenticationKey)"
+        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == authenticationKeyPath }) else { throw Errors.noVerificationMethodForKey }
         guard verificationMethod.publicKeyJwk.crv == .Ed25519 else { throw Errors.unsupportedCurve}
         let pubKeyBase64Url = verificationMethod.publicKeyJwk.x
         guard let raw = Data(base64url: pubKeyBase64Url) else { throw Errors.invalidBase64urlString }
