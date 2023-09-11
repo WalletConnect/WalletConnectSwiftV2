@@ -77,7 +77,7 @@ class NotifyWatchSubscriptionsRequester {
 
             try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
 
-            // save for later under dapp's accout + pub key
+            // save for later under dapp's account + pub key
             try kms.setTopic(responseTopic, for: keyYStorageKey)
 
             return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
