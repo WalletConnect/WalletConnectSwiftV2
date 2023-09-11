@@ -13,7 +13,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
     private let webDidResolver: WebDidResolver
     private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
-    private let subscriptionScopeProvider: SubscriptionScopeProvider
+    private let notifyConfigProvider: NotifyConfigProvider
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
 
@@ -22,7 +22,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
         webDidResolver: WebDidResolver,
         identityClient: IdentityClient,
         networkingInteractor: NetworkInteracting,
-        subscriptionScopeProvider: SubscriptionScopeProvider,
+        notifyConfigProvider: NotifyConfigProvider,
         logger: ConsoleLogging,
         notifyStorage: NotifyStorage
     ) {
@@ -30,7 +30,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
         self.webDidResolver = webDidResolver
         self.identityClient = identityClient
         self.networkingInteractor = networkingInteractor
-        self.subscriptionScopeProvider = subscriptionScopeProvider
+        self.notifyConfigProvider = notifyConfigProvider
         self.logger = logger
         self.notifyStorage = notifyStorage
     }
