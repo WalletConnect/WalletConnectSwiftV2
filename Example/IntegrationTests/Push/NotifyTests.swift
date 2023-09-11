@@ -103,7 +103,7 @@ final class NotifyTests: XCTestCase {
             }.store(in: &publishers)
 
         try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
+        try! await walletNotifyClient.subscribe(metadata: metadata, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -113,7 +113,7 @@ final class NotifyTests: XCTestCase {
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         let updateScope: Set<String> = ["alerts"]
         try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
+        try! await walletNotifyClient.subscribe(metadata: metadata, account: account)
         walletNotifyClient.newSubscriptionPublisher
             .sink { [unowned self] subscription in
                 Task(priority: .high) {
@@ -142,7 +142,7 @@ final class NotifyTests: XCTestCase {
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
         try! await walletNotifyClient.register(account: account, onSign: sign)
-        try! await walletNotifyClient.subscribe(metadata: metadata, account: account, onSign: sign)
+        try! await walletNotifyClient.subscribe(metadata: metadata, account: account)
 
         walletNotifyClient.newSubscriptionPublisher
             .sink { subscription in
