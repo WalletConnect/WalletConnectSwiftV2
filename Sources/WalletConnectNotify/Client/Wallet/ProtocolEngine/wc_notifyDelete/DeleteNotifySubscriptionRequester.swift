@@ -7,7 +7,7 @@ class DeleteNotifySubscriptionRequester {
     private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let webDidResolver: WebDidResolver
+    private let webDidResolver: NotifyWebDidResolver
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
@@ -16,7 +16,7 @@ class DeleteNotifySubscriptionRequester {
         keyserver: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        webDidResolver: WebDidResolver,
+        webDidResolver: NotifyWebDidResolver,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
         notifyStorage: NotifyStorage

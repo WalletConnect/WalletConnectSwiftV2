@@ -1,11 +1,13 @@
 import Foundation
 
-final class WebDidResolver {
+final class NotifyWebDidResolver {
+
+    private static var subscribeKey = "wc-notify-subscribe-key"
+    private static var authenticationKey = "wc-notify-authentication-key"
 
     func resolveAgreementKey(domain: String) async throws -> AgreementPublicKey {
         let didDoc = try await resolveDidDoc(domainUrl: domain)
-        guard let keyAgreement = didDoc.keyAgreement.first else { throw Errors.didDocDoesNotContainKeyAgreement }
-        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == keyAgreement }) else { throw Errors.noVerificationMethodForKey }
+        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == Self.subscribeKey }) else { throw Errors.noVerificationMethodForKey }
         guard verificationMethod.publicKeyJwk.crv == .X25519 else { throw Errors.unsupportedCurve}
         let pubKeyBase64Url = verificationMethod.publicKeyJwk.x
         return try AgreementPublicKey(base64url: pubKeyBase64Url)
@@ -15,8 +17,7 @@ final class WebDidResolver {
 
     func resolveAuthenticationKey(domain: String) async throws -> Data {
         let didDoc = try await resolveDidDoc(domainUrl: domain)
-        guard let authentication = didDoc.authentication?.first else { throw Errors.didDocDoesNotContainAuthenticationKey }
-        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == authentication }) else { throw Errors.noVerificationMethodForKey }
+        guard let verificationMethod = didDoc.verificationMethod.first(where: { verificationMethod in verificationMethod.id == Self.authenticationKey }) else { throw Errors.noVerificationMethodForKey }
         guard verificationMethod.publicKeyJwk.crv == .Ed25519 else { throw Errors.unsupportedCurve}
         let pubKeyBase64Url = verificationMethod.publicKeyJwk.x
         guard let raw = Data(base64url: pubKeyBase64Url) else { throw Errors.invalidBase64urlString }
@@ -24,13 +25,11 @@ final class WebDidResolver {
     }
 }
 
-private extension WebDidResolver {
+private extension NotifyWebDidResolver {
 
     enum Errors: Error {
         case invalidUrl
         case invalidBase64urlString
-        case didDocDoesNotContainKeyAgreement
-        case didDocDoesNotContainAuthenticationKey
         case noVerificationMethodForKey
         case unsupportedCurve
     }
