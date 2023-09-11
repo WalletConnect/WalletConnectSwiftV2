@@ -27,14 +27,14 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
     }
 
     struct Wrapper: JWTWrapper {
-        let receiptAuth: String
+        let responseAuth: String
 
         init(jwtString: String) {
-            self.receiptAuth = jwtString
+            self.responseAuth = jwtString
         }
 
         var jwtString: String {
-            return receiptAuth
+            return responseAuth
         }
     }
 
