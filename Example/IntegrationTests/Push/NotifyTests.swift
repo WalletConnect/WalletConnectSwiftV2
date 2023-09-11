@@ -123,10 +123,10 @@ final class NotifyTests: XCTestCase {
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
 
-
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account, onSign: sign)
         sleep(1)
+
         try! await clientB.register(account: account, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
@@ -149,7 +149,8 @@ final class NotifyTests: XCTestCase {
         try! await clientB.register(account: account, onSign: sign)
 
         sleep(1)
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account, onSign: sign)
+
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -190,7 +191,7 @@ final class NotifyTests: XCTestCase {
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappUrl, icons: [])
 
         try! await walletNotifyClientA.register(account: account, onSign: sign)
-        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account
+        try! await walletNotifyClientA.subscribe(dappUrl: gmDappUrl, account: account)
 
         walletNotifyClientA.newSubscriptionPublisher
             .sink { subscription in
