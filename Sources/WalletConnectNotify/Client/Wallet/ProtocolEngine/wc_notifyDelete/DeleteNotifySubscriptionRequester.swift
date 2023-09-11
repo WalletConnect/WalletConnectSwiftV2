@@ -42,7 +42,7 @@ class DeleteNotifySubscriptionRequester {
         let wrapper = try createJWTWrapper(
             dappPubKey: DIDKey(rawData: dappAuthenticationKey),
             reason: NotifyDeleteParams.userDisconnected.message,
-            app: subscription.metadata.url,
+            app: DIDWeb(host: subscription.metadata.url),
             account: subscription.account
         )
 
@@ -66,7 +66,7 @@ class DeleteNotifySubscriptionRequester {
 
 private extension DeleteNotifySubscriptionRequester {
 
-    func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: String, account: Account) throws -> NotifyDeletePayload.Wrapper {
+    func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: DIDWeb, account: Account) throws -> NotifyDeletePayload.Wrapper {
         let jwtPayload = NotifyDeletePayload(keyserver: keyserver, dappPubKey: dappPubKey, reason: reason, app: app)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,

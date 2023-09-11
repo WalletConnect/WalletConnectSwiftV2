@@ -41,13 +41,13 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
     let keyserver: URL
     let dappPubKey: DIDKey
     let messageHash: String
-    let app: String
+    let app: DIDWeb
 
     init(
         keyserver: URL,
         dappPubKey: DIDKey,
         messageHash: String,
-        app: String
+        app: DIDWeb
     ) {
         self.keyserver = keyserver
         self.dappPubKey = dappPubKey
@@ -59,7 +59,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         self.keyserver = try claims.ksu.asURL()
         self.dappPubKey = try DIDKey(did: claims.aud)
         self.messageHash = claims.sub
-        self.app = claims.app
+        self.app = try DIDWeb(did: claims.app)
     }
 
     func encode(iss: String) throws -> Claims {
@@ -71,7 +71,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: messageHash,
-            app: app
+            app: app.did
         )
     }
 }

@@ -43,14 +43,14 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
     let dappPubKey: DIDKey
     let keyserver: URL
     let subscriptionAccount: Account
-    let dappUrl: String
+    let app: DIDWeb
     let scope: String
 
-    init(dappPubKey: DIDKey, keyserver: URL, subscriptionAccount: Account, dappUrl: String, scope: String) {
+    init(dappPubKey: DIDKey, keyserver: URL, subscriptionAccount: Account, app: DIDWeb, scope: String) {
         self.dappPubKey = dappPubKey
         self.keyserver = keyserver
         self.subscriptionAccount = subscriptionAccount
-        self.dappUrl = dappUrl
+        self.app = app
         self.scope = scope
     }
 
@@ -58,7 +58,7 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         self.dappPubKey = try DIDKey(did: claims.aud)
         self.keyserver = try claims.ksu.asURL()
         self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
-        self.dappUrl = claims.app
+        self.app = try DIDWeb(did: claims.app)
         self.scope = claims.scp
     }
 
@@ -72,7 +72,7 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
             aud: dappPubKey.did(variant: .ED25519),
             sub: subscriptionAccount.did,
             scp: scope,
-            app: dappUrl
+            app: app.did
         )
     }
 }
