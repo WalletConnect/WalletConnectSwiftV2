@@ -69,7 +69,7 @@ class NotifySubscribeResponseSubscriber {
                     try groupKeychainStorage.add(agreementKeysP, forKey: notifySubscriptionTopic)
                     account = try Account(DIDPKHString: claims.sub)
                     metadata = try dappsMetadataStore.get(key: payload.topic)
-                    let availableTypes = try await notifyConfigProvider.getSubscriptionScope(dappUrl: metadata!.url)
+                    let availableTypes = try await notifyConfigProvider.getSubscriptionScope(appDomain: metadata!.url)
                     subscribedTypes = availableTypes.filter{subscribedScope.contains($0.name)}
                     logger.debug("NotifySubscribeResponseSubscriber: subscribing notify subscription topic: \(notifySubscriptionTopic!)")
                     try await networkingInteractor.subscribe(topic: notifySubscriptionTopic)
