@@ -11,8 +11,8 @@ class NotifySubscriptionsBuilder {
         var result = [NotifySubscription]()
 
         for subscription in notifyServerSubscriptions {
-            let scope = try await buildScope(selectedScope: subscription.scope, dappUrl: subscription.dappUrl)
-            guard let metadata = try? await notifyConfigProvider.getMetadata(appDomain: subscription.dappUrl),
+            let scope = try await buildScope(selectedScope: subscription.scope, dappUrl: subscription.appDomain)
+            guard let metadata = try? await notifyConfigProvider.getMetadata(appDomain: subscription.appDomain),
                   let topic = try? SymmetricKey(hex: subscription.symKey).derivedTopic() else { continue }
 
             let notifySubscription = NotifySubscription(topic: topic,

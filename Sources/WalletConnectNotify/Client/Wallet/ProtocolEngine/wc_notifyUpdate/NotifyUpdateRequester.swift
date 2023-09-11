@@ -10,7 +10,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
     }
 
     private let keyserverURL: URL
-    private let webDidResolver: WebDidResolver
+    private let webDidResolver: NotifyWebDidResolver
     private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
     private let notifyConfigProvider: NotifyConfigProvider
@@ -19,7 +19,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
 
     init(
         keyserverURL: URL,
-        webDidResolver: WebDidResolver,
+        webDidResolver: NotifyWebDidResolver,
         identityClient: IdentityClient,
         networkingInteractor: NetworkInteracting,
         notifyConfigProvider: NotifyConfigProvider,
