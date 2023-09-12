@@ -63,7 +63,7 @@ class NotifyWatchSubscriptionsRequester {
         let keyYStorageKey = "\(account)_\(notifyServerPublicKey.hexRepresentation)"
 
         if let responseTopic = kms.getTopic(for: keyYStorageKey),
-           let selfPubKeyY = kms.getPublicKey(for: responseTopic) {
+           let selfPubKeyY = kms.getAgreementSecret(for: responseTopic)?.publicKey {
             return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
         } else {
             let selfPubKeyY = try kms.createX25519KeyPair()
@@ -78,7 +78,6 @@ class NotifyWatchSubscriptionsRequester {
 
             // save for later under dapp's account + pub key
             try kms.setTopic(responseTopic, for: keyYStorageKey)
-            try kms.setPublicKey(publicKey: selfPubKeyY, for: responseTopic)
 
             return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
         }
