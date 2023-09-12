@@ -53,7 +53,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
                     try groupKeychainStorage.add(subscription.symKey, forKey: subscription.topic)
                 }
 
-                let topics = subscriptions.reduce([]) { $0 + [$1.topic] }
+                let topics = subscriptions.map { $0.topic }
 
                 try await networkingInteractor.batchSubscribe(topics: topics)
 
