@@ -58,7 +58,7 @@ private extension NotifyUpdateResponseSubscriber {
 
     func buildScope(selected: String, dappUrl: String) async throws -> [String: ScopeValue] {
         let selectedScope = selected.components(separatedBy: " ")
-        let availableScope = try await nofityConfigProvider.getSubscriptionScope(dappUrl: dappUrl)
+        let availableScope = try await nofityConfigProvider.getSubscriptionScope(appDomain: dappUrl)
         return availableScope.reduce(into: [:]) {
             $0[$1.name] = ScopeValue(description: $1.description, enabled: selectedScope.contains($1.name))
         }

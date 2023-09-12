@@ -29,7 +29,7 @@ class NotifySubscriptionsBuilder {
     }
 
     private func buildScope(selectedScope: [String], appDomain: String) async throws -> [String: ScopeValue] {
-        let availableScope = try await notifyConfigProvider.getSubscriptionScope(dappUrl: appDomain)
+        let availableScope = try await notifyConfigProvider.getSubscriptionScope(appDomain: appDomain)
         return availableScope.reduce(into: [:]) {
             $0[$1.name] = ScopeValue(description: $1.description, enabled: selectedScope.contains($1.name))
         }
