@@ -15,6 +15,8 @@ struct NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
         let aud: String
         /// array of Notify Subscriptions
         let sbs: [NotifyServerSubscription]
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
+        let sub: String
 
         static var action: String? {
             return "notify_watch_subscriptions_response"
@@ -33,10 +35,12 @@ struct NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
         }
     }
 
+    let account: Account
     let subscriptions: [NotifyServerSubscription]
     let selfIdentityKey: DIDKey
 
     init(claims: Claims) throws {
+        self.account = try Account(DIDPKHString: claims.sub)
         self.selfIdentityKey = try DIDKey(did: claims.aud)
         self.subscriptions = claims.sbs
     }
@@ -48,7 +52,8 @@ struct NotifyWatchSubscriptionsResponsePayload: JWTClaimsCodable {
             act: Claims.action,
             iss: iss,
             aud: selfIdentityKey.did(variant: .ED25519),
-            sbs: subscriptions
+            sbs: subscriptions,
+            sub: account.did
         )
     }
 
