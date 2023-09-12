@@ -103,7 +103,7 @@ final class NotifyTests: XCTestCase {
                 }
             }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
@@ -122,12 +122,12 @@ final class NotifyTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         sleep(1)
 
-        try! await clientB.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
+        try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -145,8 +145,8 @@ final class NotifyTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
-        try! await clientB.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
+        try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
         sleep(1)
 
@@ -159,7 +159,7 @@ final class NotifyTests: XCTestCase {
         let expectation = expectation(description: "expects to create and update notify subscription")
         let updateScope: Set<String> = ["alerts"]
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         walletNotifyClientA.newSubscriptionPublisher
@@ -190,7 +190,7 @@ final class NotifyTests: XCTestCase {
 
         let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappDomain, icons: [])
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, isLimited: false, onSign: sign)
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         walletNotifyClientA.newSubscriptionPublisher
