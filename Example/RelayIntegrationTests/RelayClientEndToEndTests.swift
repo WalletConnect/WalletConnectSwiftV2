@@ -22,7 +22,7 @@ class WebSocketFactoryMock: WebSocketFactory {
     }
     
     func create(with url: URL) -> WebSocketConnecting {
-        return webSocket
+        return webSocket as! WebSocketConnecting
     }
 }
 
@@ -57,6 +57,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
+            socketFactory: webSocketFactory,
             socketConnectionType: .manual,
             logger: logger
         )

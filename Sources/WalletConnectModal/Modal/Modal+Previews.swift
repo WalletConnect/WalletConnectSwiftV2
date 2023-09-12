@@ -5,7 +5,7 @@ import SwiftUI
 class WebSocketMock: WebSocketConnecting {
     var request: URLRequest = .init(url: URL(string: "wss://relay.walletconnect.com")!)
 
-    var receive: ((String) -> Void)?
+    var onText: ((String) -> Void)?
     var onConnect: (() -> Void)?
     var onDisconnect: ((Error?) -> Void)?
     var sendCallCount: Int = 0
@@ -14,7 +14,7 @@ class WebSocketMock: WebSocketConnecting {
     func connect() {}
     func disconnect() {}
     func reconnect() {}
-    func send(message: String, completion: (() -> Void)?) {}
+    func write(string: String, completion: (() -> Void)?) {}
 }
 
 class WebSocketFactoryMock: WebSocketFactory {
@@ -42,7 +42,7 @@ struct ModalContainerView_Previews: PreviewProvider {
                 icons: ["https://avatars.githubusercontent.com/u/37784886"]
             )
             
-            Networking.configure(projectId: projectId)
+            Networking.configure(projectId: projectId, socketFactory: WalletConnectSocketClientFactory())
             WalletConnectModal.configure(projectId: projectId, metadata: metadata)
         }
         

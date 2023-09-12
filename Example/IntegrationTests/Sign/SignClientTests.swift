@@ -20,6 +20,7 @@ final class SignClientTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
+            socketFactory: DefaultSocketFactory(),
             socketConnectionType: .automatic,
             logger: logger
         )
