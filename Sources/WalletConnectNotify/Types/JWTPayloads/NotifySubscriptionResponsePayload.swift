@@ -14,7 +14,7 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         let iss: String
         /// `did:key` of an identity key. Allows for the resolution of the attached blockchain account.
         let aud: String
-        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
+        /// `did:key` of the public key used for key agreement on the Notify topic
         let sub: String
         /// Dapp's domain url
         let app: String
@@ -36,13 +36,13 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         }
     }
 
-    let account: Account
     let selfPubKey: DIDKey
+    let publicKey: DIDKey
     let app: String
 
     init(claims: Claims) throws {
-        self.account = try Account(DIDPKHString: claims.sub)
         self.selfPubKey = try DIDKey(did: claims.aud)
+        self.publicKey = try DIDKey(did: claims.sub)
         self.app = claims.app
     }
 
@@ -53,7 +53,7 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
             act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
-            sub: account.did,
+            sub: publicKey.did(variant: .X25519),
             app: app
         )
     }

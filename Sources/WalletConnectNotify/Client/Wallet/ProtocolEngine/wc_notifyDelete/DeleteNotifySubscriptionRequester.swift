@@ -67,7 +67,7 @@ class DeleteNotifySubscriptionRequester {
 private extension DeleteNotifySubscriptionRequester {
 
     func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: DIDWeb, account: Account) throws -> NotifyDeletePayload.Wrapper {
-        let jwtPayload = NotifyDeletePayload(keyserver: keyserver, dappPubKey: dappPubKey, reason: reason, app: app)
+        let jwtPayload = NotifyDeletePayload(account: account, keyserver: keyserver, dappPubKey: dappPubKey, app: app)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: account
