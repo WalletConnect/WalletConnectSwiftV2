@@ -33,6 +33,9 @@ final class NotifyClientRequestSubscriber {
         client.updateSubscriptionPublisher.sink { [unowned self] subscription in
             handle(event: .notifyUpdate, params: subscription)
         }.store(in: &publishers)
+        client.subscriptionsPublisher.sink { [unowned self] subscriptions in
+            handle(event: .notifySubscriptionsChanged, params: subscriptions)
+        }.store(in: &publishers)
     }
 }
 
