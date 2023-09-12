@@ -14,7 +14,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         let iss: String
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let aud: String
-        /// Hash of the existing subscription payload
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
         /// Dapp's domain url
         let app: String
@@ -36,13 +36,13 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         }
     }
 
+    let account: Account
     let selfPubKey: DIDKey
-    let subscriptionHash: String
     let app: DIDWeb
 
     init(claims: Claims) throws {
+        self.account = try Account(DIDPKHString: claims.sub)
         self.selfPubKey = try DIDKey(did: claims.aud)
-        self.subscriptionHash = claims.sub
         self.app = try DIDWeb(did: claims.app)
     }
 
@@ -53,7 +53,7 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
             act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
-            sub: subscriptionHash,
+            sub: account.did,
             app: app.did
         )
     }

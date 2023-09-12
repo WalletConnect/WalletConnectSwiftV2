@@ -15,6 +15,8 @@ struct NotifySubscriptionsChangedResponsePayload: JWTClaimsCodable {
         let iss: String
         /// `did:key` of Notify Server authentication key
         let aud: String
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
+        let sub: String
 
         static var action: String? {
             return "notify_subscriptions_changed_response"
@@ -33,11 +35,13 @@ struct NotifySubscriptionsChangedResponsePayload: JWTClaimsCodable {
         }
     }
 
-    init(keyserver: URL, notifyServerAuthenticationKey: DIDKey) {
+    init(account: Account, keyserver: URL, notifyServerAuthenticationKey: DIDKey) {
+        self.account = account
         self.keyserver = keyserver
         self.notifyServerAuthenticationKey = notifyServerAuthenticationKey
     }
 
+    let account: Account
     let notifyServerAuthenticationKey: DIDKey
     let keyserver: URL
 
@@ -52,7 +56,8 @@ struct NotifySubscriptionsChangedResponsePayload: JWTClaimsCodable {
             ksu: keyserver.absoluteString,
             act: Claims.action,
             iss: iss,
-            aud: notifyServerAuthenticationKey.did(variant: .ED25519)
+            aud: notifyServerAuthenticationKey.did(variant: .ED25519),
+            sub: account.did
         )
     }
 

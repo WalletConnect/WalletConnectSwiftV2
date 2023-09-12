@@ -36,7 +36,7 @@ public struct AuthPayload: Codable, Equatable {
             throw Errors.invalidChainID
         }
         return CacaoPayload(
-            iss: DIDPKH(account: account).string,
+            iss: account.did,
             domain: domain,
             aud: aud,
             version: version,

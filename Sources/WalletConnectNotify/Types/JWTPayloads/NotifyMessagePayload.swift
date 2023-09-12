@@ -14,7 +14,7 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         let iss: String
         /// Blockchain account `did:pkh`
         let aud: String
-        /// Subscription ID (sha256 hash of subscriptionAuth)
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
         /// Dapp domain url
         let app: String
@@ -40,14 +40,12 @@ struct NotifyMessagePayload: JWTClaimsCodable {
 
     let dappAuthenticationKey: DIDKey
     let account: Account
-    let subscriptionId: String
     let app: DIDWeb
     let message: NotifyMessage
 
     init(claims: Claims) throws {
         self.dappAuthenticationKey = try DIDKey(did: claims.iss)
-        self.account = try DIDPKH(did: claims.aud).account
-        self.subscriptionId = claims.sub
+        self.account = try DIDPKH(did: claims.sub).account
         self.app = try DIDWeb(did: claims.app)
         self.message = claims.msg
     }
@@ -58,8 +56,8 @@ struct NotifyMessagePayload: JWTClaimsCodable {
             exp: expiry(days: 1),
             act: Claims.action,
             iss: dappAuthenticationKey.multibase(variant: .ED25519),
-            aud: account.did,
-            sub: subscriptionId,
+            aud: account.did, // TODO: Should we remove or merge with msg? 
+            sub: account.did,
             app: app.did,
             msg: message
         )

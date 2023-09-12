@@ -62,7 +62,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
     private func respond(topic: String, account: Account, rpcId: RPCID, notifyServerAuthenticationKey: DIDKey) async throws {
 
-        let receiptPayload = NotifySubscriptionsChangedResponsePayload(keyserver: keyserver, notifyServerAuthenticationKey: notifyServerAuthenticationKey)
+        let receiptPayload = NotifySubscriptionsChangedResponsePayload(account: account, keyserver: keyserver, notifyServerAuthenticationKey: notifyServerAuthenticationKey)
 
         let wrapper = try identityClient.signAndCreateWrapper(
             payload: receiptPayload,
