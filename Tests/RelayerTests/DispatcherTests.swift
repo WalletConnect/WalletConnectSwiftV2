@@ -17,7 +17,7 @@ private class DispatcherKeychainStorageMock: KeychainStorageProtocol {
 class WebSocketMock: WebSocketConnecting {
     var request: URLRequest = URLRequest(url: URL(string: "wss://relay.walletconnect.com")!)
 
-    var receive: ((String) -> Void)?
+    var onText: ((String) -> Void)?
     var onConnect: (() -> Void)?
     var onDisconnect: ((Error?) -> Void)?
     var sendCallCount: Int = 0
@@ -37,7 +37,7 @@ class WebSocketMock: WebSocketConnecting {
         isConnected = true
     }
 
-    func send(message: String, completion: (() -> Void)?) {
+    func write(string message: String, completion: (() -> Void)?) {
         sendCallCount+=1
     }
 }
