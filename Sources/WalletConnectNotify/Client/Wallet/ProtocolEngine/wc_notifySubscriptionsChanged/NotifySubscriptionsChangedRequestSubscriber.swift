@@ -45,6 +45,8 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
 
                 notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
+//                add keys to group keychain
+//                resubscribe for all the topics batch
 
                 var logProperties = ["rpcId": payload.id.string]
                 for (index, subscription) in subscriptions.enumerated() {
