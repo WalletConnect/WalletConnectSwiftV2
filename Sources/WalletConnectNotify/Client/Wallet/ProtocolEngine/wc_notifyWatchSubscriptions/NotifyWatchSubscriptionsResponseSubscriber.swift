@@ -40,6 +40,14 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
                 notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
+                
+                for subscription in subscriptions {
+                    try groupKeychainStorage.add(subscription.symKey, forKey: subscription.topic)
+                }
+
+                let topics = subscriptions.map { $0.topic }
+
+                try await networkingInteractor.batchSubscribe(topics: topics)
 
                 var logProperties = [String: String]()
                 for (index, subscription) in subscriptions.enumerated() {
