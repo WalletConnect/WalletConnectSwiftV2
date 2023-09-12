@@ -22,6 +22,7 @@ final class ConfigurationService {
             account: importAccount.account,
             bip44: DefaultBIP44Provider(),
             config: [.chatEnabled: false, .settingsEnabled: false],
+            groupIdentifier: "group.com.walletconnect.sdk",
             environment: BuildConfiguration.shared.apnsEnvironment,
             crypto: DefaultCryptoProvider(),
             onSign: importAccount.onSign

@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-public protocol ConsoleLogging {
+public protocol ConsoleLogging: ErrorHandler {
     var logsPublisher: AnyPublisher<Log, Never> { get }
     func debug(_ items: Any..., file: String, function: String, line: Int, properties: [String: String]?)
     func info(_ items: Any..., file: String, function: String, line: Int)
@@ -104,8 +104,10 @@ extension ConsoleLogger: ConsoleLogging {
         }
     }
 
+    public func handle(error: Error) {
+        self.error(error.localizedDescription)
+    }
 }
-
 
 #if DEBUG
 public struct ConsoleLoggerMock: ConsoleLogging {
@@ -121,6 +123,8 @@ public struct ConsoleLoggerMock: ConsoleLogging {
     public func error(_ items: Any..., file: String, function: String, line: Int) { }
 
     public func setLogging(level: LoggingLevel) { }
+
+    public func handle(error: Error) { }
 }
 #endif
 

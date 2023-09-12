@@ -35,7 +35,7 @@ class NotifySubscribeRequester {
         self.dappsMetadataStore = dappsMetadataStore
     }
 
-    @discardableResult func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws -> NotifySubscriptionPayload.Wrapper {
+    @discardableResult func subscribe(metadata: AppMetadata, account: Account) async throws -> NotifySubscriptionPayload.Wrapper {
 
         let dappUrl = metadata.url
 

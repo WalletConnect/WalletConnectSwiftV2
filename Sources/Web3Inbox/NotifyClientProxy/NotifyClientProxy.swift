@@ -25,7 +25,7 @@ final class NotifyClientProxy {
             try await respond(request: request)
         case .subscribe:
             let params = try parse(SubscribeRequest.self, params: request.params)
-            try await client.subscribe(metadata: params.metadata, account: params.account, onSign: onSign)
+            try await client.subscribe(metadata: params.metadata, account: params.account)
             try await respond(request: request)
         case .getActiveSubscriptions: 
             let subscriptions = client.getActiveSubscriptions()

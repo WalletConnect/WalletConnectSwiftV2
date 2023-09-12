@@ -7,8 +7,6 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         let iat: UInt64
         /// Timestamp when JWT must expire
         let exp: UInt64
-        /// Key server URL
-        let ksu: String
         /// Description of action intent. Must be equal to `notify_delete_response`
         let act: String?
 
@@ -38,25 +36,11 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         }
     }
 
-    let keyserver: URL
     let selfPubKey: DIDKey
     let subscriptionHash: String
     let app: String
 
-    init(
-        keyserver: URL,
-        selfPubKey: DIDKey,
-        subscriptionHash: String,
-        app: String
-    ) {
-        self.keyserver = keyserver
-        self.selfPubKey = selfPubKey
-        self.subscriptionHash = subscriptionHash
-        self.app = app
-    }
-
     init(claims: Claims) throws {
-        self.keyserver = try claims.ksu.asURL()
         self.selfPubKey = try DIDKey(did: claims.aud)
         self.subscriptionHash = claims.sub
         self.app = claims.app
@@ -66,7 +50,6 @@ struct NotifyDeleteResponsePayload: JWTClaimsCodable {
         return Claims(
             iat: defaultIat(),
             exp: expiry(days: 1),
-            ksu: keyserver.absoluteString,
             act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),

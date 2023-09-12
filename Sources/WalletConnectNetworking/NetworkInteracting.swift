@@ -27,6 +27,21 @@ public protocol NetworkInteracting {
         on request: ProtocolMethod
     ) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never>
 
+    func subscribeOnRequest<RequestParams: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: RequestParams.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
+    )
+
+    func subscribeOnResponse<Request: Codable, Response: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
+    )
+
     func getClientId() throws -> String
 }
 
