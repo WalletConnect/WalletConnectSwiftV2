@@ -12,8 +12,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
 
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used. diddoc authentication key
         let iss: String
-        /// Blockchain account `did:pkh`
-        let aud: String
         /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
         /// Dapp domain url
@@ -56,7 +54,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
             exp: expiry(days: 1),
             act: Claims.action,
             iss: dappAuthenticationKey.multibase(variant: .ED25519),
-            aud: account.did, // TODO: Should we remove or merge with msg? 
             sub: account.did,
             app: app.did,
             msg: message
