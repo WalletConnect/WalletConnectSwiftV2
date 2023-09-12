@@ -25,7 +25,9 @@ final class NotifyClientProxy {
             try await respond(request: request)
         case .subscribe:
             let params = try parse(SubscribeRequest.self, params: request.params)
-            try await client.subscribe(appDomain: params.appDomain, account: params.account)
+            // TODO: Remove after
+            let appDomain = params.appDomain == "notify.gm.walletconnect.com" ? "dev.gm.walletconnect.com" : params.appDomain
+            try await client.subscribe(appDomain: appDomain, account: params.account)
             try await respond(request: request)
         case .getActiveSubscriptions: 
             let subscriptions = client.getActiveSubscriptions()
@@ -44,6 +46,8 @@ final class NotifyClientProxy {
             try await respond(request: request)
         case .register:
             let params = try parse(RegisterRequest.self, params: request.params)
+            // TODO: Remove after
+            let appDomain = params.domain == "notify.gm.walletconnect.com" ? "dev.gm.walletconnect.com" : params.domain
             try await client.register(account: params.account, domain: params.domain, isLimited: params.isLimited, onSign: onSign)
             try await respond(request: request)
         }
