@@ -45,20 +45,26 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 // todo varify signature with notify server diddoc authentication key
 
-                let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
+                let oldSubscriptions = notifyStorage.getSubscriptions()
+                let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
+                logger.debug("number of subscriptions: \(newSubscriptions.count)")
 
-                notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
+                guard newSubscriptions != oldSubscriptions else {return}
 
-                for subscription in subscriptions {
+                notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
+
+                for subscription in newSubscriptions {
                     try groupKeychainStorage.add(subscription.symKey, forKey: subscription.topic)
+                    let symKey = try SymmetricKey(hex: subscription.symKey)
+                    try kms.setSymmetricKey(symKey, for: subscription.topic)
                 }
 
-                let topics = subscriptions.map { $0.topic }
+                let topics = newSubscriptions.map { $0.topic }
 
                 try await networkingInteractor.batchSubscribe(topics: topics)
 
                 var logProperties = ["rpcId": payload.id.string]
-                for (index, subscription) in subscriptions.enumerated() {
+                for (index, subscription) in newSubscriptions.enumerated() {
                     let key = "subscription_\(index + 1)"
                     logProperties[key] = subscription.topic
                 }

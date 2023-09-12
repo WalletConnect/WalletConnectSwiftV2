@@ -40,25 +40,31 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 let account = watchSubscriptionPayloadRequest.subscriptionAccount
                 // todo varify signature with notify server diddoc authentication key
 
-                let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
+                let oldSubscriptions = notifyStorage.getSubscriptions()
+                let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
-                notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
+                logger.debug("number of subscriptions: \(newSubscriptions.count)")
+
+                guard newSubscriptions != oldSubscriptions else {return}
+                notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
                 
-                for subscription in subscriptions {
+                for subscription in newSubscriptions {
                     try groupKeychainStorage.add(subscription.symKey, forKey: subscription.topic)
+                    let symKey = try SymmetricKey(hex: subscription.symKey)
+                    try kms.setSymmetricKey(symKey, for: subscription.topic)
                 }
 
-                let topics = subscriptions.map { $0.topic }
+                let topics = newSubscriptions.map { $0.topic }
 
                 try await networkingInteractor.batchSubscribe(topics: topics)
 
                 var logProperties = [String: String]()
-                for (index, subscription) in subscriptions.enumerated() {
+                for (index, subscription) in newSubscriptions.enumerated() {
                     let key = "subscription_\(index + 1)"
                     logProperties[key] = subscription.topic
                 }
 
-                logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(subscriptions.count)", properties: logProperties)
+                logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(newSubscriptions.count)", properties: logProperties)
             }
     }
 
