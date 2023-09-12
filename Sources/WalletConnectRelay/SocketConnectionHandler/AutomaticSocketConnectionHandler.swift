@@ -48,6 +48,8 @@ class AutomaticSocketConnectionHandler {
         networkMonitor.networkConnectionStatusPublisher.sink { [weak self] networkConnectionStatus in
             if networkConnectionStatus == .connected {
                 self?.reconnectIfNeeded()
+            } else {
+                self?.socket.disconnect()
             }
         }
         .store(in: &publishers)

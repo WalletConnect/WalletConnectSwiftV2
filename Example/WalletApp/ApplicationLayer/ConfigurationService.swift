@@ -1,11 +1,12 @@
 import Foundation
 
 import Web3Inbox
+import Web3Wallet
 
 final class ConfigurationService {
 
     func configure(importAccount: ImportAccount) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(projectId: InputConfig.projectId, socketFactory: WalletConnectSocketClientFactory())
         Networking.instance.setLogging(level: .debug)
 
         let metadata = AppMetadata(

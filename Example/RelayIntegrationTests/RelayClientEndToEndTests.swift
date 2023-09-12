@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import XCTest
 import WalletConnectUtils
+import Starscream
 @testable import WalletConnectRelay
 
 private class RelayKeychainStorageMock: KeychainStorageProtocol {

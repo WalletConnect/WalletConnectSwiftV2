@@ -280,6 +280,13 @@
 		C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5B2F7042970573D000DBA0E /* SolanaSwift */; };
 		C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		C5CFBECC2AA99D5D00378D41 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C5CFBECB2AA99D5D00378D41 /* Starscream */; };
+		C5CFBECD2AA9A26E00378D41 /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */; };
+		C5CFBECE2AA9A2B300378D41 /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */; };
+		C5CFBECF2AA9A2B500378D41 /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5506B4B2AA8DBCB0077AD54 /* DefaultSocketFactory.swift */; };
+		C5CFBED12AA9A31500378D41 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C5CFBED02AA9A31500378D41 /* Starscream */; };
+		C5CFBED32AA9A31B00378D41 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C5CFBED22AA9A31B00378D41 /* Starscream */; };
+		C5CFBED52AA9A32100378D41 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C5CFBED42AA9A32100378D41 /* Starscream */; };
+		C5CFBED72AA9A32700378D41 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = C5CFBED62AA9A32700378D41 /* Starscream */; };
 		C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */; };
 		C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2B2954814200A6476E /* ConnectionDetailsModule.swift */; };
 		C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A2D2954814A00A6476E /* ConnectionDetailsRouter.swift */; };
@@ -626,6 +633,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				844749FD29B9E6B2005F520B /* WalletConnectNetworking in Frameworks */,
+				C5CFBED52AA9A32100378D41 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -639,7 +647,6 @@
 				A5B6C0F12A6EAB0800927332 /* WalletConnectNotify in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
 				8487A9442A836C2A0003D5AF /* Sentry in Frameworks */,
-				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 				84943C7B2A9BA206007EBAC2 /* Mixpanel in Frameworks */,
 				A573C53929EC365000E3CBFD /* HDWalletKit in Frameworks */,
 				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
@@ -665,6 +672,7 @@
 				A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */,
 				A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */,
 				A58EC611299D57B800F3452A /* AsyncButton in Frameworks */,
+				C5CFBED32AA9A31B00378D41 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -682,6 +690,7 @@
 				A5E03DFF2864662500888481 /* WalletConnect in Frameworks */,
 				A561C80529DFCD4500DF540D /* WalletConnectSync in Frameworks */,
 				A50DF19D2A25084A0036EA6C /* WalletConnectHistory in Frameworks */,
+				C5CFBED72AA9A32700378D41 /* Starscream in Frameworks */,
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
 				84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */,
 				C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */,
@@ -698,11 +707,11 @@
 				A573C53D29EC366500E3CBFD /* HDWalletKit in Frameworks */,
 				C56EE27D293F56F8004840D1 /* WalletConnectChat in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
+				C5CFBED12AA9A31500378D41 /* Starscream in Frameworks */,
 				84536D7429EEBCF0008EA8DB /* Web3Inbox in Frameworks */,
 				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
 				8487A9462A836C3F0003D5AF /* Sentry in Frameworks */,
 				C55D349929630D440004314A /* Web3Wallet in Frameworks */,
-				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
 				A5B6C0F52A6EAB2800927332 /* WalletConnectNotify in Frameworks */,
 				C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */,
 				84943C7D2A9BA328007EBAC2 /* Mixpanel in Frameworks */,
@@ -1792,6 +1801,7 @@
 			name = RelayIntegrationTests;
 			packageProductDependencies = (
 				844749FC29B9E6B2005F520B /* WalletConnectNetworking */,
+				C5CFBED42AA9A32100378D41 /* Starscream */,
 			);
 			productName = RelayIntegrationTests;
 			productReference = 844749F329B9E5B9005F520B /* RelayIntegrationTests.xctest */;
@@ -1866,6 +1876,7 @@
 				A58EC617299D665A00F3452A /* Web3Inbox */,
 				A561C7FF29DF32CE00DF540D /* HDWalletKit */,
 				CF25F2882A432476009C7E49 /* WalletConnectModal */,
+				C5CFBED22AA9A31B00378D41 /* Starscream */,
 			);
 			productName = Showcase;
 			productReference = A58E7CE828729F550082D443 /* Showcase.app */;
@@ -1912,6 +1923,7 @@
 				A573C53A29EC365800E3CBFD /* HDWalletKit */,
 				A50DF19C2A25084A0036EA6C /* WalletConnectHistory */,
 				A5B6C0F22A6EAB1700927332 /* WalletConnectNotify */,
+				C5CFBED62AA9A32700378D41 /* Starscream */,
 			);
 			productName = IntegrationTests;
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
@@ -1943,6 +1955,7 @@
 				8487A9452A836C3F0003D5AF /* Sentry */,
 				A5B6C0F42A6EAB2800927332 /* WalletConnectNotify */,
 				84943C7C2A9BA328007EBAC2 /* Mixpanel */,
+				C5CFBED02AA9A31500378D41 /* Starscream */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -2110,6 +2123,7 @@
 				844749FF29B9EB3B005F520B /* KeychainStorageMock.swift in Sources */,
 				844749FE29B9EB1B005F520B /* InputConfig.swift in Sources */,
 				844749F629B9E5B9005F520B /* RelayClientEndToEndTests.swift in Sources */,
+				C5CFBECF2AA9A2B500378D41 /* DefaultSocketFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2129,6 +2143,7 @@
 				A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */,
 				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				84CE6448279AE68600142511 /* AccountRequestViewController.swift in Sources */,
+				C5CFBECD2AA9A26E00378D41 /* DefaultSocketFactory.swift in Sources */,
 				A5BB7F9F28B69B7100707FC6 /* SignCoordinator.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
 				84CE644E279ED2FF00142511 /* SelectChainView.swift in Sources */,
@@ -2268,6 +2283,7 @@
 				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
 				A5321C2B2A250367006CADC3 /* HistoryTests.swift in Sources */,
 				A58A1ECC29BF458600A82A20 /* ENSResolverTests.swift in Sources */,
+				C5CFBECE2AA9A2B300378D41 /* DefaultSocketFactory.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,
 				84A6E3C32A386BBC008A0571 /* Publisher.swift in Sources */,
 				A54195A02934BFEF0035AD19 /* EIP1271VerifierTests.swift in Sources */,
@@ -3297,6 +3313,26 @@
 			productName = SolanaSwift;
 		};
 		C5CFBECB2AA99D5D00378D41 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+		C5CFBED02AA9A31500378D41 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+		C5CFBED22AA9A31B00378D41 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+		C5CFBED42AA9A32100378D41 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+		C5CFBED62AA9A32700378D41 /* Starscream */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C5CFBECA2AA99D5D00378D41 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;

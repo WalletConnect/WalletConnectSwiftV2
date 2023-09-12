@@ -5,7 +5,7 @@ import WalletConnectRelay
 
 extension WebSocket: WebSocketConnecting {
     public func reconnect() {
-        
+        connect()
     }
 }
 
