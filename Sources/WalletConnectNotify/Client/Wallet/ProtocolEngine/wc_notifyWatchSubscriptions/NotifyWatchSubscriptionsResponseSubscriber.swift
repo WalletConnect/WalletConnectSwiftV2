@@ -6,18 +6,21 @@ class NotifyWatchSubscriptionsResponseSubscriber {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
+    private let groupKeychainStorage: KeychainStorageProtocol
     private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          notifyStorage: NotifyStorage,
+         groupKeychainStorage: KeychainStorageProtocol,
          notifySubscriptionsBuilder: NotifySubscriptionsBuilder
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
         self.notifyStorage = notifyStorage
+        self.groupKeychainStorage = groupKeychainStorage
         self.notifySubscriptionsBuilder = notifySubscriptionsBuilder
         subscribeForWatchSubscriptionsResponse()
     }
