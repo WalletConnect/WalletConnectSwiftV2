@@ -43,7 +43,7 @@ private extension NotifyUpdateResponseSubscriber {
             let (requestPayload, requestClaims) = try NotifyUpdatePayload.decodeAndVerify(from: payload.request)
             let (_, _) = try NotifyUpdateResponsePayload.decodeAndVerify(from: payload.response)
 
-            let scope = try await buildScope(selected: requestPayload.scope, dappUrl: requestPayload.dappUrl)
+            let scope = try await buildScope(selected: requestPayload.scope, appDomain: requestPayload.app.host)
 
             guard let oldSubscription = notifyStorage.getSubscription(topic: subscriptionTopic) else {
                 logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
@@ -56,9 +56,9 @@ private extension NotifyUpdateResponseSubscriber {
         }
     }
 
-    func buildScope(selected: String, dappUrl: String) async throws -> [String: ScopeValue] {
+    func buildScope(selected: String, appDomain: String) async throws -> [String: ScopeValue] {
         let selectedScope = selected.components(separatedBy: " ")
-        let availableScope = try await nofityConfigProvider.getSubscriptionScope(appDomain: dappUrl)
+        let availableScope = try await nofityConfigProvider.getSubscriptionScope(appDomain: appDomain)
         return availableScope.reduce(into: [:]) {
             $0[$1.name] = ScopeValue(description: $1.description, enabled: selectedScope.contains($1.name))
         }

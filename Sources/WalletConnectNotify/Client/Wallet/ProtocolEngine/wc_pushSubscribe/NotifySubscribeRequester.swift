@@ -60,7 +60,7 @@ class NotifySubscribeRequester {
         let subscriptionAuthWrapper = try await createJWTWrapper(
             dappPubKey: DIDKey(did: peerPublicKey.did),
             subscriptionAccount: account,
-            dappUrl: appDomain
+            appDomain: appDomain
         )
         let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
@@ -79,10 +79,11 @@ class NotifySubscribeRequester {
         return keys
     }
 
-    private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, dappUrl: String) async throws -> NotifySubscriptionPayload.Wrapper {
-        let types = try await notifyConfigProvider.getSubscriptionScope(appDomain: dappUrl)
+    private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, appDomain: String) async throws -> NotifySubscriptionPayload.Wrapper {
+        let types = try await notifyConfigProvider.getSubscriptionScope(appDomain: appDomain)
         let scope = types.map{$0.name}.joined(separator: " ")
-        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
+        let app = DIDWeb(host: appDomain)
+        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, app: app, scope: scope)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

@@ -38,12 +38,12 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
 
     let selfPubKey: DIDKey
     let subscriptionHash: String
-    let app: String
+    let app: DIDWeb
 
     init(claims: Claims) throws {
         self.selfPubKey = try DIDKey(did: claims.aud)
         self.subscriptionHash = claims.sub
-        self.app = claims.app
+        self.app = try DIDWeb(did: claims.app)
     }
 
     func encode(iss: String) throws -> Claims {
@@ -54,7 +54,7 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
             sub: subscriptionHash,
-            app: app
+            app: app.did
         )
     }
 }
