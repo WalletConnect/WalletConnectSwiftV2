@@ -42,7 +42,6 @@ public class NotifyClient {
     private let notifyMessageSubscriber: NotifyMessageSubscriber
     private let resubscribeService: NotifyResubscribeService
     private let notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber
-    private let deleteNotifySubscriptionSubscriber: DeleteNotifySubscriptionSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
@@ -60,7 +59,6 @@ public class NotifyClient {
          resubscribeService: NotifyResubscribeService,
          notifySubscribeRequester: NotifySubscribeRequester,
          notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber,
-         deleteNotifySubscriptionSubscriber: DeleteNotifySubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
@@ -77,7 +75,6 @@ public class NotifyClient {
         self.resubscribeService = resubscribeService
         self.notifySubscribeRequester = notifySubscribeRequester
         self.notifySubscribeResponseSubscriber = notifySubscribeResponseSubscriber
-        self.deleteNotifySubscriptionSubscriber = deleteNotifySubscriptionSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
