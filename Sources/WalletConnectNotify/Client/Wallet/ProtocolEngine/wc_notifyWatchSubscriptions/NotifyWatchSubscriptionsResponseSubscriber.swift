@@ -6,18 +6,21 @@ class NotifyWatchSubscriptionsResponseSubscriber {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
+    private let groupKeychainStorage: KeychainStorageProtocol
     private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
          notifyStorage: NotifyStorage,
+         groupKeychainStorage: KeychainStorageProtocol,
          notifySubscriptionsBuilder: NotifySubscriptionsBuilder
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.logger = logger
         self.notifyStorage = notifyStorage
+        self.groupKeychainStorage = groupKeychainStorage
         self.notifySubscriptionsBuilder = notifySubscriptionsBuilder
         subscribeForWatchSubscriptionsResponse()
     }
@@ -40,6 +43,14 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
                 notifyStorage.replaceAllSubscriptions(subscriptions, account: account)
+                
+                for subscription in subscriptions {
+                    try groupKeychainStorage.add(subscription.symKey, forKey: subscription.topic)
+                }
+
+                let topics = subscriptions.map { $0.topic }
+
+                try await networkingInteractor.batchSubscribe(topics: topics)
 
                 var logProperties = [String: String]()
                 for (index, subscription) in subscriptions.enumerated() {

@@ -57,11 +57,6 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 try await networkingInteractor.batchSubscribe(topics: topics)
 
-
-
-
-//                add keys to group keychain
-
                 var logProperties = ["rpcId": payload.id.string]
                 for (index, subscription) in subscriptions.enumerated() {
                     let key = "subscription_\(index + 1)"
