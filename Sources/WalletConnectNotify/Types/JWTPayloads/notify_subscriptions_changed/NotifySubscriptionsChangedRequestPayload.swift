@@ -13,10 +13,10 @@ struct NotifySubscriptionsChangedRequestPayload: JWTClaimsCodable {
         let iss: String
         /// Blockchain account `did:pkh`
         let aud: String
-        /// message sent by the author account
-        let sub: String
         /// array of Notify Server Subscriptions
         let sbs: [NotifyServerSubscription]
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
+        let sub: String
 
         static var action: String? {
             return "notify_subscriptions_changed"
@@ -42,7 +42,7 @@ struct NotifySubscriptionsChangedRequestPayload: JWTClaimsCodable {
     init(claims: Claims) throws {
         self.notifyServerAuthenticationKey = try DIDKey(did: claims.iss)
         self.subscriptions = claims.sbs
-        self.account = try DIDPKH(did: claims.sub).account
+        self.account = try Account(DIDPKHString: claims.sub)
     }
 
     func encode(iss: String) throws -> Claims {

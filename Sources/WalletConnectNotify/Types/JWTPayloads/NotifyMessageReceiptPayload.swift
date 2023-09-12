@@ -16,7 +16,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         let iss: String
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
         let aud: String
-        /// Hash of the stringified notify message object received
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
         /// Dapp's domain url
         let app: String
@@ -38,27 +38,27 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         }
     }
 
+    let account: Account
     let keyserver: URL
     let dappPubKey: DIDKey
-    let messageHash: String
     let app: DIDWeb
 
     init(
+        account: Account,
         keyserver: URL,
         dappPubKey: DIDKey,
-        messageHash: String,
         app: DIDWeb
     ) {
+        self.account = account
         self.keyserver = keyserver
         self.dappPubKey = dappPubKey
-        self.messageHash = messageHash
         self.app = app
     }
 
     init(claims: Claims) throws {
+        self.account = try Account(DIDPKHString: claims.sub)
         self.keyserver = try claims.ksu.asURL()
         self.dappPubKey = try DIDKey(did: claims.aud)
-        self.messageHash = claims.sub
         self.app = try DIDWeb(did: claims.app)
     }
 
@@ -70,7 +70,7 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
             act: Claims.action,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
-            sub: messageHash,
+            sub: account.did,
             app: app.did
         )
     }
