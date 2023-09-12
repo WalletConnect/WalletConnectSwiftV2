@@ -105,7 +105,7 @@ final class DispatcherTests: XCTestCase {
             XCTAssertNotNil(message)
             expectation.fulfill()
         }
-        webSocket.receive?("message")
+        webSocket.onText?("message")
         waitForExpectations(timeout: 0.001)
     }
 
