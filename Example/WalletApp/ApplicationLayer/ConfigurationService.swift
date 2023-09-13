@@ -26,6 +26,8 @@ final class ConfigurationService {
 
         Notify.instance.setLogging(level: .debug)
 
+        Task { try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign) }
+
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
             ProfilingService.instance.setUpProfiling(account: importAccount.account.absoluteString, clientId: clientId)
