@@ -18,9 +18,6 @@
 		84474A0129B9EB74005F520B /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 84474A0029B9EB74005F520B /* Starscream */; };
 		84474A0229B9ECA2005F520B /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */; };
 		8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 8448F1D327E4726F0000B866 /* WalletConnect */; };
-		84536D6E29EEAE1F008EA8DB /* Web3InboxModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84536D6D29EEAE1F008EA8DB /* Web3InboxModule.swift */; };
-		84536D7029EEAE28008EA8DB /* Web3InboxRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84536D6F29EEAE28008EA8DB /* Web3InboxRouter.swift */; };
-		84536D7229EEAE32008EA8DB /* Web3InboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84536D7129EEAE32008EA8DB /* Web3InboxViewController.swift */; };
 		84536D7429EEBCF0008EA8DB /* Web3Inbox in Frameworks */ = {isa = PBXBuildFile; productRef = 84536D7329EEBCF0008EA8DB /* Web3Inbox */; };
 		845B8D8C2934B36C0084A966 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B8D8B2934B36C0084A966 /* Account.swift */; };
 		847BD1D62989492500076C90 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D12989492500076C90 /* MainViewController.swift */; };
@@ -371,9 +368,6 @@
 		8439CB88293F658E00F2F2E2 /* PushMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushMessage.swift; sourceTree = "<group>"; };
 		844749F329B9E5B9005F520B /* RelayIntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RelayIntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		844749F529B9E5B9005F520B /* RelayClientEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayClientEndToEndTests.swift; sourceTree = "<group>"; };
-		84536D6D29EEAE1F008EA8DB /* Web3InboxModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Web3InboxModule.swift; sourceTree = "<group>"; };
-		84536D6F29EEAE28008EA8DB /* Web3InboxRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Web3InboxRouter.swift; sourceTree = "<group>"; };
-		84536D7129EEAE32008EA8DB /* Web3InboxViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Web3InboxViewController.swift; sourceTree = "<group>"; };
 		845AA7D929BA1EBA00F33739 /* IntegrationTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = IntegrationTests.xctestplan; path = ExampleApp.xcodeproj/IntegrationTests.xctestplan; sourceTree = "<group>"; };
 		845AA7DC29BB424800F33739 /* SmokeTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SmokeTests.xctestplan; sourceTree = "<group>"; };
 		845B8D8B2934B36C0084A966 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -793,16 +787,6 @@
 				844749F529B9E5B9005F520B /* RelayClientEndToEndTests.swift */,
 			);
 			path = RelayIntegrationTests;
-			sourceTree = "<group>";
-		};
-		84536D6C29EEAE0D008EA8DB /* Web3Inbox */ = {
-			isa = PBXGroup;
-			children = (
-				84536D6D29EEAE1F008EA8DB /* Web3InboxModule.swift */,
-				84536D6F29EEAE28008EA8DB /* Web3InboxRouter.swift */,
-				84536D7129EEAE32008EA8DB /* Web3InboxViewController.swift */,
-			);
-			path = Web3Inbox;
 			sourceTree = "<group>";
 		};
 		847BD1DB2989493F00076C90 /* Main */ = {
@@ -1555,7 +1539,6 @@
 			isa = PBXGroup;
 			children = (
 				A51811992A52E82100A52B15 /* Settings */,
-				84536D6C29EEAE0D008EA8DB /* Web3Inbox */,
 				847BD1DB2989493F00076C90 /* Main */,
 				C55D3477295DD4AA0004314A /* Welcome */,
 				C55D3474295DCB850004314A /* AuthRequest */,
@@ -2309,8 +2292,6 @@
 				C55D34B12965FB750004314A /* SessionProposalInteractor.swift in Sources */,
 				C56EE247293F566D004840D1 /* ScanModule.swift in Sources */,
 				C56EE28D293F5757004840D1 /* AppearanceConfigurator.swift in Sources */,
-				84536D6E29EEAE1F008EA8DB /* Web3InboxModule.swift in Sources */,
-				84536D7029EEAE28008EA8DB /* Web3InboxRouter.swift in Sources */,
 				847BD1D82989492500076C90 /* MainModule.swift in Sources */,
 				847BD1E7298A806800076C90 /* NotificationsInteractor.swift in Sources */,
 				C56EE241293F566D004840D1 /* WalletModule.swift in Sources */,
@@ -2342,7 +2323,6 @@
 				C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */,
 				C56EE242293F566D004840D1 /* ScanPresenter.swift in Sources */,
 				C56EE28B293F5757004840D1 /* SceneDelegate.swift in Sources */,
-				84536D7229EEAE32008EA8DB /* Web3InboxViewController.swift in Sources */,
 				C56EE276293F56D7004840D1 /* UIViewController.swift in Sources */,
 				C56EE275293F56D7004840D1 /* InputConfig.swift in Sources */,
 				C55D3493295DFA750004314A /* WelcomeModule.swift in Sources */,
