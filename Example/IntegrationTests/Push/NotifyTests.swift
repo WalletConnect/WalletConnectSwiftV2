@@ -14,8 +14,6 @@ import WalletConnectSigner
 
 final class NotifyTests: XCTestCase {
 
-    var walletPairingClient: PairingClient!
-
     var walletNotifyClientA: NotifyClient!
 
     let gmDappDomain = "dev.gm.walletconnect.com"
@@ -70,7 +68,6 @@ final class NotifyTests: XCTestCase {
     func makeWalletClient(prefix: String = "🦋 Wallet: ") -> NotifyClient {
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
-        walletPairingClient = pairingClient
         let pushClient = PushClientFactory.create(projectId: "",
                                                   pushHost: "echo.walletconnect.com",
                                                   keychainStorage: keychain,

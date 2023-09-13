@@ -54,9 +54,9 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                     try kms.setSymmetricKey(symKey, for: subscription.topic)
                 }
 
-                let topics = newSubscriptions.map { $0.topic }
+                try await networkingInteractor.batchSubscribe(topics: newSubscriptions.map { $0.topic })
 
-                try await networkingInteractor.batchSubscribe(topics: topics)
+                try Task.checkCancellation()
 
                 var logProperties = [String: String]()
                 for (index, subscription) in newSubscriptions.enumerated() {
