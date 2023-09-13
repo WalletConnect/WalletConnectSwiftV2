@@ -63,6 +63,8 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 try await networkingInteractor.batchSubscribe(topics: topics)
 
+                try Task.checkCancellation()
+
                 var logProperties = ["rpcId": payload.id.string]
                 for (index, subscription) in newSubscriptions.enumerated() {
                     let key = "subscription_\(index + 1)"
