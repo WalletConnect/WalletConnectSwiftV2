@@ -14,8 +14,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
         let iss: String
         /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
-        /// Dapp domain url
-        let app: String
         /// Message object
         let msg: NotifyMessage
 
@@ -38,13 +36,11 @@ struct NotifyMessagePayload: JWTClaimsCodable {
 
     let dappAuthenticationKey: DIDKey
     let account: Account
-    let app: DIDWeb
     let message: NotifyMessage
 
     init(claims: Claims) throws {
         self.dappAuthenticationKey = try DIDKey(did: claims.iss)
         self.account = try DIDPKH(did: claims.sub).account
-        self.app = try DIDWeb(did: claims.app)
         self.message = claims.msg
     }
 
@@ -55,7 +51,6 @@ struct NotifyMessagePayload: JWTClaimsCodable {
             act: Claims.action,
             iss: dappAuthenticationKey.multibase(variant: .ED25519),
             sub: account.did,
-            app: app.did,
             msg: message
         )
     }

@@ -44,8 +44,7 @@ class NotifyMessageSubscriber {
             let receiptPayload = NotifyMessageReceiptPayload(
                 account: messagePayload.account,
                 keyserver: keyserver,
-                dappPubKey: dappPubKey,
-                app: messagePayload.app
+                dappPubKey: dappPubKey
             )
 
             let wrapper = try identityClient.signAndCreateWrapper(

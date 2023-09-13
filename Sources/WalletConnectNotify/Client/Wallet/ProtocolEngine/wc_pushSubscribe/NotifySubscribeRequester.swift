@@ -82,8 +82,7 @@ class NotifySubscribeRequester {
     private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, appDomain: String) async throws -> NotifySubscriptionPayload.Wrapper {
         let types = try await notifyConfigProvider.getSubscriptionScope(appDomain: appDomain)
         let scope = types.map{$0.name}.joined(separator: " ")
-        let app = DIDWeb(host: appDomain)
-        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, app: app, scope: scope)
+        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, scope: scope)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

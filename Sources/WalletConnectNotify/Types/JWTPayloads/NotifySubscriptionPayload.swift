@@ -20,8 +20,6 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         let sub: String
         /// Scope of notification types authorized by the user
         let scp: String
-        /// Dapp's domain url
-        let app: String
 
         static var action: String? {
             return "notify_subscription"
@@ -43,14 +41,12 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
     let dappPubKey: DIDKey
     let keyserver: URL
     let subscriptionAccount: Account
-    let app: DIDWeb
     let scope: String
 
-    init(dappPubKey: DIDKey, keyserver: URL, subscriptionAccount: Account, app: DIDWeb, scope: String) {
+    init(dappPubKey: DIDKey, keyserver: URL, subscriptionAccount: Account, scope: String) {
         self.dappPubKey = dappPubKey
         self.keyserver = keyserver
         self.subscriptionAccount = subscriptionAccount
-        self.app = app
         self.scope = scope
     }
 
@@ -58,7 +54,6 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
         self.dappPubKey = try DIDKey(did: claims.aud)
         self.keyserver = try claims.ksu.asURL()
         self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
-        self.app = try DIDWeb(did: claims.app)
         self.scope = claims.scp
     }
 
@@ -71,8 +66,7 @@ struct NotifySubscriptionPayload: JWTClaimsCodable {
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
             sub: subscriptionAccount.did,
-            scp: scope,
-            app: app.did
+            scp: scope
         )
     }
 }
