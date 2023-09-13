@@ -22,11 +22,6 @@ final class MainRouter {
             .wrapToNavigationController()
     }
 
-    func web3InboxViewController() -> UIViewController {
-        return Web3InboxModule.create(app: app)
-            .wrapToNavigationController()
-    }
-
     func settingsViewController() -> UIViewController {
         return SettingsModule.create(app: app)
             .wrapToNavigationController()

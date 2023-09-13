@@ -47,9 +47,6 @@ let package = Package(
             name: "WalletConnectHistory",
             targets: ["WalletConnectHistory"]),
         .library(
-            name: "Web3Inbox",
-            targets: ["Web3Inbox"]),
-        .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
 
@@ -98,9 +95,6 @@ let package = Package(
         .target(
             name: "WalletConnectHistory",
             dependencies: ["HTTPClient", "WalletConnectRelay"]),
-        .target(
-            name: "Web3Inbox",
-            dependencies: ["WalletConnectChat", "WalletConnectNotify"]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
