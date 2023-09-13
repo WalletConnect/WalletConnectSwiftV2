@@ -85,7 +85,7 @@ public class NotifyClient {
 
     public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
         try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        try await notifyWatchSubscriptionsRequester.watchSubscriptions(account: account)
+        notifyWatchSubscriptionsRequester.setAccount(account)
     }
 
     public func setLogging(level: LoggingLevel) {
