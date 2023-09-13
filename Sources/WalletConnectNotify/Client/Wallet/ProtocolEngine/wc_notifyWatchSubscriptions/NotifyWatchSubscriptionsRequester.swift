@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 class NotifyWatchSubscriptionsRequester {
 
@@ -9,6 +10,8 @@ class NotifyWatchSubscriptionsRequester {
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
     private let notifyServerUrl = "dev.notify.walletconnect.com"
+    private var account: Account?
+    private var publishers = Set<AnyCancellable>()
 
     init(keyserverURL: URL,
          networkingInteractor: NetworkInteracting,
@@ -23,9 +26,26 @@ class NotifyWatchSubscriptionsRequester {
         self.logger = logger
         self.kms = kms
         self.webDidResolver = webDidResolver
+        setUpWatchSubscriptionsOnSocketConnection()
     }
 
-    func watchSubscriptions(account: Account) async throws {
+    func setUpWatchSubscriptionsOnSocketConnection() {
+        networkingInteractor.socketConnectionStatusPublisher
+            .sink { [unowned self] status in
+                guard status == .connected else { return }
+                Task { try await watchSubscriptions() }
+            }
+            .store(in: &publishers)
+    }
+
+    func setAccount(_ account: Account) {
+        self.account = account
+        Task { try await watchSubscriptions() }
+    }
+
+    private func watchSubscriptions() async throws {
+
+        guard let account = account else { return }
 
         logger.debug("Watching subscriptions")
 

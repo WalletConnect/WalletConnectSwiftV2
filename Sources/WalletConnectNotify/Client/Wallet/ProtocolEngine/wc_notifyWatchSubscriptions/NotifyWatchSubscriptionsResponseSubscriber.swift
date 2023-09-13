@@ -46,6 +46,7 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 logger.debug("number of subscriptions: \(newSubscriptions.count)")
 
                 guard newSubscriptions != oldSubscriptions else {return}
+                // todo: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
                 notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
                 
                 for subscription in newSubscriptions {
