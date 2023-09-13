@@ -54,8 +54,8 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
 
                 for subscription in newSubscriptions {
-                    try groupKeychainStorage.add(subscription.symKey, forKey: subscription.topic)
                     let symKey = try SymmetricKey(hex: subscription.symKey)
+                    try groupKeychainStorage.add(symKey, forKey: subscription.topic)
                     try kms.setSymmetricKey(symKey, for: subscription.topic)
                 }
 
