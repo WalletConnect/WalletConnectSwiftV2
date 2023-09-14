@@ -8,6 +8,7 @@ final class NotificationsPresenter: ObservableObject {
     private var disposeBag = Set<AnyCancellable>()
 
     @Published var subscriptions: [SubscriptionsViewModel] = []
+    @Published var listings: [ListingViewModel] = [ListingViewModel(), ListingViewModel()]
 
     init(interactor: NotificationsInteractor, router: NotificationsRouter) {
         defer { setupInitialState() }
@@ -18,6 +19,10 @@ final class NotificationsPresenter: ObservableObject {
 
     func didPress(_ subscription: SubscriptionsViewModel) {
         router.presentNotifications(subscription: subscription.subscription)
+    }
+
+    func didPress(_ listing: ListingViewModel) {
+        
     }
 
     func setupInitialState() {
@@ -35,7 +40,7 @@ final class NotificationsPresenter: ObservableObject {
 
 extension NotificationsPresenter: SceneViewModel {
     var sceneTitle: String? {
-        return "Notifications"
+        return "Inbox"
     }
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {

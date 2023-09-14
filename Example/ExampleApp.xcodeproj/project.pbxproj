@@ -197,6 +197,8 @@
 		A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */; };
 		A5C5153329BB7A6A004210BA /* InviteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C5153229BB7A6A004210BA /* InviteType.swift */; };
 		A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A5C8BE84292FE20B006CC85C /* Web3 */; };
+		A5D610C82AB31EE800C20083 /* SegmentedPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610C72AB31EE800C20083 /* SegmentedPicker.swift */; };
+		A5D610CA2AB3249100C20083 /* ListingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610C92AB3249100C20083 /* ListingViewModel.swift */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E03DF52864651200888481 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DF42864651200888481 /* Starscream */; };
 		A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E03DF9286465C700888481 /* SignClientTests.swift */; };
@@ -526,6 +528,8 @@
 		A5C20228287EB34C007E3188 /* AccountStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStorage.swift; sourceTree = "<group>"; };
 		A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
 		A5C5153229BB7A6A004210BA /* InviteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteType.swift; sourceTree = "<group>"; };
+		A5D610C72AB31EE800C20083 /* SegmentedPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedPicker.swift; sourceTree = "<group>"; };
+		A5D610C92AB3249100C20083 /* ListingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingViewModel.swift; sourceTree = "<group>"; };
 		A5E03DED286464DB00888481 /* IntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
 		A5E03DFC286465D100888481 /* Stubs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stubs.swift; sourceTree = "<group>"; };
@@ -825,6 +829,7 @@
 			isa = PBXGroup;
 			children = (
 				847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */,
+				A5D610C92AB3249100C20083 /* ListingViewModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1696,6 +1701,7 @@
 				C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */,
 				C55D349A2965BC2F0004314A /* TagsView.swift */,
 				A74D32B92A1E25AD00CB8536 /* QueryParameters.swift */,
+				A5D610C72AB31EE800C20083 /* SegmentedPicker.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -2309,6 +2315,7 @@
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
 				A57879722A4F225E00F8D10B /* ImportAccount.swift in Sources */,
 				C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */,
+				A5D610C82AB31EE800C20083 /* SegmentedPicker.swift in Sources */,
 				C56EE271293F56D7004840D1 /* View.swift in Sources */,
 				C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */,
 				C56EE24D293F566D004840D1 /* WalletRouter.swift in Sources */,
@@ -2359,6 +2366,7 @@
 				C55D3494295DFA750004314A /* WelcomePresenter.swift in Sources */,
 				C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */,
 				A57879712A4EDC8100F8D10B /* TextFieldView.swift in Sources */,
+				A5D610CA2AB3249100C20083 /* ListingViewModel.swift in Sources */,
 				84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */,
 				84943C7F2A9BA48C007EBAC2 /* ProfilingService.swift in Sources */,
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
