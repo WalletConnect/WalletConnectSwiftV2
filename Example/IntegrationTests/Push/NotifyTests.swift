@@ -194,12 +194,17 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        walletNotifyClientA.newSubscriptionPublisher
-            .sink { subscription in
+        var didNotify = false
+        walletNotifyClientA.subscriptionsPublisher
+            .sink { subscriptions in
+                guard let subscription = subscriptions.first else {return}
                 let notifier = Publisher()
-                Task(priority: .high) {
-                    try await notifier.notify(topic: subscription.topic, account: subscription.account, message: notifyMessage)
-                    subscribeExpectation.fulfill()
+                if !didNotify {
+                    didNotify = true
+                    Task(priority: .high) {
+                        try await notifier.notify(topic: subscription.topic, account: subscription.account, message: notifyMessage)
+                        subscribeExpectation.fulfill()
+                    }
                 }
             }.store(in: &publishers)
 
