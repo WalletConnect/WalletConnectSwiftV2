@@ -40,7 +40,8 @@ struct NotificationsView: View {
             } else {
                 discover()
             }
-        }.task {
+        }
+        .task {
             try! await presenter.fetch()
         }
     }
@@ -62,6 +63,8 @@ struct NotificationsView: View {
             ZStack {
                 if presenter.subscriptions.isEmpty {
                     VStack(spacing: 10) {
+                        Spacer()
+
                         Image(systemName: "bell.badge.fill")
                             .resizable()
                             .frame(width: 32, height: 32)
@@ -73,6 +76,8 @@ struct NotificationsView: View {
                             .font(.system(size: 15, weight: .regular, design: .rounded))
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
+
+                        Spacer()
                     }
                     .padding(20)
                 }

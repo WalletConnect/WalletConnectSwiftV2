@@ -23,11 +23,13 @@ final class NotificationsPresenter: ObservableObject {
     }
 
     func subscription(forListing listing: ListingViewModel) -> SubscriptionsViewModel? {
-        return subscriptions.first(where: { $0.url == listing.url })
+        return subscriptions.first(where: { $0.url == listing.appDomain })
     }
 
     func subscribe(listing: ListingViewModel) async throws {
-        try await interactor.subscribe(url: listing.url)
+        if let domain = listing.appDomain {
+            try await interactor.subscribe(domain: domain)
+        }
     }
 
     func unsubscribe(subscription: SubscriptionsViewModel) async throws {

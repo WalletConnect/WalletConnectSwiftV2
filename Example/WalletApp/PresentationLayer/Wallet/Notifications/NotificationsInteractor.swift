@@ -31,8 +31,8 @@ final class NotificationsInteractor {
         }
     }
 
-    func subscribe(url: String) async throws {
-        try await Notify.instance.subscribe(appDomain: url, account: importAccount.account)
+    func subscribe(domain: String) async throws {
+        try await Notify.instance.subscribe(appDomain: domain, account: importAccount.account)
     }
 
     func unsubscribe(topic: String) async throws {
