@@ -1,4 +1,5 @@
 import SwiftUI
+import AsyncButton
 
 struct NotificationsView: View {
 
@@ -39,17 +40,17 @@ struct NotificationsView: View {
             } else {
                 discover()
             }
+        }.task {
+            try! await presenter.fetch()
         }
     }
 
     private func discover() -> some View {
-        List {
-            ForEach(presenter.listings, id: \.id) { listing in
-                listRow(title: listing.title, subtitle: listing.subtitle, imageUrl: listing.imageUrl) {
-                    presenter.didPress(listing)
-                }
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+        return List {
+            ForEach(presenter.listings) { listing in
+                listingRow(listing: listing)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
             }
         }
         .listStyle(PlainListStyle())
@@ -80,11 +81,9 @@ struct NotificationsView: View {
                     if !presenter.subscriptions.isEmpty {
                         List {
                             ForEach(presenter.subscriptions, id: \.id) { subscription in
-                                listRow(title: subscription.title, subtitle: subscription.subtitle, imageUrl: subscription.imageUrl) {
-                                    presenter.didPress(subscription)
-                                }
-                                .listRowSeparator(.hidden)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                                subscriptionRow(subscription: subscription)
+                                    .listRowSeparator(.hidden)
+                                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                             }
                             .onDelete { indexSet in
                                 Task(priority: .high) {
@@ -100,21 +99,21 @@ struct NotificationsView: View {
         .padding(.vertical, 20)
     }
 
-    private func listRow(title: String, subtitle: String, imageUrl: String, action: @escaping  () -> Void) -> some View {
+    private func subscriptionRow(subscription: SubscriptionsViewModel) -> some View {
         Button {
-            action()
+            presenter.didPress(subscription: subscription)
         } label: {
             VStack {
                 HStack(spacing: 10) {
-                    AsyncImage(url: URL(string: imageUrl)) { phase in
+                    AsyncImage(url: subscription.imageUrl) { phase in
                         if let image = phase.image {
                             image
                                 .resizable()
                                 .frame(width: 60, height: 60)
-                                .background(Color.black)
+                                .background(Color.black.opacity(0.1))
                                 .cornerRadius(30, corners: .allCorners)
                         } else {
-                            Color.black
+                            Color.black.opacity(0.1)
                                 .frame(width: 60, height: 60)
                                 .cornerRadius(30, corners: .allCorners)
                         }
@@ -122,11 +121,11 @@ struct NotificationsView: View {
                     .padding(.leading, 20)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(title)
+                        Text(subscription.title)
                             .foregroundColor(.grey8)
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
 
-                        Text(subtitle)
+                        Text(subscription.subtitle)
                             .foregroundColor(.grey50)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
                     }
@@ -136,6 +135,49 @@ struct NotificationsView: View {
                     Image("forward-shevron")
                         .foregroundColor(.grey8)
                         .padding(.trailing, 20)
+                }
+            }
+        }
+    }
+
+    private func listingRow(listing: ListingViewModel) -> some View {
+        VStack {
+            HStack(spacing: 10) {
+                AsyncImage(url: listing.imageUrl) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .frame(width: 60, height: 60)
+                            .background(Color.black.opacity(0.1))
+                            .cornerRadius(30, corners: .allCorners)
+                    } else {
+                        Color.black.opacity(0.1)
+                            .frame(width: 60, height: 60)
+                            .cornerRadius(30, corners: .allCorners)
+                    }
+                }
+                .padding(.leading, 20)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(listing.title)
+                        .foregroundColor(.grey8)
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+
+                    Text(listing.subtitle)
+                        .foregroundColor(.grey50)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                }
+
+                Spacer()
+
+                if let subscription = presenter.subscription(forListing: listing) {
+                    AsyncButton("Unsubscribe") {
+                        try await presenter.unsubscribe(subscription: subscription)
+                    }.padding(16.0)
+                } else {
+                    AsyncButton("Subscribe") {
+                        try await presenter.subscribe(listing: listing)
+                    }.padding(16.0)
                 }
             }
         }

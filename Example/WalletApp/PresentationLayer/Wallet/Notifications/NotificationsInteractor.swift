@@ -7,9 +7,20 @@ final class NotificationsInteractor {
         return Notify.instance.subscriptionsPublisher
     }
 
+    private let importAccount: ImportAccount
+
+    init(importAccount: ImportAccount) {
+        self.importAccount = importAccount
+    }
+
     func getSubscriptions() -> [NotifySubscription] {
         let subs = Notify.instance.getActiveSubscriptions()
         return subs
+    }
+
+    func getListings() async throws -> [Listing] {
+        let service = ListingsNetworkService()
+        return try await service.getListings()
     }
 
     func removeSubscription(_ subscription: NotifySubscription) async {
@@ -18,5 +29,13 @@ final class NotificationsInteractor {
         } catch {
             print(error)
         }
+    }
+
+    func subscribe(url: String) async throws {
+        try await Notify.instance.subscribe(appDomain: url, account: importAccount.account)
+    }
+
+    func unsubscribe(topic: String) async throws {
+        try await Notify.instance.deleteSubscription(topic: topic)
     }
 }
