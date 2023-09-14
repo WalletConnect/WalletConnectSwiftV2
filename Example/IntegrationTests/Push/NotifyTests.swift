@@ -92,10 +92,11 @@ final class NotifyTests: XCTestCase {
     func testWalletCreatesSubscription() async {
         let expectation = expectation(description: "expects to create notify subscription")
 
-        walletNotifyClientA.newSubscriptionPublisher
-            .sink { [unowned self] subscription in
+        walletNotifyClientA.subscriptionsPublisher
+            .sink { [unowned self] subscriptions in
+                guard let subscription = subscriptions.first else {return}
                 Task(priority: .high) {
-                    try! await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
+                    try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
                     expectation.fulfill()
                 }
             }.store(in: &publishers)
@@ -155,25 +156,28 @@ final class NotifyTests: XCTestCase {
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
         let updateScope: Set<String> = ["alerts"]
+        expectation.assertForOverFulfill = false
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        walletNotifyClientA.newSubscriptionPublisher
-            .sink { [unowned self] subscription in
-                Task(priority: .high) {
-                    try! await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
-                }
-            }
-            .store(in: &publishers)
-
-        walletNotifyClientA.updateSubscriptionPublisher
-            .sink { [unowned self] subscription in
+        var didUpdate = false
+        walletNotifyClientA.subscriptionsPublisher
+            .sink { [unowned self] subscriptions in
+                guard let subscription = subscriptions.first else {return}
                 let updatedScope = Set(subscription.scope.filter{ $0.value.enabled == true }.keys)
-                XCTAssertEqual(updatedScope, updateScope)
-                Task(priority: .high) {
-                    try! await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
-                    expectation.fulfill()
+
+                if !didUpdate {
+                    didUpdate = true
+                    Task(priority: .high) {
+                        try await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
+                    }
+                }
+                if updateScope == updatedScope {
+                    Task(priority: .high) {
+                        try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
+                        expectation.fulfill()
+                    }
                 }
             }.store(in: &publishers)
 

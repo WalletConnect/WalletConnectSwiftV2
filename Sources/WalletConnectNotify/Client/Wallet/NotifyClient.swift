@@ -5,25 +5,12 @@ public class NotifyClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    /// publishes new subscriptions
-    public var newSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
-        return notifyStorage.newSubscriptionPublisher
-    }
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        return notifyStorage.deleteSubscriptionPublisher
-    }
-
     public var subscriptionsPublisher: AnyPublisher<[NotifySubscription], Never> {
         return notifyStorage.subscriptionsPublisher
     }
 
     public var notifyMessagePublisher: AnyPublisher<NotifyMessageRecord, Never> {
         return notifyMessageSubscriber.notifyMessagePublisher
-    }
-
-    public var updateSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
-        return notifyStorage.updateSubscriptionPublisher
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
