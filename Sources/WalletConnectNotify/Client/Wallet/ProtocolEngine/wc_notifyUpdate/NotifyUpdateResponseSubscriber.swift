@@ -36,31 +36,10 @@ private extension NotifyUpdateResponseSubscriber {
             responseOfType: NotifyUpdateResponsePayload.Wrapper.self,
             errorHandler: logger
         ) { [unowned self] payload in
+
+            let _ = try NotifyUpdateResponsePayload.decodeAndVerify(from: payload.response)
+
             logger.debug("Received Notify Update response")
-
-            let subscriptionTopic = payload.topic
-
-            let (requestPayload, requestClaims) = try NotifyUpdatePayload.decodeAndVerify(from: payload.request)
-            let (_, _) = try NotifyUpdateResponsePayload.decodeAndVerify(from: payload.response)
-
-            let scope = try await buildScope(selected: requestPayload.scope, appDomain: requestPayload.app.host)
-
-            guard let oldSubscription = notifyStorage.getSubscription(topic: subscriptionTopic) else {
-                logger.debug("NotifyUpdateResponseSubscriber Subscription does not exist")
-                return
-            }
-
-            notifyStorage.updateSubscription(oldSubscription, scope: scope, expiry: requestClaims.exp)
-
-            logger.debug("Updated Subscription")
-        }
-    }
-
-    func buildScope(selected: String, appDomain: String) async throws -> [String: ScopeValue] {
-        let selectedScope = selected.components(separatedBy: " ")
-        let availableScope = try await nofityConfigProvider.getSubscriptionScope(appDomain: appDomain)
-        return availableScope.reduce(into: [:]) {
-            $0[$1.name] = ScopeValue(description: $1.description, enabled: selectedScope.contains($1.name))
         }
     }
 }
