@@ -36,7 +36,7 @@ final class PairingTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
-            socketFactory: DefaultSocketFactory(),
+            socketFactory: WalletConnectSocketClientFactory(),
             logger: relayLogger)
 
         let networkingClient = NetworkingClientFactory.create(
