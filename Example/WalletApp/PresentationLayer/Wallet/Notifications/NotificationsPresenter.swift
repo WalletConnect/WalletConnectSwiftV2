@@ -8,6 +8,7 @@ final class NotificationsPresenter: ObservableObject {
     private var disposeBag = Set<AnyCancellable>()
 
     @Published var subscriptions: [SubscriptionsViewModel] = []
+    @Published var listings: [ListingViewModel] = []
 
     init(interactor: NotificationsInteractor, router: NotificationsRouter) {
         defer { setupInitialState() }
@@ -16,8 +17,31 @@ final class NotificationsPresenter: ObservableObject {
         
     }
 
-    func didPress(_ subscription: SubscriptionsViewModel) {
+    @MainActor
+    func fetch() async throws {
+        self.listings = try await interactor.getListings().map { ListingViewModel(listing: $0) }
+    }
+
+    func subscription(forListing listing: ListingViewModel) -> SubscriptionsViewModel? {
+        return subscriptions.first(where: { $0.url == listing.appDomain })
+    }
+
+    func subscribe(listing: ListingViewModel) async throws {
+        if let domain = listing.appDomain {
+            try await interactor.subscribe(domain: domain)
+        }
+    }
+
+    func unsubscribe(subscription: SubscriptionsViewModel) async throws {
+        try await interactor.unsubscribe(topic: subscription.subscription.topic)
+    }
+
+    func didPress(subscription: SubscriptionsViewModel) {
         router.presentNotifications(subscription: subscription.subscription)
+    }
+
+    func didPress(listing: ListingViewModel) {
+        
     }
 
     func setupInitialState() {
@@ -35,7 +59,7 @@ final class NotificationsPresenter: ObservableObject {
 
 extension NotificationsPresenter: SceneViewModel {
     var sceneTitle: String? {
-        return "Notifications"
+        return "Inbox"
     }
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
@@ -48,10 +72,8 @@ extension NotificationsPresenter: SceneViewModel {
 private extension NotificationsPresenter {
 
     func setupSubscriptions() {
-        self.subscriptions = interactor.getSubscriptions()
-            .map {
-                return SubscriptionsViewModel(subscription: $0)
-            }
+        self.subscriptions = interactor.getSubscriptions().map { SubscriptionsViewModel(subscription: $0) }
+
         interactor.subscriptionsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] notifySubscriptions in
