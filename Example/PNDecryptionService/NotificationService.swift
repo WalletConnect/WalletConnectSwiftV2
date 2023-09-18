@@ -15,7 +15,7 @@ class NotificationService: UNNotificationServiceExtension {
             let ciphertext = bestAttemptContent.userInfo["blob"] as! String
             NSLog("Push decryption, topic=%@", topic)
             do {
-                let service = NotifyDecryptionService()
+                let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 bestAttemptContent.title = pushMessage.title
                 bestAttemptContent.body = pushMessage.body
@@ -25,7 +25,7 @@ class NotificationService: UNNotificationServiceExtension {
             catch {
                 NSLog("Push decryption, error=%@", error.localizedDescription)
                 bestAttemptContent.title = ""
-                bestAttemptContent.body = "content not set"
+                bestAttemptContent.body = error.localizedDescription
             }
             contentHandler(bestAttemptContent)
         }

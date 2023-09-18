@@ -107,11 +107,15 @@ public class Serializer: Serializing {
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> (T, Data) {
+        var decryptedData = Data()
+        print(T.self)
         do {
-            let decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
+            decryptedData = try codec.decode(sealbox: sealbox, symmetricKey: symmetricKey)
             let decodedType = try JSONDecoder().decode(T.self, from: decryptedData)
             return (decodedType, decryptedData)
         } catch {
+            let str = String(decoding: decryptedData, as: UTF8.self)
+            print(str)
             logger.error("Failed to decode with error: \(error)")
             throw error
         }

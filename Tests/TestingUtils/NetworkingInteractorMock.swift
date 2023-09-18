@@ -6,6 +6,9 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 public class NetworkingInteractorMock: NetworkInteracting {
+
+    private var publishers = Set<AnyCancellable>()
+
     private(set) var subscriptions: [String] = []
     private(set) var unsubscriptions: [String] = []
 
@@ -46,6 +49,12 @@ public class NetworkingInteractorMock: NetworkInteracting {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
+    private let errorPublisherSubject = PassthroughSubject<Error, Never>()
+
+    public var errorPublisher: AnyPublisher<Error, Never> {
+        return errorPublisherSubject.eraseToAnyPublisher()
+    }
+
     // TODO: Avoid copy paste from NetworkInteractor
     public func requestSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<Request>, Never> {
         return requestPublisher
@@ -84,6 +93,45 @@ public class NetworkingInteractorMock: NetworkInteracting {
                 return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
             .eraseToAnyPublisher()
+    }
+
+    // TODO: Avoid copy paste from NetworkInteractor
+    public func subscribeOnRequest<RequestParams: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: RequestParams.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
+    ) {
+        requestSubscription(on: protocolMethod)
+            .sink { (payload: RequestSubscriptionPayload<RequestParams>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorHandler?.handle(error: error)
+                    }
+                }
+            }.store(in: &publishers)
+    }
+
+    // TODO: Avoid copy paste from NetworkInteractor
+    public func subscribeOnResponse<Request: Codable, Response: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
+    ) {
+        responseSubscription(on: protocolMethod)
+            .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorHandler?.handle(error: error)
+                    }
+                }
+            }.store(in: &publishers)
     }
 
     public func subscribe(topic: String) async throws {

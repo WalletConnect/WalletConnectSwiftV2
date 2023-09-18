@@ -12,17 +12,17 @@ class NotifySubscribeRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
-    private let webDidResolver: WebDidResolver
+    private let webDidResolver: NotifyWebDidResolver
     private let dappsMetadataStore: CodableStore<AppMetadata>
-    private let subscriptionScopeProvider: SubscriptionScopeProvider
+    private let notifyConfigProvider: NotifyConfigProvider
 
     init(keyserverURL: URL,
          networkingInteractor: NetworkInteracting,
          identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         webDidResolver: WebDidResolver,
-         subscriptionScopeProvider: SubscriptionScopeProvider,
+         webDidResolver: NotifyWebDidResolver,
+         notifyConfigProvider: NotifyConfigProvider,
          dappsMetadataStore: CodableStore<AppMetadata>
     ) {
         self.keyserverURL = keyserverURL
@@ -31,17 +31,17 @@ class NotifySubscribeRequester {
         self.logger = logger
         self.kms = kms
         self.webDidResolver = webDidResolver
-        self.subscriptionScopeProvider = subscriptionScopeProvider
         self.dappsMetadataStore = dappsMetadataStore
+        self.notifyConfigProvider = notifyConfigProvider
     }
 
-    @discardableResult func subscribe(metadata: AppMetadata, account: Account, onSign: @escaping SigningCallback) async throws -> NotifySubscriptionPayload.Wrapper {
+    @discardableResult func subscribe(appDomain: String, account: Account) async throws -> NotifySubscriptionPayload.Wrapper {
 
-        let dappUrl = metadata.url
+        logger.debug("Subscribing for Notify, dappUrl: \(appDomain)")
 
-        logger.debug("Subscribing for Notify")
+        let metadata = try await notifyConfigProvider.getMetadata(appDomain: appDomain)
 
-        let peerPublicKey = try await webDidResolver.resolvePublicKey(dappUrl: metadata.url)
+        let peerPublicKey = try await webDidResolver.resolveAgreementKey(domain: metadata.url)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
@@ -60,11 +60,11 @@ class NotifySubscribeRequester {
         let subscriptionAuthWrapper = try await createJWTWrapper(
             dappPubKey: DIDKey(did: peerPublicKey.did),
             subscriptionAccount: account,
-            dappUrl: dappUrl
+            appDomain: appDomain
         )
         let request = RPCRequest(method: protocolMethod.method, params: subscriptionAuthWrapper)
 
-        logger.debug("NotifySubscribeRequester: subscribing to response topic: \(responseTopic)")
+        logger.debug("Subscribing to response topic: \(responseTopic)")
 
         try await networkingInteractor.subscribe(topic: responseTopic)
 
@@ -79,10 +79,11 @@ class NotifySubscribeRequester {
         return keys
     }
 
-    private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, dappUrl: String) async throws -> NotifySubscriptionPayload.Wrapper {
-        let types = try await subscriptionScopeProvider.getSubscriptionScope(dappUrl: dappUrl)
+    private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, appDomain: String) async throws -> NotifySubscriptionPayload.Wrapper {
+        let types = try await notifyConfigProvider.getSubscriptionScope(appDomain: appDomain)
         let scope = types.map{$0.name}.joined(separator: " ")
-        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, dappUrl: dappUrl, scope: scope)
+        let app = DIDWeb(host: appDomain)
+        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, app: app, scope: scope)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

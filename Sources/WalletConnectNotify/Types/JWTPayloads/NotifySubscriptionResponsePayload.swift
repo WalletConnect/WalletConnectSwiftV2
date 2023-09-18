@@ -1,26 +1,26 @@
 import Foundation
 
-struct NotifyUpdateResponsePayload: JWTClaimsCodable {
+struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// timestamp when jwt was issued
         let iat: UInt64
         /// timestamp when jwt must expire
         let exp: UInt64
-        /// Description of action intent. Must be equal to "notify_update_response"
+        /// Description of action intent. Must be equal to "notify_subscription_response"
         let act: String?
 
-        /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
+        /// `did:key` of an identity key. Allows for the resolution of which Notify server was used.
         let iss: String
-        /// `did:key` of an identity key. Enables to resolve attached blockchain account.
+        /// `did:key` of an identity key. Allows for the resolution of the attached blockchain account.
         let aud: String
-        /// Hash of the new subscription payload
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
         /// Dapp's domain url
         let app: String
 
         static var action: String? {
-            return "notify_update_response"
+            return "notify_subscription_response"
         }
     }
 
@@ -36,13 +36,13 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
         }
     }
 
+    let account: Account
     let selfPubKey: DIDKey
-    let subscriptionHash: String
     let app: String
 
     init(claims: Claims) throws {
+        self.account = try Account(DIDPKHString: claims.sub)
         self.selfPubKey = try DIDKey(did: claims.aud)
-        self.subscriptionHash = claims.sub
         self.app = claims.app
     }
 
@@ -53,7 +53,7 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
             act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
-            sub: subscriptionHash,
+            sub: account.did,
             app: app
         )
     }

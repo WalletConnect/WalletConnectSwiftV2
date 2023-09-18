@@ -1,6 +1,6 @@
 import UIKit
-import Web3Inbox
 import Combine
+import WalletConnectNotify
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -29,7 +29,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.set(deviceTokenString.joined(), forKey: "deviceToken")
 
         Task(priority: .high) {            
-            try await Web3Inbox.instance.register(deviceToken: deviceToken)
+            try await Notify.instance.register(deviceToken: deviceToken)
         }
     }
 

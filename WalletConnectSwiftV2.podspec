@@ -78,7 +78,7 @@ Pod::Spec.new do |spec|
     ss.source_files = 'Sources/Web3Wallet/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectSign'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectAuth'
-    ss.dependency 'WalletConnectSwiftV2/WalletConnectEcho'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectPush'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectVerify'
   end
 
@@ -130,8 +130,8 @@ Pod::Spec.new do |spec|
     ss.dependency 'WalletConnectSwiftV2/WalletConnectJWT'
   end
 
-  spec.subspec 'WalletConnectEcho' do |ss|
-    ss.source_files = 'Sources/WalletConnectEcho/**/*.{h,m,swift}'
+  spec.subspec 'WalletConnectPush' do |ss|
+    ss.source_files = 'Sources/WalletConnectPush/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectNetworking'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectJWT'
   end

@@ -59,6 +59,10 @@ public class KeyManagementService: KeyManagementServiceProtocol {
         try keychain.add(agreementSecret, forKey: topic)
     }
 
+    public func setTopic(_ topic: String, for key: String) throws {
+        try keychain.add(topic, forKey: key)
+    }
+
     public func getSymmetricKey(for topic: String) -> SymmetricKey? {
         do {
             return try keychain.read(key: topic) as SymmetricKey
@@ -82,6 +86,14 @@ public class KeyManagementService: KeyManagementServiceProtocol {
             return nil
         } catch {
             throw error
+        }
+    }
+
+    public func getTopic(for key: String) -> String? {
+        do {
+            return try keychain.read(key: key) as String
+        } catch {
+            return nil
         }
     }
 

@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 public class NetworkingInteractor: NetworkInteracting {
+    private var tasks = Task.DisposeBag()
     private var publishers = Set<AnyCancellable>()
     private let relayClient: RelayClient
     private let serializer: Serializing
@@ -82,6 +83,43 @@ public class NetworkingInteractor: NetworkInteracting {
     public func batchUnsubscribe(topics: [String]) async throws {
         try await relayClient.batchUnsubscribe(topics: topics)
         rpcHistory.deleteAll(forTopics: topics)
+    }
+
+    public func subscribeOnRequest<RequestParams: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: RequestParams.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (RequestSubscriptionPayload<RequestParams>) async throws -> Void
+    ) {
+        requestSubscription(on: protocolMethod)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<RequestParams>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorHandler?.handle(error: error)
+                    }
+                }.store(in: &tasks)
+            }.store(in: &publishers)
+    }
+
+    public func subscribeOnResponse<Request: Codable, Response: Codable>(
+        protocolMethod: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        errorHandler: ErrorHandler?,
+        subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
+    ) {
+        responseSubscription(on: protocolMethod)
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Request, Response>) in
+                Task(priority: .high) {
+                    do {
+                        try await subscription(payload)
+                    } catch {
+                        errorHandler?.handle(error: error)
+                    }
+                }.store(in: &tasks)
+            }.store(in: &publishers)
     }
 
     public func requestSubscription<RequestParams: Codable>(on request: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {

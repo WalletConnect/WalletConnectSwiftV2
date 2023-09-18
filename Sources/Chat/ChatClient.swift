@@ -89,10 +89,16 @@ public class ChatClient {
     @discardableResult
     public func register(account: Account,
         isPrivate: Bool = false,
+        domain: String,
         onSign: @escaping SigningCallback
     ) async throws -> String {
-        let publicKey = try await identityClient.register(account: account, onSign: onSign)
-
+        let publicKey = try await identityClient.register(
+            account: account,
+            domain: domain,
+            statement: "statement",
+            resources: ["https://keys.walletconnect.com"],
+            onSign: onSign
+        )
         if !syncRegisterService.isRegistered(account: account) {
             try await chatStorage.initializeHistory(account: account)
             try await syncRegisterService.register(account: account, onSign: onSign)

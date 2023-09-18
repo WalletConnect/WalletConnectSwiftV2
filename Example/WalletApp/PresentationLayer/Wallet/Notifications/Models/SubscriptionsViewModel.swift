@@ -8,8 +8,8 @@ struct SubscriptionsViewModel: Identifiable {
         return subscription.topic
     }
 
-    var imageUrl: String {
-        return subscription.metadata.url
+    var imageUrl: URL? {
+        return try? subscription.metadata.icons.first?.asURL()
     }
 
     var title: String {
@@ -18,5 +18,9 @@ struct SubscriptionsViewModel: Identifiable {
 
     var subtitle: String {
         return subscription.metadata.description
+    }
+
+    var url: String {
+        return subscription.metadata.url
     }
 }

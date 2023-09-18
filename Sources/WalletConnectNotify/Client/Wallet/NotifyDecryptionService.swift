@@ -10,8 +10,8 @@ public class NotifyDecryptionService {
         self.serializer = serializer
     }
 
-    public init() {
-        let keychainStorage = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+    public init(groupIdentifier: String) {
+        let keychainStorage = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
         let kms = KeyManagementService(keychain: keychainStorage)
         self.serializer = Serializer(kms: kms, logger: ConsoleLogger(prefix: "🔐", loggingLevel: .off))
     }

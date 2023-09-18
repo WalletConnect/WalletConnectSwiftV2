@@ -2,12 +2,12 @@ import Foundation
 
 public struct NotifyClientFactory {
 
-    public static func create(networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, crypto: CryptoProvider) -> NotifyClient {
+    public static func create(groupIdentifier: String, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, crypto: CryptoProvider) -> NotifyClient {
         let logger = ConsoleLogger(prefix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        let groupKeychainService = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+        let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
 
         return NotifyClientFactory.create(
             keyserverURL: keyserverURL,
@@ -39,40 +39,47 @@ public struct NotifyClientFactory {
         let notifyStorage = NotifyStorage(subscriptionStore: subscriptionStore, messagesStore: messagesStore)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
-        let webDidResolver = WebDidResolver()
-        let deleteNotifySubscriptionService = DeleteNotifySubscriptionService(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
+        let webDidResolver = NotifyWebDidResolver()
+        let deleteNotifySubscriptionRequester = DeleteNotifySubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
         let resubscribeService = NotifyResubscribeService(networkInteractor: networkInteractor, notifyStorage: notifyStorage, logger: logger)
 
         let dappsMetadataStore = CodableStore<AppMetadata>(defaults: keyValueStorage, identifier: NotifyStorageIdntifiers.dappsMetadataStore)
-        let subscriptionScopeProvider = SubscriptionScopeProvider()
+        let notifyConfigProvider = NotifyConfigProvider()
 
-        let notifySubscribeRequester = NotifySubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver, subscriptionScopeProvider: subscriptionScopeProvider, dappsMetadataStore: dappsMetadataStore)
+        let notifySubscribeRequester = NotifySubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver, notifyConfigProvider: notifyConfigProvider, dappsMetadataStore: dappsMetadataStore)
 
-        let notifySubscribeResponseSubscriber = NotifySubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, dappsMetadataStore: dappsMetadataStore, subscriptionScopeProvider: subscriptionScopeProvider)
+        let notifySubscribeResponseSubscriber = NotifySubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, dappsMetadataStore: dappsMetadataStore, notifyConfigProvider: notifyConfigProvider)
 
-        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, webDidResolver: webDidResolver, identityClient: identityClient, networkingInteractor: networkInteractor, subscriptionScopeProvider: subscriptionScopeProvider, logger: logger, notifyStorage: notifyStorage)
+        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, webDidResolver: webDidResolver, identityClient: identityClient, networkingInteractor: networkInteractor, notifyConfigProvider: notifyConfigProvider, logger: logger, notifyStorage: notifyStorage)
 
-        let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, subscriptionScopeProvider: subscriptionScopeProvider, notifyStorage: notifyStorage)
-
-        let deleteNotifySubscriptionSubscriber = DeleteNotifySubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage)
+        let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, notifyConfigProvider: notifyConfigProvider, notifyStorage: notifyStorage)
 
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
+
+        let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver)
+        let notifySubscriptionsBuilder = NotifySubscriptionsBuilder(notifyConfigProvider: notifyConfigProvider)
+        let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, groupKeychainStorage: groupKeychainStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
+        let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, kms: kms, identityClient: identityClient, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
+
+        let identityService = NotifyIdentityService(keyserverURL: keyserverURL, identityClient: identityClient, logger: logger)
 
         return NotifyClient(
             logger: logger,
             kms: kms,
-            identityClient: identityClient,
+            identityService: identityService,
             pushClient: pushClient,
             notifyMessageSubscriber: notifyMessageSubscriber,
             notifyStorage: notifyStorage,
-            deleteNotifySubscriptionService: deleteNotifySubscriptionService,
+            deleteNotifySubscriptionRequester: deleteNotifySubscriptionRequester,
             resubscribeService: resubscribeService,
             notifySubscribeRequester: notifySubscribeRequester,
             notifySubscribeResponseSubscriber: notifySubscribeResponseSubscriber,
-            deleteNotifySubscriptionSubscriber: deleteNotifySubscriptionSubscriber,
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
-            subscriptionsAutoUpdater: subscriptionsAutoUpdater
+            subscriptionsAutoUpdater: subscriptionsAutoUpdater,
+            notifyWatchSubscriptionsRequester: notifyWatchSubscriptionsRequester,
+            notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber,
+            notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber
         )
     }
 }
