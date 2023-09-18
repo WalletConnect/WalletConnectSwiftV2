@@ -27,6 +27,7 @@ inputs:
   gm-dapp-host:
     description: 'GM DApp Host'
     required: false
+    default: 'gm.walletconnect.com'
   js-client-api-host:
     description: 'JS Client Api Host'
     required: false
