@@ -16,7 +16,7 @@ final class NotifyTests: XCTestCase {
 
     var walletNotifyClientA: NotifyClient!
 
-    let gmDappDomain = "gm.walletconnect.com"
+    let gmDappDomain = InputConfig.gmDappHost
 
     let pk = try! EthereumPrivateKey()
 
