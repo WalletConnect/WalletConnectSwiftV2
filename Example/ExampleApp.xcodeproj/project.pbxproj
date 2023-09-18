@@ -160,6 +160,7 @@
 		A58EC616299D5C6400F3452A /* PlainButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58EC615299D5C6400F3452A /* PlainButton.swift */; };
 		A58EC618299D665A00F3452A /* Web3Inbox in Frameworks */ = {isa = PBXBuildFile; productRef = A58EC617299D665A00F3452A /* Web3Inbox */; };
 		A59CF4F6292F83D50031A42F /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
+		A59D25EE2AB3672700D7EA3A /* AsyncButton in Frameworks */ = {isa = PBXBuildFile; productRef = A59D25ED2AB3672700D7EA3A /* AsyncButton */; };
 		A59F877628B5462900A9CD80 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A59F877528B5462900A9CD80 /* WalletConnectAuth */; };
 		A59FAEC928B7B93A002BB66F /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A59FAEC828B7B93A002BB66F /* Web3 */; };
 		A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
@@ -197,6 +198,12 @@
 		A5C2022B287EB89A007E3188 /* WelcomeInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */; };
 		A5C5153329BB7A6A004210BA /* InviteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C5153229BB7A6A004210BA /* InviteType.swift */; };
 		A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = A5C8BE84292FE20B006CC85C /* Web3 */; };
+		A5D610C82AB31EE800C20083 /* SegmentedPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610C72AB31EE800C20083 /* SegmentedPicker.swift */; };
+		A5D610CA2AB3249100C20083 /* ListingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610C92AB3249100C20083 /* ListingViewModel.swift */; };
+		A5D610CE2AB3594100C20083 /* ListingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610CD2AB3594100C20083 /* ListingsAPI.swift */; };
+		A5D610D02AB35AD500C20083 /* ListingsNetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610CF2AB35AD500C20083 /* ListingsNetworkService.swift */; };
+		A5D610D22AB35B1100C20083 /* Listings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610D12AB35B1100C20083 /* Listings.swift */; };
+		A5D610D42AB35BED00C20083 /* FailableDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D610D32AB35BED00C20083 /* FailableDecodable.swift */; };
 		A5D85228286333E300DAF5C3 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5D85227286333E300DAF5C3 /* Starscream */; };
 		A5E03DF52864651200888481 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = A5E03DF42864651200888481 /* Starscream */; };
 		A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E03DF9286465C700888481 /* SignClientTests.swift */; };
@@ -526,6 +533,12 @@
 		A5C20228287EB34C007E3188 /* AccountStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStorage.swift; sourceTree = "<group>"; };
 		A5C2022A287EB89A007E3188 /* WelcomeInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeInteractor.swift; sourceTree = "<group>"; };
 		A5C5153229BB7A6A004210BA /* InviteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteType.swift; sourceTree = "<group>"; };
+		A5D610C72AB31EE800C20083 /* SegmentedPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedPicker.swift; sourceTree = "<group>"; };
+		A5D610C92AB3249100C20083 /* ListingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingViewModel.swift; sourceTree = "<group>"; };
+		A5D610CD2AB3594100C20083 /* ListingsAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingsAPI.swift; sourceTree = "<group>"; };
+		A5D610CF2AB35AD500C20083 /* ListingsNetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingsNetworkService.swift; sourceTree = "<group>"; };
+		A5D610D12AB35B1100C20083 /* Listings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listings.swift; sourceTree = "<group>"; };
+		A5D610D32AB35BED00C20083 /* FailableDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FailableDecodable.swift; sourceTree = "<group>"; };
 		A5E03DED286464DB00888481 /* IntegrationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IntegrationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E03DF9286465C700888481 /* SignClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignClientTests.swift; sourceTree = "<group>"; };
 		A5E03DFC286465D100888481 /* Stubs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stubs.swift; sourceTree = "<group>"; };
@@ -698,6 +711,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A573C53D29EC366500E3CBFD /* HDWalletKit in Frameworks */,
+				A59D25EE2AB3672700D7EA3A /* AsyncButton in Frameworks */,
 				C56EE27D293F56F8004840D1 /* WalletConnectChat in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
 				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
@@ -825,6 +839,7 @@
 			isa = PBXGroup;
 			children = (
 				847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */,
+				A5D610C92AB3249100C20083 /* ListingViewModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1410,6 +1425,24 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		A5D610CB2AB358ED00C20083 /* BusinessLayer */ = {
+			isa = PBXGroup;
+			children = (
+				A5D610CC2AB3592F00C20083 /* ListingsSertice */,
+			);
+			path = BusinessLayer;
+			sourceTree = "<group>";
+		};
+		A5D610CC2AB3592F00C20083 /* ListingsSertice */ = {
+			isa = PBXGroup;
+			children = (
+				A5D610CD2AB3594100C20083 /* ListingsAPI.swift */,
+				A5D610CF2AB35AD500C20083 /* ListingsNetworkService.swift */,
+				A5D610D12AB35B1100C20083 /* Listings.swift */,
+			);
+			path = ListingsSertice;
+			sourceTree = "<group>";
+		};
 		A5E03DEE286464DB00888481 /* IntegrationTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -1528,6 +1561,7 @@
 				C56EE25C293F56D6004840D1 /* Common */,
 				C56EE27E293F5756004840D1 /* ApplicationLayer */,
 				C56EE29E293F577B004840D1 /* PresentationLayer */,
+				A5D610CB2AB358ED00C20083 /* BusinessLayer */,
 				C56EE2A0293F6B10004840D1 /* Other */,
 			);
 			path = WalletApp;
@@ -1696,6 +1730,8 @@
 				C56EE2A2293F6BAF004840D1 /* UIPasteboardWrapper.swift */,
 				C55D349A2965BC2F0004314A /* TagsView.swift */,
 				A74D32B92A1E25AD00CB8536 /* QueryParameters.swift */,
+				A5D610C72AB31EE800C20083 /* SegmentedPicker.swift */,
+				A5D610D32AB35BED00C20083 /* FailableDecodable.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1936,6 +1972,7 @@
 				8487A9452A836C3F0003D5AF /* Sentry */,
 				A5B6C0F42A6EAB2800927332 /* WalletConnectNotify */,
 				84943C7C2A9BA328007EBAC2 /* Mixpanel */,
+				A59D25ED2AB3672700D7EA3A /* AsyncButton */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -2309,9 +2346,11 @@
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
 				A57879722A4F225E00F8D10B /* ImportAccount.swift in Sources */,
 				C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */,
+				A5D610C82AB31EE800C20083 /* SegmentedPicker.swift in Sources */,
 				C56EE271293F56D7004840D1 /* View.swift in Sources */,
 				C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */,
 				C56EE24D293F566D004840D1 /* WalletRouter.swift in Sources */,
+				A5D610D02AB35AD500C20083 /* ListingsNetworkService.swift in Sources */,
 				C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */,
 				C55D348A295DD8CA0004314A /* PasteUriPresenter.swift in Sources */,
 				A51811A22A52E83100A52B15 /* SettingsInteractor.swift in Sources */,
@@ -2359,10 +2398,13 @@
 				C55D3494295DFA750004314A /* WelcomePresenter.swift in Sources */,
 				C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */,
 				A57879712A4EDC8100F8D10B /* TextFieldView.swift in Sources */,
+				A5D610CA2AB3249100C20083 /* ListingViewModel.swift in Sources */,
 				84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */,
+				A5D610CE2AB3594100C20083 /* ListingsAPI.swift in Sources */,
 				84943C7F2A9BA48C007EBAC2 /* ProfilingService.swift in Sources */,
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
+				A5D610D42AB35BED00C20083 /* FailableDecodable.swift in Sources */,
 				847BD1E5298A806800076C90 /* NotificationsPresenter.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
@@ -2378,6 +2420,7 @@
 				A51811A32A52E83100A52B15 /* SettingsView.swift in Sources */,
 				A57879732A4F248200F8D10B /* AccountStorage.swift in Sources */,
 				C55D34AF2965FB750004314A /* SessionProposalPresenter.swift in Sources */,
+				A5D610D22AB35B1100C20083 /* Listings.swift in Sources */,
 				C5F32A302954816100A6476E /* ConnectionDetailsInteractor.swift in Sources */,
 				847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */,
 			);
@@ -2907,7 +2950,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2945,7 +2988,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3230,6 +3273,11 @@
 		A58EC617299D665A00F3452A /* Web3Inbox */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Web3Inbox;
+		};
+		A59D25ED2AB3672700D7EA3A /* AsyncButton */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A58EC60F299D57B800F3452A /* XCRemoteSwiftPackageReference "swiftui-async-button" */;
+			productName = AsyncButton;
 		};
 		A59F877528B5462900A9CD80 /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;
