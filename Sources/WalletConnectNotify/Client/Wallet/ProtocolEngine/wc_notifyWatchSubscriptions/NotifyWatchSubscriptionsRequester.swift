@@ -9,7 +9,7 @@ class NotifyWatchSubscriptionsRequester {
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
-    private let notifyServerUrl = "dev.notify.walletconnect.com"
+    private let notifyServerUrl = "notify.walletconnect.com"
     private var account: Account?
     private var publishers = Set<AnyCancellable>()
 

@@ -21,8 +21,7 @@ struct ListingViewModel: Identifiable {
     }
 
     var appDomain: String? {
-        // TODO: Remove after gm release
-        let url = listing.homepage == "https://notify.gm.walletconnect.com" ? "https://dev.gm.walletconnect.com" : listing.homepage
+        let url = listing.homepage
         return URL(string: url)?.host
     }
 }
