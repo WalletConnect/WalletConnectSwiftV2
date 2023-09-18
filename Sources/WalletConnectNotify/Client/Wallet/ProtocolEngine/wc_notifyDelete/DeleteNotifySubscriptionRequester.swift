@@ -1,13 +1,13 @@
 import Foundation
 
-class DeleteNotifySubscriptionService {
+class DeleteNotifySubscriptionRequester {
     enum Errors: Error {
         case notifySubscriptionNotFound
     }
     private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let webDidResolver: WebDidResolver
+    private let webDidResolver: NotifyWebDidResolver
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
@@ -16,7 +16,7 @@ class DeleteNotifySubscriptionService {
         keyserver: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        webDidResolver: WebDidResolver,
+        webDidResolver: NotifyWebDidResolver,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
         notifyStorage: NotifyStorage
@@ -37,12 +37,12 @@ class DeleteNotifySubscriptionService {
         else { throw Errors.notifySubscriptionNotFound}
 
         let protocolMethod = NotifyDeleteProtocolMethod()
-        let dappPubKey = try await webDidResolver.resolvePublicKey(dappUrl: subscription.metadata.url)
+        let dappAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: subscription.metadata.url)
 
         let wrapper = try createJWTWrapper(
-            dappPubKey: DIDKey(rawData: dappPubKey.rawRepresentation),
+            dappPubKey: DIDKey(rawData: dappAuthenticationKey),
             reason: NotifyDeleteParams.userDisconnected.message,
-            app: subscription.metadata.url,
+            app: DIDWeb(host: subscription.metadata.url),
             account: subscription.account
         )
 
@@ -58,12 +58,16 @@ class DeleteNotifySubscriptionService {
 
         kms.deleteSymmetricKey(for: topic)
     }
+
+
+
+    
 }
 
-private extension DeleteNotifySubscriptionService {
+private extension DeleteNotifySubscriptionRequester {
 
-    func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: String, account: Account) throws -> NotifyDeletePayload.Wrapper {
-        let jwtPayload = NotifyDeletePayload(keyserver: keyserver, dappPubKey: dappPubKey, reason: reason, app: app)
+    func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: DIDWeb, account: Account) throws -> NotifyDeletePayload.Wrapper {
+        let jwtPayload = NotifyDeletePayload(account: account, keyserver: keyserver, dappPubKey: dappPubKey, app: app)
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: account

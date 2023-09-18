@@ -25,6 +25,10 @@ public struct SymmetricKey: Equatable {
         try self.init(rawRepresentation: data)
     }
 
+    public func derivedTopic() -> String {
+        rawRepresentation.sha256().toHexString()
+    }
+
 }
 
 extension SymmetricKey: GenericPasswordConvertible {

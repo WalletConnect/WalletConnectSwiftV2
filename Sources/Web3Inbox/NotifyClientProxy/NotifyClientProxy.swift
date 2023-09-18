@@ -25,7 +25,7 @@ final class NotifyClientProxy {
             try await respond(request: request)
         case .subscribe:
             let params = try parse(SubscribeRequest.self, params: request.params)
-            try await client.subscribe(metadata: params.metadata, account: params.account)
+            try await client.subscribe(appDomain: appDomain, account: params.account)
             try await respond(request: request)
         case .getActiveSubscriptions: 
             let subscriptions = client.getActiveSubscriptions()
@@ -44,7 +44,7 @@ final class NotifyClientProxy {
             try await respond(request: request)
         case .register:
             let params = try parse(RegisterRequest.self, params: request.params)
-            try await client.register(account: params.account, onSign: onSign)
+            try await client.register(account: params.account, domain: params.domain, isLimited: params.isLimited, onSign: onSign)
             try await respond(request: request)
         }
     }
@@ -73,7 +73,7 @@ private extension NotifyClientProxy {
     }
 
     struct SubscribeRequest: Codable {
-        let metadata: AppMetadata
+        let appDomain: String
         let account: Account
     }
 
@@ -91,6 +91,8 @@ private extension NotifyClientProxy {
 
     struct RegisterRequest: Codable {
         let account: Account
+        let domain: String
+        let isLimited: Bool
     }
 
     func parse<Request: Codable>(_ type: Request.Type, params: AnyCodable?) throws -> Request {

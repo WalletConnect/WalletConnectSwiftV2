@@ -25,7 +25,7 @@ class NotificationService: UNNotificationServiceExtension {
             catch {
                 NSLog("Push decryption, error=%@", error.localizedDescription)
                 bestAttemptContent.title = ""
-                bestAttemptContent.body = "content not set"
+                bestAttemptContent.body = error.localizedDescription
             }
             contentHandler(bestAttemptContent)
         }

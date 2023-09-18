@@ -33,17 +33,18 @@ class NotifyMessageSubscriber {
             logger.debug("Received Notify Message on topic: \(payload.topic)", properties: ["topic": payload.topic])
 
             let (messagePayload, claims) = try NotifyMessagePayload.decodeAndVerify(from: payload.request)
-            logger.debug("Decoded Notify Message: \(payload.topic)", properties: ["topic": payload.topic, "messageBody": messagePayload.message.body, "messageTitle": messagePayload.message.title, "publishedAt": payload.publishedAt.description, "id": payload.id.string])
-            let dappPubKey = try DIDKey(did: claims.iss)
-            let messageData = try JSONEncoder().encode(messagePayload.message)
 
+            logger.debug("Decoded Notify Message: \(payload.topic)", properties: ["topic": payload.topic, "messageBody": messagePayload.message.body, "messageTitle": messagePayload.message.title, "publishedAt": payload.publishedAt.description, "id": payload.id.string])
+
+            let dappPubKey = try DIDKey(did: claims.iss)
             let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
             notifyStorage.setMessage(record)
             notifyMessagePublisherSubject.send(record)
 
             let receiptPayload = NotifyMessageReceiptPayload(
-                keyserver: keyserver, dappPubKey: dappPubKey,
-                messageHash: crypto.keccak256(messageData).toHexString(),
+                account: messagePayload.account,
+                keyserver: keyserver,
+                dappPubKey: dappPubKey,
                 app: messagePayload.app
             )
 
