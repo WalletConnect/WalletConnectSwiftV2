@@ -188,7 +188,6 @@ final class NotifyTests: XCTestCase {
         let subscribeExpectation = expectation(description: "creates notify subscription")
         let messageExpectation = expectation(description: "receives a notify message")
         let notifyMessage = NotifyMessage.stub()
-
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
