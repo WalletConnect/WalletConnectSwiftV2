@@ -3,6 +3,7 @@ public struct VerifyContext: Equatable, Hashable, Codable {
         case unknown
         case valid
         case invalid
+        case scam
     }
     
     public let origin: String?

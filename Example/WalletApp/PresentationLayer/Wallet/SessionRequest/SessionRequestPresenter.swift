@@ -9,7 +9,7 @@ final class SessionRequestPresenter: ObservableObject {
     private let importAccount: ImportAccount
     
     let sessionRequest: Request
-    let verified: Bool?
+    let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
         return String(describing: sessionRequest.params.value)
@@ -32,7 +32,7 @@ final class SessionRequestPresenter: ObservableObject {
         self.router = router
         self.sessionRequest = sessionRequest
         self.importAccount = importAccount
-        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
+        self.validationStatus = context?.validation
     }
 
     @MainActor

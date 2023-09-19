@@ -246,12 +246,12 @@ private extension SessionEngine {
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
-                let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
-                let verifyContext = verifyClient.createVerifyContext(origin: origin, domain: session.peerParticipant.metadata.url)
+                let response = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let verifyContext = verifyClient.createVerifyContext(origin: response.origin, domain: session.peerParticipant.metadata.url, isScam: response.isScam)
                 verifyContextStore.set(verifyContext, forKey: request.id.string)
                 onSessionRequest?(request, verifyContext)
             } catch {
-                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: session.peerParticipant.metadata.url)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: session.peerParticipant.metadata.url, isScam: nil)
                 verifyContextStore.set(verifyContext, forKey: request.id.string)
                 onSessionRequest?(request, verifyContext)
                 return
