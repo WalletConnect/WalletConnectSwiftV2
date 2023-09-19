@@ -13,11 +13,32 @@ final class NotifyPreferencesPresenter: ObservableObject {
         return SubscriptionsViewModel(subscription: subscription)
     }
 
+    var preferences: [String] {
+        return subscriptionViewModel.scope.keys.sorted()
+    }
+
+    var isUpdateDisabled: Bool {
+        return update == subscription.scope
+    }
+
+    @Published var update: SubscriptionScope = [:]
+
     init(subscription: NotifySubscription, interactor: NotifyPreferencesInteractor, router: NotifyPreferencesRouter) {
         defer { setupInitialState() }
         self.subscription = subscription
         self.interactor = interactor
         self.router = router
+    }
+
+    @MainActor
+    func updateDidPress() async throws {
+        let scope = update
+            .filter { $0.value.enabled }
+            .map { $0.key }
+
+        try await interactor.updatePreferences(subscription: subscription, scope: Set(scope))
+
+        router.dismiss()
     }
 }
 
@@ -32,6 +53,6 @@ extension NotifyPreferencesPresenter: SceneViewModel {
 private extension NotifyPreferencesPresenter {
 
     func setupInitialState() {
-
+        update = subscription.scope
     }
 }

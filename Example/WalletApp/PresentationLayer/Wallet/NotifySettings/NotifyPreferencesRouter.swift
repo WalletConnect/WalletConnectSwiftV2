@@ -9,4 +9,8 @@ final class NotifyPreferencesRouter {
     init(app: Application) {
         self.app = app
     }
+
+    func dismiss() {
+        viewController.dismiss()
+    }
 }

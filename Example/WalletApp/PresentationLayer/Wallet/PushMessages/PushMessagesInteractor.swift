@@ -12,6 +12,10 @@ final class PushMessagesInteractor {
     var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
         return Notify.instance.messagesPublisher(topic: subscription.topic)
     }
+
+    var subscriptionPublisher: AnyPublisher<[NotifySubscription], Never> {
+        return Notify.instance.subscriptionsPublisher
+    }
     
     func getPushMessages() -> [NotifyMessageRecord] {
         return Notify.instance.getMessageHistory(topic: subscription.topic)

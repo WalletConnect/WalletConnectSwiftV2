@@ -1,6 +1,8 @@
 import Foundation
 import WalletConnectNotify
 
+typealias SubscriptionScope = [String: ScopeValue]
+
 struct SubscriptionsViewModel: Identifiable {
     let subscription: NotifySubscription
 
@@ -26,5 +28,9 @@ struct SubscriptionsViewModel: Identifiable {
 
     var domain: String {
         return subscription.metadata.url
+    }
+
+    var scope: SubscriptionScope {
+        return subscription.scope
     }
 }

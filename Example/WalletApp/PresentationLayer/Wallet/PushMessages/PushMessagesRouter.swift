@@ -17,7 +17,7 @@ final class PushMessagesRouter {
 
     func presentPreferences(subscription: NotifySubscription) {
         let controller = NotifyPreferencesModule.create(app: app, subscription: subscription)
-        controller.sheetPresentationController?.detents = [.medium()]
+        controller.sheetPresentationController?.detents = [.custom(resolver: { _ in UIScreen.main.bounds.height * 2/3 })]
         controller.sheetPresentationController?.prefersGrabberVisible = true
         controller.present(from: viewController)
     }

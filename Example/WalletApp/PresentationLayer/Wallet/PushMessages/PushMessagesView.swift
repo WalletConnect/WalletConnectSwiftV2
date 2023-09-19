@@ -50,7 +50,6 @@ struct PushMessagesView: View {
                 }
                 .padding(.leading, 20)
 
-
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {
                         Text(pushMessage.title)

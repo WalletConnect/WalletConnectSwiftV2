@@ -15,6 +15,11 @@ public struct NotifySubscription: DatabaseObject {
 }
 
 public struct ScopeValue: Codable, Equatable {
-    let description: String
-    let enabled: Bool
+    public let description: String
+    public let enabled: Bool
+
+    public init(description: String, enabled: Bool) {
+        self.description = description
+        self.enabled = enabled
+    }
 }

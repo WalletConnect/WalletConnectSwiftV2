@@ -4,7 +4,7 @@ import WalletConnectNotify
 
 final class PushMessagesPresenter: ObservableObject {
 
-    private let subscription: NotifySubscription
+    private var subscription: NotifySubscription
     private let interactor: PushMessagesInteractor
     private let router: PushMessagesRouter
     private var disposeBag = Set<AnyCancellable>()
@@ -90,6 +90,13 @@ private extension PushMessagesPresenter {
                 self.pushMessages = self.interactor.getPushMessages()
             }
             .store(in: &disposeBag)
+
+        interactor.subscriptionPublisher
+            .sink { [unowned self] subscriptions in
+                if let updated = subscriptions.first(where: { $0.topic == subscription.topic }) {
+                    subscription = updated
+                }
+            }.store(in: &disposeBag)
     }
 }
 
