@@ -21,6 +21,7 @@ struct PushMessagesView: View {
                     .onDelete { indexSet in
                         presenter.deletePushMessage(at: indexSet)
                     }
+                    Spacer().frame(height: 50.0)
                 } else {
                     emptyStateView()
                         .listRowSeparator(.hidden)

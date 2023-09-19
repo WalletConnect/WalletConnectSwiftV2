@@ -52,6 +52,7 @@ struct NotificationsView: View {
                 listingRow(listing: listing)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                    .listRowBackground(Color.clear)
             }
         }
         .listStyle(PlainListStyle())
@@ -116,10 +117,10 @@ struct NotificationsView: View {
                             image
                                 .resizable()
                                 .frame(width: 60, height: 60)
-                                .background(Color.black.opacity(0.1))
+                                .background(Color.grey8.opacity(0.1))
                                 .cornerRadius(30, corners: .allCorners)
                         } else {
-                            Color.black.opacity(0.1)
+                            Color.grey8.opacity(0.1)
                                 .frame(width: 60, height: 60)
                                 .cornerRadius(30, corners: .allCorners)
                         }
@@ -154,10 +155,10 @@ struct NotificationsView: View {
                         image
                             .resizable()
                             .frame(width: 60, height: 60)
-                            .background(Color.black.opacity(0.1))
+                            .background(Color.grey8.opacity(0.1))
                             .cornerRadius(30, corners: .allCorners)
                     } else {
-                        Color.black.opacity(0.1)
+                        Color.grey8.opacity(0.1)
                             .frame(width: 60, height: 60)
                             .cornerRadius(30, corners: .allCorners)
                     }
