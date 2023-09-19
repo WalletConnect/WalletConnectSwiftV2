@@ -16,7 +16,7 @@ final class NotifyTests: XCTestCase {
 
     var walletNotifyClientA: NotifyClient!
 
-    let gmDappDomain = "gm.walletconnect.com"
+    let gmDappDomain = InputConfig.gmDappHost
 
     let pk = try! EthereumPrivateKey()
 
@@ -124,7 +124,6 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         sleep(1)
-
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
@@ -188,9 +187,6 @@ final class NotifyTests: XCTestCase {
         let subscribeExpectation = expectation(description: "creates notify subscription")
         let messageExpectation = expectation(description: "receives a notify message")
         let notifyMessage = NotifyMessage.stub()
-
-        let metadata = AppMetadata(name: "GM Dapp", description: "", url: gmDappDomain, icons: [])
-
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
