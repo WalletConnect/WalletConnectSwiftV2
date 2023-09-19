@@ -124,7 +124,6 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         sleep(1)
-
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
