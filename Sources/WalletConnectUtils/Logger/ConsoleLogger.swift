@@ -111,8 +111,8 @@ extension ConsoleLogger: ConsoleLogging {
 
 #if DEBUG
 public struct ConsoleLoggerMock: ConsoleLogging {
-    public var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {
-        return PassthroughSubject<WalletConnectUtils.Log, Never>().eraseToAnyPublisher()
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return PassthroughSubject<Log, Never>().eraseToAnyPublisher()
     }
 
     public init() {}
