@@ -9,4 +9,8 @@ final class PushMessagesRouter {
     init(app: Application) {
         self.app = app
     }
+
+    func dismiss() {
+        viewController.pop()
+    }
 }

@@ -4,11 +4,16 @@ import WalletConnectNotify
 
 final class PushMessagesPresenter: ObservableObject {
 
+    private let subscription: NotifySubscription
     private let interactor: PushMessagesInteractor
     private let router: PushMessagesRouter
     private var disposeBag = Set<AnyCancellable>()
-    
+
     @Published private var pushMessages: [NotifyMessageRecord] = []
+
+    var subscriptionViewModel: NotifySubscriptionViewModel {
+        return NotifySubscriptionViewModel(subscription: subscription)
+    }
 
     var messages: [PushMessageViewModel] {
         return pushMessages
@@ -16,8 +21,9 @@ final class PushMessagesPresenter: ObservableObject {
             .map { PushMessageViewModel(pushMessageRecord: $0) }
     }
 
-    init(interactor: PushMessagesInteractor, router: PushMessagesRouter) {
+    init(subscription: NotifySubscription, interactor: PushMessagesInteractor, router: PushMessagesRouter) {
         defer { setupInitialState() }
+        self.subscription = subscription
         self.interactor = interactor
         self.router = router
         setUpMessagesRefresh()
@@ -32,23 +38,28 @@ final class PushMessagesPresenter: ObservableObject {
             }).store(in: &disposeBag)
     }
 
-    
     func deletePushMessage(at indexSet: IndexSet) {
         if let index = indexSet.first {
             interactor.deletePushMessage(id: pushMessages[index].id)
         }
+    }
+
+    func unsubscribe() {
+        interactor.deleteSubscription(subscription)
+        router.dismiss()
     }
 }
 
 // MARK: SceneViewModel
 
 extension PushMessagesPresenter: SceneViewModel {
-    var sceneTitle: String? {
-        return interactor.subscription.metadata.name
-    }
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
-        return .always
+        return .never
+    }
+
+    var navigationBarStyle: NavigationBarStyle {
+        return .clear
     }
 }
 

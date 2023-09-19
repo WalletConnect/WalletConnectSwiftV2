@@ -20,4 +20,10 @@ final class PushMessagesInteractor {
     func deletePushMessage(id: String) {
         Notify.instance.deleteNotifyMessage(id: id)
     }
+
+    func deleteSubscription(_ subscription: NotifySubscription) {
+        Task(priority: .high) {
+            try await Notify.instance.deleteSubscription(topic: subscription.topic)
+        }
+    }
 }

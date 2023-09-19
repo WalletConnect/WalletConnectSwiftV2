@@ -4,7 +4,7 @@ import HTTPClient
 enum ListingsAPI: HTTPService {
 
     var path: String {
-        return "/v3/dapps"
+        return "/w3i/v1/projects"
     }
 
     var method: HTTPMethod {
@@ -16,7 +16,7 @@ enum ListingsAPI: HTTPService {
     }
 
     var queryParameters: [String : String]? {
-        return ["projectId": InputConfig.projectId, "is_notify_enabled": "true"]
+        return ["projectId": InputConfig.projectId, "entries": "100", "is_verified": "false"]
     }
 
     var additionalHeaderFields: [String : String]? {

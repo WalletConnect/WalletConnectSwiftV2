@@ -18,7 +18,7 @@ struct NotificationsView: View {
                                 content: { item, isSelected in
                     Text(item)
                         .font(.headline)
-                        .foregroundColor(isSelected ? Color.black : Color.gray )
+                        .foregroundColor(isSelected ? Color.primary : Color.secondary )
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                 },
@@ -26,7 +26,7 @@ struct NotificationsView: View {
                     VStack(spacing: 0) {
                         Spacer()
                         Rectangle()
-                            .fill(Color.black)
+                            .fill(Color.primary)
                             .frame(height: 1)
                     }
                 })
@@ -89,6 +89,7 @@ struct NotificationsView: View {
                                 subscriptionRow(subscription: subscription)
                                     .listRowSeparator(.hidden)
                                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                                    .listRowBackground(Color.clear)
                             }
                             .onDelete { indexSet in
                                 Task(priority: .high) {
@@ -178,11 +179,15 @@ struct NotificationsView: View {
                 if let subscription = presenter.subscription(forListing: listing) {
                     AsyncButton("Unsubscribe") {
                         try await presenter.unsubscribe(subscription: subscription)
-                    }.padding(16.0)
+                    }
+                    .foregroundColor(.red)
+                    .padding(16.0)
                 } else {
                     AsyncButton("Subscribe") {
                         try await presenter.subscribe(listing: listing)
-                    }.padding(16.0)
+                    }
+                    .foregroundColor(.primary)
+                    .padding(16.0)
                 }
             }
         }

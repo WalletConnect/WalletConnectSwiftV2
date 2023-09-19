@@ -69,6 +69,7 @@
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
 		A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507BE1929E8032E0038EF70 /* EIP55Tests.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
+		A50D53BA2AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53B92AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift */; };
 		A50DF19D2A25084A0036EA6C /* WalletConnectHistory in Frameworks */ = {isa = PBXBuildFile; productRef = A50DF19C2A25084A0036EA6C /* WalletConnectHistory */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
 		A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
@@ -431,6 +432,7 @@
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
 		A507BE1929E8032E0038EF70 /* EIP55Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIP55Tests.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
+		A50D53B92AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifySubscriptionViewModel.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultBIP44Provider.swift; sourceTree = "<group>"; };
 		A51811972A52E21A00A52B15 /* ConfigurationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationService.swift; sourceTree = "<group>"; };
@@ -874,6 +876,7 @@
 			children = (
 				84B8154F2991217900FAD54E /* PushMessagesModule.swift */,
 				84B815502991217900FAD54E /* PushMessagesPresenter.swift */,
+				A50D53B92AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift */,
 				84B815512991217900FAD54E /* PushMessagesRouter.swift */,
 				84B815522991217900FAD54E /* PushMessagesInteractor.swift */,
 				84B815532991217900FAD54E /* PushMessagesView.swift */,
@@ -2366,6 +2369,7 @@
 				C56EE270293F56D7004840D1 /* String.swift in Sources */,
 				A51811A12A52E83100A52B15 /* SettingsRouter.swift in Sources */,
 				C56EE279293F56D7004840D1 /* Color.swift in Sources */,
+				A50D53BA2AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift in Sources */,
 				847BD1E6298A806800076C90 /* NotificationsRouter.swift in Sources */,
 				C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */,
 				C56EE243293F566D004840D1 /* ScanView.swift in Sources */,
