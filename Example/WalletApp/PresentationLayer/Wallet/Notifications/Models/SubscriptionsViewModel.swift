@@ -12,15 +12,19 @@ struct SubscriptionsViewModel: Identifiable {
         return try? subscription.metadata.icons.first?.asURL()
     }
 
-    var title: String {
-        return subscription.metadata.name
-    }
-
     var subtitle: String {
         return subscription.metadata.description
     }
 
-    var url: String {
+    var name: String {
+        return subscription.metadata.name
+    }
+
+    var description: String {
+        return subscription.metadata.description
+    }
+
+    var domain: String {
         return subscription.metadata.url
     }
 }

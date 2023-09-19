@@ -76,7 +76,7 @@ struct PushMessagesView: View {
 
     func headerView() -> some View {
         VStack(spacing: 0) {
-            AsyncImage(url: presenter.subscriptionViewModel.iconUrl) { phase in
+            AsyncImage(url: presenter.subscriptionViewModel.imageUrl) { phase in
                 if let image = phase.image {
                     image
                         .resizable()

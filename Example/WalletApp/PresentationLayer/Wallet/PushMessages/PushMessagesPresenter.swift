@@ -11,8 +11,8 @@ final class PushMessagesPresenter: ObservableObject {
 
     @Published private var pushMessages: [NotifyMessageRecord] = []
 
-    var subscriptionViewModel: NotifySubscriptionViewModel {
-        return NotifySubscriptionViewModel(subscription: subscription)
+    var subscriptionViewModel: SubscriptionsViewModel {
+        return SubscriptionsViewModel(subscription: subscription)
     }
 
     var messages: [PushMessageViewModel] {
@@ -48,6 +48,10 @@ final class PushMessagesPresenter: ObservableObject {
         interactor.deleteSubscription(subscription)
         router.dismiss()
     }
+
+    @objc func preferencesDidPress() {
+        router.presentPreferences(subscription: subscription)
+    }
 }
 
 // MARK: SceneViewModel
@@ -60,6 +64,15 @@ extension PushMessagesPresenter: SceneViewModel {
 
     var navigationBarStyle: NavigationBarStyle {
         return .clear
+    }
+
+    var rightBarButtonItem: UIBarButtonItem? {
+        return UIBarButtonItem(
+            image: UIImage(systemName: "gearshape"),
+            style: .plain,
+            target: self,
+            action: #selector(preferencesDidPress)
+        )
     }
 }
 

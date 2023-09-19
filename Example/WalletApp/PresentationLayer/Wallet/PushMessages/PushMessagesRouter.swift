@@ -1,4 +1,5 @@
 import UIKit
+import WalletConnectNotify
 
 final class PushMessagesRouter {
 
@@ -12,5 +13,12 @@ final class PushMessagesRouter {
 
     func dismiss() {
         viewController.pop()
+    }
+
+    func presentPreferences(subscription: NotifySubscription) {
+        let controller = NotifyPreferencesModule.create(app: app, subscription: subscription)
+        controller.sheetPresentationController?.detents = [.medium()]
+        controller.sheetPresentationController?.prefersGrabberVisible = true
+        controller.present(from: viewController)
     }
 }

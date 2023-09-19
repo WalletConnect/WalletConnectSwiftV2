@@ -69,7 +69,11 @@
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
 		A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507BE1929E8032E0038EF70 /* EIP55Tests.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
-		A50D53BA2AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53B92AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift */; };
+		A50D53C12ABA055700A4FD8B /* NotifyPreferencesModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */; };
+		A50D53C22ABA055700A4FD8B /* NotifyPreferencesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */; };
+		A50D53C32ABA055700A4FD8B /* NotifyPreferencesRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BE2ABA055700A4FD8B /* NotifyPreferencesRouter.swift */; };
+		A50D53C42ABA055700A4FD8B /* NotifyPreferencesInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BF2ABA055700A4FD8B /* NotifyPreferencesInteractor.swift */; };
+		A50D53C52ABA055700A4FD8B /* NotifyPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53C02ABA055700A4FD8B /* NotifyPreferencesView.swift */; };
 		A50DF19D2A25084A0036EA6C /* WalletConnectHistory in Frameworks */ = {isa = PBXBuildFile; productRef = A50DF19C2A25084A0036EA6C /* WalletConnectHistory */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
 		A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
@@ -432,7 +436,11 @@
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
 		A507BE1929E8032E0038EF70 /* EIP55Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIP55Tests.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
-		A50D53B92AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifySubscriptionViewModel.swift; sourceTree = "<group>"; };
+		A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesModule.swift; sourceTree = "<group>"; };
+		A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesPresenter.swift; sourceTree = "<group>"; };
+		A50D53BE2ABA055700A4FD8B /* NotifyPreferencesRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesRouter.swift; sourceTree = "<group>"; };
+		A50D53BF2ABA055700A4FD8B /* NotifyPreferencesInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesInteractor.swift; sourceTree = "<group>"; };
+		A50D53C02ABA055700A4FD8B /* NotifyPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesView.swift; sourceTree = "<group>"; };
 		A50F3945288005B200064555 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultBIP44Provider.swift; sourceTree = "<group>"; };
 		A51811972A52E21A00A52B15 /* ConfigurationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationService.swift; sourceTree = "<group>"; };
@@ -876,7 +884,6 @@
 			children = (
 				84B8154F2991217900FAD54E /* PushMessagesModule.swift */,
 				84B815502991217900FAD54E /* PushMessagesPresenter.swift */,
-				A50D53B92AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift */,
 				84B815512991217900FAD54E /* PushMessagesRouter.swift */,
 				84B815522991217900FAD54E /* PushMessagesInteractor.swift */,
 				84B815532991217900FAD54E /* PushMessagesView.swift */,
@@ -980,6 +987,18 @@
 				84E6B84B29787A8000428BAF /* Info.plist */,
 			);
 			path = PNDecryptionService;
+			sourceTree = "<group>";
+		};
+		A50D53BB2ABA053600A4FD8B /* NotifySettings */ = {
+			isa = PBXGroup;
+			children = (
+				A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */,
+				A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */,
+				A50D53BE2ABA055700A4FD8B /* NotifyPreferencesRouter.swift */,
+				A50D53BF2ABA055700A4FD8B /* NotifyPreferencesInteractor.swift */,
+				A50D53C02ABA055700A4FD8B /* NotifyPreferencesView.swift */,
+			);
+			path = NotifySettings;
 			sourceTree = "<group>";
 		};
 		A50F3944288005A700064555 /* Types */ = {
@@ -1573,6 +1592,7 @@
 		C56EE229293F5668004840D1 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
+				A50D53BB2ABA053600A4FD8B /* NotifySettings */,
 				A51811992A52E82100A52B15 /* Settings */,
 				847BD1DB2989493F00076C90 /* Main */,
 				C55D3477295DD4AA0004314A /* Welcome */,
@@ -2341,6 +2361,8 @@
 				84B815552991217900FAD54E /* PushMessagesPresenter.swift in Sources */,
 				A5A0844029D2F626000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				847BD1DD2989494F00076C90 /* TabPage.swift in Sources */,
+				A50D53C42ABA055700A4FD8B /* NotifyPreferencesInteractor.swift in Sources */,
+				A50D53C22ABA055700A4FD8B /* NotifyPreferencesPresenter.swift in Sources */,
 				C55D348B295DD8CA0004314A /* PasteUriRouter.swift in Sources */,
 				84B815572991217900FAD54E /* PushMessagesInteractor.swift in Sources */,
 				847BD1E4298A806800076C90 /* NotificationsModule.swift in Sources */,
@@ -2349,6 +2371,7 @@
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
 				A57879722A4F225E00F8D10B /* ImportAccount.swift in Sources */,
 				C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */,
+				A50D53C32ABA055700A4FD8B /* NotifyPreferencesRouter.swift in Sources */,
 				A5D610C82AB31EE800C20083 /* SegmentedPicker.swift in Sources */,
 				C56EE271293F56D7004840D1 /* View.swift in Sources */,
 				C5B2F6FD297055B0000DBA0E /* Signer.swift in Sources */,
@@ -2369,7 +2392,6 @@
 				C56EE270293F56D7004840D1 /* String.swift in Sources */,
 				A51811A12A52E83100A52B15 /* SettingsRouter.swift in Sources */,
 				C56EE279293F56D7004840D1 /* Color.swift in Sources */,
-				A50D53BA2AB9D44200A4FD8B /* NotifySubscriptionViewModel.swift in Sources */,
 				847BD1E6298A806800076C90 /* NotificationsRouter.swift in Sources */,
 				C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */,
 				C56EE243293F566D004840D1 /* ScanView.swift in Sources */,
@@ -2393,6 +2415,7 @@
 				C56EE273293F56D7004840D1 /* UIColor.swift in Sources */,
 				A51811982A52E21A00A52B15 /* ConfigurationService.swift in Sources */,
 				C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */,
+				A50D53C52ABA055700A4FD8B /* NotifyPreferencesView.swift in Sources */,
 				84B815562991217900FAD54E /* PushMessagesRouter.swift in Sources */,
 				C56EE246293F566D004840D1 /* ScanRouter.swift in Sources */,
 				C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */,
@@ -2410,6 +2433,7 @@
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
 				A5D610D42AB35BED00C20083 /* FailableDecodable.swift in Sources */,
 				847BD1E5298A806800076C90 /* NotificationsPresenter.swift in Sources */,
+				A50D53C12ABA055700A4FD8B /* NotifyPreferencesModule.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
 				A518119F2A52E83100A52B15 /* SettingsModule.swift in Sources */,

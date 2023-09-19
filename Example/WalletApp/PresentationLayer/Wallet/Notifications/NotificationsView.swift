@@ -127,7 +127,7 @@ struct NotificationsView: View {
                     .padding(.leading, 20)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(subscription.title)
+                        Text(subscription.name)
                             .foregroundColor(.grey8)
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
 

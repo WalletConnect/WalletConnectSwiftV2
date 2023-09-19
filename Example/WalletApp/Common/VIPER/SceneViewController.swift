@@ -90,6 +90,7 @@ private extension SceneViewController {
             navigationController?.navigationBar.isTranslucent = true
             navigationController?.navigationBar.backgroundColor = .clear
             navigationController?.navigationBar.barTintColor = .clear
+            navigationController?.navigationBar.tintColor = .w_foreground
         }
     }
 }
