@@ -14,6 +14,10 @@ struct InputConfig {
         return config(for: "GM_DAPP_PROJECT_ID")!
     }
 
+    static var gmDappHost: String {
+        return config(for: "GM_DAPP_HOST")!
+    }
+
     static var gmDappProjectSecret: String {
         return config(for: "GM_DAPP_PROJECT_SECRET")!
     }
