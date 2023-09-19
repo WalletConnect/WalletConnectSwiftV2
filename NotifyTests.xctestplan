@@ -41,6 +41,11 @@
   "testTargets" : [
     {
       "selectedTests" : [
+        "NotifyTests\/testNotifyServerSubscribeAndNotifies()",
+        "NotifyTests\/testNotifySubscriptionChanged()",
+        "NotifyTests\/testNotifyWatchSubscriptions()",
+        "NotifyTests\/testWalletCreatesAndUpdatesSubscription()",
+        "NotifyTests\/testWalletCreatesSubscription()",
         "PushTests\/testNotifyServerSubscribeAndNotifies()",
         "PushTests\/testWalletCreatesAndUpdatesSubscription()"
       ],

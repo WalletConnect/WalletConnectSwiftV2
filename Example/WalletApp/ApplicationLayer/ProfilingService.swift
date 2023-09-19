@@ -2,7 +2,6 @@ import Foundation
 import Mixpanel
 import WalletConnectNetworking
 import Combine
-import Web3Inbox
 
 final class ProfilingService {
     public static var instance = ProfilingService()
@@ -32,7 +31,6 @@ final class ProfilingService {
         mixpanel.people.set(properties: ["$name": account, "account": account])
 
         handleLogs(from: Networking.instance.logsPublisher)
-        handleLogs(from: Web3Inbox.instance.logsPublisher)
     }
 
     private func handleLogs(from publisher: AnyPublisher<Log, Never>) {

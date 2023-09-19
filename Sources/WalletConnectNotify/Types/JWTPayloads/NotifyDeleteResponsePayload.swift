@@ -1,26 +1,26 @@
 import Foundation
 
-struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
+struct NotifyDeleteResponsePayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
-        /// timestamp when jwt was issued
+        /// Timestamp when JWT was issued
         let iat: UInt64
-        /// timestamp when jwt must expire
+        /// Timestamp when JWT must expire
         let exp: UInt64
-        /// Description of action intent. Must be equal to "notify_subscription_response"
+        /// Description of action intent. Must be equal to `notify_delete_response`
         let act: String?
 
-        /// `did:key` of an identity key. Allows for the resolution of which Notify server was used.
+        /// `did:key` of an identity key. Enables to resolve associated Dapp domain used
         let iss: String
-        /// `did:key` of an identity key. Allows for the resolution of the attached blockchain account.
+        /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let aud: String
-        /// `did:key` of the public key used for key agreement on the Notify topic
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
         /// Dapp's domain url
         let app: String
 
         static var action: String? {
-            return "notify_subscription_response"
+            return "notify_delete_response"
         }
     }
 
@@ -36,14 +36,14 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         }
     }
 
+    let account: Account
     let selfPubKey: DIDKey
-    let publicKey: DIDKey
-    let app: String
+    let app: DIDWeb
 
     init(claims: Claims) throws {
+        self.account = try Account(DIDPKHString: claims.sub)
         self.selfPubKey = try DIDKey(did: claims.aud)
-        self.publicKey = try DIDKey(did: claims.sub)
-        self.app = claims.app
+        self.app = try DIDWeb(did: claims.app)
     }
 
     func encode(iss: String) throws -> Claims {
@@ -53,8 +53,8 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
             act: Claims.action,
             iss: iss,
             aud: selfPubKey.did(variant: .ED25519),
-            sub: publicKey.did(variant: .X25519),
-            app: app
+            sub: account.did,
+            app: app.did
         )
     }
 }

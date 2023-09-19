@@ -52,7 +52,7 @@ struct ReceiptPayload: JWTClaimsCodable {
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
             sub: messageHash,
-            aud: DIDPKH(account: senderAccount).string,
+            aud: senderAccount.did,
             act: Claims.action
         )
     }

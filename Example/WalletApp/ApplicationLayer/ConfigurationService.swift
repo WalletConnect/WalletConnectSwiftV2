@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNetworking
+import WalletConnectNotify
 import Web3Wallet
-import Web3Inbox
 
 final class ConfigurationService {
 
@@ -18,16 +18,15 @@ final class ConfigurationService {
 
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
 
-        Web3Inbox.configure(
-            account: importAccount.account,
-            bip44: DefaultBIP44Provider(),
-            config: [.chatEnabled: false, .settingsEnabled: false],
+        Notify.configure(
             groupIdentifier: "group.com.walletconnect.sdk",
             environment: BuildConfiguration.shared.apnsEnvironment,
-            crypto: DefaultCryptoProvider(),
-            onSign: importAccount.onSign
+            crypto: DefaultCryptoProvider()
         )
-        Web3Inbox.instance.setLogging(level: .debug)
+
+        Notify.instance.setLogging(level: .debug)
+
+        Task { try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign) }
 
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)

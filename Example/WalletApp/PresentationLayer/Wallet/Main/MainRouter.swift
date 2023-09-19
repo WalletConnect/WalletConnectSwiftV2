@@ -17,13 +17,8 @@ final class MainRouter {
             .wrapToNavigationController()
     }
 
-    func notificationsViewController() -> UIViewController {
-        return NotificationsModule.create(app: app)
-            .wrapToNavigationController()
-    }
-
-    func web3InboxViewController() -> UIViewController {
-        return Web3InboxModule.create(app: app)
+    func notificationsViewController(importAccount: ImportAccount) -> UIViewController {
+        return NotificationsModule.create(app: app, importAccount: importAccount)
             .wrapToNavigationController()
     }
 

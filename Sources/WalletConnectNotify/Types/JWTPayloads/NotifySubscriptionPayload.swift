@@ -1,6 +1,6 @@
 import Foundation
 
-struct NotifyMessageReceiptPayload: JWTClaimsCodable {
+struct NotifySubscriptionPayload: JWTClaimsCodable {
 
     struct Claims: JWTClaims {
         /// Timestamp when JWT was issued
@@ -9,69 +9,71 @@ struct NotifyMessageReceiptPayload: JWTClaimsCodable {
         let exp: UInt64
         /// Key server URL
         let ksu: String
-        /// Action intent (must be `notify_receipt`)
+        /// Description of action intent. Must be equal to `notify_subscription`
         let act: String?
 
         /// `did:key` of an identity key. Enables to resolve attached blockchain account.
         let iss: String
         /// `did:key` of an identity key. Enables to resolve associated Dapp domain used.
         let aud: String
-        /// Hash of the stringified notify message object received
+        /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
+        /// Scope of notification types authorized by the user
+        let scp: String
         /// Dapp's domain url
         let app: String
 
         static var action: String? {
-            return "notify_receipt"
+            return "notify_subscription"
         }
     }
 
     struct Wrapper: JWTWrapper {
-        let receiptAuth: String
+        let subscriptionAuth: String
 
         init(jwtString: String) {
-            self.receiptAuth = jwtString
+            self.subscriptionAuth = jwtString
         }
 
         var jwtString: String {
-            return receiptAuth
+            return subscriptionAuth
         }
     }
 
-    let keyserver: URL
     let dappPubKey: DIDKey
-    let messageHash: String
-    let app: String
+    let keyserver: URL
+    let subscriptionAccount: Account
+    let app: DIDWeb
+    let scope: String
 
-    init(
-        keyserver: URL,
-        dappPubKey: DIDKey,
-        messageHash: String,
-        app: String
-    ) {
-        self.keyserver = keyserver
+    init(dappPubKey: DIDKey, keyserver: URL, subscriptionAccount: Account, app: DIDWeb, scope: String) {
         self.dappPubKey = dappPubKey
-        self.messageHash = messageHash
+        self.keyserver = keyserver
+        self.subscriptionAccount = subscriptionAccount
         self.app = app
+        self.scope = scope
     }
 
     init(claims: Claims) throws {
-        self.keyserver = try claims.ksu.asURL()
         self.dappPubKey = try DIDKey(did: claims.aud)
-        self.messageHash = claims.sub
-        self.app = claims.app
+        self.keyserver = try claims.ksu.asURL()
+        self.subscriptionAccount = try Account(DIDPKHString: claims.sub)
+        self.app = try DIDWeb(did: claims.app)
+        self.scope = claims.scp
     }
 
     func encode(iss: String) throws -> Claims {
         return Claims(
             iat: defaultIat(),
-            exp: expiry(days: 1),
+            exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
             act: Claims.action,
             iss: iss,
             aud: dappPubKey.did(variant: .ED25519),
-            sub: messageHash,
-            app: app
+            sub: subscriptionAccount.did,
+            scp: scope,
+            app: app.did
         )
     }
 }
+
