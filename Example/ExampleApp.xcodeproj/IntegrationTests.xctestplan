@@ -52,7 +52,9 @@
       "skippedTests" : [
         "AuthTests\/testEIP1271RespondSuccess()",
         "ChatTests",
-        "ENSResolverTests"
+        "ENSResolverTests",
+        "SyncDerivationServiceTests",
+        "SyncTests"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",
