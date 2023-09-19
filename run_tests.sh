@@ -84,7 +84,7 @@ else
     update_xctestrun --key "PROJECT_ID" --value "$PROJECT_ID" --target "$XCTESTRUN"
     update_xctestrun --key "GM_DAPP_PROJECT_ID" --value "$GM_DAPP_PROJECT_ID" --target "$XCTESTRUN"
     update_xctestrun --key "GM_DAPP_PROJECT_SECRET" --value "$GM_DAPP_PROJECT_SECRET" --target "$XCTESTRUN"
-    update_xctestrun --key "GM_DAPP_HOST" --value "$GM_DAPP_PROJECT_HOST" --target "$XCTESTRUN"
+    update_xctestrun --key "GM_DAPP_HOST" --value "$GM_DAPP_HOST" --target "$XCTESTRUN"
     update_xctestrun --key "CAST_HOST" --value "$CAST_HOST" --target "$XCTESTRUN"
     update_xctestrun --key "JS_CLIENT_API_HOST" --value "$JS_CLIENT_API_HOST" --target "$XCTESTRUN"
 
