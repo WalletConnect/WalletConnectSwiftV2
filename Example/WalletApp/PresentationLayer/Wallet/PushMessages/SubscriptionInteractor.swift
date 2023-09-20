@@ -1,7 +1,7 @@
 import WalletConnectNotify
 import Combine
 
-final class PushMessagesInteractor {
+final class SubscriptionInteractor {
 
     let subscription: NotifySubscription
 

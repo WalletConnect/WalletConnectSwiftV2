@@ -1,7 +1,7 @@
 import UIKit
 import WalletConnectNotify
 
-final class PushMessagesRouter {
+final class SubscriptionRouter {
 
     weak var viewController: UIViewController!
 

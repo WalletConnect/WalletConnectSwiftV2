@@ -2,11 +2,11 @@ import UIKit
 import Combine
 import WalletConnectNotify
 
-final class PushMessagesPresenter: ObservableObject {
+final class SubscriptionPresenter: ObservableObject {
 
     private var subscription: NotifySubscription
-    private let interactor: PushMessagesInteractor
-    private let router: PushMessagesRouter
+    private let interactor: SubscriptionInteractor
+    private let router: SubscriptionRouter
     private var disposeBag = Set<AnyCancellable>()
 
     @Published private var pushMessages: [NotifyMessageRecord] = []
@@ -15,13 +15,13 @@ final class PushMessagesPresenter: ObservableObject {
         return SubscriptionsViewModel(subscription: subscription)
     }
 
-    var messages: [PushMessageViewModel] {
+    var messages: [NotifyMessageViewModel] {
         return pushMessages
             .sorted { $0.publishedAt > $1.publishedAt }
-            .map { PushMessageViewModel(pushMessageRecord: $0) }
+            .map { NotifyMessageViewModel(pushMessageRecord: $0) }
     }
 
-    init(subscription: NotifySubscription, interactor: PushMessagesInteractor, router: PushMessagesRouter) {
+    init(subscription: NotifySubscription, interactor: SubscriptionInteractor, router: SubscriptionRouter) {
         defer { setupInitialState() }
         self.subscription = subscription
         self.interactor = interactor
@@ -56,7 +56,7 @@ final class PushMessagesPresenter: ObservableObject {
 
 // MARK: SceneViewModel
 
-extension PushMessagesPresenter: SceneViewModel {
+extension SubscriptionPresenter: SceneViewModel {
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
         return .never
@@ -78,7 +78,7 @@ extension PushMessagesPresenter: SceneViewModel {
 
 // MARK: Privates
 
-private extension PushMessagesPresenter {
+private extension SubscriptionPresenter {
 
     func setupInitialState() {
         pushMessages = interactor.getPushMessages()

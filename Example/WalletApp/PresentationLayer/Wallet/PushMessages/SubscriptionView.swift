@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct PushMessagesView: View {
+struct SubscriptionView: View {
 
-    @EnvironmentObject var presenter: PushMessagesPresenter
+    @EnvironmentObject var presenter: SubscriptionPresenter
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,7 +33,7 @@ struct PushMessagesView: View {
         .ignoresSafeArea(.container)
     }
 
-    private func notificationView(pushMessage: PushMessageViewModel) -> some View {
+    private func notificationView(pushMessage: NotifyMessageViewModel) -> some View {
         VStack(alignment: .center) {
             HStack(spacing: 10) {
                 AsyncImage(url: URL(string: pushMessage.imageUrl)) { phase in
@@ -152,7 +152,7 @@ struct PushMessagesView: View {
 #if DEBUG
 struct PushMessagesView_Previews: PreviewProvider {
     static var previews: some View {
-        PushMessagesView()
+        SubscriptionView()
     }
 }
 #endif

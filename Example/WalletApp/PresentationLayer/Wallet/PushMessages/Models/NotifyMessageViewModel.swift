@@ -1,7 +1,7 @@
 import Foundation
 import WalletConnectNotify
 
-struct PushMessageViewModel: Identifiable {
+struct NotifyMessageViewModel: Identifiable {
 
     let pushMessageRecord: NotifyMessageRecord
 
