@@ -23,7 +23,7 @@ final class NotificationsPresenter: ObservableObject {
     }
 
     func subscription(forListing listing: ListingViewModel) -> SubscriptionsViewModel? {
-        return subscriptions.first(where: { $0.url == listing.appDomain })
+        return subscriptions.first(where: { $0.domain == listing.appDomain })
     }
 
     func subscribe(listing: ListingViewModel) async throws {

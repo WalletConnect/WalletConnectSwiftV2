@@ -1,6 +1,6 @@
 import UIKit
 
-final class PushMessagesRouter {
+final class NotifyPreferencesRouter {
 
     weak var viewController: UIViewController!
 
@@ -8,5 +8,9 @@ final class PushMessagesRouter {
 
     init(app: Application) {
         self.app = app
+    }
+
+    func dismiss() {
+        viewController.dismiss()
     }
 }
