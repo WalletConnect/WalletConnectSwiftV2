@@ -6,10 +6,6 @@ struct InputConfig {
         return config(for: "RELAY_HOST")!
     }
 
-    static var castHost: String {
-        return config(for: "CAST_HOST")!
-    }
-
     static var gmDappProjectId: String {
         return config(for: "GM_DAPP_PROJECT_ID")!
     }
@@ -24,6 +20,10 @@ struct InputConfig {
 
     static var jsClientApiHost: String {
         return config(for: "JS_CLIENT_API_HOST")!
+    }
+
+    static var notifyHost: String {
+        return config(for: "CAST_HOST")!
     }
 
     static var relayUrl: String {
