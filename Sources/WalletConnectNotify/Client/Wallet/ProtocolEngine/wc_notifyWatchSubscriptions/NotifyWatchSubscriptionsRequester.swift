@@ -9,7 +9,7 @@ class NotifyWatchSubscriptionsRequester {
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
-    private let notifyServerUrl = "notify.walletconnect.com"
+    private let notifyHost: String
     private var account: Account?
     private var publishers = Set<AnyCancellable>()
 
@@ -18,7 +18,8 @@ class NotifyWatchSubscriptionsRequester {
          identityClient: IdentityClient,
          logger: ConsoleLogging,
          kms: KeyManagementService,
-         webDidResolver: NotifyWebDidResolver
+         webDidResolver: NotifyWebDidResolver,
+         notifyHost: String
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient
@@ -26,6 +27,7 @@ class NotifyWatchSubscriptionsRequester {
         self.logger = logger
         self.kms = kms
         self.webDidResolver = webDidResolver
+        self.notifyHost = notifyHost
         setUpWatchSubscriptionsOnSocketConnection()
     }
 
@@ -49,8 +51,8 @@ class NotifyWatchSubscriptionsRequester {
 
         logger.debug("Watching subscriptions")
 
-        let notifyServerPublicKey = try await webDidResolver.resolveAgreementKey(domain: notifyServerUrl)
-        let notifyServerAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: notifyServerUrl)
+        let notifyServerPublicKey = try await webDidResolver.resolveAgreementKey(domain: notifyHost)
+        let notifyServerAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: notifyHost)
         let notifyServerAuthenticationDidKey = DIDKey(rawData: notifyServerAuthenticationKey)
         let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
 
