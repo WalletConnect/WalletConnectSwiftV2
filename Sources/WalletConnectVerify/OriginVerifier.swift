@@ -14,7 +14,7 @@ public final class OriginVerifier {
         self.verifyHost = verifyHost
     }
     
-    func verifyOrigin(assertionId: String) async throws -> String {
+    func verifyOrigin(assertionId: String) async throws -> VerifyResponse {
         let sessionConfiguration = URLSessionConfiguration.default
         sessionConfiguration.timeoutIntervalForRequest = 5.0
         sessionConfiguration.timeoutIntervalForResource = 5.0
@@ -30,7 +30,7 @@ public final class OriginVerifier {
             guard let origin = response.origin else {
                 throw Errors.registrationFailed
             }
-            return origin
+            return response
         } catch {
             if (error as? HTTPError) == .couldNotConnect && !fallback {
                 fallback = true

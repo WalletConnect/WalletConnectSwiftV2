@@ -12,7 +12,7 @@ final class NotificationsRouter {
     }
 
     func presentNotifications(subscription: NotifySubscription) {
-        PushMessagesModule.create(app: app, subscription: subscription)
+        SubscriptionModule.create(app: app, subscription: subscription)
             .push(from: viewController)
     }
 }

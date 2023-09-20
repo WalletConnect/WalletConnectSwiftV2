@@ -2,6 +2,7 @@ import SwiftUI
 
 enum NavigationBarStyle {
     case translucent(UIColor)
+    case clear
 }
 
 protocol SceneViewModel {
@@ -80,8 +81,16 @@ private extension SceneViewController {
     func setupNavigationBarStyle() {
         switch viewModel.navigationBarStyle {
         case .translucent(let color):
+            navigationController?.navigationBar.backgroundColor = .w_background
             navigationController?.navigationBar.barTintColor = color
             navigationController?.navigationBar.isTranslucent = true
+        case .clear:
+            navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+            navigationController?.navigationBar.shadowImage = UIImage()
+            navigationController?.navigationBar.isTranslucent = true
+            navigationController?.navigationBar.backgroundColor = .clear
+            navigationController?.navigationBar.barTintColor = .clear
+            navigationController?.navigationBar.tintColor = .w_foreground
         }
     }
 }

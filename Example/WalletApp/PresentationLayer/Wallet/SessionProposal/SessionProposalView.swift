@@ -22,22 +22,6 @@ struct SessionProposalView: View {
                         Text(presenter.sessionProposal.proposer.name)
                             .foregroundColor(.grey8)
                             .font(.system(size: 22, weight: .bold, design: .rounded))
-                        
-                        if let verified = presenter.verified {
-                            if verified {
-                                Image(systemName: "checkmark.shield.fill")
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .green)
-                            } else {
-                                Image(systemName: "xmark.shield.fill")
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .red)
-                            }
-                        } else {
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .orange)
-                        }
                     }
                     
                     .padding(.top, 10)
@@ -46,12 +30,29 @@ struct SessionProposalView: View {
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                     
-                    Text(presenter.sessionProposal.proposer.name)
+                    Text(presenter.sessionProposal.proposer.url)
                         .foregroundColor(.grey50)
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.top, 8)
+                    
+                    switch presenter.validationStatus {
+                    case .unknown:
+                        verifyBadgeView(imageName: "exclamationmark.circle.fill", title: "Cannot verify", color: .orange)
+                        
+                    case .valid:
+                        verifyBadgeView(imageName: "checkmark.seal.fill", title: "Verified domain", color: .blue)
+                        
+                    case .invalid:
+                        verifyBadgeView(imageName: "exclamationmark.triangle.fill", title: "Invalid domain", color: .red)
+                        
+                    case .scam:
+                        verifyBadgeView(imageName: "exclamationmark.shield.fill", title: "Security risk", color: .red)
+                        
+                    default:
+                        EmptyView()
+                    }
                     
                     Divider()
                         .padding(.top, 12)
@@ -80,7 +81,7 @@ struct SessionProposalView: View {
                                     .lineSpacing(4)
                                     .padding(.vertical, 12)
                             }
-                            
+
                             ForEach(optionalNamespaces.keys.sorted(), id: \.self) { chain in
                                 if let namespaces = optionalNamespaces[chain] {
                                     sessionProposalView(namespaces: namespaces)
@@ -89,7 +90,22 @@ struct SessionProposalView: View {
                         }
                     }
                     .frame(height: 250)
-                    .padding(.top, 12)
+                    .cornerRadius(20)
+                    .padding(.vertical, 12)
+                    
+                    switch presenter.validationStatus {
+                    case .invalid:
+                        verifyDescriptionView(imageName: "exclamationmark.triangle.fill", title: "Invalid domain", description: "This domain cannot be verified. Check the request carefully before approving.", color: .red)
+                        
+                    case .unknown:
+                        verifyDescriptionView(imageName: "exclamationmark.circle.fill", title: "Unknown domain", description: "This domain cannot be verified. Check the request carefully before approving.", color: .orange)
+                        
+                    case .scam:
+                        verifyDescriptionView(imageName: "exclamationmark.shield.fill", title: "Security risk", description: "This website is flagged as unsafe by multiple security providers. Leave immediately to protect your assets.", color: .red)
+                        
+                    default:
+                        EmptyView()
+                    }
                     
                     HStack(spacing: 20) {
                         Button {
@@ -151,7 +167,7 @@ struct SessionProposalView: View {
         }
         .edgesIgnoringSafeArea(.all)
     }
-    //private func sessionProposalView(chain: String) -> some View {
+
     private func sessionProposalView(namespaces: ProposalNamespace) -> some View {
         VStack {
             VStack(alignment: .leading) {
@@ -228,6 +244,45 @@ struct SessionProposalView: View {
             .cornerRadius(25, corners: .allCorners)
         }
         .padding(.bottom, 15)
+    }
+    
+    private func verifyBadgeView(imageName: String, title: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: imageName)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(color)
+            
+            Text(title)
+                .foregroundColor(color)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+            
+        }
+        .padding(5)
+        .background(color.opacity(0.15))
+        .cornerRadius(10)
+        .padding(.top, 8)
+    }
+    
+    private func verifyDescriptionView(imageName: String, title: String, description: String, color: Color) -> some View {
+        HStack(spacing: 15) {
+            Image(systemName: imageName)
+                .font(.system(size: 20, design: .rounded))
+                .foregroundColor(color)
+            
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .foregroundColor(color)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                
+                Text(description)
+                    .foregroundColor(.grey8)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(color.opacity(0.15))
+        .cornerRadius(20)
     }
 }
 

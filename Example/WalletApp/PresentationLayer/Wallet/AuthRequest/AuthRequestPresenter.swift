@@ -9,7 +9,7 @@ final class AuthRequestPresenter: ObservableObject {
 
     let importAccount: ImportAccount
     let request: AuthRequest
-    let verified: Bool?
+    let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
         return interactor.formatted(request: request, account: importAccount.account)
@@ -29,7 +29,7 @@ final class AuthRequestPresenter: ObservableObject {
         self.router = router
         self.importAccount = importAccount
         self.request = request
-        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
+        self.validationStatus = context?.validation
     }
 
     @MainActor

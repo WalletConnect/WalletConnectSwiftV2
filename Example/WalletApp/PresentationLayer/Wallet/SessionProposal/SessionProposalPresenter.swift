@@ -9,7 +9,7 @@ final class SessionProposalPresenter: ObservableObject {
 
     let importAccount: ImportAccount
     let sessionProposal: Session.Proposal
-    let verified: Bool?
+    let validationStatus: VerifyContext.ValidationStatus?
     
     @Published var showError = false
     @Published var errorMessage = "Error"
@@ -28,7 +28,7 @@ final class SessionProposalPresenter: ObservableObject {
         self.router = router
         self.sessionProposal = proposal
         self.importAccount = importAccount
-        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
+        self.validationStatus = context?.validation
     }
     
     @MainActor

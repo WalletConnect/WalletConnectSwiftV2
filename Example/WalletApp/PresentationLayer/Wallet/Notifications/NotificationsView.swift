@@ -18,7 +18,7 @@ struct NotificationsView: View {
                                 content: { item, isSelected in
                     Text(item)
                         .font(.headline)
-                        .foregroundColor(isSelected ? Color.black : Color.gray )
+                        .foregroundColor(isSelected ? Color.primary : Color.secondary )
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                 },
@@ -26,7 +26,7 @@ struct NotificationsView: View {
                     VStack(spacing: 0) {
                         Spacer()
                         Rectangle()
-                            .fill(Color.black)
+                            .fill(Color.primary)
                             .frame(height: 1)
                     }
                 })
@@ -52,6 +52,7 @@ struct NotificationsView: View {
                 listingRow(listing: listing)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                    .listRowBackground(Color.clear)
             }
         }
         .listStyle(PlainListStyle())
@@ -89,6 +90,7 @@ struct NotificationsView: View {
                                 subscriptionRow(subscription: subscription)
                                     .listRowSeparator(.hidden)
                                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                                    .listRowBackground(Color.clear)
                             }
                             .onDelete { indexSet in
                                 Task(priority: .high) {
@@ -110,15 +112,15 @@ struct NotificationsView: View {
         } label: {
             VStack {
                 HStack(spacing: 10) {
-                    AsyncImage(url: subscription.imageUrl) { phase in
+                    CacheAsyncImage(url: subscription.imageUrl) { phase in
                         if let image = phase.image {
                             image
                                 .resizable()
                                 .frame(width: 60, height: 60)
-                                .background(Color.black.opacity(0.1))
+                                .background(Color.grey8.opacity(0.1))
                                 .cornerRadius(30, corners: .allCorners)
                         } else {
-                            Color.black.opacity(0.1)
+                            Color.grey8.opacity(0.1)
                                 .frame(width: 60, height: 60)
                                 .cornerRadius(30, corners: .allCorners)
                         }
@@ -126,7 +128,7 @@ struct NotificationsView: View {
                     .padding(.leading, 20)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(subscription.title)
+                        Text(subscription.name)
                             .foregroundColor(.grey8)
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
 
@@ -148,15 +150,15 @@ struct NotificationsView: View {
     private func listingRow(listing: ListingViewModel) -> some View {
         VStack {
             HStack(spacing: 10) {
-                AsyncImage(url: listing.imageUrl) { phase in
+                CacheAsyncImage(url: listing.imageUrl) { phase in
                     if let image = phase.image {
                         image
                             .resizable()
                             .frame(width: 60, height: 60)
-                            .background(Color.black.opacity(0.1))
+                            .background(Color.grey8.opacity(0.1))
                             .cornerRadius(30, corners: .allCorners)
                     } else {
-                        Color.black.opacity(0.1)
+                        Color.grey8.opacity(0.1)
                             .frame(width: 60, height: 60)
                             .cornerRadius(30, corners: .allCorners)
                     }
@@ -178,11 +180,15 @@ struct NotificationsView: View {
                 if let subscription = presenter.subscription(forListing: listing) {
                     AsyncButton("Unsubscribe") {
                         try await presenter.unsubscribe(subscription: subscription)
-                    }.padding(16.0)
+                    }
+                    .foregroundColor(.red)
+                    .padding(16.0)
                 } else {
                     AsyncButton("Subscribe") {
                         try await presenter.subscribe(listing: listing)
-                    }.padding(16.0)
+                    }
+                    .foregroundColor(.primary)
+                    .padding(16.0)
                 }
             }
         }
