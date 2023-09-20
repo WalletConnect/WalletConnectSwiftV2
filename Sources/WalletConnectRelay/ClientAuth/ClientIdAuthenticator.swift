@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol ClientIdAuthenticating {
-    func createAuthToken() throws -> String
+    func createAuthToken(url: String?) throws -> String
 }
 
 public struct ClientIdAuthenticator: ClientIdAuthenticating {
@@ -13,9 +13,9 @@ public struct ClientIdAuthenticator: ClientIdAuthenticating {
         self.url = url
     }
 
-    public func createAuthToken() throws -> String {
+    public func createAuthToken(url: String? = nil) throws -> String {
         let keyPair = try clientIdStorage.getOrCreateKeyPair()
-        let payload = RelayAuthPayload(subject: getSubject(), audience: url)
+        let payload = RelayAuthPayload(subject: getSubject(), audience: url ?? self.url)
         return try payload.signAndCreateWrapper(keyPair: keyPair).jwtString
     }
 
