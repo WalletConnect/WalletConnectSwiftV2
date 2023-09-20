@@ -6,5 +6,6 @@ extension Notify {
         let groupIdentifier: String
         let environment: APNSEnvironment
         let crypto: CryptoProvider
+        let notifyHost: String
     }
 }
