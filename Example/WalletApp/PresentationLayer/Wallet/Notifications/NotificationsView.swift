@@ -112,7 +112,7 @@ struct NotificationsView: View {
         } label: {
             VStack {
                 HStack(spacing: 10) {
-                    AsyncImage(url: subscription.imageUrl) { phase in
+                    CacheAsyncImage(url: subscription.imageUrl) { phase in
                         if let image = phase.image {
                             image
                                 .resizable()
@@ -150,7 +150,7 @@ struct NotificationsView: View {
     private func listingRow(listing: ListingViewModel) -> some View {
         VStack {
             HStack(spacing: 10) {
-                AsyncImage(url: listing.imageUrl) { phase in
+                CacheAsyncImage(url: listing.imageUrl) { phase in
                     if let image = phase.image {
                         image
                             .resizable()

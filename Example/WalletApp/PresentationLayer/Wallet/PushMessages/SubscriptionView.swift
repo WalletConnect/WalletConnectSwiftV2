@@ -36,7 +36,7 @@ struct SubscriptionView: View {
     private func notificationView(pushMessage: NotifyMessageViewModel) -> some View {
         VStack(alignment: .center) {
             HStack(spacing: 10) {
-                AsyncImage(url: URL(string: pushMessage.imageUrl)) { phase in
+                CacheAsyncImage(url: URL(string: pushMessage.imageUrl)) { phase in
                     if let image = phase.image {
                         image
                             .resizable()
@@ -76,7 +76,7 @@ struct SubscriptionView: View {
 
     func headerView() -> some View {
         VStack(spacing: 0) {
-            AsyncImage(url: presenter.subscriptionViewModel.imageUrl) { phase in
+            CacheAsyncImage(url: presenter.subscriptionViewModel.imageUrl) { phase in
                 if let image = phase.image {
                     image
                         .resizable()
