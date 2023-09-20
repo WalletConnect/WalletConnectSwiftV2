@@ -39,68 +39,16 @@ struct SessionProposalView: View {
                     
                     switch presenter.validationStatus {
                     case .unknown:
-                        HStack(spacing: 5) {
-                            Image(systemName: "exclamationmark.circle.fill")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.orange)
-                            
-                            Text("Cannot verify")
-                                .foregroundColor(.orange)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                        }
-                        .padding(5)
-                        .background(Color.orange.opacity(0.15))
-                        .cornerRadius(10)
-                        .padding(.top, 8)
+                        verifyBadgeView(imageName: "exclamationmark.circle.fill", title: "Cannot verify", color: .orange)
                         
                     case .valid:
-                        HStack(spacing: 5) {
-                            Image(systemName: "checkmark.seal.fill")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.blue)
-                            
-                            Text("Verified domain")
-                                .foregroundColor(.blue)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                        }
-                        .padding(5)
-                        .background(Color.blue.opacity(0.15))
-                        .cornerRadius(10)
-                        .padding(.top, 8)
+                        verifyBadgeView(imageName: "checkmark.seal.fill", title: "Verified domain", color: .blue)
                         
                     case .invalid:
-                        HStack(spacing: 5) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.red)
-                            
-                            Text("Invalid domain")
-                                .foregroundColor(.red)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                        }
-                        .padding(5)
-                        .background(Color.red.opacity(0.15))
-                        .cornerRadius(10)
-                        .padding(.top, 8)
+                        verifyBadgeView(imageName: "exclamationmark.triangle.fill", title: "Invalid domain", color: .red)
                         
                     case .scam:
-                        HStack(spacing: 5) {
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.red)
-                            
-                            Text("Security risk")
-                                .foregroundColor(.red)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                        }
-                        .padding(5)
-                        .background(Color.red.opacity(0.15))
-                        .cornerRadius(10)
-                        .padding(.top, 8)
+                        verifyBadgeView(imageName: "exclamationmark.shield.fill", title: "Security risk", color: .red)
                         
                     default:
                         EmptyView()
@@ -147,67 +95,13 @@ struct SessionProposalView: View {
                     
                     switch presenter.validationStatus {
                     case .invalid:
-                        HStack(spacing: 15) {
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .font(.system(size: 20, design: .rounded))
-                                .foregroundColor(.red)
-                            
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("Invalid domain")
-                                    .foregroundColor(.red)
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                                Text("This website has a domain that does not match the sender of this request. Approving may lead to loss of funds.")
-                                    .foregroundColor(.grey8)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red.opacity(0.15))
-                        .cornerRadius(20)
+                        verifyDescriptionView(imageName: "exclamationmark.triangle.fill", title: "Invalid domain", description: "This domain cannot be verified. Check the request carefully before approving.", color: .red)
                         
                     case .unknown:
-                        HStack(spacing: 15) {
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .font(.system(size: 20, design: .rounded))
-                                .foregroundColor(.orange)
-                            
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("Unknown domain")
-                                    .foregroundColor(.orange)
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                                Text("This domain cannot be verified. Check the request carefully before approving.")
-                                    .foregroundColor(.grey8)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.orange.opacity(0.15))
-                        .cornerRadius(20)
+                        verifyDescriptionView(imageName: "exclamationmark.circle.fill", title: "Unknown domain", description: "This domain cannot be verified. Check the request carefully before approving.", color: .orange)
                         
                     case .scam:
-                        HStack(spacing: 15) {
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .font(.system(size: 20, design: .rounded))
-                                .foregroundColor(.red)
-                            
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("Security risk")
-                                    .foregroundColor(.red)
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                
-                                Text("This website is flagged as unsafe by multiple security providers. Leave immediately to protect your assets.")
-                                    .foregroundColor(.grey8)
-                                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red.opacity(0.15))
-                        .cornerRadius(20)
+                        verifyDescriptionView(imageName: "exclamationmark.shield.fill", title: "Security risk", description: "This website is flagged as unsafe by multiple security providers. Leave immediately to protect your assets.", color: .red)
                         
                     default:
                         EmptyView()
@@ -350,6 +244,45 @@ struct SessionProposalView: View {
             .cornerRadius(25, corners: .allCorners)
         }
         .padding(.bottom, 15)
+    }
+    
+    private func verifyBadgeView(imageName: String, title: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: imageName)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(color)
+            
+            Text(title)
+                .foregroundColor(color)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+            
+        }
+        .padding(5)
+        .background(color.opacity(0.15))
+        .cornerRadius(10)
+        .padding(.top, 8)
+    }
+    
+    private func verifyDescriptionView(imageName: String, title: String, description: String, color: Color) -> some View {
+        HStack(spacing: 15) {
+            Image(systemName: imageName)
+                .font(.system(size: 20, design: .rounded))
+                .foregroundColor(color)
+            
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .foregroundColor(color)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                
+                Text(description)
+                    .foregroundColor(.grey8)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(color.opacity(0.15))
+        .cornerRadius(20)
     }
 }
 
