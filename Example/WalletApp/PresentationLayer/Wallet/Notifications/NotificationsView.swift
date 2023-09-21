@@ -42,7 +42,7 @@ struct NotificationsView: View {
             }
         }
         .task {
-            try! await presenter.fetch()
+            try? await presenter.fetch()
         }
     }
 
