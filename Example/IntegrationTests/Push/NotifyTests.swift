@@ -11,7 +11,7 @@ import WalletConnectPush
 @testable import WalletConnectPairing
 import WalletConnectIdentity
 import WalletConnectSigner
-
+ 
 final class NotifyTests: XCTestCase {
 
     var walletNotifyClientA: NotifyClient!
