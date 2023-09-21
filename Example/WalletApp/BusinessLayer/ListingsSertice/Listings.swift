@@ -13,8 +13,8 @@ struct Listing: Codable {
     }
     let id: String
     let name: String
-    let description: String
-    let homepage: String
-    let image_url: ImageURL
+    let description: String?
+    let homepage: String?
+    let image_url: ImageURL?
     let dapp_url: String
 }
