@@ -9,7 +9,7 @@ struct ListingViewModel: Identifiable {
     }
 
     var imageUrl: URL? {
-        return listing.image_url.md
+        return listing.image_url?.md
     }
 
     var title: String {
@@ -17,11 +17,11 @@ struct ListingViewModel: Identifiable {
     }
 
     var subtitle: String {
-        return listing.description
+        return listing.description ?? ""
     }
 
     var appDomain: String? {
-        let url = listing.homepage
+        let url = listing.dapp_url
         return URL(string: url)?.host
     }
 }
