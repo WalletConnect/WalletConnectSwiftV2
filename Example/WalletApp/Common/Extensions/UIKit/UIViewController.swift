@@ -48,6 +48,12 @@ extension UIViewController {
         navigationController.navigationBar.prefersLargeTitles = true
         return navigationController
     }
+
+    func showAlert(title: String, error: Error) {
+        let alert = UIAlertController(title: title, message: error.localizedDescription, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 extension UIApplication {
