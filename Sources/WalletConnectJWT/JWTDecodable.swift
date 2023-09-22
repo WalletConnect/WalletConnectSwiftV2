@@ -43,10 +43,8 @@ extension JWTClaimsCodable {
 
     public func signAndCreateWrapper(keyPair: SigningPrivateKey) throws -> Wrapper {
         let claims = try encode(iss: keyPair.publicKey.did)
-        var jwt = JWT(claims: claims)
-        try jwt.sign(using: EdDSASigner(keyPair))
-        let jwtString = try jwt.encoded()
-        return Wrapper(jwtString: jwtString)
+        let jwt = try JWT(claims: claims, signer: EdDSASigner(keyPair))
+        return Wrapper(jwtString: jwt.string)
     }
 
     public func defaultIat() -> UInt64 {
