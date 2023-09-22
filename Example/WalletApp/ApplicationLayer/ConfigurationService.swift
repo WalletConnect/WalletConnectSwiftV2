@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 import WalletConnectNetworking
 import WalletConnectNotify
 import Web3Wallet
@@ -26,7 +26,15 @@ final class ConfigurationService {
 
         Notify.instance.setLogging(level: .debug)
 
-        Task { try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign) }
+        Task {
+            do {
+                try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign)
+            } catch {
+                DispatchQueue.main.async {
+                    UIApplication.currentWindow.rootViewController?.showAlert(title: "Register error", error: error)
+                }
+            }
+        }
 
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
