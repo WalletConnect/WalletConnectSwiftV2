@@ -6,10 +6,12 @@ class SubscriptionWatcher: ObservableObject {
 
     private var timerCancellable: AnyCancellable?
     private var appLifecycleCancellable: AnyCancellable?
+    private var notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester
 
-    private let backgroundQueue = DispatchQueue(label: "com.example.subscriptionWatcher", qos: .background)
+    private let backgroundQueue = DispatchQueue(label: "com.walletconncet.subscriptionWatcher", qos: .background)
 
-    init() {
+    init(notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester) {
+        self.notifyWatchSubscriptionsRequester = notifyWatchSubscriptionsRequester
         setupTimer()
         watchAppLifecycle()
     }
@@ -26,7 +28,7 @@ class SubscriptionWatcher: ObservableObject {
     }
 
     func watchSubscriptions() {
-        
+        Task(priority: .background) { try await notifyWatchSubscriptionsRequester.watchSubscriptions() }
     }
 
     func watchAppLifecycle() {

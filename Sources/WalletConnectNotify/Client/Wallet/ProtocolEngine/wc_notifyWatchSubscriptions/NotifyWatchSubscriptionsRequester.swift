@@ -28,16 +28,6 @@ class NotifyWatchSubscriptionsRequester {
         self.kms = kms
         self.webDidResolver = webDidResolver
         self.notifyHost = notifyHost
-        setUpWatchSubscriptionsOnSocketConnection()
-    }
-
-    func setUpWatchSubscriptionsOnSocketConnection() {
-        networkingInteractor.socketConnectionStatusPublisher
-            .sink { [unowned self] status in
-                guard status == .connected else { return }
-                Task { try await watchSubscriptions() }
-            }
-            .store(in: &publishers)
     }
 
     func setAccount(_ account: Account) {
@@ -45,7 +35,7 @@ class NotifyWatchSubscriptionsRequester {
         Task { try await watchSubscriptions() }
     }
 
-    private func watchSubscriptions() async throws {
+    func watchSubscriptions() async throws {
 
         guard let account = account else { return }
 
