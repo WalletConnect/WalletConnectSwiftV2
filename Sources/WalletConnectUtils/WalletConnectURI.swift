@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 public struct WalletConnectURI: Equatable {
 
@@ -43,6 +43,27 @@ public struct WalletConnectURI: Equatable {
         self.topic = topic
         self.symKey = symKey
         self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
+    }
+    
+    public init?(deeplinkUri: URL) {
+        if let deeplinkUri = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") {
+            self.init(string: deeplinkUri)
+        }
+        return nil
+    }
+    
+    public init?(connectionOptions: UIScene.ConnectionOptions) {
+        if let uri = connectionOptions.urlContexts.first?.url.query?.replacingOccurrences(of: "uri=", with: "") {
+            self.init(string: uri)
+        }
+        return nil
+    }
+    
+    public init?(urlContext: UIOpenURLContext) {
+        if let uri = urlContext.url.query?.replacingOccurrences(of: "uri=", with: "") {
+            self.init(string: uri)
+        }
+        return nil
     }
 
     private var relayQuery: String {
