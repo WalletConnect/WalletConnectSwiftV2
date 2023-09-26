@@ -80,7 +80,24 @@ public class NotifyClient {
     }
 
     public func subscribe(appDomain: String, account: Account) async throws {
-        try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
+        return try await withCheckedThrowingContinuation { continuation in
+
+            var cancallable: AnyCancellable?
+            cancallable = subscriptionsPublisher.sink { subscriptions in
+                guard subscriptions.contains(where: { $0.metadata.url == appDomain }) else { return }
+                cancallable?.cancel()
+                continuation.resume(with: .success(()))
+            }
+
+            Task { [cancallable] in
+                do {
+                    try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
+                } catch {
+                    cancallable?.cancel()
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     public func update(topic: String, scope: Set<String>) async throws {
