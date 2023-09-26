@@ -85,6 +85,7 @@ private extension SubscriptionPresenter {
 
         interactor.messagesPublisher
             .receive(on: DispatchQueue.main)
+            .debounce(for: 1, scheduler: RunLoop.main)
             .sink { [weak self] messages in
                 guard let self = self else { return }
                 self.pushMessages = self.interactor.getPushMessages()
