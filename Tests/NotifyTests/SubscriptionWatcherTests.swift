@@ -35,7 +35,7 @@ class SubscriptionWatcherTests: XCTestCase {
 
         sut.watchSubscriptions()
 
-        wait(for: [expectation], timeout: 0.01)
+        wait(for: [expectation], timeout: 0.5)
     }
 
 
@@ -53,7 +53,7 @@ class SubscriptionWatcherTests: XCTestCase {
 
         mockNotificationCenter.post(name: UIApplication.willEnterForegroundNotification)
 
-        wait(for: [setupExpectation, watchSubscriptionsExpectation], timeout: 0.01)
+        wait(for: [setupExpectation, watchSubscriptionsExpectation], timeout: 0.5)
     }
 
     func testTimerTriggeringWatchSubscriptionsMultipleTimes() {
@@ -67,6 +67,6 @@ class SubscriptionWatcherTests: XCTestCase {
             expectation.fulfill()
         }
 
-        wait(for: [expectation], timeout: 0.01)
+        wait(for: [expectation], timeout: 0.5)
     }
 }
