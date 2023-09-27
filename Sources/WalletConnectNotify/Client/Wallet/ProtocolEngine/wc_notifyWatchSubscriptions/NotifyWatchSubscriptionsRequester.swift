@@ -1,6 +1,10 @@
 import Foundation
 import Combine
 
+protocol NotifyWatchSubscriptionsRequesting {
+    func watchSubscriptions() async throws
+}
+
 class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
 
     private let keyserverURL: URL
@@ -102,3 +106,13 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
         )
     }
 }
+
+#if DEBUG
+class MockNotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
+    var onWatchSubscriptions: (() -> Void)?
+
+    func watchSubscriptions() async throws {
+        onWatchSubscriptions?()
+    }
+}
+#endif

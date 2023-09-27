@@ -39,7 +39,7 @@ class SubscriptionWatcherTests: XCTestCase {
     }
 
 
-    func testWatchAppLifecycleReactsToNotification() {
+    func testWatchAppLifecycleReactsToEnterForegroundNotification() {
         let setupExpectation = XCTestExpectation(description: "Expect setupTimer to be called on app enter foreground")
         let watchSubscriptionsExpectation = XCTestExpectation(description: "Expect watchSubscriptions to be called on app enter foreground")
 
