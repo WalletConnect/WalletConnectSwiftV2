@@ -80,7 +80,6 @@ public struct NotifyClientFactory {
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
             subscriptionsAutoUpdater: subscriptionsAutoUpdater,
-            notifyWatchSubscriptionsRequester: notifyWatchSubscriptionsRequester,
             notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber,
             notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber,
             subscriptionWatcher: subscriptionWatcher

@@ -32,7 +32,6 @@ public class NotifyClient {
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
-    private let notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester
     private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
     private let notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
     private let subscriptionWatcher: SubscriptionWatcher
@@ -50,7 +49,6 @@ public class NotifyClient {
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
-         notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester,
          notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
          notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
          subscriptionWatcher: SubscriptionWatcher
@@ -67,7 +65,6 @@ public class NotifyClient {
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
-        self.notifyWatchSubscriptionsRequester = notifyWatchSubscriptionsRequester
         self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
         self.subscriptionWatcher = subscriptionWatcher
@@ -75,7 +72,7 @@ public class NotifyClient {
 
     public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
         try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        notifyWatchSubscriptionsRequester.setAccount(account)
+        subscriptionWatcher.setAccount(account)
     }
 
     public func setLogging(level: LoggingLevel) {
