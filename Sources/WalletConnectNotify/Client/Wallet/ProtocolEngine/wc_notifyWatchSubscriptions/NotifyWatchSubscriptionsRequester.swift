@@ -32,7 +32,6 @@ class NotifyWatchSubscriptionsRequester {
 
     func setAccount(_ account: Account) {
         self.account = account
-        Task { try await watchSubscriptions() }
     }
 
     func watchSubscriptions() async throws {
