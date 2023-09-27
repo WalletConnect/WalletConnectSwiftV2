@@ -158,9 +158,6 @@ final class NotifyTests: XCTestCase {
         let updateScope: Set<String> = ["alerts"]
         expectation.assertForOverFulfill = false
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
-
         var didUpdate = false
         walletNotifyClientA.subscriptionsPublisher
             .sink { [unowned self] subscriptions in
@@ -181,6 +178,9 @@ final class NotifyTests: XCTestCase {
                 }
             }.store(in: &publishers)
 
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
 
@@ -188,8 +188,6 @@ final class NotifyTests: XCTestCase {
         let subscribeExpectation = expectation(description: "creates notify subscription")
         let messageExpectation = expectation(description: "receives a notify message")
         let notifyMessage = NotifyMessage.stub()
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         var didNotify = false
         walletNotifyClientA.subscriptionsPublisher
@@ -214,6 +212,9 @@ final class NotifyTests: XCTestCase {
                     messageExpectation.fulfill()
                 }
         }.store(in: &publishers)
+
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
     }
