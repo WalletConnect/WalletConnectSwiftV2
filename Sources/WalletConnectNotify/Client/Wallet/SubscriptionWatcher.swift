@@ -1,27 +1,38 @@
 import Foundation
 import Combine
-import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
 
-class SubscriptionWatcher: ObservableObject {
+class SubscriptionWatcher {
 
     private var timerCancellable: AnyCancellable?
     private var appLifecycleCancellable: AnyCancellable?
-    private var notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester
+    private var notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting
     private let logger: ConsoleLogging
     private let backgroundQueue = DispatchQueue(label: "com.walletconnect.subscriptionWatcher", qos: .background)
+    private let notificationCenter: NotificationPublishing
 
-    init(notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester,
-         logger: ConsoleLogging) {
+#if DEBUG
+    var timerInterval: TimeInterval = 5 * 60
+    var onSetupTimer: (() -> Void)?
+#endif
+
+    init(notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting,
+         logger: ConsoleLogging,
+         notificationCenter: NotificationPublishing = NotificationCenter.default) {
         self.notifyWatchSubscriptionsRequester = notifyWatchSubscriptionsRequester
         self.logger = logger
+        self.notificationCenter = notificationCenter
         setupTimer()
         watchAppLifecycle()
     }
 
     func setupTimer() {
+        onSetupTimer?()
         logger.debug("Setting up Subscription Watcher timer")
         timerCancellable?.cancel()
-        timerCancellable = Timer.publish(every: 5 * 60, on: .main, in: .common)
+        timerCancellable = Timer.publish(every: timerInterval, on: .main, in: .common)
             .autoconnect()
             .sink { [unowned self] _ in
                 backgroundQueue.async {
@@ -36,7 +47,8 @@ class SubscriptionWatcher: ObservableObject {
     }
 
     func watchAppLifecycle() {
-        appLifecycleCancellable = NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+#if os(iOS)
+        appLifecycleCancellable = notificationCenter.publisher(for: UIApplication.willEnterForegroundNotification)
             .receive(on: RunLoop.main)
             .sink { [unowned self] _ in
                 logger.debug("Will setup Subscription Watcher after app entered foreground")
@@ -45,5 +57,43 @@ class SubscriptionWatcher: ObservableObject {
                     self.watchSubscriptions()
                 }
             }
+#endif
+    }
+}
+
+
+protocol NotifyWatchSubscriptionsRequesting {
+    func watchSubscriptions() async throws
+}
+
+protocol NotificationPublishing {
+    func publisher(for name: NSNotification.Name) -> AnyPublisher<Notification, Never>
+}
+
+extension NotificationCenter: NotificationPublishing {
+    func publisher(for name: NSNotification.Name) -> AnyPublisher<Notification, Never> {
+        return publisher(for: name, object: nil).eraseToAnyPublisher()
+    }
+}
+
+
+
+class MockNotificationCenter: NotificationPublishing {
+    private let subject = PassthroughSubject<Notification, Never>()
+
+    func publisher(for name: NSNotification.Name) -> AnyPublisher<Notification, Never> {
+        return subject.eraseToAnyPublisher()
+    }
+
+    func post(name: NSNotification.Name) {
+        subject.send(Notification(name: name))
+    }
+}
+
+class MockNotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
+    var onWatchSubscriptions: (() -> Void)?
+
+    func watchSubscriptions() async throws {
+        onWatchSubscriptions?()
     }
 }

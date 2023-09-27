@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-class NotifyWatchSubscriptionsRequester {
+class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
 
     private let keyserverURL: URL
     private let identityClient: IdentityClient
