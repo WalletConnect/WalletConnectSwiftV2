@@ -13,12 +13,8 @@ class SubscriptionWatcher {
     private let backgroundQueue = DispatchQueue(label: "com.walletconnect.subscriptionWatcher", qos: .background)
     private let notificationCenter: NotificationPublishing
 
-#if DEBUG
-    var timerInterval: TimeInterval = 1
-    var onSetupTimer: (() -> Void)?
-#else
     var timerInterval: TimeInterval = 5 * 60
-#endif
+    var onSetupTimer: (() -> Void)?
 
     init(notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting,
          logger: ConsoleLogging,
@@ -31,9 +27,7 @@ class SubscriptionWatcher {
     }
 
     func setupTimer() {
-#if DEBUG
         onSetupTimer?()
-#endif
         logger.debug("Setting up Subscription Watcher timer")
         timerCancellable?.cancel()
         timerCancellable = Timer.publish(every: timerInterval, on: .main, in: .common)
@@ -64,6 +58,3 @@ class SubscriptionWatcher {
 #endif
     }
 }
-
-
-
