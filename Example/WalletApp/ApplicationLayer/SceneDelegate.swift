@@ -28,7 +28,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         window?.makeKeyAndVisible()
 
-        app.uri = connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?uri=", with: "")
+        app.uri = WalletConnectURI(connectionOptions: connectionOptions)
         app.requestSent = (connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?", with: "") == "requestSent")
 
         configurators.configure()
@@ -37,11 +37,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
 
-		let queryParams = context.url.queryParameters
+		let uri = WalletConnectURI(urlContext: context)
 		
-		if let uri = queryParams["uri"] as? String {
+		if let uri {
 			Task {
-				try await Pair.instance.pair(uri: WalletConnectURI(string: uri)!)
+				try await Pair.instance.pair(uri: uri)
 			}
 		}
     }
