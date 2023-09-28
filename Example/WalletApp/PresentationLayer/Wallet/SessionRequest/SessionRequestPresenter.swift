@@ -9,6 +9,7 @@ final class SessionRequestPresenter: ObservableObject {
     private let importAccount: ImportAccount
     
     let sessionRequest: Request
+    let session: Session?
     let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
@@ -31,6 +32,7 @@ final class SessionRequestPresenter: ObservableObject {
         self.interactor = interactor
         self.router = router
         self.sessionRequest = sessionRequest
+        self.session = interactor.getSession(topic: sessionRequest.topic)
         self.importAccount = importAccount
         self.validationStatus = context?.validation
     }
