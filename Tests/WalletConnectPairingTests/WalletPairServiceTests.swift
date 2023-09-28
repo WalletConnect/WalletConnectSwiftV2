@@ -28,9 +28,9 @@ final class WalletPairServiceTestsTests: XCTestCase {
     }
 
     func testPairOnSameUriPresentsRequest() async {
-        let rpcRequest = RPCRequest(method: "session_propose", id: 1234)
-        
         let uri = WalletConnectURI.stub()
+        let rpcRequest = RPCRequest(method: "session_propose", id: 1234, topic: uri.topic)
+        
         try! await service.pair(uri)
         var pairing = storageMock.getPairing(forTopic: uri.topic)
         pairing?.receivedRequest()

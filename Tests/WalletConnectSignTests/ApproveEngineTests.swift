@@ -125,7 +125,7 @@ final class ApproveEngineTests: XCTestCase {
         let session = WCSession.stub(isSelfController: true, acknowledged: false)
         sessionStorageMock.setSession(session)
 
-        let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
+        let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub(), topic: session.topic)
         let response = RPCResponse(matchingRequest: request, result: RPCResult.response(AnyCodable(true)))
 
         networkingInteractor.responsePublisherSubject.send((session.topic, request, response, Date(), nil))
@@ -140,7 +140,7 @@ final class ApproveEngineTests: XCTestCase {
         cryptoMock.setAgreementSecret(AgreementKeys.stub(), topic: session.topic)
         try! cryptoMock.setPrivateKey(privateKey)
 
-        let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub())
+        let request = RPCRequest(method: SessionSettleProtocolMethod().method, params: SessionType.SettleParams.stub(), topic: session.topic)
         let response = RPCResponse.stubError(forRequest: request)
 
         networkingInteractor.responsePublisherSubject.send((session.topic, request, response, Date(), nil))

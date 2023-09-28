@@ -5,14 +5,14 @@ import TestingUtils
 
 private func makeRequests() -> [RPCRequest] {
     return [
-        RPCRequest(method: String.random(), id: Int64.random()),
-        RPCRequest(method: String.random(), id: String.random()),
-        RPCRequest(method: String.random(), params: EmptyCodable(), id: Int64.random()),
-        RPCRequest(method: String.random(), params: EmptyCodable(), id: String.random()),
-        RPCRequest(method: String.random(), params: [0, 1, 2], id: Int64.random()),
-        RPCRequest(method: String.random(), params: ["0", "1", "2"], id: String.random()),
-        RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: Int64.random()),
-        RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: String.random())
+        RPCRequest(method: String.random(), id: Int64.random(), topic: "topic"),
+        RPCRequest(method: String.random(), id: String.random(), topic: "topic"),
+        RPCRequest(method: String.random(), params: EmptyCodable(), id: Int64.random(), topic: "topic"),
+        RPCRequest(method: String.random(), params: EmptyCodable(), id: String.random(), topic: "topic"),
+        RPCRequest(method: String.random(), params: [0, 1, 2], id: Int64.random(), topic: "topic"),
+        RPCRequest(method: String.random(), params: ["0", "1", "2"], id: String.random(), topic: "topic"),
+        RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: Int64.random(), topic: "topic"),
+        RPCRequest(method: String.random(), params: [AnyCodable(0), AnyCodable("0")], id: String.random(), topic: "topic")
     ]
 }
 
@@ -29,31 +29,31 @@ final class RPCRequestTests: XCTestCase {
         let idGenerator = TestIdentifierGenerator()
         let cachedGenerator = RPCRequest.defaultIdentifierGenerator
         RPCRequest.defaultIdentifierGenerator = idGenerator
-        let requestA = RPCRequest(method: String.random(), params: EmptyCodable())
-        let requestB = RPCRequest(method: String.random())
+        let requestA = RPCRequest(method: String.random(), params: EmptyCodable(), topic: "topic")
+        let requestB = RPCRequest(method: String.random(), topic: "topic")
         XCTAssertEqual(requestA.id, idGenerator.id)
         XCTAssertEqual(requestB.id, idGenerator.id)
         RPCRequest.defaultIdentifierGenerator = cachedGenerator
     }
 
     func testCheckedParamsInit() {
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0]))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: Int64.random()))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: String.random()))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable()))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: Int64.random()))
-        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: String.random()))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], topic: "topic"))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: Int64.random(), topic: "topic"))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: [0], id: String.random(), topic: "topic"))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), topic: "topic"))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: Int64.random(), topic: "topic"))
+        XCTAssertNoThrow(try RPCRequest(method: "method", checkedParams: EmptyCodable(), id: String.random(), topic: "topic"))
     }
 
     func testCheckedParamsInitFailsWithPrimitives() {
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: Int64.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: String.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: Int64.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: String.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: Int64.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: String.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: Int64.random()))
-        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: String.random()))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: Int64.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: 0, id: String.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: Int64.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: "string", id: String.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: Int64.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: Double.pi, id: String.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: Int64.random(), topic: "topic"))
+        XCTAssertThrowsError(try RPCRequest(method: "method", checkedParams: true, id: String.random(), topic: "topic"))
     }
 
     func testRoundTripCoding() throws {
