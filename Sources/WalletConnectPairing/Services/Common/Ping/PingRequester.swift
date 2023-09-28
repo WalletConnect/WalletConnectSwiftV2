@@ -10,7 +10,7 @@ public class PingRequester {
     }
 
     public func ping(topic: String) async throws {
-        let request = RPCRequest(method: method.method, params: PairingPingParams())
+        let request = RPCRequest(method: method.method, params: PairingPingParams(), topic: topic)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: method)
     }
 }

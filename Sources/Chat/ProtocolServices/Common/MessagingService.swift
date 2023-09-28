@@ -38,7 +38,7 @@ class MessagingService {
         )
 
         let protocolMethod = ChatMessageProtocolMethod()
-        let request = RPCRequest(method: protocolMethod.method, params: wrapper)
+        let request = RPCRequest(method: protocolMethod.method, params: wrapper, topic: topic)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         logger.debug("Message sent on topic: \(topic)")

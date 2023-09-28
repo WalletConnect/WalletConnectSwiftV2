@@ -193,7 +193,15 @@ public class NetworkingInteractor: NetworkInteracting {
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String, _ publishedAt: Date) {
         if let (deserializedJsonRpcRequest, derivedTopic, decryptedPayload): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleRequest(topic: topic, request: deserializedJsonRpcRequest, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+            if let rpcRequestTopic = deserializedJsonRpcRequest.topic {
+                if rpcRequestTopic == topic {
+                    handleRequest(topic: topic, request: deserializedJsonRpcRequest, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                } else {
+                    logger.debug("Networking Interactor - Mismatched topic decoded from message")
+                }
+            } else {
+                handleRequest(topic: topic, request: deserializedJsonRpcRequest, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+            }
         } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleResponse(topic: topic, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
         } else {

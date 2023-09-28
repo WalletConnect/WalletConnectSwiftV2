@@ -45,7 +45,8 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
         let request = try createJWTRequest(
             dappPubKey: DIDKey(rawData: dappAuthenticationKey),
             subscriptionAccount: subscription.account,
-            appDomain: subscription.metadata.url, scope: scope
+            appDomain: subscription.metadata.url, scope: scope,
+            topic: topic
         )
 
         let protocolMethod = NotifyUpdateProtocolMethod()
@@ -53,7 +54,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
-    private func createJWTRequest(dappPubKey: DIDKey, subscriptionAccount: Account, appDomain: String, scope: Set<String>) throws -> RPCRequest {
+    private func createJWTRequest(dappPubKey: DIDKey, subscriptionAccount: Account, appDomain: String, scope: Set<String>, topic: String) throws -> RPCRequest {
         let protocolMethod = NotifyUpdateProtocolMethod().method
         let scopeClaim = scope.joined(separator: " ")
         let app = DIDWeb(host: appDomain)
@@ -62,6 +63,6 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
             payload: jwtPayload,
             account: subscriptionAccount
         )
-        return RPCRequest(method: protocolMethod, params: wrapper)
+        return RPCRequest(method: protocolMethod, params: wrapper, topic: topic)
     }
 }

@@ -182,6 +182,7 @@ public class ChatClient {
     /// Ping its peer to evaluate if it's currently online
     /// - Parameter topic: chat thread topic
     public func ping(topic: String) {
+        // Pass 'topic' value to the RPCRequest when implemented
         fatalError("not implemented")
     }
 

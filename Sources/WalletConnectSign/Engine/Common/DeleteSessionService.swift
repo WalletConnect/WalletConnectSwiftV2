@@ -21,7 +21,7 @@ class DeleteSessionService {
         let protocolMethod = SessionDeleteProtocolMethod()
         let reason = SessionType.Reason(code: reasonCode.code, message: reasonCode.message)
         logger.debug("Will delete session for reason: message: \(reason.message) code: \(reason.code)")
-        let request = RPCRequest(method: protocolMethod.method, params: reason)
+        let request = RPCRequest(method: protocolMethod.method, params: reason, topic: topic)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         sessionStore.delete(topic: topic)
         logger.debug("Session disconnected")

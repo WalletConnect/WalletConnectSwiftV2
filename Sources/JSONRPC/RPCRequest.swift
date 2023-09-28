@@ -16,59 +16,62 @@ public struct RPCRequest: Equatable {
     public let params: AnyCodable?
 
     public let id: RPCID?
+    
+    public let topic: String?
 
-    internal init(method: String, params: AnyCodable?, id: RPCID?) {
+    internal init(method: String, params: AnyCodable?, id: RPCID?, topic: String? = nil) {
         self.jsonrpc = "2.0"
         self.method = method
         self.params = params
         self.id = id
+        self.topic = topic
     }
 
-    internal init<C>(method: String, checkedParams params: C, id: RPCID) throws where C: Codable {
+    internal init<C>(method: String, checkedParams params: C, id: RPCID, topic: String?) throws where C: Codable {
         if params is Int || params is Double || params is String || params is Bool {
             throw Error.invalidPrimitiveParameter
         }
-        self.init(method: method, params: AnyCodable(params), id: id)
+        self.init(method: method, params: AnyCodable(params), id: id, topic: topic)
     }
 
-    public init<C>(method: String, checkedParams params: C, idGenerator: IdentifierGenerator = defaultIdentifierGenerator) throws where C: Codable {
-        try self.init(method: method, checkedParams: params, id: idGenerator.next())
+    public init<C>(method: String, checkedParams params: C, idGenerator: IdentifierGenerator = defaultIdentifierGenerator, topic: String?) throws where C: Codable {
+        try self.init(method: method, checkedParams: params, id: idGenerator.next(), topic: topic)
     }
 
-    public init<C>(method: String, checkedParams params: C, id: Int64) throws where C: Codable {
-        try self.init(method: method, checkedParams: params, id: .right(id))
+    public init<C>(method: String, checkedParams params: C, id: Int64, topic: String?) throws where C: Codable {
+        try self.init(method: method, checkedParams: params, id: .right(id), topic: topic)
     }
 
-    public init<C>(method: String, checkedParams params: C, id: String) throws where C: Codable {
-        try self.init(method: method, checkedParams: params, id: .left(id))
+    public init<C>(method: String, checkedParams params: C, id: String, topic: String?) throws where C: Codable {
+        try self.init(method: method, checkedParams: params, id: .left(id), topic: topic)
     }
 
-    public init<C>(method: String, params: C, idGenerator: IdentifierGenerator = defaultIdentifierGenerator) where C: Codable {
-        self.init(method: method, params: AnyCodable(params), id: idGenerator.next())
+    public init<C>(method: String, params: C, idGenerator: IdentifierGenerator = defaultIdentifierGenerator, topic: String?) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: idGenerator.next(), topic: topic)
     }
 
-    public init<C>(method: String, params: C, id: Int64) where C: Codable {
-        self.init(method: method, params: AnyCodable(params), id: .right(id))
+    public init<C>(method: String, params: C, id: Int64, topic: String?) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: .right(id), topic: topic)
     }
 
-    public init<C>(method: String, params: C, rpcid: RPCID) where C: Codable {
-        self.init(method: method, params: AnyCodable(params), id: rpcid)
+    public init<C>(method: String, params: C, rpcid: RPCID, topic: String?) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: rpcid, topic: topic)
     }
 
-    public init<C>(method: String, params: C, id: String) where C: Codable {
-        self.init(method: method, params: AnyCodable(params), id: .left(id))
+    public init<C>(method: String, params: C, id: String, topic: String?) where C: Codable {
+        self.init(method: method, params: AnyCodable(params), id: .left(id), topic: topic)
     }
 
-    public init(method: String, idGenerator: IdentifierGenerator = defaultIdentifierGenerator) {
-        self.init(method: method, params: nil, id: idGenerator.next())
+    public init(method: String, idGenerator: IdentifierGenerator = defaultIdentifierGenerator, topic: String?) {
+        self.init(method: method, params: nil, id: idGenerator.next(), topic: topic)
     }
 
-    public init(method: String, id: Int64) {
-        self.init(method: method, params: nil, id: .right(id))
+    public init(method: String, id: Int64, topic: String?) {
+        self.init(method: method, params: nil, id: .right(id), topic: topic)
     }
 
-    public init(method: String, id: String) {
-        self.init(method: method, params: nil, id: .left(id))
+    public init(method: String, id: String, topic: String?) {
+        self.init(method: method, params: nil, id: .left(id), topic: topic)
     }
 }
 
@@ -101,6 +104,7 @@ extension RPCRequest: Codable {
         id = try container.decodeIfPresent(RPCID.self, forKey: .id)
         method = try container.decode(String.self, forKey: .method)
         params = try container.decodeIfPresent(AnyCodable.self, forKey: .params)
+        topic = try container.decodeIfPresent(String.self, forKey: .topic)
         if let decodedParams = params {
             if decodedParams.value is Int || decodedParams.value is Double || decodedParams.value is String || decodedParams.value is Bool {
                 throw DecodingError.dataCorruptedError(
