@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "32f641cf24fc7abc1c591a2025e9f2f572648b0f",
-          "version": "1.7.2"
+          "revision": "db51c407d3be4a051484a141bf0bff36c43d3b1e",
+          "version": "1.8.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "12998398eb51e2e8ff7098163fa97d305eee6d87",
-          "version": "8.11.0"
+          "revision": "14aa6e47b03b820fd2b338728637570b9e969994",
+          "version": "8.12.0"
         }
       },
       {
