@@ -45,13 +45,15 @@ actor PushRegisterService {
             guard response.status == .success else {
                 throw Errors.registrationFailed
             }
-            logger.debug("Successfully registered at Echo Server")
+            logger.debug("Successfully registered at Push Server")
         } catch {
             if (error as? HTTPError) == .couldNotConnect && !fallback {
+                logger.debug("Trying fallback")
                 fallback = true
                 await echoHostFallback()
                 try await register(deviceToken: deviceToken)
             }
+            logger.debug("Push Server registration error: \(error.localizedDescription)")
             throw error
         }
     }

@@ -26,20 +26,22 @@ final class ConfigurationService {
 
         Notify.instance.setLogging(level: .debug)
 
-        Task {
-            do {
-                try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign)
-            } catch {
-                DispatchQueue.main.async {
-                    UIApplication.currentWindow.rootViewController?.showAlert(title: "Register error", error: error)
-                }
-            }
-        }
-
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
             ProfilingService.instance.setUpProfiling(account: importAccount.account.absoluteString, clientId: clientId)
         }
         LoggingService.instance.startLogging()
+
+        Task {
+            do {
+                try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign)
+            } catch {
+                DispatchQueue.main.async {
+                    let logMessage = LogMessage(message: "Push Server registration failed with: \(error.localizedDescription)")
+                    ProfilingService.instance.send(logMessage: logMessage)
+                    UIApplication.currentWindow.rootViewController?.showAlert(title: "Register error", error: error)
+                }
+            }
+        }
     }
 }
