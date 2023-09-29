@@ -121,6 +121,7 @@ struct SessionRequestView: View {
                         Text(presenter.message)
                             .foregroundColor(.grey50)
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)

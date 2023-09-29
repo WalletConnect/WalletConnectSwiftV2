@@ -13,7 +13,9 @@ final class SessionRequestPresenter: ObservableObject {
     let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
-        return String(describing: sessionRequest.params.value)
+        let message = try? sessionRequest.params.get([String].self)
+        let decryptedMessage = message.map { String(data: Data(hex: $0.first ?? ""), encoding: .utf8) }
+        return (decryptedMessage ?? "Failed to decrypt") ?? "Failed to decrypt"
     }
     
     @Published var showError = false
@@ -57,8 +59,17 @@ final class SessionRequestPresenter: ObservableObject {
 
 // MARK: - Private functions
 private extension SessionRequestPresenter {
-    func setupInitialState() {
+    func setupInitialState() {}
+    
+    func hexToString(hexString: String) -> String {
+        let regex = try! NSRegularExpression(pattern: "(0x)?([0-9A-Fa-f]{2})", options: .caseInsensitive)
+        let textNS = hexString as NSString
+        let matchesArray = regex.matches(in: textNS as String, options: [], range: NSMakeRange(0, textNS.length))
+        let characters = matchesArray.map {
+            Character(UnicodeScalar(UInt32(textNS.substring(with: $0.range(at: 2)), radix: 16)!)!)
+        }
 
+        return String(characters)
     }
 }
 
