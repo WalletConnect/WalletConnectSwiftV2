@@ -49,9 +49,9 @@ struct NotificationsView: View {
     private func discover() -> some View {
         return List {
             ForEach(presenter.listings) { listing in
-                listingRow(listing: listing)
+                discoverListRow(listing: listing)
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
                     .listRowBackground(Color.clear)
             }
         }
@@ -147,32 +147,21 @@ struct NotificationsView: View {
         }
     }
 
-    private func listingRow(listing: ListingViewModel) -> some View {
-        VStack {
-            HStack(spacing: 10) {
+    private func discoverListRow(listing: ListingViewModel) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
                 CacheAsyncImage(url: listing.imageUrl) { phase in
                     if let image = phase.image {
                         image
                             .resizable()
-                            .frame(width: 60, height: 60)
+                            .frame(width: 48.0, height: 48.0)
                             .background(Color.grey8.opacity(0.1))
                             .cornerRadius(30, corners: .allCorners)
                     } else {
                         Color.grey8.opacity(0.1)
-                            .frame(width: 60, height: 60)
+                            .frame(width: 48.0, height: 48.0)
                             .cornerRadius(30, corners: .allCorners)
                     }
-                }
-                .padding(.leading, 20)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(listing.title)
-                        .foregroundColor(.grey8)
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-
-                    Text(listing.subtitle)
-                        .foregroundColor(.grey50)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
                 }
 
                 Spacer()
@@ -182,16 +171,34 @@ struct NotificationsView: View {
                         try await presenter.unsubscribe(subscription: subscription)
                     }
                     .foregroundColor(.red)
-                    .padding(16.0)
                 } else {
                     AsyncButton("Subscribe") {
                         try await presenter.subscribe(listing: listing)
                     }
                     .foregroundColor(.primary)
-                    .padding(16.0)
                 }
             }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(listing.title)
+                    .foregroundColor(.grey8)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+
+                Text(listing.appDomain ?? .empty)
+                    .foregroundColor(.grey50)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+            }
+
+            Text(listing.subtitle)
+                .foregroundColor(.grey50)
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .lineLimit(2)
         }
+        .padding(16.0)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.grey95, lineWidth: 1)
+        )
     }
 }
 

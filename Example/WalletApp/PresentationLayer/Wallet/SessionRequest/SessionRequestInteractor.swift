@@ -22,4 +22,8 @@ final class SessionRequestInteractor {
             response: .error(.init(code: 0, message: ""))
         )
     }
+    
+    func getSession(topic: String) -> Session? {
+        return Web3Wallet.instance.getSessions().first(where: { $0.topic == topic })
+    }
 }

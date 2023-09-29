@@ -26,19 +26,30 @@ struct AuthRequestView: View {
                         .foregroundColor(.grey8)
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                     
-                    Text(presenter.request.payload.domain)
-                        .foregroundColor(.grey50)
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
+                    if case .valid = presenter.validationStatus {
+                        HStack {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.blue)
+                            
+                            Text(presenter.request.payload.domain)
+                                .foregroundColor(.grey8)
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .lineSpacing(4)
+                        }
                         .padding(.top, 8)
+                    } else {
+                        Text(presenter.request.payload.domain)
+                            .foregroundColor(.grey8)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .padding(.top, 8)
+                    }
                     
                     switch presenter.validationStatus {
                     case .unknown:
                         verifyBadgeView(imageName: "exclamationmark.circle.fill", title: "Cannot verify", color: .orange)
-                        
-                    case .valid:
-                        verifyBadgeView(imageName: "checkmark.seal.fill", title: "Verified domain", color: .blue)
                         
                     case .invalid:
                         verifyBadgeView(imageName: "exclamationmark.triangle.fill", title: "Invalid domain", color: .red)
@@ -68,52 +79,21 @@ struct AuthRequestView: View {
                         }
                     }
                     
-                    HStack(spacing: 20) {
-                        Button {
-                            Task(priority: .userInitiated) { try await
-                                presenter.onReject()
-                            }
-                        } label: {
-                            Text("Decline")
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(.white)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .padding(.vertical, 11)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            .foregroundNegative,
-                                            .lightForegroundNegative
-                                        ]),
-                                        startPoint: .top, endPoint: .bottom)
-                                )
-                                .cornerRadius(20)
+                    if case .scam = presenter.validationStatus {
+                        VStack(spacing: 20) {
+                            declineButton()
+                            allowButton()
                         }
-                        .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
-                        
-                        Button {
-                            Task(priority: .userInitiated) { try await
-                                presenter.onApprove()
-                            }
-                        } label: {
-                            Text("Allow")
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(.white)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .padding(.vertical, 11)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [
-                                            .foregroundPositive,
-                                            .lightForegroundPositive
-                                        ]),
-                                        startPoint: .top, endPoint: .bottom)
-                                )
-                                .cornerRadius(20)
+                        .padding(.top, 25)
+                    } else {
+                        HStack {
+                            declineButton()
+                            allowButton()
                         }
-                        .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
+                        .padding(.top, 25)
                     }
-                    .padding(.top, 25)
+                    
+                    
                 }
                 .padding(20)
                 .background(.ultraThinMaterial)
@@ -147,13 +127,12 @@ struct AuthRequestView: View {
                     }
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)
-                    .frame(height: 250)
+                    .frame(height: 150)
                 }
                 .background(Color.whiteBackground)
                 .cornerRadius(20, corners: .allCorners)
                 .padding(.horizontal, 5)
                 .padding(.bottom, 5)
-
             }
             .background(.thinMaterial)
             .cornerRadius(25, corners: .allCorners)
@@ -198,6 +177,61 @@ struct AuthRequestView: View {
         .padding()
         .background(color.opacity(0.15))
         .cornerRadius(20)
+    }
+    
+    private func declineButton() -> some View {
+        Button {
+            Task(priority: .userInitiated) { try await
+                presenter.onReject()
+            }
+        } label: {
+            Text("Decline")
+                .frame(maxWidth: .infinity)
+                .foregroundColor(.white)
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .padding(.vertical, 11)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            .foregroundNegative,
+                            .lightForegroundNegative
+                        ]),
+                        startPoint: .top, endPoint: .bottom)
+                )
+                .cornerRadius(20)
+        }
+        .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
+    }
+    
+    private func allowButton() -> some View {
+        Button {
+            Task(priority: .userInitiated) { try await
+                presenter.onApprove()
+            }
+        } label: {
+            Text(presenter.validationStatus == .scam ? "Proceed anyway" : "Allow")
+                .frame(maxWidth: .infinity)
+                .foregroundColor(presenter.validationStatus == .scam ? .grey50 : .white)
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .padding(.vertical, 11)
+                .background(
+                    Group {
+                        if presenter.validationStatus == .scam {
+                            Color.clear
+                        } else {
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    .foregroundPositive,
+                                    .lightForegroundPositive
+                                ]),
+                                startPoint: .top, endPoint: .bottom
+                            )
+                        }
+                    }
+                )
+                .cornerRadius(20)
+        }
+        .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
     }
 }
 
