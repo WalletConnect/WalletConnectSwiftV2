@@ -12,8 +12,10 @@ class SubscriptionWatcher {
     private let logger: ConsoleLogging
     private let backgroundQueue = DispatchQueue(label: "com.walletconnect.subscriptionWatcher", qos: .background)
     private let notificationCenter: NotificationPublishing
+    private var watchSubscriptionsWorkItem: DispatchWorkItem?
 
     var timerInterval: TimeInterval = 5 * 60
+    var debounceInterval: TimeInterval = 0.5
     var onSetupTimer: (() -> Void)?
 
     init(notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting,
@@ -41,14 +43,19 @@ class SubscriptionWatcher {
         notifyWatchSubscriptionsRequester.setAccount(account)
         setupTimer()
         watchAppLifecycle()
-#if DEBUG
         watchSubscriptions()
-#endif
     }
 
     func watchSubscriptions() {
-        logger.debug("Will watch subscriptions")
-        Task(priority: .background) { try await notifyWatchSubscriptionsRequester.watchSubscriptions() }
+        watchSubscriptionsWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.logger.debug("Will watch subscriptions")
+            Task(priority: .background) { [weak self] in try await self?.notifyWatchSubscriptionsRequester.watchSubscriptions() }
+        }
+
+        watchSubscriptionsWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + debounceInterval, execute: workItem)
     }
 
     func watchAppLifecycle() {

@@ -17,6 +17,7 @@ class SubscriptionWatcherTests: XCTestCase {
         mockNotificationCenter = MockNotificationCenter()
         sut = SubscriptionWatcher(notifyWatchSubscriptionsRequester: mockRequester, logger: mockLogger, notificationCenter: mockNotificationCenter)
         let account = Account("eip155:1:0x1AAe9864337E821f2F86b5D27468C59AA333C877")!
+        sut.debounceInterval = 0.0001
         sut.setAccount(account)
     }
 
