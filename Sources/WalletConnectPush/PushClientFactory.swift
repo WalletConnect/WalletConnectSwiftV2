@@ -34,6 +34,6 @@ public struct PushClientFactory {
 
         let registerService = PushRegisterService(httpClient: httpClient, projectId: projectId, clientIdStorage: clientIdStorage, pushAuthenticator: pushAuthenticator, logger: logger, environment: environment)
 
-        return PushClient(registerService: registerService)
+        return PushClient(registerService: registerService, logger: logger)
     }
 }

@@ -14,8 +14,7 @@ public class NotifyClient {
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
-        logger.logsPublisher
-            .eraseToAnyPublisher()
+        return logger.logsPublisher
     }
 
     private let deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester
