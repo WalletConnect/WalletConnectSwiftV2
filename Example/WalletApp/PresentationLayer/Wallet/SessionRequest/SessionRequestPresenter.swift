@@ -9,10 +9,13 @@ final class SessionRequestPresenter: ObservableObject {
     private let importAccount: ImportAccount
     
     let sessionRequest: Request
+    let session: Session?
     let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
-        return String(describing: sessionRequest.params.value)
+        let message = try? sessionRequest.params.get([String].self)
+        let decryptedMessage = message.map { String(data: Data(hex: $0.first ?? ""), encoding: .utf8) }
+        return (decryptedMessage ?? "Failed to decrypt") ?? "Failed to decrypt"
     }
     
     @Published var showError = false
@@ -31,6 +34,7 @@ final class SessionRequestPresenter: ObservableObject {
         self.interactor = interactor
         self.router = router
         self.sessionRequest = sessionRequest
+        self.session = interactor.getSession(topic: sessionRequest.topic)
         self.importAccount = importAccount
         self.validationStatus = context?.validation
     }
@@ -55,9 +59,7 @@ final class SessionRequestPresenter: ObservableObject {
 
 // MARK: - Private functions
 private extension SessionRequestPresenter {
-    func setupInitialState() {
-
-    }
+    func setupInitialState() {}
 }
 
 // MARK: - SceneViewModel

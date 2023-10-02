@@ -1,7 +1,12 @@
 import Foundation
 import Combine
 
-class NotifyWatchSubscriptionsRequester {
+protocol NotifyWatchSubscriptionsRequesting {
+    func setAccount(_ account: Account)
+    func watchSubscriptions() async throws
+}
+
+class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
 
     private let keyserverURL: URL
     private let identityClient: IdentityClient
@@ -28,24 +33,13 @@ class NotifyWatchSubscriptionsRequester {
         self.kms = kms
         self.webDidResolver = webDidResolver
         self.notifyHost = notifyHost
-        setUpWatchSubscriptionsOnSocketConnection()
-    }
-
-    func setUpWatchSubscriptionsOnSocketConnection() {
-        networkingInteractor.socketConnectionStatusPublisher
-            .sink { [unowned self] status in
-                guard status == .connected else { return }
-                Task { try await watchSubscriptions() }
-            }
-            .store(in: &publishers)
     }
 
     func setAccount(_ account: Account) {
         self.account = account
-        Task { try await watchSubscriptions() }
     }
 
-    private func watchSubscriptions() async throws {
+    func watchSubscriptions() async throws {
 
         guard let account = account else { return }
 
@@ -113,3 +107,15 @@ class NotifyWatchSubscriptionsRequester {
         )
     }
 }
+
+#if DEBUG
+class MockNotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
+    func setAccount(_ account: WalletConnectUtils.Account) {}
+
+    var onWatchSubscriptions: (() -> Void)?
+
+    func watchSubscriptions() async throws {
+        onWatchSubscriptions?()
+    }
+}
+#endif

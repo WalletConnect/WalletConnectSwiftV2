@@ -14,8 +14,7 @@ public class NotifyClient {
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
-        logger.logsPublisher
-            .eraseToAnyPublisher()
+        return logger.logsPublisher
     }
 
     private let deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester
@@ -32,9 +31,9 @@ public class NotifyClient {
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
-    private let notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester
     private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
     private let notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
+    private let subscriptionWatcher: SubscriptionWatcher
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
@@ -49,9 +48,9 @@ public class NotifyClient {
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
-         notifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequester,
          notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
-         notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
+         notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
+         subscriptionWatcher: SubscriptionWatcher
     ) {
         self.logger = logger
         self.pushClient = pushClient
@@ -65,14 +64,14 @@ public class NotifyClient {
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
-        self.notifyWatchSubscriptionsRequester = notifyWatchSubscriptionsRequester
         self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
+        self.subscriptionWatcher = subscriptionWatcher
     }
 
     public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
         try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        notifyWatchSubscriptionsRequester.setAccount(account)
+        subscriptionWatcher.setAccount(account)
     }
 
     public func setLogging(level: LoggingLevel) {
@@ -80,7 +79,24 @@ public class NotifyClient {
     }
 
     public func subscribe(appDomain: String, account: Account) async throws {
-        try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
+        return try await withCheckedThrowingContinuation { continuation in
+
+            var cancellable: AnyCancellable?
+            cancellable = subscriptionsPublisher.sink { subscriptions in
+                guard subscriptions.contains(where: { $0.metadata.url == appDomain }) else { return }
+                cancellable?.cancel()
+                continuation.resume(with: .success(()))
+            }
+
+            Task { [cancellable] in
+                do {
+                    try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
+                } catch {
+                    cancellable?.cancel()
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     public func update(topic: String, scope: Set<String>) async throws {

@@ -1,21 +1,23 @@
 import Foundation
 
 public protocol ClientIdAuthenticating {
-    func createAuthToken() throws -> String
+    func createAuthToken(url: String?) throws -> String
 }
 
-public struct ClientIdAuthenticator: ClientIdAuthenticating {
+public final class ClientIdAuthenticator: ClientIdAuthenticating {
     private let clientIdStorage: ClientIdStoring
-    private let url: String
+    private var url: String
 
     public init(clientIdStorage: ClientIdStoring, url: String) {
         self.clientIdStorage = clientIdStorage
         self.url = url
     }
 
-    public func createAuthToken() throws -> String {
+    public func createAuthToken(url: String? = nil) throws -> String {
+        url.flatMap { self.url = $0 }
+        
         let keyPair = try clientIdStorage.getOrCreateKeyPair()
-        let payload = RelayAuthPayload(subject: getSubject(), audience: url)
+        let payload = RelayAuthPayload(subject: getSubject(), audience: self.url)
         return try payload.signAndCreateWrapper(keyPair: keyPair).jwtString
     }
 

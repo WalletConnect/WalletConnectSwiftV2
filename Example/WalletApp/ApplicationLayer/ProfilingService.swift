@@ -33,6 +33,7 @@ final class ProfilingService {
 
         handleLogs(from: Networking.instance.logsPublisher)
         handleLogs(from: Notify.instance.logsPublisher)
+        handleLogs(from: Push.instance.logsPublisher)
     }
 
     private func handleLogs(from publisher: AnyPublisher<Log, Never>) {
