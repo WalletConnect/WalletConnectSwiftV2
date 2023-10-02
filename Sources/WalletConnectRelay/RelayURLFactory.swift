@@ -23,7 +23,7 @@ struct RelayUrlFactory {
             URLQueryItem(name: "projectId", value: projectId)
         ]
         do {
-            let authToken = try socketAuthenticator.createAuthToken()
+            let authToken = try socketAuthenticator.createAuthToken(url: fallback ? "wss://" + NetworkConstants.fallbackUrl : "wss://" + relayHost)
             components.queryItems?.append(URLQueryItem(name: "auth", value: authToken))
         } catch {
             // TODO: Handle token creation errors
