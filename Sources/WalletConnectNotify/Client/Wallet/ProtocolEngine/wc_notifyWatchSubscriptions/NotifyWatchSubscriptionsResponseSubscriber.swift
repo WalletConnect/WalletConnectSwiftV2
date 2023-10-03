@@ -43,6 +43,8 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 let oldSubscriptions = notifyStorage.getSubscriptions()
                 let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
+                try Task.checkCancellation()
+
                 logger.debug("number of subscriptions: \(newSubscriptions.count)")
 
                 guard newSubscriptions != oldSubscriptions else {return}
