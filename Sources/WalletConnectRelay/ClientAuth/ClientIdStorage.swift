@@ -35,6 +35,7 @@ public struct ClientIdStorage: ClientIdStoring {
 
     public func getClientId() throws -> String {
         let pubKey = try getPublicPart()
+        let _ = try getPrivatePart(for: pubKey)
         return DIDKey(rawData: pubKey.rawRepresentation).did(variant: .ED25519)
     }
 }
@@ -43,6 +44,7 @@ private extension ClientIdStorage {
 
     enum Errors: Error {
         case publicPartNotFound
+        case privatePartNotFound
     }
 
     func migrateIfNeeded() {
@@ -72,7 +74,11 @@ private extension ClientIdStorage {
     }
 
     func getPrivatePart(for publicPart: SigningPublicKey) throws -> SigningPrivateKey {
-        return try keychain.read(key: publicPart.storageId)
+        do {
+            return try keychain.read(key: publicPart.storageId)
+        } catch {
+            throw Errors.privatePartNotFound
+        }
     }
 
     func setPrivatePart(_ newValue: SigningPrivateKey) throws {
