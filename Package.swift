@@ -46,9 +46,6 @@ let package = Package(
         .library(
             name: "WalletConnectHistory",
             targets: ["WalletConnectHistory"]),
-        .library(
-            name: "Web3Inbox",
-            targets: ["Web3Inbox"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
