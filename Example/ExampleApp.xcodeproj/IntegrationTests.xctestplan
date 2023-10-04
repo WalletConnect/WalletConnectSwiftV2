@@ -53,6 +53,7 @@
         "AuthTests\/testEIP1271RespondSuccess()",
         "ChatTests",
         "ENSResolverTests",
+        "HistoryTests",
         "SyncDerivationServiceTests",
         "SyncTests"
       ],
