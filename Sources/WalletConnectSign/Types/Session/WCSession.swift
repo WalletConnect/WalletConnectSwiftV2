@@ -8,6 +8,7 @@ struct WCSession: SequenceObject, Equatable {
 
     let topic: String
     let pairingTopic: String
+    let symKey: String
     let relay: RelayProtocolOptions
     let selfParticipant: Participant
     let peerParticipant: Participant
@@ -30,6 +31,7 @@ struct WCSession: SequenceObject, Equatable {
 
     init(topic: String,
          pairingTopic: String,
+         symKey: String,
          timestamp: Date,
          selfParticipant: Participant,
          peerParticipant: Participant,
@@ -38,6 +40,7 @@ struct WCSession: SequenceObject, Equatable {
          acknowledged: Bool) {
         self.topic = topic
         self.pairingTopic = pairingTopic
+        self.symKey = symKey
         self.timestamp = timestamp
         self.relay = settleParams.relay
         self.controller = AgreementPeer(publicKey: settleParams.controller.publicKey)
@@ -54,6 +57,7 @@ struct WCSession: SequenceObject, Equatable {
     internal init(
         topic: String,
         pairingTopic: String,
+        symKey: String,
         timestamp: Date,
         relay: RelayProtocolOptions,
         controller: AgreementPeer,
@@ -69,6 +73,7 @@ struct WCSession: SequenceObject, Equatable {
     ) {
         self.topic = topic
         self.pairingTopic = pairingTopic
+        self.symKey = symKey
         self.timestamp = timestamp
         self.relay = relay
         self.controller = controller
@@ -168,6 +173,8 @@ struct WCSession: SequenceObject, Equatable {
         return Session(
             topic: topic,
             pairingTopic: pairingTopic,
+            symKey: symKey,
+            relay: relay,
             peer: peerParticipant.metadata,
             requiredNamespaces: requiredNamespaces,
             namespaces: namespaces,
@@ -182,7 +189,7 @@ struct WCSession: SequenceObject, Equatable {
 extension WCSession {
 
     enum CodingKeys: String, CodingKey {
-        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces, sessionProperties
+        case topic, pairingTopic, symKey, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces, sessionProperties
     }
 
     init(from decoder: Decoder) throws {
@@ -199,6 +206,7 @@ extension WCSession {
         self.timestamp = try container.decode(Date.self, forKey: .timestamp)
         self.requiredNamespaces = try container.decode([String: ProposalNamespace].self, forKey: .requiredNamespaces)
         self.pairingTopic = try container.decode(String.self, forKey: .pairingTopic)
+        self.symKey = try container.decode(String.self, forKey: .symKey)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -215,5 +223,6 @@ extension WCSession {
         try container.encode(expiryDate, forKey: .expiryDate)
         try container.encode(timestamp, forKey: .timestamp)
         try container.encode(requiredNamespaces, forKey: .requiredNamespaces)
+        try container.encode(symKey, forKey: .symKey)
     }
 }

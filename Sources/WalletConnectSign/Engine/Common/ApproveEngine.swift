@@ -156,6 +156,7 @@ final class ApproveEngine {
         let session = WCSession(
             topic: topic,
             pairingTopic: pairingTopic,
+            symKey: agreementKeys.sharedKey.hexRepresentation,
             timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: proposal.proposer,
@@ -371,6 +372,7 @@ private extension ApproveEngine {
         let session = WCSession(
             topic: sessionTopic,
             pairingTopic: pairingTopic,
+            symKey: agreementKeys.sharedKey.hexRepresentation,
             timestamp: Date(),
             selfParticipant: selfParticipant,
             peerParticipant: params.controller,

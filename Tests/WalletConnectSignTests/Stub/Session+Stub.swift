@@ -15,11 +15,13 @@ extension WCSession {
         timestamp: Date = Date()
     ) -> WCSession {
             let peerKey = selfPrivateKey.publicKey.hexRepresentation
+            let symKey = AgreementPrivateKey().publicKey.hexRepresentation
             let selfKey = AgreementPrivateKey().publicKey.hexRepresentation
             let controllerKey = isSelfController ? selfKey : peerKey
             return WCSession(
                 topic: topic,
                 pairingTopic: "",
+                symKey: symKey,
                 timestamp: timestamp,
                 relay: RelayProtocolOptions.stub(),
                 controller: AgreementPeer(publicKey: controllerKey),

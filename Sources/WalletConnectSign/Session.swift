@@ -6,6 +6,8 @@ import Foundation
 public struct Session: Codable {
     public let topic: String
     public let pairingTopic: String
+    public let symKey: String
+    public let relay: RelayProtocolOptions
     public let peer: AppMetadata
     public let requiredNamespaces: [String: ProposalNamespace]
     public let namespaces: [String: SessionNamespace]
@@ -66,5 +68,11 @@ extension Session {
         return namespaces.values.reduce(into: []) { result, namespace in
             result = result + Array(namespace.accounts)
         }
+    }
+
+    public var uri: WalletConnectURI {
+        return WalletConnectURI(topic: pairingTopic,
+                                symKey: symKey,
+                                relay: relay)
     }
 }
