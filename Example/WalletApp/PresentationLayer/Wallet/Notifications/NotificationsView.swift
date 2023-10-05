@@ -38,7 +38,7 @@ struct NotificationsView: View {
                                 .padding(.trailing, 32)
                         }
                     })
-                    .animation(.easeInOut(duration: 0.3), value: true)
+                    .animation(.easeInOut(duration: 0.3))
                 }
                 .listRowBackground(Color.clear)
             }
@@ -50,7 +50,7 @@ struct NotificationsView: View {
     }
 
     private func discover() -> some View {
-        return ForEach(presenter.listings) { listing in
+        return ForEach(presenter.listingViewModels) { listing in
             discoverListRow(listing: listing)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -79,7 +79,7 @@ struct NotificationsView: View {
     }
 
     private func notifications() -> some View {
-        ForEach(presenter.subscriptions, id: \.id) { subscription in
+        ForEach(presenter.subscriptionViewModels, id: \.id) { subscription in
             subscriptionRow(subscription: subscription)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -114,12 +114,12 @@ struct NotificationsView: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(subscription.name)
-                            .foregroundColor(.grey8)
-                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundColor(.Foreground100)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
 
                         Text(subscription.subtitle)
-                            .foregroundColor(.grey50)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.Foreground150)
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
                     }
                 }
             }
@@ -146,7 +146,7 @@ struct NotificationsView: View {
                 Spacer()
 
                 if let subscription = presenter.subscription(forListing: listing) {
-                    AsyncButton("Unsubscribed") {
+                    AsyncButton("Subscribed") {
                         try await presenter.unsubscribe(subscription: subscription)
                     }
                     .buttonStyle(W3MButtonStyle(size: .m, variant: .accent, rightIcon: .Checkmark))
