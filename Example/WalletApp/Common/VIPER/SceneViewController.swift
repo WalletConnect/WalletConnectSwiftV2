@@ -56,6 +56,10 @@ class SceneViewController<ViewModel: SceneViewModel, Content: View>: UIHostingCo
         super.viewDidLoad()
         setupView()
         setupNavigation()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         setupNavigationBarStyle()
     }
 
