@@ -168,24 +168,16 @@ struct NotificationsView: View {
                 Spacer()
 
                 if let subscription = presenter.subscription(forListing: listing) {
-                    AsyncButton {
+                    AsyncButton("Unsubscribed") {
                         try await presenter.unsubscribe(subscription: subscription)
-                    } label: {
-                        Button(action: {}) {
-                            Text("Unsubscribed")
-                        }
-                        .buttonStyle(W3MButtonStyle(size: .m, variant: .accent, rightIcon: .Checkmark))
-                        .disabled(true)
                     }
+                    .buttonStyle(W3MButtonStyle(size: .m, variant: .accent, rightIcon: .Checkmark))
+                    .disabled(true)
                 } else {
-                    AsyncButton {
+                    AsyncButton("Subscribe") {
                         try await presenter.subscribe(listing: listing)
-                    } label: {
-                        Button(action: {}) {
-                            Text("Subscribe")
-                        }
-                        .buttonStyle(W3MButtonStyle(size: .m))
                     }
+                    .buttonStyle(W3MButtonStyle(size: .m))
                 }
             }
 
