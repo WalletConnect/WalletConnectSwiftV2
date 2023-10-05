@@ -1,4 +1,5 @@
 import SwiftUI
+import Web3ModalUI
 import AsyncButton
 
 struct NotificationsView: View {
@@ -167,34 +168,47 @@ struct NotificationsView: View {
                 Spacer()
 
                 if let subscription = presenter.subscription(forListing: listing) {
-                    AsyncButton("Unsubscribe") {
+                    AsyncButton {
                         try await presenter.unsubscribe(subscription: subscription)
+                    } label: {
+                        Button(action: {}) {
+                            Text("Unsubscribed")
+                        }
+                        .buttonStyle(W3MButtonStyle(size: .m, variant: .accent, rightIcon: .Checkmark))
+                        .disabled(true)
                     }
-                    .foregroundColor(.red)
                 } else {
-                    AsyncButton("Subscribe") {
+                    AsyncButton {
                         try await presenter.subscribe(listing: listing)
+                    } label: {
+                        Button(action: {}) {
+                            Text("Subscribe")
+                        }
+                        .buttonStyle(W3MButtonStyle(size: .m))
                     }
-                    .foregroundColor(.primary)
                 }
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(listing.title)
-                    .foregroundColor(.grey8)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .font(.paragraph700)
+                    .foregroundColor(.Foreground100)
 
                 Text(listing.appDomain ?? .empty)
-                    .foregroundColor(.grey50)
+                    .foregroundColor(.Foreground200)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
             }
 
             Text(listing.subtitle)
-                .foregroundColor(.grey50)
+                .foregroundColor(.Foreground150)
                 .font(.system(size: 14, weight: .regular, design: .rounded))
                 .lineLimit(2)
         }
         .padding(16.0)
+        .background(
+            RadialGradient(gradient: Gradient(colors: [.Blue100.opacity(0.1), .clear]), center: .topLeading, startRadius: 0, endRadius: 300)
+        )
+        .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.grey95, lineWidth: 1)
