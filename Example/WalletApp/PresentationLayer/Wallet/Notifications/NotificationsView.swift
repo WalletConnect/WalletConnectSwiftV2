@@ -10,40 +10,43 @@ struct NotificationsView: View {
 
     @ViewBuilder
     var body: some View {
-        List {
-            Section {
-                if selectedIndex == 0 {
-                    notifications()
-                } else {
-                    discover()
-                }
-            } header: {
-                HStack {
-                    SegmentedPicker(["Notifications", "Discover"],
-                                    selectedIndex: Binding(
-                                        get: { selectedIndex },
-                                        set: { selectedIndex = $0 ?? 0 }),
-                                    content: { item, isSelected in
-                        Text(item)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(isSelected ? Color.primary : Color.secondary )
-                            .padding(.trailing, 32)
-                            .padding(.vertical, 8)
-                    }, selection: {
-                        VStack(spacing: 0) {
-                            Spacer()
-                            Rectangle()
-                                .fill(.Blue100)
-                                .frame(height: 2)
+        VStack(spacing: 0) {
+            PreventCollapseView()
+            List {
+                Section {
+                    if selectedIndex == 0 {
+                        notifications()
+                    } else {
+                        discover()
+                    }
+                } header: {
+                    HStack {
+                        SegmentedPicker(["Notifications", "Discover"],
+                                        selectedIndex: Binding(
+                                            get: { selectedIndex },
+                                            set: { selectedIndex = $0 ?? 0 }),
+                                        content: { item, isSelected in
+                            Text(item)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(isSelected ? Color.primary : Color.secondary )
                                 .padding(.trailing, 32)
-                        }
-                    })
+                                .padding(.vertical, 8)
+                        }, selection: {
+                            VStack(spacing: 0) {
+                                Spacer()
+                                Rectangle()
+                                    .fill(.Blue100)
+                                    .frame(height: 2)
+                                    .padding(.trailing, 32)
+                            }
+                        })
+                    }
                     .animation(.easeInOut(duration: 0.3))
+                    .listRowBackground(Color.clear)
                 }
-                .listRowBackground(Color.clear)
             }
+            .listStyle(PlainListStyle())
         }
-        .listStyle(PlainListStyle())
         .task {
             try? await presenter.fetch()
         }
@@ -183,6 +186,17 @@ struct NotificationsView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.grey95, lineWidth: 1)
         )
+    }
+}
+
+private struct PreventCollapseView: View {
+
+    private var mostlyClear = Color(UIColor(white: 0.0, alpha: 0.0005))
+
+    var body: some View {
+        Rectangle()
+            .fill(mostlyClear)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 1)
     }
 }
 
