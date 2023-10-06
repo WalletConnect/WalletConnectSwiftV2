@@ -21,11 +21,13 @@ struct NotifyPreferencesView: View {
             }
             .frame(maxWidth: .infinity)
             .alignmentGuide(.listRowSeparatorLeading) { _ in -50 }
+            .listRowBackground(Color.clear)
 
             ForEach(Array(viewModel.preferences.enumerated()), id: \.offset) { i, preference in
                 if let value = viewModel.subscriptionViewModel.scope[preference] {
                     preferenceRow(title: preference, value: value)
                         .listRowSeparator(i == viewModel.preferences.count-1 ? .hidden : .visible)
+                        .listRowBackground(Color.clear)
                 }
             }
 
@@ -42,6 +44,7 @@ struct NotifyPreferencesView: View {
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isUpdateDisabled)
+            .listRowBackground(Color.clear)
         }
         .listStyle(.plain)
     }

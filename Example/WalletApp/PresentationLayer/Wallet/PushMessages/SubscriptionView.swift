@@ -5,23 +5,29 @@ struct SubscriptionView: View {
     @EnvironmentObject var presenter: SubscriptionPresenter
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
+            VStack {
+                RadialGradient(gradient: Gradient(colors: [.Blue100.opacity(0.1), .clear]), center: .topLeading, startRadius: 0, endRadius: 300)
+                    .frame(height: 300)
+                Spacer()
+            }
+
             List {
                 headerView()
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
 
                 if !presenter.messages.isEmpty {
                     ForEach(presenter.messages, id: \.id) { pm in
                         notificationView(pushMessage: pm)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 32, trailing: 0))
+                            .listRowSeparator(.visible)
+                            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
                             .listRowBackground(Color.clear)
                     }
                     .onDelete { indexSet in
                         presenter.deletePushMessage(at: indexSet)
                     }
-                    Spacer().frame(height: 50.0)
                 } else {
                     emptyStateView()
                         .listRowSeparator(.hidden)
@@ -31,11 +37,12 @@ struct SubscriptionView: View {
             .listStyle(PlainListStyle())
         }
         .ignoresSafeArea(.container)
+        .safeAreaInset(edge: .bottom) { Spacer().frame(height: 50) }
     }
 
     private func notificationView(pushMessage: NotifyMessageViewModel) -> some View {
         VStack(alignment: .center) {
-            HStack(spacing: 10) {
+            HStack(spacing: 12) {
                 CacheAsyncImage(url: URL(string: pushMessage.imageUrl)) { phase in
                     if let image = phase.image {
                         image
@@ -54,18 +61,18 @@ struct SubscriptionView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {
                         Text(pushMessage.title)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.Foreground100)
                             .font(.system(size: 14, weight: .semibold))
 
                         Spacer()
 
                         Text(pushMessage.publishedAt)
-                            .foregroundColor(.grey50)
+                            .foregroundColor(.Foreground250)
                             .font(.system(size: 11))
                     }
 
                     Text(pushMessage.subtitle)
-                        .foregroundColor(.grey50)
+                        .foregroundColor(.Foreground175)
                         .font(.system(size: 13))
 
                 }
@@ -87,22 +94,22 @@ struct SubscriptionView: View {
                 }
             }
             .clipShape(Circle())
-            .padding(.top, 50.0)
+            .padding(.top, 56.0)
             .padding(.bottom, 8.0)
 
             Text(presenter.subscriptionViewModel.name)
-                .font(.headline)
-                .foregroundColor(.primary)
+                .font(.large700)
+                .foregroundColor(.Foreground100)
                 .padding(.bottom, 8.0)
 
             Text(presenter.subscriptionViewModel.domain)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.Foreground200)
                 .padding(.bottom, 16.0)
 
             Text(presenter.subscriptionViewModel.description)
-                .font(.footnote)
-                .foregroundColor(.primary)
+                .font(.system(size: 14, weight: .regular))
+                .foregroundColor(.Foreground100)
                 .padding(.bottom, 16.0)
 
             Menu {
@@ -127,6 +134,7 @@ struct SubscriptionView: View {
                         .stroke(Color.grey95, lineWidth: 1)
                 )
             }
+            .padding(.bottom, 20.0)
         }
         .frame(maxWidth: .infinity)
     }

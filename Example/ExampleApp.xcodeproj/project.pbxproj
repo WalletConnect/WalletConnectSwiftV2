@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -226,6 +226,7 @@
 		A5E22D242840C8DB00E36487 /* SafariEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D232840C8DB00E36487 /* SafariEngine.swift */; };
 		A5E22D2C2840EAC300E36487 /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E22D2B2840EAC300E36487 /* XCUIElement.swift */; };
 		A5E776BA29F4362D00172091 /* AlertError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E776B929F4362D00172091 /* AlertError.swift */; };
+		A5F1526F2ACDC46B00D745A6 /* Web3ModalUI in Frameworks */ = {isa = PBXBuildFile; productRef = A5F1526E2ACDC46B00D745A6 /* Web3ModalUI */; };
 		A74D32BA2A1E25AD00CB8536 /* QueryParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74D32B92A1E25AD00CB8536 /* QueryParameters.swift */; };
 		C5133A78294125CC00A8314C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = C5133A77294125CC00A8314C /* Web3 */; };
 		C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
@@ -729,6 +730,7 @@
 				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
 				8487A9462A836C3F0003D5AF /* Sentry in Frameworks */,
 				C55D349929630D440004314A /* Web3Wallet in Frameworks */,
+				A5F1526F2ACDC46B00D745A6 /* Web3ModalUI in Frameworks */,
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
 				A5B6C0F52A6EAB2800927332 /* WalletConnectNotify in Frameworks */,
 				C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */,
@@ -1999,6 +2001,7 @@
 				A5B6C0F42A6EAB2800927332 /* WalletConnectNotify */,
 				84943C7C2A9BA328007EBAC2 /* Mixpanel */,
 				A59D25ED2AB3672700D7EA3A /* AsyncButton */,
+				A5F1526E2ACDC46B00D745A6 /* Web3ModalUI */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -2076,6 +2079,7 @@
 				A561C7FE29DF32CE00DF540D /* XCRemoteSwiftPackageReference "HDWallet" */,
 				8487A9422A836C2A0003D5AF /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				84943C792A9BA206007EBAC2 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
+				A5F1526D2ACDC46B00D745A6 /* XCRemoteSwiftPackageReference "web3modal-swift" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -3215,6 +3219,14 @@
 				version = 3.1.2;
 			};
 		};
+		A5F1526D2ACDC46B00D745A6 /* XCRemoteSwiftPackageReference "web3modal-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
+			requirement = {
+				branch = "feat/ui-package";
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3362,6 +3374,11 @@
 		A5E03E00286466EA00888481 /* WalletConnectChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectChat;
+		};
+		A5F1526E2ACDC46B00D745A6 /* Web3ModalUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5F1526D2ACDC46B00D745A6 /* XCRemoteSwiftPackageReference "web3modal-swift" */;
+			productName = Web3ModalUI;
 		};
 		C5133A77294125CC00A8314C /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;

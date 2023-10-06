@@ -82,11 +82,20 @@ public class NotifyClient {
         return try await withCheckedThrowingContinuation { continuation in
 
             var cancellable: AnyCancellable?
-            cancellable = subscriptionsPublisher.sink { subscriptions in
-                guard subscriptions.contains(where: { $0.metadata.url == appDomain }) else { return }
-                cancellable?.cancel()
-                continuation.resume(with: .success(()))
-            }
+            cancellable = subscriptionsPublisher
+                .setFailureType(to: Error.self)
+                .timeout(10, scheduler: RunLoop.main, customError: { Errors.subscribeTimeout })
+                .sink(receiveCompletion: { completion in
+                    defer { cancellable?.cancel() }
+                    switch completion {
+                    case .failure(let error): continuation.resume(with: .failure(error))
+                    case .finished: break
+                    }
+                }, receiveValue: { subscriptions in
+                    guard subscriptions.contains(where: { $0.metadata.url == appDomain }) else { return }
+                    cancellable?.cancel()
+                    continuation.resume(with: .success(()))
+                })
 
             Task { [cancellable] in
                 do {
@@ -129,6 +138,20 @@ public class NotifyClient {
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
         return notifyStorage.messagesPublisher(topic: topic)
+    }
+}
+
+private extension NotifyClient {
+
+    enum Errors: Error, LocalizedError {
+        case subscribeTimeout
+
+        var errorDescription: String? {
+            switch self {
+            case .subscribeTimeout:
+                return "Subscribe method timeout"
+            }
+        }
     }
 }
 
