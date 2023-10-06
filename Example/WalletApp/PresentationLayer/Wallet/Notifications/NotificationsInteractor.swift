@@ -38,4 +38,8 @@ final class NotificationsInteractor {
     func unsubscribe(topic: String) async throws {
         try await Notify.instance.deleteSubscription(topic: topic)
     }
+
+    func messagesCount(subscription: NotifySubscription) -> Int {
+        return Notify.instance.getMessageHistory(topic: subscription.topic).count
+    }
 }
