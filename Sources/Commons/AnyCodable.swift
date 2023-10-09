@@ -164,7 +164,7 @@ extension AnyCodable: Decodable, Encodable {
             if let intVal = try? container.decode(Int.self) {
                 value = intVal
             } else if let doubleVal = try? container.decode(Double.self) {
-                value = Decimal(doubleVal)
+                value = doubleVal
             } else if let boolVal = try? container.decode(Bool.self) {
                 value = boolVal
             } else if let stringVal = try? container.decode(String.self) {
