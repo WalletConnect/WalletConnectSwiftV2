@@ -4,12 +4,15 @@ import XCTest
 @testable import WalletConnectJWT
 
 final class JWTTests: XCTestCase {
-    let expectedJWT =  "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTY5MTAwOTcsImV4cCI6MTY1Njk5NjQ5NywiaXNzIjoiZGlkOmtleTp6Nk1rb2RIWnduZVZSU2h0YUxmOEpLWWt4cERHcDF2R1pucEdtZEJwWDhNMmV4eEgiLCJzdWIiOiJjNDc5ZmU1ZGM0NjRlNzcxZTc4YjE5M2QyMzlhNjViNThkMjc4Y2FkMWMzNGJmYjBiNTcxNmU1YmI1MTQ5MjhlIiwiYXVkIjoid3NzOi8vcmVsYXkud2FsbGV0Y29ubmVjdC5jb20ifQ.0JkxOM-FV21U7Hk-xycargj_qNRaYV2H5HYtE4GzAeVQYiKWj7YySY5AdSqtCgGzX4Gt98XWXn2kSr9rE1qvCA"
+    let expectedJWT =  "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ3c3M6Ly9yZWxheS53YWxsZXRjb25uZWN0LmNvbSIsImV4cCI6MTY1Njk5NjQ5NywiaWF0IjoxNjU2OTEwMDk3LCJpc3MiOiJkaWQ6a2V5Ono2TWtvZEhad25lVlJTaHRhTGY4SktZa3hwREdwMXZHWm5wR21kQnBYOE0yZXh4SCIsInN1YiI6ImM0NzlmZTVkYzQ2NGU3NzFlNzhiMTkzZDIzOWE2NWI1OGQyNzhjYWQxYzM0YmZiMGI1NzE2ZTViYjUxNDkyOGUifQ.0JkxOM-FV21U7Hk-xycargj_qNRaYV2H5HYtE4GzAeVQYiKWj7YySY5AdSqtCgGzX4Gt98XWXn2kSr9rE1qvCA"
 
     func testJWTEncoding() throws {
         let signer = EdDSASignerMock()
         signer.signature = "0JkxOM-FV21U7Hk-xycargj_qNRaYV2H5HYtE4GzAeVQYiKWj7YySY5AdSqtCgGzX4Gt98XWXn2kSr9rE1qvCA"
-        let jwt = try JWT(claims: RelayAuthPayload.Claims.stub(), signer: signer)
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        jsonEncoder.dateEncodingStrategy = .secondsSince1970
+        let jwt = try JWT(claims: RelayAuthPayload.Claims.stub(), signer: signer, jsonEncoder: jsonEncoder)
         XCTAssertEqual(expectedJWT, jwt.string)
     }
 

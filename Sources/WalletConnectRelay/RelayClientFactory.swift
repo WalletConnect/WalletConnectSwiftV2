@@ -39,7 +39,7 @@ public struct RelayClientFactory {
         logger: ConsoleLogging
     ) -> RelayClient {
 
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorage)
+        let clientIdStorage = ClientIdStorage(defaults: keyValueStorage, keychain: keychainStorage, logger: logger)
 
         let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
