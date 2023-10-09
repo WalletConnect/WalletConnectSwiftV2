@@ -10,7 +10,7 @@ final class NotifyPreferencesPresenter: ObservableObject {
     private var disposeBag = Set<AnyCancellable>()
 
     var subscriptionViewModel: SubscriptionsViewModel {
-        return SubscriptionsViewModel(subscription: subscription)
+        return SubscriptionsViewModel(subscription: subscription, messages: [])
     }
 
     var preferences: [String] {
