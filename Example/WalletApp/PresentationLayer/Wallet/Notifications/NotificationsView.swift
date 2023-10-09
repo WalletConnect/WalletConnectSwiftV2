@@ -124,6 +124,18 @@ struct NotificationsView: View {
                             .foregroundColor(.Foreground150)
                             .font(.system(size: 14, weight: .regular, design: .rounded))
                     }
+
+                    Spacer()
+                    
+                    if subscription.hasMessage {
+                        Text(String(subscription.messagesCount))
+                            .foregroundColor(.Inverse100)
+                            .font(.system(size: 13, weight: .medium))
+                            .frame(width: 20, height: 20)
+                            .background {
+                                Circle().foregroundColor(.blue100)
+                            }
+                    }
                 }
             }
         }

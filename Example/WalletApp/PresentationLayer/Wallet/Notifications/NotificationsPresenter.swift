@@ -13,10 +13,8 @@ final class NotificationsPresenter: ObservableObject {
 
     var subscriptionViewModels: [SubscriptionsViewModel] {
         return subscriptions
-            .map { SubscriptionsViewModel(subscription: $0) }
-            .sorted { lhs, rhs in
-                return interactor.messagesCount(subscription: lhs.subscription) > interactor.messagesCount(subscription: rhs.subscription)
-            }
+            .map { SubscriptionsViewModel(subscription: $0, messages: interactor.messages(for: $0)) }
+            .sorted { $0.messagesCount > $1.messagesCount }
     }
 
     var listingViewModels: [ListingViewModel] {
