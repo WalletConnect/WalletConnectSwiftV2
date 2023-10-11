@@ -14,16 +14,12 @@ public actor VerifyClient: VerifyClientProtocol {
     let originVerifier: OriginVerifier
     let assertionRegistrer: AssertionRegistrer
     let appAttestationRegistrer: AppAttestationRegistrer
-    
-    private let verifyHost: String
 
     init(
-        verifyHost: String,
         originVerifier: OriginVerifier,
         assertionRegistrer: AssertionRegistrer,
         appAttestationRegistrer: AppAttestationRegistrer
     ) {
-        self.verifyHost = verifyHost
         self.originVerifier = originVerifier
         self.assertionRegistrer = assertionRegistrer
         self.appAttestationRegistrer = appAttestationRegistrer
@@ -41,21 +37,18 @@ public actor VerifyClient: VerifyClientProtocol {
         guard isScam == nil else {
             return VerifyContext(
                 origin: origin,
-                validation: .scam,
-                verifyUrl: verifyHost
+                validation: .scam
             )
         }
         if let origin, let originUrl = URL(string: origin), let domainUrl = URL(string: domain) {
             return VerifyContext(
                 origin: origin,
-                validation: (originUrl.host == domainUrl.host) ? .valid : .invalid,
-                verifyUrl: verifyHost
+                validation: (originUrl.host == domainUrl.host) ? .valid : .invalid
             )
         } else {
             return VerifyContext(
                 origin: origin,
-                validation: .unknown,
-                verifyUrl: verifyHost
+                validation: .unknown
             )
         }
     }
@@ -75,7 +68,7 @@ public struct VerifyClientMock: VerifyClientProtocol {
     }
     
     public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
-        return VerifyContext(origin: "domain.com", validation: .valid, verifyUrl: "verify.walletconnect.com")
+        return VerifyContext(origin: "domain.com", validation: .valid)
     }
 }
 
