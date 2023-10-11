@@ -115,21 +115,19 @@ final class NotifyTests: XCTestCase {
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
-            Task(priority: .high) {
-                if !subscriptions.isEmpty {
-                    expectation.fulfill()
-                }
+            if !subscriptions.isEmpty {
+                expectation.fulfill()
             }
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        sleep(1)
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
+
 
     func testNotifySubscriptionChanged() async throws {
         let expectation = expectation(description: "expects client B to receive subscription after both clients are registered and client A creates one")
