@@ -61,9 +61,20 @@ public class KeyedDatabase<Element> where Element: DatabaseObject {
         var map = index[key] ?? [:]
 
         for element in elements {
-            guard
-                map[element.databaseId] == nil else { continue }
-                map[element.databaseId] = element
+            map[element.databaseId] = element
+        }
+
+        index[key] = map
+
+        return true
+    }
+
+    @discardableResult
+    public func replace(elements: [Element], for key: String) -> Bool {
+        var map: [String: Element] = [:]
+
+        for element in elements {
+            map[element.databaseId] = element
         }
 
         index[key] = map
