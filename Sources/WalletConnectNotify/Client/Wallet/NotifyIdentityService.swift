@@ -13,7 +13,7 @@ final class NotifyIdentityService {
     }
 
     public func register(account: Account, domain: String, isLimited: Bool, onSign: @escaping SigningCallback) async throws {
-        let statement = makeStatement(isLimited: isLimited, domain: domain, keyserverHost: keyserverURL.host!)
+        let statement = makeStatement(isLimited: isLimited)
         let pubKey = try await identityClient.register(account: account,
             domain: domain,
             statement: statement,
@@ -29,12 +29,12 @@ final class NotifyIdentityService {
 
 private extension NotifyIdentityService {
 
-    func makeStatement(isLimited: Bool, domain: String, keyserverHost: String) -> String {
+    func makeStatement(isLimited: Bool) -> String {
         switch isLimited {
         case true:
-            return "I further authorize this DAPP to send and receive messages on my behalf for this domain and manage my identity at \(keyserverHost)."
+            return "I further authorize this app to send and receive messages on my behalf for THIS domains using my WalletConnect identity. Read more at https://walletconnect.com/identity"
         case false:
-            return "I further authorize this WALLET to send and receive messages on my behalf for ALL domains and manage my identity at \(keyserverHost)."
+            return "I further authorize this app to send and receive messages on my behalf for ALL domain using my WalletConnect identity. Read more at https://walletconnect.com/identity"
         }
     }
 }
