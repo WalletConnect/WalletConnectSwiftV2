@@ -64,10 +64,7 @@ final class NotifyStorage: NotifyStoring {
     }
 
     func replaceAllSubscriptions(_ subscriptions: [NotifySubscription], account: Account) {
-        subscriptionStore.deleteAll(for: account.absoluteString)
-        // todo - compare old with new = delete messages for removed subscriptions
-        //messages for new subscriptions are not required
-        subscriptionStore.set(elements: subscriptions, for: account.absoluteString)
+        subscriptionStore.replace(elements: subscriptions, for: account.absoluteString)
         subscriptionsSubject.send(subscriptions)
     }
 

@@ -14,15 +14,19 @@ final class NotificationsPresenter: ObservableObject {
     var subscriptionViewModels: [SubscriptionsViewModel] {
         return subscriptions
             .map { SubscriptionsViewModel(subscription: $0, messages: interactor.messages(for: $0)) }
-            .sorted { $0.messagesCount > $1.messagesCount }
+            .sorted(by:
+                { $0.messagesCount > $1.messagesCount },
+                { $0.name < $1.name }
+            )
     }
 
     var listingViewModels: [ListingViewModel] {
         return listings
             .map { ListingViewModel(listing: $0) }
-            .sorted { lhs, rhs in
-                return subscription(forListing: lhs) != nil && subscription(forListing: rhs) == nil
-            }
+            .sorted(by: 
+                { subscription(forListing: $0) != nil && subscription(forListing: $1) == nil },
+                { $0.title < $1.title }
+            )
     }
 
     init(interactor: NotificationsInteractor, router: NotificationsRouter) {
