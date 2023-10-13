@@ -12,7 +12,7 @@ let package = Package(
     products: [
         .library(
             name: "WalletConnect",
-            targets: ["WalletConnectSign"]),
+            targets: ["WalletConnectSign","WalletConnectModal"]),
         .library(
             name: "WalletConnectChat",
             targets: ["WalletConnectChat"]),
@@ -128,7 +128,6 @@ let package = Package(
         .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],
-            path: "Sources/WalletConnectModal",
             exclude: ["Secrets/secrets.json.sample"],
             resources: [
                 .copy("Secrets/secrets.json"),
