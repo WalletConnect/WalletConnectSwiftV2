@@ -2,7 +2,6 @@ import Foundation
 import Combine
 
 protocol NotifyWatchSubscriptionsRequesting {
-    func setAccount(_ account: Account)
     func watchSubscriptions() async throws
 }
 
@@ -14,8 +13,8 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
+    private let notifyAccountProvider: NotifyAccountProvider
     private let notifyHost: String
-    private var account: Account?
     private var publishers = Set<AnyCancellable>()
 
     init(keyserverURL: URL,
@@ -24,6 +23,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          webDidResolver: NotifyWebDidResolver,
+         notifyAccountProvider: NotifyAccountProvider,
          notifyHost: String
     ) {
         self.keyserverURL = keyserverURL
@@ -32,16 +32,12 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
         self.logger = logger
         self.kms = kms
         self.webDidResolver = webDidResolver
+        self.notifyAccountProvider = notifyAccountProvider
         self.notifyHost = notifyHost
     }
 
-    func setAccount(_ account: Account) {
-        self.account = account
-    }
-
     func watchSubscriptions() async throws {
-
-        guard let account = account else { return }
+        let account = try notifyAccountProvider.getCurrentAccount()
 
         logger.debug("Watching subscriptions")
 
@@ -52,17 +48,13 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
 
         let (responseTopic, selfPubKeyY) = try generateAgreementKeysIfNeeded(notifyServerPublicKey: notifyServerPublicKey, account: account)
 
-
-
         logger.debug("setting symm key for response topic \(responseTopic)")
 
         let protocolMethod = NotifyWatchSubscriptionsProtocolMethod()
 
-
         let watchSubscriptionsAuthWrapper = try await createJWTWrapper(
             notifyServerAuthenticationDidKey: notifyServerAuthenticationDidKey,
             subscriptionAccount: account)
-
 
         let request = RPCRequest(method: protocolMethod.method, params: watchSubscriptionsAuthWrapper)
 

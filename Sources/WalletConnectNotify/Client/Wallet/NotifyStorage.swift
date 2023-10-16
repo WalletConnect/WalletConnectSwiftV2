@@ -2,7 +2,8 @@ import Foundation
 import Combine
 
 protocol NotifyStoring {
-    func getSubscriptions() -> [NotifySubscription]
+    func getAllSubscriptions() -> [NotifySubscription]
+    func getSubscriptions(account: Account) -> [NotifySubscription]
     func getSubscription(topic: String) -> NotifySubscription?
     func setSubscription(_ subscription: NotifySubscription) async throws
     func deleteSubscription(topic: String) async throws
@@ -50,8 +51,12 @@ final class NotifyStorage: NotifyStoring {
 
     // MARK: Subscriptions
 
-    func getSubscriptions() -> [NotifySubscription] {
+    func getAllSubscriptions() -> [NotifySubscription] {
         return subscriptionStore.getAll()
+    }
+
+    func getSubscriptions(account: Account) -> [NotifySubscription] {
+        return subscriptionStore.getAll(for: account.absoluteString)
     }
 
     func getSubscription(topic: String) -> NotifySubscription? {
@@ -65,7 +70,6 @@ final class NotifyStorage: NotifyStoring {
 
     func replaceAllSubscriptions(_ subscriptions: [NotifySubscription], account: Account) {
         subscriptionStore.replace(elements: subscriptions, for: account.absoluteString)
-        subscriptionsSubject.send(subscriptions)
     }
 
     func deleteSubscription(topic: String) throws {

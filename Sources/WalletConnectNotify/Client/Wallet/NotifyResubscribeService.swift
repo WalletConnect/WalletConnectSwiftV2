@@ -13,19 +13,27 @@ final class NotifyResubscribeService {
         self.networkInteractor = networkInteractor
         self.notifyStorage = notifyStorage
         self.logger = logger
-        setUpResubscription()
     }
 
-    func setUpResubscription() {
-        networkInteractor.socketConnectionStatusPublisher
-            .sink { [unowned self] status in
-                guard status == .connected else { return }
-                let topics = notifyStorage.getSubscriptions().map{$0.topic}
-                logger.debug("Resubscribing to notify subscription topics: \(topics)", properties: ["topics": topics.joined(separator: ", ")])
-                Task(priority: .high) {
-                    try await networkInteractor.batchSubscribe(topics: topics)
-                }
-            }
-            .store(in: &publishers)
+    func resubscribe(account: Account) async throws {
+        let topics = notifyStorage.getSubscriptions(account: account).map { $0.topic }
+
+        logger.debug(
+            "Subscribed to notify subscription topics: \(topics)",
+            properties: ["topics": topics.joined(separator: ", ")]
+        )
+
+        try await networkInteractor.batchSubscribe(topics: topics)
+    }
+
+    func unsubscribe(account: Account) async throws {
+        let topics = notifyStorage.getSubscriptions(account: account).map { $0.topic }
+
+        logger.debug(
+            "Unsubscribed from notify subscription topics: \(topics)",
+            properties: ["topics": topics.joined(separator: ", ")]
+        )
+
+        try await networkInteractor.batchUnsubscribe(topics: topics)
     }
 }

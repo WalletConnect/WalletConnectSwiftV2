@@ -14,12 +14,15 @@ final class NotifyIdentityService {
 
     public func register(account: Account, domain: String, isLimited: Bool, onSign: @escaping SigningCallback) async throws {
         let statement = makeStatement(isLimited: isLimited)
-        let pubKey = try await identityClient.register(account: account,
+        _ = try await identityClient.register(account: account,
             domain: domain,
             statement: statement,
             resources: [keyserverURL.absoluteString],
             onSign: onSign)
-        logger.debug("Did register an account: \(account)")
+    }
+
+    public func unregister(account: Account) async throws {
+        try await identityClient.unregister(account: account)
     }
 
     func isIdentityRegistered(account: Account) -> Bool {

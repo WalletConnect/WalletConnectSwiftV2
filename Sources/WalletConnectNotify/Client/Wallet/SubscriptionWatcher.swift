@@ -26,25 +26,22 @@ class SubscriptionWatcher {
         self.notificationCenter = notificationCenter
     }
 
-    func setupTimer() {
-        onSetupTimer?()
-        logger.debug("Setting up Subscription Watcher timer")
-        timerCancellable?.cancel()
-        timerCancellable = Timer.publish(every: timerInterval, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.backgroundQueue.async {
-                    self?.watchSubscriptions()
-                }
-            }
-    }
+    deinit { stop() }
 
-    func setAccount(_ account: Account) {
-        notifyWatchSubscriptionsRequester.setAccount(account)
+    func start() {
         setupTimer()
         watchAppLifecycle()
         watchSubscriptions()
     }
+
+    func stop() {
+        timerCancellable?.cancel()
+        appLifecycleCancellable?.cancel()
+        watchSubscriptionsWorkItem?.cancel()
+    }
+}
+
+private extension SubscriptionWatcher {
 
     func watchSubscriptions() {
         watchSubscriptionsWorkItem?.cancel()
@@ -70,5 +67,18 @@ class SubscriptionWatcher {
                 }
             }
 #endif
+    }
+
+    func setupTimer() {
+        onSetupTimer?()
+        logger.debug("Setting up Subscription Watcher timer")
+        timerCancellable?.cancel()
+        timerCancellable = Timer.publish(every: timerInterval, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                self?.backgroundQueue.async {
+                    self?.watchSubscriptions()
+                }
+            }
     }
 }

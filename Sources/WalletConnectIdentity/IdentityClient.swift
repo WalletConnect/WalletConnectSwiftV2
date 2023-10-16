@@ -34,8 +34,8 @@ public final class IdentityClient {
         return inviteKey
     }
 
-    public func unregister(account: Account, onSign: SigningCallback) async throws {
-        try await identityService.unregister(account: account, onSign: onSign)
+    public func unregister(account: Account) async throws {
+        try await identityService.unregister(account: account)
         logger.debug("Did unregister an account: \(account)")
     }
 

@@ -14,7 +14,7 @@ final class NotificationsInteractor {
     }
 
     func getSubscriptions() -> [NotifySubscription] {
-        let subs = Notify.instance.getActiveSubscriptions()
+        let subs = Notify.instance.getActiveSubscriptions(account: importAccount.account)
         return subs
     }
 

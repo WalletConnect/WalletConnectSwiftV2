@@ -25,6 +25,7 @@ public class NotifyClient {
     private let pushClient: PushClient
     private let identityService: NotifyIdentityService
     private let notifyStorage: NotifyStorage
+    private let notifyAccountProvider: NotifyAccountProvider
     private let notifyMessageSubscriber: NotifyMessageSubscriber
     private let resubscribeService: NotifyResubscribeService
     private let notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber
@@ -47,6 +48,7 @@ public class NotifyClient {
          notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
+         notifyAccountProvider: NotifyAccountProvider,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
          notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
          notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
@@ -63,6 +65,7 @@ public class NotifyClient {
         self.notifySubscribeResponseSubscriber = notifySubscribeResponseSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
+        self.notifyAccountProvider = notifyAccountProvider
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
         self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
@@ -71,7 +74,18 @@ public class NotifyClient {
 
     public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
         try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        subscriptionWatcher.setAccount(account)
+        try await resubscribeService.resubscribe(account: account)
+        
+        notifyAccountProvider.setAccount(account)
+        subscriptionWatcher.start()
+    }
+
+    func unregister(account: Account) async throws {
+        try await identityService.unregister(account: account)
+        try await resubscribeService.unsubscribe(account: account)
+
+        notifyAccountProvider.logout()
+        subscriptionWatcher.stop()
     }
 
     public func setLogging(level: LoggingLevel) {
@@ -112,8 +126,8 @@ public class NotifyClient {
         try await notifyUpdateRequester.update(topic: topic, scope: scope)
     }
 
-    public func getActiveSubscriptions() -> [NotifySubscription] {
-        return notifyStorage.getSubscriptions()
+    public func getActiveSubscriptions(account: Account) -> [NotifySubscription] {
+        return notifyStorage.getSubscriptions(account: account)
     }
 
     public func getMessageHistory(topic: String) -> [NotifyMessageRecord] {
