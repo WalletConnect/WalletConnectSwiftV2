@@ -29,6 +29,10 @@ class MockNotifyStoring: NotifyStoring {
         }
     }
 
+    func deleteSubscriptions(account: WalletConnectUtils.Account) {
+        subscriptions = subscriptions.filter { $0.account != account }
+    }
+
     func deleteSubscription(topic: String) async throws {
         subscriptions.removeAll(where: { $0.topic == topic })
     }
