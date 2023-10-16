@@ -15,7 +15,7 @@ final class SessionRequestPresenter: ObservableObject {
     var message: String {
         let message = try? sessionRequest.params.get([String].self)
         let decryptedMessage = message.map { String(data: Data(hex: $0.first ?? ""), encoding: .utf8) }
-        return (decryptedMessage ?? "Failed to decrypt") ?? "Failed to decrypt"
+        return (decryptedMessage ?? String(describing: sessionRequest.params.value)) ?? String(describing: sessionRequest.params.value)
     }
     
     @Published var showError = false
