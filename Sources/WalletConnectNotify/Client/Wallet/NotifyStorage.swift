@@ -7,6 +7,7 @@ protocol NotifyStoring {
     func getSubscription(topic: String) -> NotifySubscription?
     func setSubscription(_ subscription: NotifySubscription) async throws
     func deleteSubscription(topic: String) async throws
+    func deleteSubscriptions(account: Account)
 }
 
 final class NotifyStorage: NotifyStoring {
@@ -77,6 +78,10 @@ final class NotifyStorage: NotifyStoring {
         }
         subscriptionStore.delete(id: topic, for: subscription.account.absoluteString)
         deleteSubscriptionSubject.send(topic)
+    }
+
+    func deleteSubscriptions(account: Account) {
+        subscriptionStore.deleteAll(for: account.absoluteString)
     }
 
     func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) {
