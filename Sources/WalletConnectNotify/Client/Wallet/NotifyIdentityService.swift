@@ -32,9 +32,9 @@ private extension NotifyIdentityService {
     func makeStatement(isLimited: Bool) -> String {
         switch isLimited {
         case true:
-            return "I further authorize this app to send and receive messages on my behalf for THIS domains using my WalletConnect identity. Read more at https://walletconnect.com/identity"
+            return "I further authorize this app to send and receive messages on my behalf for THIS domain using my WalletConnect identity. Read more at https://walletconnect.com/identity"
         case false:
-            return "I further authorize this app to send and receive messages on my behalf for ALL domain using my WalletConnect identity. Read more at https://walletconnect.com/identity"
+            return "I further authorize this app to send and receive messages on my behalf for ALL domains using my WalletConnect identity. Read more at https://walletconnect.com/identity"
         }
     }
 }
