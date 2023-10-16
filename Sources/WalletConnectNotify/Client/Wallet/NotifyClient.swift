@@ -90,9 +90,13 @@ public class NotifyClient {
         logger.setLogging(level: level)
     }
 
-    public func subscribe(appDomain: String, account: Account) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
+    public func subscribe(appDomain: String, account: Account, await: Bool = true) async throws {
+        guard `await` else {
+            try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
+            return
+        }
 
+        return try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
             cancellable = subscriptionsPublisher
                 .setFailureType(to: Error.self)
@@ -118,6 +122,10 @@ public class NotifyClient {
                 }
             }
         }
+    }
+
+    public func subscribeAndAwait(appDomain: String, account: Account) async throws {
+        try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {

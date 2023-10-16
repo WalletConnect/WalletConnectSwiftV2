@@ -104,7 +104,7 @@ final class NotifyTests: XCTestCase {
             }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account, await: false)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -123,7 +123,7 @@ final class NotifyTests: XCTestCase {
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account, await: false)
 
         sleep(1)
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
@@ -149,7 +149,7 @@ final class NotifyTests: XCTestCase {
 
         sleep(1)
 
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account, await: false)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -180,7 +180,7 @@ final class NotifyTests: XCTestCase {
             }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account, await: false)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -215,7 +215,7 @@ final class NotifyTests: XCTestCase {
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account, await: false)
 
         wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
     }
