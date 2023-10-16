@@ -102,8 +102,6 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
 
 #if DEBUG
 class MockNotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
-    func setAccount(_ account: WalletConnectUtils.Account) {}
-
     var onWatchSubscriptions: (() -> Void)?
 
     func watchSubscriptions() async throws {

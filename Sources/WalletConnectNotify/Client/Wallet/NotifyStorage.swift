@@ -22,6 +22,8 @@ final class NotifyStorage: NotifyStoring {
     private let subscriptionsSubject = PassthroughSubject<[NotifySubscription], Never>()
     private let messagesSubject = PassthroughSubject<[NotifyMessageRecord], Never>()
 
+    private let accountProvider: NotifyAccountProvider
+
     var newSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
         return newSubscriptionSubject.eraseToAnyPublisher()
     }
@@ -38,13 +40,10 @@ final class NotifyStorage: NotifyStoring {
         return subscriptionsSubject.eraseToAnyPublisher()
     }
 
-    var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
-        return messagesSubject.eraseToAnyPublisher()
-    }
-
-    init(subscriptionStore: KeyedDatabase<NotifySubscription>, messagesStore: KeyedDatabase<NotifyMessageRecord>) {
+    init(subscriptionStore: KeyedDatabase<NotifySubscription>, messagesStore: KeyedDatabase<NotifyMessageRecord>, accountProvider: NotifyAccountProvider) {
         self.subscriptionStore = subscriptionStore
         self.messagesStore = messagesStore
+        self.accountProvider = accountProvider
 
         setupSubscriptions()
     }
@@ -90,7 +89,7 @@ final class NotifyStorage: NotifyStoring {
     // MARK: Messages
 
     func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
-        return messagesPublisher
+        return messagesSubject
             .map { $0.filter { $0.topic == topic } }
             .eraseToAnyPublisher()
     }
@@ -126,7 +125,8 @@ private extension NotifyStorage {
         }
 
         subscriptionStore.onUpdate = { [unowned self] in
-            subscriptionsSubject.send(subscriptionStore.getAll())
+            guard let account = try? accountProvider.getCurrentAccount() else { return }
+            subscriptionsSubject.send(getSubscriptions(account: account))
         }
     }
 }

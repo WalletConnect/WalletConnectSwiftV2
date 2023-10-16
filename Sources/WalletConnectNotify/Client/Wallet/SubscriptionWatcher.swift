@@ -41,7 +41,7 @@ class SubscriptionWatcher {
     }
 }
 
-private extension SubscriptionWatcher {
+internal extension SubscriptionWatcher {
 
     func watchSubscriptions() {
         watchSubscriptionsWorkItem?.cancel()
