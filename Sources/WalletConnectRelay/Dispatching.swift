@@ -43,6 +43,9 @@ final class Dispatcher: NSObject, Dispatching {
         
         let socket = socketFactory.create(with: relayUrlFactory.create(fallback: fallback))
         socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
+        if let bundleId = Bundle.main.bundleIdentifier {
+            socket.request.addValue(bundleId, forHTTPHeaderField: "Origin")
+        }
         self.socket = socket
         
         switch socketConnectionType {
