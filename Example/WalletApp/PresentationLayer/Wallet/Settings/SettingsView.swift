@@ -1,4 +1,5 @@
 import SwiftUI
+import AsyncButton
 
 struct SettingsView: View {
 
@@ -19,8 +20,8 @@ struct SettingsView: View {
             }
 
             Section {
-                Button {
-                    viewModel.logoutPressed()
+                AsyncButton {
+                    try await viewModel.logoutPressed()
                 } label: {
                     Text("Log out")
                         .foregroundColor(.red)

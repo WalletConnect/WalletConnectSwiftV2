@@ -80,7 +80,7 @@ public class NotifyClient {
         subscriptionWatcher.start()
     }
 
-    func unregister(account: Account) async throws {
+    public func unregister(account: Account) async throws {
         try await identityService.unregister(account: account)
         try await resubscribeService.unsubscribe(account: account)
 
