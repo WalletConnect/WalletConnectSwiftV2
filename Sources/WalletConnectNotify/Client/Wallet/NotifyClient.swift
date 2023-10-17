@@ -33,6 +33,7 @@ public class NotifyClient {
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
     private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
+    private let notifyWatchAgreementService: NotifyWatchAgreementService
     private let notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
     private let subscriptionWatcher: SubscriptionWatcher
 
@@ -51,6 +52,7 @@ public class NotifyClient {
          notifyAccountProvider: NotifyAccountProvider,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
          notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
+         notifyWatchAgreementService: NotifyWatchAgreementService,
          notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
          subscriptionWatcher: SubscriptionWatcher
     ) {
@@ -68,6 +70,7 @@ public class NotifyClient {
         self.notifyAccountProvider = notifyAccountProvider
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
         self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
+        self.notifyWatchAgreementService = notifyWatchAgreementService
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
         self.subscriptionWatcher = subscriptionWatcher
     }
@@ -80,6 +83,7 @@ public class NotifyClient {
 
     public func unregister(account: Account) async throws {
         try await identityService.unregister(account: account)
+        notifyWatchAgreementService.removeAgreement(account: account)
         notifyStorage.deleteSubscriptions(account: account)
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()

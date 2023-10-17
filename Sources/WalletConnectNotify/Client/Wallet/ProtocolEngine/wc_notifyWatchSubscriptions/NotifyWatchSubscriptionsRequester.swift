@@ -10,10 +10,10 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
     private let keyserverURL: URL
     private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
     private let notifyAccountProvider: NotifyAccountProvider
+    private let notifyWatchAgreementService: NotifyWatchAgreementService
     private let notifyHost: String
     private var publishers = Set<AnyCancellable>()
 
@@ -21,18 +21,18 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
          networkingInteractor: NetworkInteracting,
          identityClient: IdentityClient,
          logger: ConsoleLogging,
-         kms: KeyManagementService,
          webDidResolver: NotifyWebDidResolver,
          notifyAccountProvider: NotifyAccountProvider,
+         notifyWatchAgreementService: NotifyWatchAgreementService,
          notifyHost: String
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.kms = kms
         self.webDidResolver = webDidResolver
         self.notifyAccountProvider = notifyAccountProvider
+        self.notifyWatchAgreementService = notifyWatchAgreementService
         self.notifyHost = notifyHost
     }
 
@@ -46,7 +46,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
         let notifyServerAuthenticationDidKey = DIDKey(rawData: notifyServerAuthenticationKey)
         let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
 
-        let (responseTopic, selfPubKeyY) = try generateAgreementKeysIfNeeded(notifyServerPublicKey: notifyServerPublicKey, account: account)
+        let (responseTopic, selfPubKeyY) = try notifyWatchAgreementService.generateAgreementKeysIfNeeded(notifyServerPublicKey: notifyServerPublicKey, account: account)
 
         logger.debug("setting symm key for response topic \(responseTopic)")
 
@@ -63,32 +63,6 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
         try await networkingInteractor.subscribe(topic: responseTopic)
 
         try await networkingInteractor.request(request, topic: watchSubscriptionsTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY))
-    }
-
-
-    private func generateAgreementKeysIfNeeded(notifyServerPublicKey: AgreementPublicKey, account: Account) throws -> (responseTopic: String, selfPubKeyY: Data) {
-
-        let keyYStorageKey = "\(account)_\(notifyServerPublicKey.hexRepresentation)"
-
-        if let responseTopic = kms.getTopic(for: keyYStorageKey),
-           let selfPubKeyY = kms.getAgreementSecret(for: responseTopic)?.publicKey {
-            return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
-        } else {
-            let selfPubKeyY = try kms.createX25519KeyPair()
-            let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
-
-            let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPubKeyY, peerPublicKey: notifyServerPublicKey.hexRepresentation)
-
-            try kms.setSymmetricKey(agreementKeys.sharedKey, for: watchSubscriptionsTopic)
-            let responseTopic = agreementKeys.derivedTopic()
-
-            try kms.setAgreementSecret(agreementKeys, topic: responseTopic)
-
-            // save for later under dapp's account + pub key
-            try kms.setTopic(responseTopic, for: keyYStorageKey)
-
-            return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
-        }
     }
 
     private func createJWTWrapper(notifyServerAuthenticationDidKey: DIDKey, subscriptionAccount: Account) async throws -> NotifyWatchSubscriptionsPayload.Wrapper {
