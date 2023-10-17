@@ -74,7 +74,6 @@ public class NotifyClient {
 
     public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
         try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        try await resubscribeService.resubscribe(account: account)
         notifyAccountProvider.setAccount(account)
         subscriptionWatcher.start()
     }
