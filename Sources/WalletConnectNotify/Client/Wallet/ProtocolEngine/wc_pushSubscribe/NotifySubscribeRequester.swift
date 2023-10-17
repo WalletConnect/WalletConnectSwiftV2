@@ -39,16 +39,16 @@ class NotifySubscribeRequester {
 
         logger.debug("Subscribing for Notify, dappUrl: \(appDomain)")
 
-        let metadata = try await notifyConfigProvider.getMetadata(appDomain: appDomain)
+        let config = try await notifyConfigProvider.resolveNotifyConfig(appDomain: appDomain)
 
-        let peerPublicKey = try await webDidResolver.resolveAgreementKey(domain: metadata.url)
+        let peerPublicKey = try await webDidResolver.resolveAgreementKey(domain: appDomain)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
         let responseTopic = keysY.derivedTopic()
         
-        dappsMetadataStore.set(metadata, forKey: responseTopic)
+        dappsMetadataStore.set(config.metadata, forKey: responseTopic)
 
         try kms.setSymmetricKey(keysY.sharedKey, for: subscribeTopic)
         try kms.setAgreementSecret(keysY, topic: responseTopic)
@@ -80,10 +80,17 @@ class NotifySubscribeRequester {
     }
 
     private func createJWTWrapper(dappPubKey: DIDKey, subscriptionAccount: Account, appDomain: String) async throws -> NotifySubscriptionPayload.Wrapper {
-        let types = try await notifyConfigProvider.getSubscriptionScope(appDomain: appDomain)
-        let scope = types.map{$0.name}.joined(separator: " ")
+        let config = try await notifyConfigProvider.resolveNotifyConfig(appDomain: appDomain)
         let app = DIDWeb(host: appDomain)
-        let jwtPayload = NotifySubscriptionPayload(dappPubKey: dappPubKey, keyserver: keyserverURL, subscriptionAccount: subscriptionAccount, app: app, scope: scope)
+        let jwtPayload = NotifySubscriptionPayload(
+            dappPubKey: dappPubKey,
+            keyserver: keyserverURL,
+            subscriptionAccount: subscriptionAccount,
+            app: app, 
+            scope: config.notificationTypes
+                .map { $0.name }
+                .joined(separator: " ")
+        )
         return try identityClient.signAndCreateWrapper(
             payload: jwtPayload,
             account: subscriptionAccount

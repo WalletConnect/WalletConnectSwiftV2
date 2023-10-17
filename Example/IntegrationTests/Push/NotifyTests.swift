@@ -74,7 +74,8 @@ final class NotifyTests: XCTestCase {
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
-        let client = NotifyClientFactory.create(keyserverURL: keyserverURL,
+        let client = NotifyClientFactory.create(projectId: InputConfig.projectId, 
+                                                keyserverURL: keyserverURL,
                                                 logger: notifyLogger,
                                                 keyValueStorage: keyValueStorage,
                                                 keychainStorage: keychain,
