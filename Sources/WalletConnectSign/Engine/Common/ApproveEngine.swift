@@ -169,7 +169,7 @@ final class ApproveEngine {
         sessionStore.setSession(session)
 
         let protocolMethod = SessionSettleProtocolMethod()
-        let request = RPCRequest(method: protocolMethod.method, params: settleParams)
+        let request = RPCRequest(method: protocolMethod.method, params: settleParams, topic: topic)
 
         async let subscription: () = networkingInteractor.subscribe(topic: topic)
         async let settleRequest: () = networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)

@@ -64,7 +64,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
             subscriptionAccount: account)
 
 
-        let request = RPCRequest(method: protocolMethod.method, params: watchSubscriptionsAuthWrapper)
+        let request = RPCRequest(method: protocolMethod.method, params: watchSubscriptionsAuthWrapper, topic: responseTopic)
 
         logger.debug("Subscribing to response topic: \(responseTopic)")
 

@@ -46,7 +46,7 @@ class DeleteNotifySubscriptionRequester {
             account: subscription.account
         )
 
-        let request = RPCRequest(method: protocolMethod.method, params: wrapper)
+        let request = RPCRequest(method: protocolMethod.method, params: wrapper, topic: topic)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         try notifyStorage.deleteSubscription(topic: topic)

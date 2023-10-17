@@ -37,7 +37,7 @@ private extension ENSResolverContract {
     func ethCall(with data: String) async throws -> RPCResponse {
         let call = EthCall(to: address, data: data)
         let params = AnyCodable([AnyCodable(call), AnyCodable("latest")])
-        let request = RPCRequest(method: "eth_call", params: params)
+        let request = RPCRequest(method: "eth_call", params: params, topic: nil)
         let data = try JSONEncoder().encode(request)
         let httpService = RPCService(data: data, projectId: projectId, chainId: chainId)
         return try await httpClient.request(RPCResponse.self, at: httpService)

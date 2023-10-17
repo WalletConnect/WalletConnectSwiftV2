@@ -60,7 +60,7 @@ class InviteService {
         )
 
         let inviteId = RPCID()
-        let request = RPCRequest(method: protocolMethod.method, params: wrapper, rpcid: inviteId)
+        let request = RPCRequest(method: protocolMethod.method, params: wrapper, rpcid: inviteId, topic: inviteTopic)
 
         try await networkingInteractor.subscribe(topic: responseTopic)
         try await networkingInteractor.request(request, topic: inviteTopic, protocolMethod: protocolMethod, envelopeType: .type1(pubKey: selfPubKeyY.rawRepresentation))

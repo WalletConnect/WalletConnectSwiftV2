@@ -20,7 +20,7 @@ class DeletePairingService {
         let reason = PairingReasonCode.userDisconnected
         let protocolMethod = PairingProtocolMethod.delete
         logger.debug("Will delete pairing for reason: message: \(reason.message) code: \(reason.code)")
-        let request = RPCRequest(method: protocolMethod.method, params: reason)
+        let request = RPCRequest(method: protocolMethod.method, params: reason, topic: topic)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         pairingStorage.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)

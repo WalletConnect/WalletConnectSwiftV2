@@ -46,7 +46,7 @@ class AppRespondSubscriberTests: XCTestCase {
 
         XCTAssertNotEqual(params.payloadParams, compromissedParams.payloadParams)
 
-        let request = RPCRequest(method: "wc_authRequest", params: AuthRequestParams.stub(), id: requestId.right!)
+        let request = RPCRequest(method: "wc_authRequest", params: AuthRequestParams.stub(), id: requestId.right!, topic: topic)
         try! rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
 
         var messageId: RPCID!

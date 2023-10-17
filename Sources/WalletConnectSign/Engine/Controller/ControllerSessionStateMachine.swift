@@ -31,7 +31,7 @@ final class ControllerSessionStateMachine {
         try Namespace.validate(namespaces)
         logger.debug("Controller will update methods")
         sessionStore.setSession(session)
-        let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateParams(namespaces: namespaces))
+        let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateParams(namespaces: namespaces), topic: topic)
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
@@ -42,7 +42,7 @@ final class ControllerSessionStateMachine {
        try session.updateExpiry(by: ttl)
        let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
        sessionStore.setSession(session)
-       let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
+       let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry), topic: topic)
        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
    }
 

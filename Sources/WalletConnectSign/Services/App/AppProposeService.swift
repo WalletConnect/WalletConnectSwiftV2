@@ -47,7 +47,7 @@ final class AppProposeService {
             sessionProperties: sessionProperties
         )
         
-        let request = RPCRequest(method: protocolMethod.method, params: proposal)
+        let request = RPCRequest(method: protocolMethod.method, params: proposal, topic: pairingTopic)
         try await networkingInteractor.request(request, topic: pairingTopic, protocolMethod: protocolMethod)
     }
 }

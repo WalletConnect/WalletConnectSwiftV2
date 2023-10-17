@@ -7,7 +7,7 @@ extension RelayRPC where Parameters: Codable {
     }
 
     func asRPCRequest() -> RPCRequest {
-        RPCRequest(method: self.method, params: self.params, idGenerator: self.idGenerator)
+        RPCRequest(method: self.method, params: self.params, idGenerator: self.idGenerator, topic: nil)
     }
 }
 

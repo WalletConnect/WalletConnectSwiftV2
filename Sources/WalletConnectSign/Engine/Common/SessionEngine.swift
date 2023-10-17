@@ -67,7 +67,7 @@ final class SessionEngine {
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let protocolMethod = SessionRequestProtocolMethod(ttl: request.calculateTtl())
-        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id)
+        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id, topic: request.topic)
         try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
     }
 
@@ -106,7 +106,7 @@ final class SessionEngine {
         guard session.hasPermission(forEvent: event.name, onChain: chainId) else {
             throw WalletConnectError.invalidEvent
         }
-        let rpcRequest = RPCRequest(method: protocolMethod.method, params: SessionType.EventParams(event: event, chainId: chainId))
+        let rpcRequest = RPCRequest(method: protocolMethod.method, params: SessionType.EventParams(event: event, chainId: chainId), topic: topic)
         try await networkingInteractor.request(rpcRequest, topic: topic, protocolMethod: protocolMethod)
     }
 }

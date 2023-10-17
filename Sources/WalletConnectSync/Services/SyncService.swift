@@ -51,7 +51,7 @@ final class SyncService {
         let protocolMethod = SyncSetMethod()
         let params = StoreSet(key: object.databaseId, value: try object.json())
         let rpcid = RPCID()
-        let request = RPCRequest(method: protocolMethod.method, params: params, rpcid: rpcid)
+        let request = RPCRequest(method: protocolMethod.method, params: params, rpcid: rpcid, topic: nil)
         let record = try indexStore.getRecord(account: account, name: store)
 
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
@@ -64,7 +64,7 @@ final class SyncService {
     func delete(account: Account, store: String, key: String) async throws {
         let protocolMethod = SyncDeleteMethod()
         let rpcid = RPCID()
-        let request = RPCRequest(method: protocolMethod.method, params: ["key": key], rpcid: rpcid)
+        let request = RPCRequest(method: protocolMethod.method, params: ["key": key], rpcid: rpcid, topic: nil)
         let record = try indexStore.getRecord(account: account, name: store)
 
         try await networkInteractor.request(request, topic: record.topic, protocolMethod: protocolMethod)
