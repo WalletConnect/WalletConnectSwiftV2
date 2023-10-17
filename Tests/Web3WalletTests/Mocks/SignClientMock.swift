@@ -59,6 +59,17 @@ final class SignClientMock: SignClientProtocol {
             .eraseToAnyPublisher()
     }
     
+    var sessionEventPublisher: AnyPublisher<(event: WalletConnectSign.Session.Event, sessionTopic: String, chainId: WalletConnectUtils.Blockchain?), Never> {
+        return Result.Publisher(
+            (
+                WalletConnectSign.Session.Event(name: "chainChanged", data: AnyCodable("event_data")),
+                "topic",
+                Blockchain("eip155:1")
+            )
+        )
+            .eraseToAnyPublisher()
+    }
+    
     var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
         let sessionProposal = Session.Proposal(
             id: "",
