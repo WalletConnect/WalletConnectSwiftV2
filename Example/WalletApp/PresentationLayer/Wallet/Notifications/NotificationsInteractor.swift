@@ -1,3 +1,4 @@
+import Foundation
 import WalletConnectNotify
 import Combine
 
@@ -32,7 +33,32 @@ final class NotificationsInteractor {
     }
 
     func subscribe(domain: String) async throws {
-        try await Notify.instance.subscribe(appDomain: domain, account: importAccount.account)
+        return try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = subscriptionsPublisher
+                .setFailureType(to: Error.self)
+                .timeout(10, scheduler: RunLoop.main, customError: { Errors.subscribeTimeout })
+                .sink(receiveCompletion: { completion in
+                    defer { cancellable?.cancel() }
+                    switch completion {
+                    case .failure(let error): continuation.resume(with: .failure(error))
+                    case .finished: break
+                    }
+                }, receiveValue: { subscriptions in
+                    guard subscriptions.contains(where: { $0.metadata.url == domain }) else { return }
+                    cancellable?.cancel()
+                    continuation.resume(with: .success(()))
+                })
+
+            Task { [cancellable] in
+                do {
+                    try await Notify.instance.subscribe(appDomain: domain, account: importAccount.account)
+                } catch {
+                    cancellable?.cancel()
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     func unsubscribe(topic: String) async throws {
@@ -41,5 +67,19 @@ final class NotificationsInteractor {
 
     func messages(for subscription: NotifySubscription) -> [NotifyMessageRecord] {
         return Notify.instance.getMessageHistory(topic: subscription.topic)
+    }
+}
+
+private extension NotificationsInteractor {
+
+    enum Errors: Error, LocalizedError {
+        case subscribeTimeout
+
+        var errorDescription: String? {
+            switch self {
+            case .subscribeTimeout:
+                return "Subscribe method timeout"
+            }
+        }
     }
 }

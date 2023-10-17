@@ -89,41 +89,7 @@ public class NotifyClient {
         logger.setLogging(level: level)
     }
 
-    public func subscribe(appDomain: String, account: Account, await: Bool = true) async throws {
-        guard `await` else {
-            try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
-            return
-        }
-
-        return try await withCheckedThrowingContinuation { continuation in
-            var cancellable: AnyCancellable?
-            cancellable = subscriptionsPublisher
-                .setFailureType(to: Error.self)
-                .timeout(10, scheduler: RunLoop.main, customError: { Errors.subscribeTimeout })
-                .sink(receiveCompletion: { completion in
-                    defer { cancellable?.cancel() }
-                    switch completion {
-                    case .failure(let error): continuation.resume(with: .failure(error))
-                    case .finished: break
-                    }
-                }, receiveValue: { subscriptions in
-                    guard subscriptions.contains(where: { $0.metadata.url == appDomain }) else { return }
-                    cancellable?.cancel()
-                    continuation.resume(with: .success(()))
-                })
-
-            Task { [cancellable] in
-                do {
-                    try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
-                } catch {
-                    cancellable?.cancel()
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-
-    public func subscribeAndAwait(appDomain: String, account: Account) async throws {
+    public func subscribe(appDomain: String, account: Account) async throws {
         try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
     }
 
@@ -157,20 +123,6 @@ public class NotifyClient {
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
         return notifyStorage.messagesPublisher(topic: topic)
-    }
-}
-
-private extension NotifyClient {
-
-    enum Errors: Error, LocalizedError {
-        case subscribeTimeout
-
-        var errorDescription: String? {
-            switch self {
-            case .subscribeTimeout:
-                return "Subscribe method timeout"
-            }
-        }
     }
 }
 
