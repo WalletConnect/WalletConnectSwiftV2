@@ -51,8 +51,12 @@ final class SessionEngine {
         return sessionStore.hasSession(forTopic: topic)
     }
 
+    func getWCSessions() -> [WCSession] {
+        sessionStore.getAll()
+    }
+    
     func getSessions() -> [Session] {
-        sessionStore.getAll().map {$0.publicRepresentation()}
+        getWCSessions().map { $0.publicRepresentation() }
     }
 
     func request(_ request: Request) async throws {

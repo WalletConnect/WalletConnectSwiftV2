@@ -259,13 +259,18 @@ public final class SignClient: SignClientProtocol {
         try await controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
 
-    /// For wallet to extend a session to 7 days
+    /// For dapp and wallet to extend a session to 7 days
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be extended.
     public func extend(topic: String) async throws {
         let ttl: Int64 = Session.defaultTimeToLive
-        if sessionEngine.hasSession(for: topic) {
+        guard let session = sessionEngine.getWCSessions().first(where: { $0.topic == topic }) else {
+            throw WalletConnectError.noSessionMatchingTopic(topic)
+        }
+        if session.selfIsController {
             try await controllerSessionStateMachine.extend(topic: topic, by: ttl)
+        } else {
+            try await nonControllerSessionStateMachine.extend(topic: topic, by: ttl)
         }
     }
 
