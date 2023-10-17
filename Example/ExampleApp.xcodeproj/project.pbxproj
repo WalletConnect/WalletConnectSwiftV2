@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -305,6 +305,13 @@
 		C5F32A322954816C00A6476E /* ConnectionDetailsPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A312954816C00A6476E /* ConnectionDetailsPresenter.swift */; };
 		C5F32A342954817600A6476E /* ConnectionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F32A332954817600A6476E /* ConnectionDetailsView.swift */; };
 		C5F32A362954FE3C00A6476E /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C5F32A352954FE3C00A6476E /* Colors.xcassets */; };
+		C5FFEA762ADD8956007282A2 /* BrowserModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA752ADD8956007282A2 /* BrowserModule.swift */; };
+		C5FFEA782ADD896E007282A2 /* BrowserPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA772ADD896E007282A2 /* BrowserPresenter.swift */; };
+		C5FFEA7A2ADD8974007282A2 /* BrowserRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA792ADD8974007282A2 /* BrowserRouter.swift */; };
+		C5FFEA7C2ADD897C007282A2 /* BrowserInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA7B2ADD897C007282A2 /* BrowserInteractor.swift */; };
+		C5FFEA7E2ADD8985007282A2 /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA7D2ADD8985007282A2 /* BrowserView.swift */; };
+		C5FFEA812ADDACD7007282A2 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA802ADDACD7007282A2 /* WebView.swift */; };
+		C5FFEA842ADDAD6D007282A2 /* SafariViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FFEA832ADDAD6D007282A2 /* SafariViewController.swift */; };
 		CF1A594529E5876600AAC16B /* XCUIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A593A29E5876600AAC16B /* XCUIElement.swift */; };
 		CF1A594629E5876600AAC16B /* PushNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A593C29E5876600AAC16B /* PushNotificationTests.swift */; };
 		CF1A594829E5876600AAC16B /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF1A593F29E5876600AAC16B /* Engine.swift */; };
@@ -634,6 +641,13 @@
 		C5F32A312954816C00A6476E /* ConnectionDetailsPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsPresenter.swift; sourceTree = "<group>"; };
 		C5F32A332954817600A6476E /* ConnectionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDetailsView.swift; sourceTree = "<group>"; };
 		C5F32A352954FE3C00A6476E /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
+		C5FFEA752ADD8956007282A2 /* BrowserModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserModule.swift; sourceTree = "<group>"; };
+		C5FFEA772ADD896E007282A2 /* BrowserPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPresenter.swift; sourceTree = "<group>"; };
+		C5FFEA792ADD8974007282A2 /* BrowserRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserRouter.swift; sourceTree = "<group>"; };
+		C5FFEA7B2ADD897C007282A2 /* BrowserInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserInteractor.swift; sourceTree = "<group>"; };
+		C5FFEA7D2ADD8985007282A2 /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
+		C5FFEA802ADDACD7007282A2 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		C5FFEA832ADDAD6D007282A2 /* SafariViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariViewController.swift; sourceTree = "<group>"; };
 		CF1A593029E5873D00AAC16B /* EchoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EchoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF1A593A29E5876600AAC16B /* XCUIElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XCUIElement.swift; sourceTree = "<group>"; };
 		CF1A593C29E5876600AAC16B /* PushNotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationTests.swift; sourceTree = "<group>"; };
@@ -1606,6 +1620,7 @@
 		C56EE229293F5668004840D1 /* Wallet */ = {
 			isa = PBXGroup;
 			children = (
+				C5FFEA742ADD8942007282A2 /* Browser */,
 				A50D53BB2ABA053600A4FD8B /* NotifySettings */,
 				A51811992A52E82100A52B15 /* Settings */,
 				847BD1DB2989493F00076C90 /* Main */,
@@ -1797,6 +1812,36 @@
 				C5F32A332954817600A6476E /* ConnectionDetailsView.swift */,
 			);
 			path = ConnectionDetails;
+			sourceTree = "<group>";
+		};
+		C5FFEA742ADD8942007282A2 /* Browser */ = {
+			isa = PBXGroup;
+			children = (
+				C5FFEA822ADDAD5B007282A2 /* SafariViewController */,
+				C5FFEA7F2ADDACCC007282A2 /* WebView */,
+				C5FFEA752ADD8956007282A2 /* BrowserModule.swift */,
+				C5FFEA772ADD896E007282A2 /* BrowserPresenter.swift */,
+				C5FFEA792ADD8974007282A2 /* BrowserRouter.swift */,
+				C5FFEA7B2ADD897C007282A2 /* BrowserInteractor.swift */,
+				C5FFEA7D2ADD8985007282A2 /* BrowserView.swift */,
+			);
+			path = Browser;
+			sourceTree = "<group>";
+		};
+		C5FFEA7F2ADDACCC007282A2 /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				C5FFEA802ADDACD7007282A2 /* WebView.swift */,
+			);
+			path = WebView;
+			sourceTree = "<group>";
+		};
+		C5FFEA822ADDAD5B007282A2 /* SafariViewController */ = {
+			isa = PBXGroup;
+			children = (
+				C5FFEA832ADDAD6D007282A2 /* SafariViewController.swift */,
+			);
+			path = SafariViewController;
 			sourceTree = "<group>";
 		};
 		CF1A593129E5873D00AAC16B /* EchoUITests */ = {
@@ -2384,6 +2429,7 @@
 				847BD1E4298A806800076C90 /* NotificationsModule.swift in Sources */,
 				C55D348C295DD8CA0004314A /* PasteUriInteractor.swift in Sources */,
 				847BD1D92989492500076C90 /* MainPresenter.swift in Sources */,
+				C5FFEA842ADDAD6D007282A2 /* SafariViewController.swift in Sources */,
 				C55D3497295DFA750004314A /* WelcomeView.swift in Sources */,
 				A57879722A4F225E00F8D10B /* ImportAccount.swift in Sources */,
 				C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */,
@@ -2415,6 +2461,7 @@
 				C56EE243293F566D004840D1 /* ScanView.swift in Sources */,
 				84310D05298BC980000C15B6 /* MainInteractor.swift in Sources */,
 				C56EE288293F5757004840D1 /* ThirdPartyConfigurator.swift in Sources */,
+				C5FFEA7E2ADD8985007282A2 /* BrowserView.swift in Sources */,
 				847BD1D62989492500076C90 /* MainViewController.swift in Sources */,
 				C5B2F6FA29705293000DBA0E /* SessionRequestInteractor.swift in Sources */,
 				C55D34AE2965FB750004314A /* SessionProposalModule.swift in Sources */,
@@ -2435,9 +2482,12 @@
 				A5B4F7C32ABB20AE0099AF7C /* SubscriptionInteractor.swift in Sources */,
 				A50D53C52ABA055700A4FD8B /* NotifyPreferencesView.swift in Sources */,
 				C56EE246293F566D004840D1 /* ScanRouter.swift in Sources */,
+				C5FFEA7A2ADD8974007282A2 /* BrowserRouter.swift in Sources */,
 				C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */,
+				C5FFEA812ADDACD7007282A2 /* WebView.swift in Sources */,
 				C5B2F6F829705293000DBA0E /* SessionRequestView.swift in Sources */,
 				C56EE28C293F5757004840D1 /* Configurator.swift in Sources */,
+				C5FFEA782ADD896E007282A2 /* BrowserPresenter.swift in Sources */,
 				C55D3489295DD8CA0004314A /* PasteUriModule.swift in Sources */,
 				C55D3494295DFA750004314A /* WelcomePresenter.swift in Sources */,
 				C5B2F6F929705293000DBA0E /* SessionRequestPresenter.swift in Sources */,
@@ -2456,11 +2506,13 @@
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
 				A518119F2A52E83100A52B15 /* SettingsModule.swift in Sources */,
+				C5FFEA7C2ADD897C007282A2 /* BrowserInteractor.swift in Sources */,
 				8487A9482A83AD680003D5AF /* LoggingService.swift in Sources */,
 				C55D348D295DD8CA0004314A /* PasteUriView.swift in Sources */,
 				C5F32A2C2954814200A6476E /* ConnectionDetailsModule.swift in Sources */,
 				C56EE249293F566D004840D1 /* ScanInteractor.swift in Sources */,
 				C56EE28A293F5757004840D1 /* AppDelegate.swift in Sources */,
+				C5FFEA762ADD8956007282A2 /* BrowserModule.swift in Sources */,
 				C56EE2A3293F6BAF004840D1 /* UIPasteboardWrapper.swift in Sources */,
 				C5B2F6F629705293000DBA0E /* SessionRequestModule.swift in Sources */,
 				C56EE24E293F566D004840D1 /* WalletInteractor.swift in Sources */,
