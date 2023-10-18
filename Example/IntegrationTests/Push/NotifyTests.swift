@@ -152,7 +152,7 @@ final class NotifyTests: XCTestCase {
     
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
-        let updateScope: Set<String> = ["Alerts"]
+        let updateScope: Set<String> = ["8529aae8-cb26-4d49-922e-eb099044bebe"]
         expectation.assertForOverFulfill = false
 
         var didUpdate = false
@@ -184,7 +184,7 @@ final class NotifyTests: XCTestCase {
     func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates notify subscription")
         let messageExpectation = expectation(description: "receives a notify message")
-        let notifyMessage = NotifyMessage.stub()
+        let notifyMessage = NotifyMessage.stub(type: "8529aae8-cb26-4d49-922e-eb099044bebe")
 
         var didNotify = false
         walletNotifyClientA.subscriptionsPublisher

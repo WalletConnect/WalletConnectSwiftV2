@@ -53,10 +53,10 @@ struct NotifyPreferencesView: View {
         Toggle(isOn: .init(get: {
             viewModel.update[title]?.enabled ?? value.enabled
         }, set: { newValue in
-            viewModel.update[title] = ScopeValue(description: value.description, enabled: newValue)
+            viewModel.update[title] = ScopeValue(id: value.id, name: value.name, description: value.description, enabled: newValue)
         })) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                Text(value.name)
                     .foregroundColor(.primary)
                     .font(.system(size: 14, weight: .semibold))
 

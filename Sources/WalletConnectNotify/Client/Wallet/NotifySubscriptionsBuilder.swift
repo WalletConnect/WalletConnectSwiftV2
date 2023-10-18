@@ -36,7 +36,12 @@ class NotifySubscriptionsBuilder {
 
     private func buildScope(selectedScope: [String], availableScope: [NotifyConfig.NotificationType]) async throws -> [String: ScopeValue] {
         return availableScope.reduce(into: [:]) {
-            $0[$1.name] = ScopeValue(description: $1.name, enabled: selectedScope.contains($1.name))
+            $0[$1.id] = ScopeValue(
+                id: $1.id,
+                name: $1.name,
+                description: $1.description,
+                enabled: selectedScope.contains($1.id)
+            )
         }
     }
 }
