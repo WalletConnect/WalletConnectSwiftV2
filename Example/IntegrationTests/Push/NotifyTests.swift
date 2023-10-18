@@ -152,7 +152,7 @@ final class NotifyTests: XCTestCase {
     
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
-        let updateScope: Set<String> = ["alerts"]
+        let updateScope: Set<String> = ["Alerts"]
         expectation.assertForOverFulfill = false
 
         var didUpdate = false
