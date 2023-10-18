@@ -18,12 +18,16 @@ struct NotifyConfig: Codable {
     let image_url: ImageUrl?
     let notificationTypes: [NotificationType]
 
+    var appDomain: String {
+        return URL(string: homepage)?.host ?? ""
+    }
+
     var metadata: AppMetadata {
         return AppMetadata(
             name: name,
             description:
                 description,
-            url: homepage,
+            url: appDomain,
             icons: [image_url?.sm, image_url?.md, image_url?.lg].compactMap { $0 }
         )
     }
