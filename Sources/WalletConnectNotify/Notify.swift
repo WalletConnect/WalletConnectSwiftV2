@@ -7,6 +7,7 @@ public class Notify {
         }
         Push.configure(pushHost: config.pushHost, environment: config.environment)
         return NotifyClientFactory.create(
+            projectId: Networking.projectId,
             groupIdentifier: config.groupIdentifier,
             networkInteractor: Networking.interactor,
             pairingRegisterer: Pair.registerer,
