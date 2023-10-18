@@ -15,11 +15,12 @@ struct NotifyConfig: Codable {
     let name: String
     let homepage: String
     let description: String
+    let dapp_url: String
     let image_url: ImageUrl?
     let notificationTypes: [NotificationType]
 
     var appDomain: String {
-        return URL(string: homepage)?.host ?? homepage
+        return URL(string: dapp_url)?.host ?? dapp_url
     }
 
     var metadata: AppMetadata {
