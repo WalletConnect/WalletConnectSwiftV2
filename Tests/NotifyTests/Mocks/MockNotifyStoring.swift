@@ -29,7 +29,7 @@ class MockNotifyStoring: NotifyStoring {
         }
     }
 
-    func deleteSubscriptions(account: WalletConnectUtils.Account) {
+    func clearDatabase(account: WalletConnectUtils.Account) {
         subscriptions = subscriptions.filter { $0.account != account }
     }
 

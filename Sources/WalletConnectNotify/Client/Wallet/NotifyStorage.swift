@@ -7,7 +7,7 @@ protocol NotifyStoring {
     func getSubscription(topic: String) -> NotifySubscription?
     func setSubscription(_ subscription: NotifySubscription) async throws
     func deleteSubscription(topic: String) async throws
-    func deleteSubscriptions(account: Account)
+    func clearDatabase(account: Account)
 }
 
 final class NotifyStorage: NotifyStoring {
