@@ -13,7 +13,6 @@ class NotifySubscribeRequester {
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
-    private let dappsMetadataStore: CodableStore<AppMetadata>
     private let notifyConfigProvider: NotifyConfigProvider
 
     init(keyserverURL: URL,
@@ -22,8 +21,7 @@ class NotifySubscribeRequester {
          logger: ConsoleLogging,
          kms: KeyManagementService,
          webDidResolver: NotifyWebDidResolver,
-         notifyConfigProvider: NotifyConfigProvider,
-         dappsMetadataStore: CodableStore<AppMetadata>
+         notifyConfigProvider: NotifyConfigProvider
     ) {
         self.keyserverURL = keyserverURL
         self.identityClient = identityClient
@@ -31,7 +29,6 @@ class NotifySubscribeRequester {
         self.logger = logger
         self.kms = kms
         self.webDidResolver = webDidResolver
-        self.dappsMetadataStore = dappsMetadataStore
         self.notifyConfigProvider = notifyConfigProvider
     }
 
@@ -47,8 +44,6 @@ class NotifySubscribeRequester {
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
 
         let responseTopic = keysY.derivedTopic()
-        
-        dappsMetadataStore.set(config.metadata, forKey: responseTopic)
 
         try kms.setSymmetricKey(keysY.sharedKey, for: subscribeTopic)
         try kms.setAgreementSecret(keysY, topic: responseTopic)

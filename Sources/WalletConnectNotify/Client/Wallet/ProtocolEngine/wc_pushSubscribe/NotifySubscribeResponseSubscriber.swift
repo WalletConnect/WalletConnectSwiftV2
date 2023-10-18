@@ -12,7 +12,6 @@ class NotifySubscribeResponseSubscriber {
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
     private let groupKeychainStorage: KeychainStorageProtocol
-    private let dappsMetadataStore: CodableStore<AppMetadata>
     private let notifyConfigProvider: NotifyConfigProvider
 
     init(networkingInteractor: NetworkInteracting,
@@ -20,7 +19,6 @@ class NotifySubscribeResponseSubscriber {
          logger: ConsoleLogging,
          groupKeychainStorage: KeychainStorageProtocol,
          notifyStorage: NotifyStorage,
-         dappsMetadataStore: CodableStore<AppMetadata>,
          notifyConfigProvider: NotifyConfigProvider
     ) {
         self.networkingInteractor = networkingInteractor
@@ -28,7 +26,6 @@ class NotifySubscribeResponseSubscriber {
         self.logger = logger
         self.groupKeychainStorage = groupKeychainStorage
         self.notifyStorage = notifyStorage
-        self.dappsMetadataStore = dappsMetadataStore
         self.notifyConfigProvider = notifyConfigProvider
         subscribeForSubscriptionResponse()
     }
