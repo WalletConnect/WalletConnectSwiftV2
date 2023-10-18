@@ -19,7 +19,7 @@ struct NotifyConfig: Codable {
     let notificationTypes: [NotificationType]
 
     var appDomain: String {
-        return URL(string: homepage)?.host ?? ""
+        return URL(string: homepage)?.host ?? homepage
     }
 
     var metadata: AppMetadata {
