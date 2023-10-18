@@ -31,7 +31,8 @@ private extension NotifyConfigProvider {
             id: UUID().uuidString,
             name: appDomain,
             homepage: "https://\(appDomain)",
-            description: "",
+            description: "", 
+            dapp_url: "https://\(appDomain)",
             image_url: nil,
             notificationTypes: []
         )
