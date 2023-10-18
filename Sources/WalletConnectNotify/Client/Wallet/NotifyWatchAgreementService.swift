@@ -12,9 +12,17 @@ final class NotifyWatchAgreementService {
 
         let keyYStorageKey = storageKey(account: account)
 
-        if let responseTopic = kms.getTopic(for: keyYStorageKey), let selfPubKeyY = kms.getAgreementSecret(for: responseTopic)?.publicKey {
-            return (responseTopic: responseTopic, selfPubKeyY: selfPubKeyY.rawRepresentation)
-        } else {
+        if 
+            let responseTopic = kms.getTopic(for: keyYStorageKey),
+            let agreement = kms.getAgreementSecret(for: responseTopic),
+            let recoveredAgreement = try? kms.performKeyAgreement(
+                selfPublicKey: agreement.publicKey,
+                peerPublicKey: notifyServerPublicKey.hexRepresentation
+            ), agreement == recoveredAgreement
+        { 
+            return (responseTopic: responseTopic, selfPubKeyY: agreement.publicKey.rawRepresentation)
+        }
+        else {
             let selfPubKeyY = try kms.createX25519KeyPair()
             let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
 
