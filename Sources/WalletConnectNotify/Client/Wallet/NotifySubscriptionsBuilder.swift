@@ -11,8 +11,9 @@ class NotifySubscriptionsBuilder {
         var result = [NotifySubscription]()
 
         for subscription in notifyServerSubscriptions {
+            let config = await notifyConfigProvider.resolveNotifyConfig(appDomain: subscription.appDomain)
+
             do {
-                let config = try await notifyConfigProvider.resolveNotifyConfig(appDomain: subscription.appDomain)
                 let topic = try SymmetricKey(hex: subscription.symKey).derivedTopic()
                 let scope = try await buildScope(selectedScope: subscription.scope, availableScope: config.notificationTypes)
 
