@@ -13,7 +13,7 @@ struct SessionProposal: Codable, Equatable {
             pairingTopic: pairingTopic,
             proposer: proposer.metadata,
             requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
+            optionalNamespaces: optionalNamespaces ?? [:],
             sessionProperties: sessionProperties,
             proposal: self
         )
