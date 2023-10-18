@@ -13,7 +13,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
     private let logger: ConsoleLogging
     private let webDidResolver: NotifyWebDidResolver
     private let notifyAccountProvider: NotifyAccountProvider
-    private let notifyWatchAgreementService: NotifyWatchAgreementService
+    private let notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider
     private let notifyHost: String
     private var publishers = Set<AnyCancellable>()
 
@@ -23,7 +23,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
          logger: ConsoleLogging,
          webDidResolver: NotifyWebDidResolver,
          notifyAccountProvider: NotifyAccountProvider,
-         notifyWatchAgreementService: NotifyWatchAgreementService,
+         notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider,
          notifyHost: String
     ) {
         self.keyserverURL = keyserverURL
@@ -32,7 +32,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
         self.logger = logger
         self.webDidResolver = webDidResolver
         self.notifyAccountProvider = notifyAccountProvider
-        self.notifyWatchAgreementService = notifyWatchAgreementService
+        self.notifyWatcherAgreementKeysProvider = notifyWatcherAgreementKeysProvider
         self.notifyHost = notifyHost
     }
 
@@ -46,7 +46,7 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
         let notifyServerAuthenticationDidKey = DIDKey(rawData: notifyServerAuthenticationKey)
         let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
 
-        let (responseTopic, selfPubKeyY) = try notifyWatchAgreementService.generateAgreementKeysIfNeeded(notifyServerPublicKey: notifyServerPublicKey, account: account)
+        let (responseTopic, selfPubKeyY) = try notifyWatcherAgreementKeysProvider.generateAgreementKeysIfNeeded(notifyServerPublicKey: notifyServerPublicKey, account: account)
 
         logger.debug("setting symm key for response topic \(responseTopic)")
 

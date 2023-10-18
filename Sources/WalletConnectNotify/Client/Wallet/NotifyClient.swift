@@ -33,7 +33,7 @@ public class NotifyClient {
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
     private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
-    private let notifyWatchAgreementService: NotifyWatchAgreementService
+    private let notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider
     private let notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
     private let subscriptionWatcher: SubscriptionWatcher
 
@@ -52,7 +52,7 @@ public class NotifyClient {
          notifyAccountProvider: NotifyAccountProvider,
          subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
          notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
-         notifyWatchAgreementService: NotifyWatchAgreementService,
+         notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider,
          notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
          subscriptionWatcher: SubscriptionWatcher
     ) {
@@ -70,7 +70,7 @@ public class NotifyClient {
         self.notifyAccountProvider = notifyAccountProvider
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
         self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
-        self.notifyWatchAgreementService = notifyWatchAgreementService
+        self.notifyWatcherAgreementKeysProvider = notifyWatcherAgreementKeysProvider
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
         self.subscriptionWatcher = subscriptionWatcher
     }
@@ -83,7 +83,7 @@ public class NotifyClient {
 
     public func unregister(account: Account) async throws {
         try await identityService.unregister(account: account)
-        notifyWatchAgreementService.removeAgreement(account: account)
+        notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
         notifyStorage.clearDatabase(account: account)
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()

@@ -59,8 +59,8 @@ public struct NotifyClientFactory {
 
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
 
-        let notifyWatchAgreementService = NotifyWatchAgreementService(kms: kms)
-        let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, webDidResolver: webDidResolver, notifyAccountProvider: notifyAccountProvider, notifyWatchAgreementService: notifyWatchAgreementService, notifyHost: notifyHost)
+        let notifyWatcherAgreementKeysProvider = NotifyWatcherAgreementKeysProvider(kms: kms)
+        let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, webDidResolver: webDidResolver, notifyAccountProvider: notifyAccountProvider, notifyWatcherAgreementKeysProvider: notifyWatcherAgreementKeysProvider, notifyHost: notifyHost)
         let notifySubscriptionsBuilder = NotifySubscriptionsBuilder(notifyConfigProvider: notifyConfigProvider)
         let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, groupKeychainStorage: groupKeychainStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
         let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, kms: kms, identityClient: identityClient, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
@@ -84,7 +84,7 @@ public struct NotifyClientFactory {
             notifyAccountProvider: notifyAccountProvider,
             subscriptionsAutoUpdater: subscriptionsAutoUpdater,
             notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber, 
-            notifyWatchAgreementService: notifyWatchAgreementService,
+            notifyWatcherAgreementKeysProvider: notifyWatcherAgreementKeysProvider,
             notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber,
             subscriptionWatcher: subscriptionWatcher
         )

@@ -1,6 +1,6 @@
 import Foundation
 
-final class NotifyWatchAgreementService {
+final class NotifyWatcherAgreementKeysProvider {
 
     private let kms: KeyManagementServiceProtocol
 
@@ -46,7 +46,7 @@ final class NotifyWatchAgreementService {
     }
 }
 
-private extension NotifyWatchAgreementService {
+private extension NotifyWatcherAgreementKeysProvider {
 
     func storageKey(account: Account) -> String {
         return "watchSubscriptionResponseTopic_\(account.absoluteString)"
