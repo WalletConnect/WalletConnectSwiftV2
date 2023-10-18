@@ -17,8 +17,8 @@ final class MainPresenter {
         return [
             router.walletViewController(importAccount: importAccount),
             router.notificationsViewController(importAccount: importAccount),
-            router.settingsViewController(),
-            router.browserViewController()
+            router.browserViewController(),
+            router.settingsViewController()
         ]
     }
 

@@ -16,11 +16,51 @@ struct BrowserView: View {
             
             ZStack {
                 if selectedBrowser == 0 {
-                    WebView(url: URL(string: "https://react-app.walletconnect.com")!)
+                    VStack {
+                        HStack {
+                            TextField(
+                                viewModel.urlString,
+                                text: $viewModel.urlString
+                            )
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onSubmit {
+                                viewModel.loadURLString()
+                            }
+                            
+                            Button {
+                                viewModel.reload()
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        Divider()
+                            .padding(.top)
+                        
+                        if let url = URL(string: viewModel.urlString) {
+                            WebView(url: url, viewModel: viewModel)
+                        }
+                        
+                        Spacer()
+                    }
+                    .onAppear {
+                        viewModel.loadURLString()
+                    }
                 } else {
-                    SafariWebView(url: URL(string: "https://react-app.walletconnect.com")!)
+                    if let url = URL(string: viewModel.urlString) {
+                        SafariWebView(url: url.sanitise)
+                    }
                 }
             }
         }
     }
 }
+
+#if DEBUG
+struct BrowserView_Previews: PreviewProvider {
+    static var previews: some View {
+        BrowserView()
+    }
+}
+#endif
