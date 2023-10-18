@@ -38,7 +38,8 @@ public struct NotifyClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let subscriptionStore = KeyedDatabase<NotifySubscription>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifySubscription)
         let messagesStore = KeyedDatabase<NotifyMessageRecord>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifyMessagesRecords)
-        let notifyStorage = NotifyStorage(subscriptionStore: subscriptionStore, messagesStore: messagesStore)
+        let notifyAccountProvider = NotifyAccountProvider()
+        let notifyStorage = NotifyStorage(subscriptionStore: subscriptionStore, messagesStore: messagesStore, accountProvider: notifyAccountProvider)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = NotifyWebDidResolver()
@@ -58,7 +59,8 @@ public struct NotifyClientFactory {
 
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
 
-        let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver, notifyHost: notifyHost)
+        let notifyWatcherAgreementKeysProvider = NotifyWatcherAgreementKeysProvider(kms: kms)
+        let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, webDidResolver: webDidResolver, notifyAccountProvider: notifyAccountProvider, notifyWatcherAgreementKeysProvider: notifyWatcherAgreementKeysProvider, notifyHost: notifyHost)
         let notifySubscriptionsBuilder = NotifySubscriptionsBuilder(notifyConfigProvider: notifyConfigProvider)
         let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, groupKeychainStorage: groupKeychainStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
         let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, kms: kms, identityClient: identityClient, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
@@ -79,8 +81,10 @@ public struct NotifyClientFactory {
             notifySubscribeResponseSubscriber: notifySubscribeResponseSubscriber,
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
+            notifyAccountProvider: notifyAccountProvider,
             subscriptionsAutoUpdater: subscriptionsAutoUpdater,
-            notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber,
+            notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber, 
+            notifyWatcherAgreementKeysProvider: notifyWatcherAgreementKeysProvider,
             notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber,
             subscriptionWatcher: subscriptionWatcher
         )

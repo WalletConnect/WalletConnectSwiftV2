@@ -115,9 +115,8 @@ public class ChatClient {
 
     /// Unregisters a blockchain account with previously registered identity key
     /// Must not unregister invite key but must stop listening for invites
-    /// - Parameter onSign: Callback for signing CAIP-122 message to verify blockchain account ownership
-    public func unregister(account: Account, onSign: @escaping SigningCallback) async throws {
-        try await identityClient.unregister(account: account, onSign: onSign)
+    public func unregister(account: Account) async throws {
+        try await identityClient.unregister(account: account)
     }
 
     /// Queries the keyserver with a blockchain account

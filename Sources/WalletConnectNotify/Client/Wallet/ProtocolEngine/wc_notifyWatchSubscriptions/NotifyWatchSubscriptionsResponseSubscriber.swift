@@ -38,17 +38,19 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 let (watchSubscriptionPayloadRequest, _) = try NotifyWatchSubscriptionsPayload.decodeAndVerify(from: payload.request)
 
                 let account = watchSubscriptionPayloadRequest.subscriptionAccount
-                // todo varify signature with notify server diddoc authentication key
+                // TODO: varify signature with notify server diddoc authentication key
 
-                let oldSubscriptions = notifyStorage.getSubscriptions()
+                let oldSubscriptions = notifyStorage.getSubscriptions(account: account)
                 let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
                 try Task.checkCancellation()
 
-                logger.debug("number of subscriptions: \(newSubscriptions.count)")
+                let subscriptions = oldSubscriptions.difference(from: newSubscriptions)
 
-                guard newSubscriptions != oldSubscriptions else {return}
-                // todo: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
+                logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
+
+                guard subscriptions.count > 0 else { return }
+                // TODO: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
                 notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
                 
                 for subscription in newSubscriptions {

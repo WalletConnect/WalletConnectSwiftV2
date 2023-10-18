@@ -58,7 +58,7 @@ actor IdentityService {
         return try storage.saveInviteKey(inviteKey, for: account)
     }
 
-    func unregister(account: Account, onSign: SigningCallback) async throws {
+    func unregister(account: Account) async throws {
         let identityKey = try storage.getIdentityKey(for: account)
         let identityPublicKey = DIDKey(rawData: identityKey.publicKey.rawRepresentation)
         let idAuth = try makeIDAuth(account: account, issuer: identityPublicKey, claims: UnregisterIdentityClaims.self)

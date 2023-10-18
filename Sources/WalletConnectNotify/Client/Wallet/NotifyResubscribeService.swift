@@ -16,11 +16,11 @@ final class NotifyResubscribeService {
         setUpResubscription()
     }
 
-    func setUpResubscription() {
+    private func setUpResubscription() {
         networkInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                let topics = notifyStorage.getSubscriptions().map{$0.topic}
+                let topics = notifyStorage.getAllSubscriptions().map { $0.topic }
                 logger.debug("Resubscribing to notify subscription topics: \(topics)", properties: ["topics": topics.joined(separator: ", ")])
                 Task(priority: .high) {
                     try await networkInteractor.batchSubscribe(topics: topics)

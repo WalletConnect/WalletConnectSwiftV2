@@ -43,13 +43,18 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 let (jwtPayload, _) = try NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request)
                 let account = jwtPayload.account
 
-                // todo varify signature with notify server diddoc authentication key
+                // TODO: varify signature with notify server diddoc authentication key
 
-                let oldSubscriptions = notifyStorage.getSubscriptions()
+                let oldSubscriptions = notifyStorage.getSubscriptions(account: account)
                 let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
-                logger.debug("number of subscriptions: \(newSubscriptions.count)")
+                
+                try Task.checkCancellation()
 
-                guard newSubscriptions != oldSubscriptions else {return}
+                let subscriptions = oldSubscriptions.difference(from: newSubscriptions)
+
+                logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
+
+                guard subscriptions.count > 0 else { return }
 
                 notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
 
