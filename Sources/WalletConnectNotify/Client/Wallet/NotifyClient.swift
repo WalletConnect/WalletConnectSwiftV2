@@ -84,7 +84,7 @@ public class NotifyClient {
     public func unregister(account: Account) async throws {
         try await identityService.unregister(account: account)
         notifyWatchAgreementService.removeAgreement(account: account)
-        notifyStorage.deleteSubscriptions(account: account)
+        notifyStorage.clearDatabase(account: account)
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()
     }

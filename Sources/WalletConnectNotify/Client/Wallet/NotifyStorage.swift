@@ -80,7 +80,10 @@ final class NotifyStorage: NotifyStoring {
         deleteSubscriptionSubject.send(topic)
     }
 
-    func deleteSubscriptions(account: Account) {
+    func clearDatabase(account: Account) {
+        for subscription in getSubscriptions(account: account) {
+            deleteMessages(topic: subscription.topic)
+        }
         subscriptionStore.deleteAll(for: account.absoluteString)
     }
 
