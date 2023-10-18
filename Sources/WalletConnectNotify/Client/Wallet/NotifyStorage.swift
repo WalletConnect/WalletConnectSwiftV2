@@ -2,10 +2,12 @@ import Foundation
 import Combine
 
 protocol NotifyStoring {
-    func getSubscriptions() -> [NotifySubscription]
+    func getAllSubscriptions() -> [NotifySubscription]
+    func getSubscriptions(account: Account) -> [NotifySubscription]
     func getSubscription(topic: String) -> NotifySubscription?
     func setSubscription(_ subscription: NotifySubscription) async throws
     func deleteSubscription(topic: String) async throws
+    func clearDatabase(account: Account)
 }
 
 final class NotifyStorage: NotifyStoring {
@@ -20,6 +22,8 @@ final class NotifyStorage: NotifyStoring {
     private let deleteSubscriptionSubject = PassthroughSubject<String, Never>()
     private let subscriptionsSubject = PassthroughSubject<[NotifySubscription], Never>()
     private let messagesSubject = PassthroughSubject<[NotifyMessageRecord], Never>()
+
+    private let accountProvider: NotifyAccountProvider
 
     var newSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
         return newSubscriptionSubject.eraseToAnyPublisher()
@@ -37,21 +41,22 @@ final class NotifyStorage: NotifyStoring {
         return subscriptionsSubject.eraseToAnyPublisher()
     }
 
-    var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
-        return messagesSubject.eraseToAnyPublisher()
-    }
-
-    init(subscriptionStore: KeyedDatabase<NotifySubscription>, messagesStore: KeyedDatabase<NotifyMessageRecord>) {
+    init(subscriptionStore: KeyedDatabase<NotifySubscription>, messagesStore: KeyedDatabase<NotifyMessageRecord>, accountProvider: NotifyAccountProvider) {
         self.subscriptionStore = subscriptionStore
         self.messagesStore = messagesStore
+        self.accountProvider = accountProvider
 
         setupSubscriptions()
     }
 
     // MARK: Subscriptions
 
-    func getSubscriptions() -> [NotifySubscription] {
+    func getAllSubscriptions() -> [NotifySubscription] {
         return subscriptionStore.getAll()
+    }
+
+    func getSubscriptions(account: Account) -> [NotifySubscription] {
+        return subscriptionStore.getAll(for: account.absoluteString)
     }
 
     func getSubscription(topic: String) -> NotifySubscription? {
@@ -64,11 +69,7 @@ final class NotifyStorage: NotifyStoring {
     }
 
     func replaceAllSubscriptions(_ subscriptions: [NotifySubscription], account: Account) {
-        subscriptionStore.deleteAll(for: account.absoluteString)
-        // todo - compare old with new = delete messages for removed subscriptions
-        //messages for new subscriptions are not required
-        subscriptionStore.set(elements: subscriptions, for: account.absoluteString)
-        subscriptionsSubject.send(subscriptions)
+        subscriptionStore.replace(elements: subscriptions, for: account.absoluteString)
     }
 
     func deleteSubscription(topic: String) throws {
@@ -77,6 +78,13 @@ final class NotifyStorage: NotifyStoring {
         }
         subscriptionStore.delete(id: topic, for: subscription.account.absoluteString)
         deleteSubscriptionSubject.send(topic)
+    }
+
+    func clearDatabase(account: Account) {
+        for subscription in getSubscriptions(account: account) {
+            deleteMessages(topic: subscription.topic)
+        }
+        subscriptionStore.deleteAll(for: account.absoluteString)
     }
 
     func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) {
@@ -89,7 +97,7 @@ final class NotifyStorage: NotifyStoring {
     // MARK: Messages
 
     func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
-        return messagesPublisher
+        return messagesSubject
             .map { $0.filter { $0.topic == topic } }
             .eraseToAnyPublisher()
     }
@@ -125,7 +133,8 @@ private extension NotifyStorage {
         }
 
         subscriptionStore.onUpdate = { [unowned self] in
-            subscriptionsSubject.send(subscriptionStore.getAll())
+            guard let account = try? accountProvider.getCurrentAccount() else { return }
+            subscriptionsSubject.send(getSubscriptions(account: account))
         }
     }
 }

@@ -74,7 +74,9 @@ final class ChatTests: XCTestCase {
         let historyClient = HistoryClientFactory.create(
             historyUrl: "https://history.walletconnect.com",
             relayUrl: "wss://relay.walletconnect.com",
-            keychain: keychain
+            keyValueStorage: keyValueStorage,
+            keychain: keychain,
+            logger: logger
         )
 
         let clientId = try! networkingInteractor.getClientId()

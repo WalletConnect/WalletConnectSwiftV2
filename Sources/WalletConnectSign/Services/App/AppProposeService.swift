@@ -43,7 +43,7 @@ final class AppProposeService {
             relays: [relay],
             proposer: proposer,
             requiredNamespaces: namespaces,
-            optionalNamespaces: optionalNamespaces,
+            optionalNamespaces: optionalNamespaces ?? [:],
             sessionProperties: sessionProperties
         )
         

@@ -7,12 +7,12 @@ struct JWT<JWTClaims: JWTEncodable>: Codable, Equatable {
     let signature: String
     let string: String
 
-    init(claims: JWTClaims, signer: JWTSigning) throws {
+    init(claims: JWTClaims, signer: JWTSigning, jsonEncoder: JSONEncoder = .jwt) throws {
         self.header = JWTHeader(alg: signer.alg)
         self.claims = claims
 
-        let headerString = try header.encode()
-        let claimsString = try claims.encode()
+        let headerString = try header.encode(jsonEncoder: jsonEncoder)
+        let claimsString = try claims.encode(jsonEncoder: jsonEncoder)
         let signature = try signer.sign(header: headerString, claims: claimsString)
         
         self.signature = signature

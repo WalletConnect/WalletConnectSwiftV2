@@ -2,10 +2,12 @@ import Foundation
 @testable import WalletConnectKMS
 
 final class KeyManagementServiceMock: KeyManagementServiceProtocol {
+    
     private(set) var privateKeys: [String: AgreementPrivateKey] = [:]
     private(set) var symmetricKeys: [String: SymmetricKey] = [:]
     private(set) var agreementKeys: [String: AgreementKeys] = [:]
     private(set) var publicKeys: [String: AgreementPublicKey] = [:]
+    private(set) var topics: [String: String] = [:]
 
     func getSymmetricKeyRepresentable(for topic: String) -> Data? {
         if let key = getAgreementSecret(for: topic)?.sharedKey {
@@ -94,6 +96,18 @@ final class KeyManagementServiceMock: KeyManagementServiceProtocol {
         privateKeys = [:]
         symmetricKeys = [:]
         agreementKeys = [:]
+    }
+    
+    func setTopic(_ topic: String, for key: String) throws {
+        topics[key] = topic
+    }
+
+    func getTopic(for key: String) -> String? {
+        return topics[key]
+    }
+
+    func deleteTopic(for key: String) {
+        topics[key] = nil
     }
 }
 

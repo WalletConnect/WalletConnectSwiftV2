@@ -38,10 +38,12 @@ final class SettingsPresenter: ObservableObject {
         return deviceToken
     }
 
-    func logoutPressed() {
+    func logoutPressed() async throws {
+        guard let account = accountStorage.importAccount?.account else { return }
+        try await interactor.notifyUnregister(account: account)
         accountStorage.importAccount = nil
         UserDefaults.standard.set(nil, forKey: "deviceToken")
-        router.presentWelcome()
+        await router.presentWelcome()
     }
 }
 

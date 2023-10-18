@@ -13,7 +13,7 @@ extension NotifySubscription {
             account: account,
             relay: relay,
             metadata: metadata,
-            scope: ["test": ScopeValue(description: "desc", enabled: true)],
+            scope: ["test": ScopeValue(id: "id", name: "name", description: "desc", enabled: true)],
             expiry: expiry,
             symKey: symKey
         )

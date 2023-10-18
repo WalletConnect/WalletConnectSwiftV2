@@ -60,8 +60,10 @@ final class DispatcherTests: XCTestCase {
         webSocket = WebSocketMock()
         let webSocketFactory = WebSocketFactoryMock(webSocket: webSocket)
         networkMonitor = NetworkMonitoringMock()
+        let defaults = RuntimeKeyValueStorage()
+        let logger = ConsoleLoggerMock()
         let keychainStorageMock = DispatcherKeychainStorageMock()
-        let clientIdStorage = ClientIdStorage(keychain: keychainStorageMock)
+        let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychainStorageMock, logger: logger)
         let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
             url: "wss://relay.walletconnect.com"

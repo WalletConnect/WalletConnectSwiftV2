@@ -9,7 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: 
+      group: apple-silicon
 
     steps:
     - uses: actions/checkout@v3
