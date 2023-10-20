@@ -7,5 +7,6 @@ extension Notify {
         let environment: APNSEnvironment
         let crypto: CryptoProvider
         let notifyHost: String
+        let explorerHost: String
     }
 }

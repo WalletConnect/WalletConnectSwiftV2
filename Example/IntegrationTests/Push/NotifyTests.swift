@@ -84,7 +84,8 @@ final class NotifyTests: XCTestCase {
                                                 pairingRegisterer: pairingClient,
                                                 pushClient: pushClient,
                                                 crypto: DefaultCryptoProvider(),
-                                                notifyHost: InputConfig.notifyHost)
+                                                notifyHost: InputConfig.notifyHost, 
+                                                explorerHost: InputConfig.explorerHost)
         return client
     }
 
@@ -152,19 +153,25 @@ final class NotifyTests: XCTestCase {
     
     func testWalletCreatesAndUpdatesSubscription() async {
         let expectation = expectation(description: "expects to create and update notify subscription")
-        let updateScope: Set<String> = ["8529aae8-cb26-4d49-922e-eb099044bebe"]
         expectation.assertForOverFulfill = false
 
+        var updateScope: Set<String>!
         var didUpdate = false
+
         walletNotifyClientA.subscriptionsPublisher
             .sink { [unowned self] subscriptions in
-                guard let subscription = subscriptions.first else { return }
+                guard 
+                    let subscription = subscriptions.first,
+                    let scope = subscription.scope.keys.first
+                else { return }
+
                 let updatedScope = Set(subscription.scope.filter { $0.value.enabled == true }.keys)
 
                 if !didUpdate {
+                    updateScope = Set([scope])
                     didUpdate = true
                     Task(priority: .high) {
-                        try await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
+                        try await walletNotifyClientA.update(topic: subscription.topic, scope: Set([scope]))
                     }
                 }
                 if updateScope == updatedScope {
@@ -184,17 +191,26 @@ final class NotifyTests: XCTestCase {
     func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates notify subscription")
         let messageExpectation = expectation(description: "receives a notify message")
-        let notifyMessage = NotifyMessage.stub(type: "8529aae8-cb26-4d49-922e-eb099044bebe")
+
+        var notifyMessage: NotifyMessage!
 
         var didNotify = false
         walletNotifyClientA.subscriptionsPublisher
             .sink { subscriptions in
-                guard let subscription = subscriptions.first else { return }
+                guard
+                    let subscription = subscriptions.first,
+                    let scope = subscription.scope.keys.first
+                else { return }
+
                 let notifier = Publisher()
                 if !didNotify {
                     didNotify = true
+
+                    let message = NotifyMessage.stub(type: scope)
+                    notifyMessage = message
+
                     Task(priority: .high) {
-                        try await notifier.notify(topic: subscription.topic, account: subscription.account, message: notifyMessage)
+                        try await notifier.notify(topic: subscription.topic, account: subscription.account, message: message)
                         subscribeExpectation.fulfill()
                     }
                 }
@@ -202,7 +218,7 @@ final class NotifyTests: XCTestCase {
 
         walletNotifyClientA.notifyMessagePublisher
             .sink { [unowned self] notifyMessageRecord in
-                XCTAssertEqual(notifyMessage, notifyMessageRecord.message)
+                XCTAssertEqual(notifyMessageRecord.message, notifyMessage)
 
                 Task(priority: .high) {
                     try await walletNotifyClientA.deleteSubscription(topic: notifyMessageRecord.topic)
