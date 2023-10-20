@@ -27,6 +27,11 @@ final class MainRouter {
             .wrapToNavigationController()
     }
     
+    func browserViewController() -> UIViewController {
+        return BrowserModule.create(app: app)
+            .wrapToNavigationController()
+    }
+    
     func present(proposal: Session.Proposal, importAccount: ImportAccount, context: VerifyContext?) {
         SessionProposalModule.create(app: app, importAccount: importAccount, proposal: proposal, context: context)
             .presentFullScreen(from: viewController, transparentBackground: true)
