@@ -9,9 +9,13 @@ inputs:
     required: false
     default: 'relay.walletconnect.com'
   notify-endpoint:
-    description: 'The endpoint of the notify server e.g. cast.walletconnect.com'
+    description: 'The endpoint of the notify server e.g. notify.walletconnect.com'
     required: false
-    default: 'cast.walletconnect.com'
+    default: 'notify.walletconnect.com'
+  explorer-endpoint:
+    description: 'The endpoint of the explorer server e.g. explorer-api.walletconnect.com'
+    required: false
+    default: 'explorer-api.walletconnect.com'
   project-id:
     description: 'WalletConnect project id'
     required: true
@@ -59,13 +63,13 @@ runs:
     - name: Run integration tests
       if: inputs.type == 'integration-tests'
       shell: bash
-      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }} GM_DAPP_PROJECT_SECRET=${{ inputs.gm-dapp-project-secret }} GM_DAPP_HOST=${{ inputs.gm-dapp-host }} JS_CLIENT_API_HOST=${{ inputs.js-client-api-host }}
+      run: make integration_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} EXPLORER_HOST=${{ inputs.explorer-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }} GM_DAPP_PROJECT_SECRET=${{ inputs.gm-dapp-project-secret }} GM_DAPP_HOST=${{ inputs.gm-dapp-host }} JS_CLIENT_API_HOST=${{ inputs.js-client-api-host }}
 
     # Relay Integration tests
     - name: Run Relay integration tests
       if: inputs.type == 'relay-tests'
       shell: bash
-      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }}
+      run: make relay_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} EXPLORER_HOST=${{ inputs.explorer-endpoint }}
 
     # Smoke tests
     - name: Run smoke tests
@@ -77,7 +81,7 @@ runs:
     - name: Run notify tests
       if: inputs.type == 'notify-tests'
       shell: bash
-      run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }} GM_DAPP_PROJECT_SECRET=${{ inputs.gm-dapp-project-secret }} GM_DAPP_HOST=${{ inputs.gm-dapp-host }}
+      run: make notify_tests RELAY_HOST=${{ inputs.relay-endpoint }} PROJECT_ID=${{ inputs.project-id }} CAST_HOST=${{ inputs.notify-endpoint }} EXPLORER_HOST=${{ inputs.explorer-endpoint }} GM_DAPP_PROJECT_ID=${{ inputs.gm-dapp-project-id }} GM_DAPP_PROJECT_SECRET=${{ inputs.gm-dapp-project-secret }} GM_DAPP_HOST=${{ inputs.gm-dapp-host }}
 
     - name: Run x-platform protocol tests
       if: inputs.type == 'x-platform-protocol-tests'
