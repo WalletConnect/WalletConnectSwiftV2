@@ -89,7 +89,11 @@ extension WalletConnectModal {
         let modal = WalletConnectModalSheetController()
         vc.present(modal, animated: true)
     }
-    
+
+    public static func create() -> UIViewController {
+        return WalletConnectModalSheetController()
+    }
+
     private static func topViewController(_ base: UIViewController? = nil) -> UIViewController? {
         
         let base = base ?? UIApplication
