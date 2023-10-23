@@ -1,5 +1,6 @@
 import Foundation
 
-struct VerifyResponse: Decodable {
-    let origin: String?
+public struct VerifyResponse: Decodable {
+    public let origin: String?
+    public let isScam: Bool?
 }

@@ -10,7 +10,7 @@ final class SettingsRouter {
         self.app = app
     }
 
-    func presentWelcome() {
+    @MainActor func presentWelcome() async {
         WelcomeModule.create(app: app).present()
     }
 }

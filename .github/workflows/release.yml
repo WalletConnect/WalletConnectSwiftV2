@@ -9,7 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: 
+      group: apple-silicon
 
     steps:
     - uses: actions/checkout@v3
@@ -35,4 +36,4 @@ jobs:
         APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
         WALLETAPP_SENTRY_DSN: ${{ secrets.WALLETAPP_SENTRY_DSN }}
       run: |
-        make release_all APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }} WALLETAPP_SENTRY_DSN=${{ secrets.WALLETAPP_SENTRY_DSN }} MIXPANEL_TOKEN=${{secrets.MIXPANEL_TOKEN}}
+        make release_wallet APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }} WALLETAPP_SENTRY_DSN=${{ secrets.WALLETAPP_SENTRY_DSN }} MIXPANEL_TOKEN=${{secrets.MIXPANEL_TOKEN}}

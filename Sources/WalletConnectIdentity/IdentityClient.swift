@@ -22,8 +22,8 @@ public final class IdentityClient {
         self.logger = logger
     }
 
-    public func register(account: Account, onSign: SigningCallback) async throws -> String {
-        let pubKey = try await identityService.registerIdentity(account: account, onSign: onSign)
+    public func register(account: Account, domain: String, statement: String, resources: [String], onSign: SigningCallback) async throws -> String {
+        let pubKey = try await identityService.registerIdentity(account: account, domain: domain, statement: statement, resources: resources, onSign: onSign)
         logger.debug("Did register an account: \(account)")
         return pubKey
     }
@@ -34,8 +34,8 @@ public final class IdentityClient {
         return inviteKey
     }
 
-    public func unregister(account: Account, onSign: SigningCallback) async throws {
-        try await identityService.unregister(account: account, onSign: onSign)
+    public func unregister(account: Account) async throws {
+        try await identityService.unregister(account: account)
         logger.debug("Did unregister an account: \(account)")
     }
 

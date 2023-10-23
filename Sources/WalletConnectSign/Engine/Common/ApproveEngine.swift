@@ -314,15 +314,16 @@ private extension ApproveEngine {
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
-                let origin = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let response = try await verifyClient.verifyOrigin(assertionId: assertionId)
                 let verifyContext = verifyClient.createVerifyContext(
-                    origin: origin,
-                    domain: payload.request.proposer.metadata.url
+                    origin: response.origin,
+                    domain: payload.request.proposer.metadata.url,
+                    isScam: response.isScam
                 )
                 verifyContextStore.set(verifyContext, forKey: proposal.proposer.publicKey)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
             } catch {
-                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url, isScam: nil)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
                 return
             }

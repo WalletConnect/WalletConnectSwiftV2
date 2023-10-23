@@ -92,7 +92,7 @@ private extension HistoryService {
             pairingTopic: record.topic,
             proposer: proposal.proposer.metadata,
             requiredNamespaces: proposal.requiredNamespaces,
-            optionalNamespaces: proposal.optionalNamespaces,
+            optionalNamespaces: proposal.optionalNamespaces ?? [:],
             sessionProperties: proposal.sessionProperties,
             proposal: proposal
         )

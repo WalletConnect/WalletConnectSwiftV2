@@ -31,7 +31,9 @@ final class RelayClientEndToEndTests: XCTestCase {
     private var publishers = Set<AnyCancellable>()
 
     func makeRelayClient(prefix: String) -> RelayClient {
-        let clientIdStorage = ClientIdStorage(keychain: KeychainStorageMock())
+        let keyValueStorage = RuntimeKeyValueStorage()
+        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
+        let clientIdStorage = ClientIdStorage(defaults: keyValueStorage, keychain: KeychainStorageMock(), logger: logger)
         let socketAuthenticator = ClientIdAuthenticator(
             clientIdStorage: clientIdStorage,
             url: InputConfig.relayUrl
@@ -43,7 +45,6 @@ final class RelayClientEndToEndTests: XCTestCase {
         )
         let socket = WebSocket(url: urlFactory.create(fallback: false))
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
-        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
@@ -51,7 +52,6 @@ final class RelayClientEndToEndTests: XCTestCase {
             logger: logger
         )
         let keychain = KeychainStorageMock()
-        let keyValueStorage = RuntimeKeyValueStorage()
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
             projectId: InputConfig.projectId,

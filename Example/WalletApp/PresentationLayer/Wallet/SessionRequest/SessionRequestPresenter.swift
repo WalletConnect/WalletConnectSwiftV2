@@ -9,10 +9,13 @@ final class SessionRequestPresenter: ObservableObject {
     private let importAccount: ImportAccount
     
     let sessionRequest: Request
-    let verified: Bool?
+    let session: Session?
+    let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
-        return String(describing: sessionRequest.params.value)
+        let message = try? sessionRequest.params.get([String].self)
+        let decryptedMessage = message.map { String(data: Data(hex: $0.first ?? ""), encoding: .utf8) }
+        return (decryptedMessage ?? String(describing: sessionRequest.params.value)) ?? String(describing: sessionRequest.params.value)
     }
     
     @Published var showError = false
@@ -31,8 +34,9 @@ final class SessionRequestPresenter: ObservableObject {
         self.interactor = interactor
         self.router = router
         self.sessionRequest = sessionRequest
+        self.session = interactor.getSession(topic: sessionRequest.topic)
         self.importAccount = importAccount
-        self.verified = (context?.validation == .valid) ? true : (context?.validation == .unknown ? nil : false)
+        self.validationStatus = context?.validation
     }
 
     @MainActor
@@ -55,9 +59,7 @@ final class SessionRequestPresenter: ObservableObject {
 
 // MARK: - Private functions
 private extension SessionRequestPresenter {
-    func setupInitialState() {
-
-    }
+    func setupInitialState() {}
 }
 
 // MARK: - SceneViewModel

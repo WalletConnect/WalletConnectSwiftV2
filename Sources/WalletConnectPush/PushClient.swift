@@ -1,10 +1,17 @@
 import Foundation
+import Combine
 
 public class PushClient: PushClientProtocol {
     private let registerService: PushRegisterService
+    private let logger: ConsoleLogging
 
-    init(registerService: PushRegisterService) {
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return logger.logsPublisher
+    }
+
+    init(registerService: PushRegisterService, logger: ConsoleLogging) {
         self.registerService = registerService
+        self.logger = logger
     }
 
     public func register(deviceToken: Data) async throws {

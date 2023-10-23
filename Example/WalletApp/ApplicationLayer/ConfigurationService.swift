@@ -1,6 +1,7 @@
-import Foundation
+import UIKit
+import WalletConnectNetworking
+import WalletConnectNotify
 
-import Web3Inbox
 import Web3Wallet
 
 final class ConfigurationService {
@@ -18,21 +19,30 @@ final class ConfigurationService {
 
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
 
-        Web3Inbox.configure(
-            account: importAccount.account,
-            bip44: DefaultBIP44Provider(),
-            config: [.chatEnabled: false, .settingsEnabled: false],
+        Notify.configure(
             groupIdentifier: "group.com.walletconnect.sdk",
             environment: BuildConfiguration.shared.apnsEnvironment,
-            crypto: DefaultCryptoProvider(),
-            onSign: importAccount.onSign
+            crypto: DefaultCryptoProvider()
         )
-        Web3Inbox.instance.setLogging(level: .debug)
+
+        Notify.instance.setLogging(level: .debug)
 
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)
             ProfilingService.instance.setUpProfiling(account: importAccount.account.absoluteString, clientId: clientId)
         }
         LoggingService.instance.startLogging()
+
+        Task {
+            do {
+                try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign)
+            } catch {
+                DispatchQueue.main.async {
+                    let logMessage = LogMessage(message: "Push Server registration failed with: \(error.localizedDescription)")
+                    ProfilingService.instance.send(logMessage: logMessage)
+                    UIApplication.currentWindow.rootViewController?.showAlert(title: "Register error", error: error)
+                }
+            }
+        }
     }
 }

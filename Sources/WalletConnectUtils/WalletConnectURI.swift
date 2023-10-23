@@ -1,7 +1,6 @@
 import Foundation
 
 public struct WalletConnectURI: Equatable {
-
     public let topic: String
     public let version: String
     public let symKey: String
@@ -44,6 +43,13 @@ public struct WalletConnectURI: Equatable {
         self.symKey = symKey
         self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
     }
+    
+    public init?(deeplinkUri: URL) {
+        if let deeplinkUri = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") {
+            self.init(string: deeplinkUri)
+        }
+        return nil
+    }
 
     private var relayQuery: String {
         var query = "relay-protocol=\(relay.protocol)"
@@ -61,3 +67,25 @@ public struct WalletConnectURI: Equatable {
         return URLComponents(string: urlString)
     }
 }
+
+#if canImport(UIKit)
+
+import UIKit
+
+extension WalletConnectURI {
+    public init?(connectionOptions: UIScene.ConnectionOptions) {
+        if let uri = connectionOptions.urlContexts.first?.url.query?.replacingOccurrences(of: "uri=", with: "") {
+            self.init(string: uri)
+        }
+        return nil
+    }
+    
+    public init?(urlContext: UIOpenURLContext) {
+        if let uri = urlContext.url.query?.replacingOccurrences(of: "uri=", with: "") {
+            self.init(string: uri)
+        }
+        return nil
+    }
+}
+
+#endif

@@ -1,17 +1,14 @@
 import Foundation
 
 public protocol JWTEncodable: Codable, Equatable {
-    func encode() throws -> String
+    func encode(jsonEncoder: JSONEncoder) throws -> String
 
     static func decode(from string: String) throws -> Self
 }
 
 extension JWTEncodable {
 
-    public func encode() throws -> String {
-        let jsonEncoder = JSONEncoder()
-        jsonEncoder.outputFormatting = .withoutEscapingSlashes
-        jsonEncoder.dateEncodingStrategy = .secondsSince1970
+    public func encode(jsonEncoder: JSONEncoder) throws -> String {
         let data = try jsonEncoder.encode(self)
         return JWTEncoder.base64urlEncodedString(data: data)
     }

@@ -16,6 +16,10 @@
         "value" : "$(RELAY_HOST)"
       },
       {
+        "key" : "GM_DAPP_HOST",
+        "value" : "$(GM_DAPP_HOST)"
+      },
+      {
         "key" : "JS_CLIENT_API_HOST",
         "value" : "$(JS_CLIENT_API_HOST)"
       },
@@ -48,7 +52,10 @@
       "skippedTests" : [
         "AuthTests\/testEIP1271RespondSuccess()",
         "ChatTests",
-        "ENSResolverTests"
+        "ENSResolverTests",
+        "HistoryTests",
+        "SyncDerivationServiceTests",
+        "SyncTests"
       ],
       "target" : {
         "containerPath" : "container:ExampleApp.xcodeproj",

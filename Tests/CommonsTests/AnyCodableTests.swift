@@ -28,7 +28,7 @@ private struct SampleStruct: Codable, Equatable {
         SampleStruct(
             bool: true,
             int: 1337,
-            double: 13.37,
+            double: 13,
             string: "verystringwow",
             object: SubObject(
                 string: "0xdeadbeef"
@@ -40,7 +40,7 @@ private struct SampleStruct: Codable, Equatable {
 {
     "bool": true,
     "int": 1337,
-    "double": 13.37,
+    "double": 13,
     "string": "verystringwow",
     "object": {
         "string": "0xdeadbeef"
@@ -52,7 +52,7 @@ private struct SampleStruct: Codable, Equatable {
 {
     "bool": ****,
     "int": 1337,
-    "double": 13.37,
+    "double": 13,
     "string": "verystringwow",
 }
 """.data(using: .utf8)!

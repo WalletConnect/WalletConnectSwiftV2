@@ -5,15 +5,6 @@ public class NotifyClient {
 
     private var publishers = Set<AnyCancellable>()
 
-    /// publishes new subscriptions
-    public var newSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
-        return notifyStorage.newSubscriptionPublisher
-    }
-
-    public var deleteSubscriptionPublisher: AnyPublisher<String, Never> {
-        return notifyStorage.deleteSubscriptionPublisher
-    }
-
     public var subscriptionsPublisher: AnyPublisher<[NotifySubscription], Never> {
         return notifyStorage.subscriptionsPublisher
     }
@@ -22,79 +13,96 @@ public class NotifyClient {
         return notifyMessageSubscriber.notifyMessagePublisher
     }
 
-    public var updateSubscriptionPublisher: AnyPublisher<NotifySubscription, Never> {
-        return notifyStorage.updateSubscriptionPublisher
-    }
-
     public var logsPublisher: AnyPublisher<Log, Never> {
-        logger.logsPublisher
-            .eraseToAnyPublisher()
+        return logger.logsPublisher
     }
 
-    private let deleteNotifySubscriptionService: DeleteNotifySubscriptionService
+    private let deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester
     private let notifySubscribeRequester: NotifySubscribeRequester
 
     public let logger: ConsoleLogging
 
     private let pushClient: PushClient
-    private let identityClient: IdentityClient
+    private let identityService: NotifyIdentityService
     private let notifyStorage: NotifyStorage
+    private let notifyAccountProvider: NotifyAccountProvider
     private let notifyMessageSubscriber: NotifyMessageSubscriber
     private let resubscribeService: NotifyResubscribeService
     private let notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber
-    private let deleteNotifySubscriptionSubscriber: DeleteNotifySubscriptionSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
+    private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
+    private let notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider
+    private let notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
+    private let subscriptionWatcher: SubscriptionWatcher
 
     init(logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
-         identityClient: IdentityClient,
+         identityService: NotifyIdentityService,
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
-         deleteNotifySubscriptionService: DeleteNotifySubscriptionService,
+         deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester,
          resubscribeService: NotifyResubscribeService,
          notifySubscribeRequester: NotifySubscribeRequester,
          notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber,
-         deleteNotifySubscriptionSubscriber: DeleteNotifySubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
-         subscriptionsAutoUpdater: SubscriptionsAutoUpdater
+         notifyAccountProvider: NotifyAccountProvider,
+         subscriptionsAutoUpdater: SubscriptionsAutoUpdater,
+         notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
+         notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider,
+         notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
+         subscriptionWatcher: SubscriptionWatcher
     ) {
         self.logger = logger
         self.pushClient = pushClient
-        self.identityClient = identityClient
+        self.identityService = identityService
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
-        self.deleteNotifySubscriptionService = deleteNotifySubscriptionService
+        self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
         self.resubscribeService = resubscribeService
         self.notifySubscribeRequester = notifySubscribeRequester
         self.notifySubscribeResponseSubscriber = notifySubscribeResponseSubscriber
-        self.deleteNotifySubscriptionSubscriber = deleteNotifySubscriptionSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
+        self.notifyAccountProvider = notifyAccountProvider
         self.subscriptionsAutoUpdater = subscriptionsAutoUpdater
+        self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
+        self.notifyWatcherAgreementKeysProvider = notifyWatcherAgreementKeysProvider
+        self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
+        self.subscriptionWatcher = subscriptionWatcher
     }
 
-    public func register(account: Account, onSign: @escaping SigningCallback) async throws {
-        _ = try await identityClient.register(account: account, onSign: onSign)
+    public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
+        try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
+        notifyAccountProvider.setAccount(account)
+        subscriptionWatcher.start()
+    }
+
+    public func unregister(account: Account) async throws {
+        try await identityService.unregister(account: account)
+        notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
+        notifyStorage.clearDatabase(account: account)
+        notifyAccountProvider.logout()
+        subscriptionWatcher.stop()
     }
 
     public func setLogging(level: LoggingLevel) {
         logger.setLogging(level: level)
     }
 
-    public func subscribe(metadata: AppMetadata, account: Account) async throws {
-        try await notifySubscribeRequester.subscribe(metadata: metadata, account: account)
+    public func subscribe(appDomain: String, account: Account) async throws {
+        try await notifySubscribeRequester.subscribe(appDomain: appDomain, account: account)
     }
 
     public func update(topic: String, scope: Set<String>) async throws {
         try await notifyUpdateRequester.update(topic: topic, scope: scope)
     }
 
-    public func getActiveSubscriptions() -> [NotifySubscription] {
-        return notifyStorage.getSubscriptions()
+    public func getActiveSubscriptions(account: Account) -> [NotifySubscription] {
+        return notifyStorage.getSubscriptions(account: account)
     }
 
     public func getMessageHistory(topic: String) -> [NotifyMessageRecord] {
@@ -102,7 +110,7 @@ public class NotifyClient {
     }
 
     public func deleteSubscription(topic: String) async throws {
-        try await deleteNotifySubscriptionService.delete(topic: topic)
+        try await deleteNotifySubscriptionRequester.delete(topic: topic)
     }
 
     public func deleteNotifyMessage(id: String) {
@@ -114,7 +122,7 @@ public class NotifyClient {
     }
 
     public func isIdentityRegistered(account: Account) -> Bool {
-        return identityClient.isIdentityRegistered(account: account)
+        return identityService.isIdentityRegistered(account: account)
     }
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {

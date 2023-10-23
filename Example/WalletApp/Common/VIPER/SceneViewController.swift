@@ -1,7 +1,8 @@
 import SwiftUI
 
 enum NavigationBarStyle {
-    case translucent(UIColor)
+    case solid(UIColor)
+    case clear
 }
 
 protocol SceneViewModel {
@@ -29,7 +30,7 @@ extension SceneViewModel {
         return .none
     }
     var navigationBarStyle: NavigationBarStyle {
-        return .translucent(.w_background)
+        return .solid(.w_background)
     }
     var preferredStatusBarStyle: UIStatusBarStyle {
         return .default
@@ -55,6 +56,10 @@ class SceneViewController<ViewModel: SceneViewModel, Content: View>: UIHostingCo
         super.viewDidLoad()
         setupView()
         setupNavigation()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         setupNavigationBarStyle()
     }
 
@@ -79,9 +84,18 @@ private extension SceneViewController {
 
     func setupNavigationBarStyle() {
         switch viewModel.navigationBarStyle {
-        case .translucent(let color):
+        case .solid(let color):
+            navigationController?.navigationBar.setBackgroundImage(color.image(), for: .default)
+            navigationController?.navigationBar.isTranslucent = false
+            navigationController?.navigationBar.backgroundColor = color
             navigationController?.navigationBar.barTintColor = color
+        case .clear:
+            navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+            navigationController?.navigationBar.shadowImage = UIImage()
             navigationController?.navigationBar.isTranslucent = true
+            navigationController?.navigationBar.backgroundColor = .clear
+            navigationController?.navigationBar.barTintColor = .clear
+            navigationController?.navigationBar.tintColor = .w_foreground
         }
     }
 }

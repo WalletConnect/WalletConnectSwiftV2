@@ -78,11 +78,14 @@ final class PairingTests: XCTestCase {
         let prefix = "🐶 Wallet: "
         let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
+        let defaults = RuntimeKeyValueStorage()
         walletPairingClient = pairingClient
         let historyClient = HistoryClientFactory.create(
             historyUrl: "https://history.walletconnect.com",
             relayUrl: "wss://relay.walletconnect.com",
-            keychain: keychain
+            keyValueStorage: defaults,
+            keychain: keychain,
+            logger: notifyLogger
         )
         appAuthClient = AuthClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),

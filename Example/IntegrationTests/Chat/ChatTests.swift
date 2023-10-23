@@ -38,10 +38,10 @@ final class ChatTests: XCTestCase {
         invitee1 = makeClient(prefix: "🦖 Invitee", account: inviteeAccount)
         inviter1 = makeClient(prefix: "🍄 Inviter", account: inviterAccount)
 
-        try await invitee1.register(account: inviteeAccount) { message in
+        try await invitee1.register(account: inviteeAccount, domain: "") { message in
             return self.sign(message, privateKey: self.privateKey1)
         }
-        try await inviter1.register(account: inviterAccount) { message in
+        try await inviter1.register(account: inviterAccount, domain: "") { message in
             return self.sign(message, privateKey: self.privateKey2)
         }
     }
@@ -68,7 +68,9 @@ final class ChatTests: XCTestCase {
         let historyClient = HistoryClientFactory.create(
             historyUrl: "https://history.walletconnect.com",
             relayUrl: "wss://relay.walletconnect.com",
-            keychain: keychain
+            keyValueStorage: keyValueStorage,
+            keychain: keychain,
+            logger: logger
         )
 
         let clientId = try! networkingInteractor.getClientId()

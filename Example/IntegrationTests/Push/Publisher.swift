@@ -3,7 +3,7 @@ import Foundation
 
 class Publisher {
     func notify(topic: String, account: Account, message: NotifyMessage) async throws {
-        let url = URL(string: "https://\(InputConfig.castHost)/\(InputConfig.gmDappProjectId)/notify")!
+        let url = URL(string: "https://\(InputConfig.notifyHost)/\(InputConfig.gmDappProjectId)/notify")!
         var request = URLRequest(url: url)
         let notifyRequestPayload = NotifyRequest(notification: message, accounts: [account])
         let encoder = JSONEncoder()

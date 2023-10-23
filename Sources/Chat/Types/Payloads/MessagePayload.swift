@@ -54,7 +54,7 @@ struct MessagePayload: JWTClaimsCodable {
             iat: defaultIatMilliseconds(),
             exp: expiry(days: 30),
             ksu: keyserver.absoluteString,
-            aud: DIDPKH(account: recipientAccount).string,
+            aud: recipientAccount.did,
             sub: message,
             act: Claims.action
         )

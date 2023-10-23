@@ -120,12 +120,10 @@ extension WalletPresenter {
     }
     
     private func pairFromDapp() {
-        guard let uri = app.uri,
-              let walletConnectUri = WalletConnectURI(string: uri)
-        else {
+        guard let uri = app.uri else {
             return
         }
-        pair(uri: walletConnectUri)
+        pair(uri: uri)
     }
     
     private func removePairingIndicator() {

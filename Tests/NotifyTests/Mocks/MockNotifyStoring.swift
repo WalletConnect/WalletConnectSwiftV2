@@ -2,18 +2,23 @@ import Foundation
 @testable import WalletConnectNotify
 
 class MockNotifyStoring: NotifyStoring {
+
     var subscriptions: [NotifySubscription]
 
     init(subscriptions: [NotifySubscription]) {
         self.subscriptions = subscriptions
     }
 
-    func getSubscriptions() -> [NotifySubscription] {
-        return subscriptions
+    func getSubscriptions(account: Account) -> [NotifySubscription] {
+        return subscriptions.filter { $0.account == account }
     }
 
     func getSubscription(topic: String) -> NotifySubscription? {
         return subscriptions.first { $0.topic == topic }
+    }
+
+    func getAllSubscriptions() -> [WalletConnectNotify.NotifySubscription] {
+        return subscriptions
     }
 
     func setSubscription(_ subscription: NotifySubscription) async throws {
@@ -22,6 +27,10 @@ class MockNotifyStoring: NotifyStoring {
         } else {
             subscriptions.append(subscription)
         }
+    }
+
+    func clearDatabase(account: WalletConnectUtils.Account) {
+        subscriptions = subscriptions.filter { $0.account != account }
     }
 
     func deleteSubscription(topic: String) async throws {
