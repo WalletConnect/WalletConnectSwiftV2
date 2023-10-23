@@ -38,6 +38,7 @@ build_all:
 		RELAY_HOST='$(RELAY_HOST)' \
 		PROJECT_ID='$(PROJECT_ID)' \
 		CAST_HOST='$(CAST_HOST)' \
+		EXPLORER_HOST='$(EXPLORER_HOST)' \
 		JS_CLIENT_API_HOST='$(JS_CLIENT_API_HOST)' \
 		build-for-testing \
 		| xcbeautify

@@ -26,6 +26,10 @@ struct InputConfig {
         return config(for: "CAST_HOST")!
     }
 
+    static var explorerHost: String {
+        return config(for: "EXPLORER_HOST")!
+    }
+
     static var relayUrl: String {
         return "wss://\(relayHost)"
     }
