@@ -35,19 +35,7 @@ final class ControllerSessionStateMachine {
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
-   func extend(topic: String, by ttl: Int64) async throws {
-       var session = try getSession(for: topic)
-       let protocolMethod = SessionExtendProtocolMethod()
-       try validateController(session)
-       try session.updateExpiry(by: ttl)
-       let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
-       sessionStore.setSession(session)
-       let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
-       try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-   }
-
     // MARK: - Handle Response
-
     private func setupSubscriptions() {
         networkingInteractor.responseSubscription(on: SessionUpdateProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateParams, RPCResult>) in

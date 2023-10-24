@@ -50,13 +50,9 @@ final class SessionEngine {
     func hasSession(for topic: String) -> Bool {
         return sessionStore.hasSession(forTopic: topic)
     }
-
-    func getWCSessions() -> [WCSession] {
-        sessionStore.getAll()
-    }
     
     func getSessions() -> [Session] {
-        getWCSessions().map { $0.publicRepresentation() }
+        sessionStore.getAll().map { $0.publicRepresentation() }
     }
 
     func request(_ request: Request) async throws {

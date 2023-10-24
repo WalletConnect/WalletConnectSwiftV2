@@ -109,6 +109,7 @@ public final class SignClient: SignClientProtocol {
     private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
+    private let sessionExtendRequester: SessionExtendRequester
     private let appProposeService: AppProposeService
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
@@ -138,6 +139,7 @@ public final class SignClient: SignClientProtocol {
          sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
+         sessionExtendRequester: SessionExtendRequester,
          appProposeService: AppProposeService,
          disconnectService: DisconnectService,
          historyService: HistoryService,
@@ -152,6 +154,7 @@ public final class SignClient: SignClientProtocol {
         self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
+        self.sessionExtendRequester = sessionExtendRequester
         self.appProposeService = appProposeService
         self.historyService = historyService
         self.cleanupService = cleanupService
@@ -264,13 +267,8 @@ public final class SignClient: SignClientProtocol {
     ///   - topic: Topic of the session that is intended to be extended.
     public func extend(topic: String) async throws {
         let ttl: Int64 = Session.defaultTimeToLive
-        guard let session = sessionEngine.getWCSessions().first(where: { $0.topic == topic }) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-        if session.selfIsController {
-            try await controllerSessionStateMachine.extend(topic: topic, by: ttl)
-        } else {
-            try await nonControllerSessionStateMachine.extend(topic: topic, by: ttl)
+        if sessionEngine.hasSession(for: topic) {
+            try await sessionExtendRequester.extend(topic: topic, by: ttl)
         }
     }
 
