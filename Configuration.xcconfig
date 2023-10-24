@@ -1,5 +1,9 @@
 RELAY_HOST = relay.walletconnect.com
 
+CAST_HOST = notify.walletconnect.com
+
+EXPLORER_HOST = explorer-api.walletconnect.com
+
 // Uncomment next line and paste your project id. Get this on: https://cloud.walletconnect.com/sign-in
 // PROJECT_ID = YOUR_PROJECT_ID
 
@@ -18,5 +22,3 @@ RELAY_HOST = relay.walletconnect.com
 // WALLETAPP_SENTRY_DSN = WALLETAPP_SENTRY_DSN
 
 // MIXPANEL_TOKEN = MIXPANEL_TOKEN
-
-CAST_HOST = notify.walletconnect.com
