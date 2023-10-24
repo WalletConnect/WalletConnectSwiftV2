@@ -16,6 +16,10 @@
         "value" : "$(RELAY_HOST)"
       },
       {
+        "key" : "EXPLORER_HOST",
+        "value" : "$(EXPLORER_HOST)"
+      },
+      {
         "key" : "GM_DAPP_HOST",
         "value" : "$(GM_DAPP_HOST)"
       },
