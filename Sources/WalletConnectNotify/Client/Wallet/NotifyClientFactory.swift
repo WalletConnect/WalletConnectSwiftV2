@@ -10,7 +10,7 @@ public struct NotifyClientFactory {
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
 
         return NotifyClientFactory.create(
-            projectId: projectId,
+            explorerProjectId: projectId,
             keyserverURL: keyserverURL,
             logger: logger,
             keyValueStorage: keyValueStorage,
@@ -26,7 +26,7 @@ public struct NotifyClientFactory {
     }
 
     static func create(
-        projectId: String,
+        explorerProjectId: String,
         keyserverURL: URL,
         logger: ConsoleLogging,
         keyValueStorage: KeyValueStorage,
@@ -50,7 +50,7 @@ public struct NotifyClientFactory {
         let deleteNotifySubscriptionRequester = DeleteNotifySubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
         let resubscribeService = NotifyResubscribeService(networkInteractor: networkInteractor, notifyStorage: notifyStorage, logger: logger)
 
-        let notifyConfigProvider = NotifyConfigProvider(projectId: projectId, explorerHost: explorerHost)
+        let notifyConfigProvider = NotifyConfigProvider(projectId: explorerProjectId, explorerHost: explorerHost)
 
         let notifySubscribeRequester = NotifySubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver, notifyConfigProvider: notifyConfigProvider)
 
