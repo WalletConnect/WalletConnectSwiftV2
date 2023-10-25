@@ -2,9 +2,7 @@ import Foundation
 import Combine
 
 final class ControllerSessionStateMachine {
-
     var onNamespacesUpdate: ((String, [String: SessionNamespace]) -> Void)?
-    var onExtend: ((String, Date) -> Void)?
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -42,12 +40,6 @@ final class ControllerSessionStateMachine {
                 handleUpdateResponse(payload: payload)
             }
             .store(in: &publishers)
-
-        networkingInteractor.responseSubscription(on: SessionExtendProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) in
-                handleUpdateExpiryResponse(payload: payload)
-            }
-            .store(in: &publishers)
     }
 
     private func handleUpdateResponse(payload: ResponseSubscriptionPayload<SessionType.UpdateParams, RPCResult>) {
@@ -65,22 +57,6 @@ final class ControllerSessionStateMachine {
             }
         case .error:
             logger.error("Peer failed to update session")
-        }
-    }
-
-    private func handleUpdateExpiryResponse(payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) {
-        guard var session = sessionStore.getSession(forTopic: payload.topic) else { return }
-        switch payload.response {
-        case .response:
-            do {
-                try session.updateExpiry(to: payload.request.expiry)
-                sessionStore.setSession(session)
-                onExtend?(session.topic, session.expiryDate)
-            } catch {
-                logger.error("Update expiry error: \(error.localizedDescription)")
-            }
-        case .error:
-            logger.error("Peer failed to extend session")
         }
     }
 
