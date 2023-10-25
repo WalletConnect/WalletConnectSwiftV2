@@ -49,6 +49,9 @@ let package = Package(
         .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
+        .library(
+            name: "Database", // TODO: Remove library
+            targets: ["Database"]),
 
     ],
     dependencies: [
@@ -130,6 +133,9 @@ let package = Package(
         .target(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
+        .target(
+            name: "Database",
+            dependencies: []),
         .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],
