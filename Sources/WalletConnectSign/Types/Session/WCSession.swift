@@ -158,7 +158,7 @@ struct WCSession: SequenceObject, Equatable {
     mutating func updateExpiry(to expiry: Int64) throws {
         let newExpiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
         let maxExpiryDate = Date(timeIntervalSinceNow: TimeInterval(WCSession.defaultTimeToLive))
-        guard newExpiryDate >= expiryDate && newExpiryDate <= maxExpiryDate else {
+        guard newExpiryDate.millisecondsSince1970 >= (expiryDate.millisecondsSince1970 / 1000) && newExpiryDate <= maxExpiryDate else {
             throw WalletConnectError.invalidUpdateExpiryValue
         }
         self.expiryDate = newExpiryDate

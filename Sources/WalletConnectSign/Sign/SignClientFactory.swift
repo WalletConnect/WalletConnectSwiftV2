@@ -30,6 +30,9 @@ public struct SignClientFactory {
         let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyContextStore: verifyContextStore, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
+        let sessionExtendRequester = SessionExtendRequester(sessionStore: sessionStore, networkingInteractor: networkingClient)
+        let sessionExtendRequestSubscriber = SessionExtendRequestSubscriber(networkingInteractor: networkingClient, sessionStore: sessionStore, logger: logger)
+        let sessionExtendResponseSubscriber = SessionExtendResponseSubscriber(networkingInteractor: networkingClient, sessionStore: sessionStore, logger: logger)
         let sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.sessionTopicToProposal.rawValue)
         let approveEngine = ApproveEngine(
             networkingInteractor: networkingClient,
@@ -60,6 +63,9 @@ public struct SignClientFactory {
             sessionPingService: sessionPingService,
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
             controllerSessionStateMachine: controllerSessionStateMachine,
+            sessionExtendRequester: sessionExtendRequester,
+            sessionExtendRequestSubscriber: sessionExtendRequestSubscriber,
+            sessionExtendResponseSubscriber: sessionExtendResponseSubscriber,
             appProposeService: appProposerService,
             disconnectService: disconnectService,
             historyService: historyService,

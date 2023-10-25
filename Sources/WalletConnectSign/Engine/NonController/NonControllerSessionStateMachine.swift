@@ -2,9 +2,7 @@ import Foundation
 import Combine
 
 final class NonControllerSessionStateMachine {
-
     var onNamespacesUpdate: ((String, [String: SessionNamespace]) -> Void)?
-    var onExtend: ((String, Date) -> Void)?
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -12,10 +10,12 @@ final class NonControllerSessionStateMachine {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
 
-    init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
-         sessionStore: WCSessionStorage,
-         logger: ConsoleLogging) {
+    init(
+        networkingInteractor: NetworkInteracting,
+        kms: KeyManagementServiceProtocol,
+        sessionStore: WCSessionStorage,
+        logger: ConsoleLogging
+    ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.sessionStore = sessionStore
@@ -27,11 +27,6 @@ final class NonControllerSessionStateMachine {
         networkingInteractor.requestSubscription(on: SessionUpdateProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.UpdateParams>) in
                 onSessionUpdateNamespacesRequest(payload: payload, updateParams: payload.request)
-            }.store(in: &publishers)
-
-        networkingInteractor.requestSubscription(on: SessionExtendProtocolMethod())
-            .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.UpdateExpiryParams>) in
-                onSessionUpdateExpiry(payload: payload, updateExpiryParams: payload.request)
             }.store(in: &publishers)
     }
 
@@ -71,28 +66,5 @@ final class NonControllerSessionStateMachine {
         }
 
         onNamespacesUpdate?(session.topic, updateParams.namespaces)
-    }
-
-    private func onSessionUpdateExpiry(payload: SubscriptionPayload, updateExpiryParams: SessionType.UpdateExpiryParams) {
-        let protocolMethod = SessionExtendProtocolMethod()
-        let topic = payload.topic
-        guard var session = sessionStore.getSession(forTopic: topic) else {
-            return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
-        }
-        guard session.peerIsController else {
-            return respondError(payload: payload, reason: .unauthorizedExtendRequest, protocolMethod: protocolMethod)
-        }
-        do {
-            try session.updateExpiry(to: updateExpiryParams.expiry)
-        } catch {
-            return respondError(payload: payload, reason: .invalidExtendRequest, protocolMethod: protocolMethod)
-        }
-        sessionStore.setSession(session)
-
-        Task(priority: .high) {
-            try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
-        }
-
-        onExtend?(session.topic, session.expiryDate)
     }
 }
