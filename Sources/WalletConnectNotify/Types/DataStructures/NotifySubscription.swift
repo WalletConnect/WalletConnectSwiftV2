@@ -1,6 +1,7 @@
 import Foundation
+import Database
 
-public struct NotifySubscription: DatabaseObject {
+public struct NotifySubscription: DatabaseObject, SqliteRow {
     public let topic: String
     public let account: Account
     public let relay: RelayProtocolOptions
@@ -12,6 +13,28 @@ public struct NotifySubscription: DatabaseObject {
 
     public var databaseId: String {
         return topic
+    }
+
+    public init(decoder: SqliteRowDecoder) throws {
+        self.topic = try decoder.decodeString(at: 0)
+        self.account = try Account(decoder.decodeString(at: 1))!
+        self.relay = try decoder.decodeCodable(at: 2)
+        self.metadata = try decoder.decodeCodable(at: 3)
+        self.scope = try decoder.decodeCodable(at: 4)
+        self.expiry = try decoder.decodeDate(at: 5)
+        self.symKey = try decoder.decodeString(at: 6)
+    }
+
+    public func encode() -> SqliteRowEncoder {
+        var encoder = SqliteRowEncoder()
+        encoder.encodeString(topic, for: "topic")
+        encoder.encodeString(account.absoluteString, for: "account")
+        encoder.encodeCodable(relay, for: "relay")
+        encoder.encodeCodable(metadata, for: "metadata")
+        encoder.encodeCodable(scope, for: "scope")
+        encoder.encodeDate(expiry, for: "expiry")
+        encoder.encodeString(symKey, for: "symKey")
+        return encoder
     }
 }
 

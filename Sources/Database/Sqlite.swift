@@ -38,7 +38,7 @@ public final class Sqlite {
 
     /// One-Step query execution
     /// - Parameter sql: SQL query
-    public func executeBatchUpdate(sql: String) throws {
+    public func execute(sql: String) throws {
         var error: UnsafeMutablePointer<CChar>?
         guard sqlite3_exec(db, sql, nil, nil, &error) == SQLITE_OK else {
             let message = error.map { String(cString: $0) }

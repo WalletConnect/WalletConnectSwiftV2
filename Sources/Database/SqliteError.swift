@@ -5,4 +5,6 @@ public enum SQLiteError: Error {
     case queryPrepare(statement: String)
     case exec(error: String?)
     case decodeString(index: Int32)
+    case stringIsNotBase64
+    case stringIsNotTimestamp
 }
