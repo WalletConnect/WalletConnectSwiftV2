@@ -36,20 +36,12 @@ final class NotificationsInteractor {
         return try await withCheckedThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
             cancellable = subscriptionsPublisher
-                .setFailureType(to: Error.self)
-                .timeout(10, scheduler: RunLoop.main, customError: { Errors.subscribeTimeout })
-                .sink(receiveCompletion: { completion in
-                    defer { cancellable?.cancel() }
-                    switch completion {
-                    case .failure(let error): continuation.resume(with: .failure(error))
-                    case .finished: break
-                    }
-                }, receiveValue: { subscriptions in
+                .sink { subscriptions in
                     guard subscriptions.contains(where: { $0.metadata.url == domain }) else { return }
                     cancellable?.cancel()
                     continuation.resume(with: .success(()))
-                })
-
+                }
+            
             Task { [cancellable] in
                 do {
                     try await Notify.instance.subscribe(appDomain: domain, account: importAccount.account)
