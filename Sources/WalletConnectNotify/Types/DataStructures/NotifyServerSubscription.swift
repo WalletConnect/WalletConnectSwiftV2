@@ -6,4 +6,5 @@ struct NotifyServerSubscription: Codable, Equatable {
     let scope: [String]
     let symKey: String
     let expiry: Date
+    let appAuthenticationKey: String
 }
