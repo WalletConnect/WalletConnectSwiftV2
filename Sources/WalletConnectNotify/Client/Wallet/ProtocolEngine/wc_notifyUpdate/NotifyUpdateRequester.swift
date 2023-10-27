@@ -10,7 +10,6 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
     }
 
     private let keyserverURL: URL
-    private let webDidResolver: NotifyWebDidResolver
     private let identityClient: IdentityClient
     private let networkingInteractor: NetworkInteracting
     private let notifyConfigProvider: NotifyConfigProvider
@@ -19,7 +18,6 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
 
     init(
         keyserverURL: URL,
-        webDidResolver: NotifyWebDidResolver,
         identityClient: IdentityClient,
         networkingInteractor: NetworkInteracting,
         notifyConfigProvider: NotifyConfigProvider,
@@ -27,7 +25,6 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
         notifyStorage: NotifyStorage
     ) {
         self.keyserverURL = keyserverURL
-        self.webDidResolver = webDidResolver
         self.identityClient = identityClient
         self.networkingInteractor = networkingInteractor
         self.notifyConfigProvider = notifyConfigProvider
@@ -40,10 +37,10 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
 
         guard let subscription = notifyStorage.getSubscription(topic: topic) else { throw Errors.noSubscriptionForGivenTopic }
 
-        let dappAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: subscription.metadata.url)
+        let dappAuthenticationKey = try DIDKey(did: subscription.appAuthenticationKey)
 
         let request = try createJWTRequest(
-            dappPubKey: DIDKey(rawData: dappAuthenticationKey),
+            dappPubKey: dappAuthenticationKey,
             subscriptionAccount: subscription.account,
             appDomain: subscription.metadata.url, scope: scope
         )
