@@ -136,13 +136,13 @@ final class NotifyTests: XCTestCase {
         let expectation = expectation(description: "expects client B to receive subscription after both clients are registered and client A creates one")
         expectation.assertForOverFulfill = false
 
+        var subscription: NotifySubscription!
+
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
-        clientB.subscriptionChangedPublisher.sink { subscriptions in
-            guard let subscription = subscriptions.first else { return }
-            Task(priority: .high) {
-                try await clientB.deleteSubscription(topic: subscription.topic)
-                expectation.fulfill()
-            }
+        clientB.subscriptionsPublisher.sink { subscriptions in
+            guard let newSubscription = subscriptions.first else { return }
+            subscription = newSubscription
+            expectation.fulfill()
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
@@ -150,6 +150,8 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+
+        try await clientB.deleteSubscription(topic: subscription.topic)
     }
     
     func testWalletCreatesAndUpdatesSubscription() async {

@@ -53,7 +53,9 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 let oldSubscriptions = notifyStorage.getSubscriptions(account: account)
                 let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
-                
+
+                subscriptionChangedSubject.send(newSubscriptions)
+
                 try Task.checkCancellation()
 
                 let subscriptions = oldSubscriptions.difference(from: newSubscriptions)
@@ -61,7 +63,6 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
 
                 if subscriptions.count > 0 {
-                    subscriptionChangedSubject.send(newSubscriptions)
                     notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
 
                     for subscription in newSubscriptions {

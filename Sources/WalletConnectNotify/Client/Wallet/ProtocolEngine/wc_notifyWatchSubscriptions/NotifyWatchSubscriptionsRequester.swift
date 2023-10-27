@@ -41,8 +41,10 @@ class NotifyWatchSubscriptionsRequester: NotifyWatchSubscriptionsRequesting {
 
         logger.debug("Watching subscriptions")
 
-        let notifyServerPublicKey = try await webDidResolver.resolveAgreementKey(domain: notifyHost)
-        let notifyServerAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: notifyHost)
+        let didDoc = try await webDidResolver.resolveDidDoc(appDomain: notifyHost)
+        let notifyServerPublicKey = try webDidResolver.resolveAgreementKey(didDoc: didDoc)
+        let notifyServerAuthenticationKey = try webDidResolver.resolveAuthenticationKey(didDoc: didDoc)
+
         let notifyServerAuthenticationDidKey = DIDKey(rawData: notifyServerAuthenticationKey)
         let watchSubscriptionsTopic = notifyServerPublicKey.rawRepresentation.sha256().toHexString()
 

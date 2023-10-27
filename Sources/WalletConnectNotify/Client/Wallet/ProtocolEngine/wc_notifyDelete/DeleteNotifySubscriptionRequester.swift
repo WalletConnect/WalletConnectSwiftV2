@@ -54,11 +54,7 @@ class DeleteNotifySubscriptionRequester {
         logger.debug("Subscription removed, topic: \(topic)")
 
         kms.deleteSymmetricKey(for: topic)
-    }
-
-
-
-    
+    } 
 }
 
 private extension DeleteNotifySubscriptionRequester {
