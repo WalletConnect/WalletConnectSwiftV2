@@ -15,7 +15,8 @@ extension NotifySubscription {
             metadata: metadata,
             scope: ["test": ScopeValue(id: "id", name: "name", description: "desc", enabled: true)],
             expiry: expiry,
-            symKey: symKey
+            symKey: symKey,
+            appAuthenticationKey: "did:key:z6MkpTEGT75mnz8TiguXYYVnS1GbsNCdLo72R7kUCLShTuFV"
         )
     }
 }

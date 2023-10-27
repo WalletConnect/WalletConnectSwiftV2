@@ -38,7 +38,7 @@ class SubscriptionWatcher {
     }
 }
 
-internal extension SubscriptionWatcher {
+private extension SubscriptionWatcher {
 
     func setupAppLifecyclePublisher() {
 #if os(iOS)
