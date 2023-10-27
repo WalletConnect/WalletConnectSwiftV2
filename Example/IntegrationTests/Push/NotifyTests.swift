@@ -137,7 +137,7 @@ final class NotifyTests: XCTestCase {
         expectation.assertForOverFulfill = false
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
-        clientB.subscriptionsPublisher.sink { subscriptions in
+        clientB.subscriptionChangedPublisher.sink { subscriptions in
             guard let subscription = subscriptions.first else { return }
             Task(priority: .high) {
                 try await clientB.deleteSubscription(topic: subscription.topic)

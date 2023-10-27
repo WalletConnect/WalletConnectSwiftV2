@@ -11,6 +11,12 @@ class NotifySubscriptionsChangedRequestSubscriber {
     private let notifyStorage: NotifyStorage
     private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
     
+    private let subscriptionChangedSubject = PassthroughSubject<[NotifySubscription], Never>()
+
+    var subscriptionChangedPublisher: AnyPublisher<[NotifySubscription], Never> {
+        return subscriptionChangedSubject.eraseToAnyPublisher()
+    }
+
     init(
         keyserver: URL,
         networkingInteractor: NetworkInteracting,
@@ -54,7 +60,8 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
 
-                if subscriptions.count > 0 {                    
+                if subscriptions.count > 0 {
+                    subscriptionChangedSubject.send(newSubscriptions)
                     notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
 
                     for subscription in newSubscriptions {
