@@ -89,7 +89,7 @@ final class NotifyStorage: NotifyStoring {
 
     func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) {
         let expiry = Date(timeIntervalSince1970: TimeInterval(expiry))
-        let updated = NotifySubscription(topic: subscription.topic, account: subscription.account, relay: subscription.relay, metadata: subscription.metadata, scope: scope, expiry: expiry, symKey: subscription.symKey)
+        let updated = NotifySubscription(topic: subscription.topic, account: subscription.account, relay: subscription.relay, metadata: subscription.metadata, scope: scope, expiry: expiry, symKey: subscription.symKey, appAuthenticationKey: subscription.appAuthenticationKey)
         subscriptionStore.set(element: updated, for: updated.account.absoluteString)
         updateSubscriptionSubject.send(updated)
     }
