@@ -24,7 +24,8 @@ class NotifySubscriptionsBuilder {
                     metadata: config.metadata,
                     scope: scope,
                     expiry: subscription.expiry,
-                    symKey: subscription.symKey
+                    symKey: subscription.symKey, 
+                    appAuthenticationKey: subscription.appAuthenticationKey
                 ))
             } catch {
                 continue

@@ -78,7 +78,7 @@ public class NotifyClient {
     public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
         try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
         notifyAccountProvider.setAccount(account)
-        subscriptionWatcher.start()
+        try await subscriptionWatcher.start()
     }
 
     public func unregister(account: Account) async throws {
@@ -132,6 +132,11 @@ public class NotifyClient {
 
 #if targetEnvironment(simulator)
 extension NotifyClient {
+
+    public var subscriptionChangedPublisher: AnyPublisher<[NotifySubscription], Never> {
+        return notifySubscriptionsChangedRequestSubscriber.subscriptionChangedPublisher
+    }
+
     public func register(deviceToken: String) async throws {
         try await pushClient.register(deviceToken: deviceToken)
     }

@@ -109,6 +109,9 @@ public final class SignClient: SignClientProtocol {
     private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
+    private let sessionExtendRequester: SessionExtendRequester
+    private let sessionExtendRequestSubscriber: SessionExtendRequestSubscriber
+    private let sessionExtendResponseSubscriber: SessionExtendResponseSubscriber
     private let appProposeService: AppProposeService
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
@@ -138,6 +141,9 @@ public final class SignClient: SignClientProtocol {
          sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
+         sessionExtendRequester: SessionExtendRequester,
+         sessionExtendRequestSubscriber: SessionExtendRequestSubscriber,
+         sessionExtendResponseSubscriber: SessionExtendResponseSubscriber,
          appProposeService: AppProposeService,
          disconnectService: DisconnectService,
          historyService: HistoryService,
@@ -152,6 +158,9 @@ public final class SignClient: SignClientProtocol {
         self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
+        self.sessionExtendRequester = sessionExtendRequester
+        self.sessionExtendRequestSubscriber = sessionExtendRequestSubscriber
+        self.sessionExtendResponseSubscriber = sessionExtendResponseSubscriber
         self.appProposeService = appProposeService
         self.historyService = historyService
         self.cleanupService = cleanupService
@@ -259,13 +268,13 @@ public final class SignClient: SignClientProtocol {
         try await controllerSessionStateMachine.update(topic: topic, namespaces: namespaces)
     }
 
-    /// For wallet to extend a session to 7 days
+    /// For dapp and wallet to extend a session to 7 days
     /// - Parameters:
     ///   - topic: Topic of the session that is intended to be extended.
     public func extend(topic: String) async throws {
         let ttl: Int64 = Session.defaultTimeToLive
         if sessionEngine.hasSession(for: topic) {
-            try await controllerSessionStateMachine.extend(topic: topic, by: ttl)
+            try await sessionExtendRequester.extend(topic: topic, by: ttl)
         }
     }
 
@@ -399,13 +408,13 @@ public final class SignClient: SignClientProtocol {
         controllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             sessionUpdatePublisherSubject.send((topic, namespaces))
         }
-        controllerSessionStateMachine.onExtend = { [unowned self] topic, date in
-            sessionExtendPublisherSubject.send((topic, date))
-        }
         nonControllerSessionStateMachine.onNamespacesUpdate = { [unowned self] topic, namespaces in
             sessionUpdatePublisherSubject.send((topic, namespaces))
         }
-        nonControllerSessionStateMachine.onExtend = { [unowned self] topic, date in
+        sessionExtendRequestSubscriber.onExtend = { [unowned self] topic, date in
+            sessionExtendPublisherSubject.send((topic, date))
+        }
+        sessionExtendResponseSubscriber.onExtend = { [unowned self] topic, date in
             sessionExtendPublisherSubject.send((topic, date))
         }
         sessionEngine.onEventReceived = { [unowned self] topic, event, chainId in

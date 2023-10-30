@@ -2,9 +2,7 @@ import Foundation
 import Combine
 
 final class ControllerSessionStateMachine {
-
     var onNamespacesUpdate: ((String, [String: SessionNamespace]) -> Void)?
-    var onExtend: ((String, Date) -> Void)?
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -35,29 +33,11 @@ final class ControllerSessionStateMachine {
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
     }
 
-   func extend(topic: String, by ttl: Int64) async throws {
-       var session = try getSession(for: topic)
-       let protocolMethod = SessionExtendProtocolMethod()
-       try validateController(session)
-       try session.updateExpiry(by: ttl)
-       let newExpiry = Int64(session.expiryDate.timeIntervalSince1970 )
-       sessionStore.setSession(session)
-       let request = RPCRequest(method: protocolMethod.method, params: SessionType.UpdateExpiryParams(expiry: newExpiry))
-       try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
-   }
-
     // MARK: - Handle Response
-
     private func setupSubscriptions() {
         networkingInteractor.responseSubscription(on: SessionUpdateProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateParams, RPCResult>) in
                 handleUpdateResponse(payload: payload)
-            }
-            .store(in: &publishers)
-
-        networkingInteractor.responseSubscription(on: SessionExtendProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) in
-                handleUpdateExpiryResponse(payload: payload)
             }
             .store(in: &publishers)
     }
@@ -77,22 +57,6 @@ final class ControllerSessionStateMachine {
             }
         case .error:
             logger.error("Peer failed to update session")
-        }
-    }
-
-    private func handleUpdateExpiryResponse(payload: ResponseSubscriptionPayload<SessionType.UpdateExpiryParams, RPCResult>) {
-        guard var session = sessionStore.getSession(forTopic: payload.topic) else { return }
-        switch payload.response {
-        case .response:
-            do {
-                try session.updateExpiry(to: payload.request.expiry)
-                sessionStore.setSession(session)
-                onExtend?(session.topic, session.expiryDate)
-            } catch {
-                logger.error("Update expiry error: \(error.localizedDescription)")
-            }
-        case .error:
-            logger.error("Peer failed to extend session")
         }
     }
 
