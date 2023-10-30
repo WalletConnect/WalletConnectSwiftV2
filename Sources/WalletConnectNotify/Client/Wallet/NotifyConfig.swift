@@ -13,7 +13,7 @@ struct NotifyConfig: Codable {
     }
     let id: String
     let name: String
-    let homepage: String
+    let homepage: String?
     let description: String
     let dapp_url: String
     let image_url: ImageUrl?

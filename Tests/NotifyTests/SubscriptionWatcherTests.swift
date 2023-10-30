@@ -16,8 +16,6 @@ class SubscriptionWatcherTests: XCTestCase {
         mockLogger = ConsoleLoggerMock()
         mockNotificationCenter = MockNotificationCenter()
         sut = SubscriptionWatcher(notifyWatchSubscriptionsRequester: mockRequester, logger: mockLogger, notificationCenter: mockNotificationCenter)
-        sut.debounceInterval = 0.0001
-        sut.start()
     }
 
     override func tearDown() {
@@ -28,39 +26,36 @@ class SubscriptionWatcherTests: XCTestCase {
         super.tearDown()
     }
 
-    func testWatchSubscriptions() {
+    func testWatchSubscriptions() async throws {
         let expectation = XCTestExpectation(description: "Expect watchSubscriptions to be called")
 
         mockRequester.onWatchSubscriptions = {
             expectation.fulfill()
         }
 
-        sut.watchSubscriptions()
+        try await sut.start()
 
         wait(for: [expectation], timeout: 0.5)
     }
 
 
-    func testWatchAppLifecycleReactsToEnterForegroundNotification() {
-        let setupExpectation = XCTestExpectation(description: "Expect setupTimer to be called on app enter foreground")
+    func testWatchAppLifecycleReactsToEnterForegroundNotification() async throws  {
         let watchSubscriptionsExpectation = XCTestExpectation(description: "Expect watchSubscriptions to be called on app enter foreground")
-
-        sut.onSetupTimer = {
-            setupExpectation.fulfill()
-        }
+        watchSubscriptionsExpectation.expectedFulfillmentCount = 2
 
         mockRequester.onWatchSubscriptions = {
             watchSubscriptionsExpectation.fulfill()
         }
 
-        mockNotificationCenter.post(name: UIApplication.willEnterForegroundNotification)
+        try await sut.start()
 
-        wait(for: [setupExpectation, watchSubscriptionsExpectation], timeout: 0.5)
+        await mockNotificationCenter.post(name: UIApplication.willEnterForegroundNotification)
+
+        wait(for: [watchSubscriptionsExpectation], timeout: 0.5)
     }
 
-    func testTimerTriggeringWatchSubscriptionsMultipleTimes() {
+    func testTimerTriggeringWatchSubscriptionsMultipleTimes() async throws  {
         sut.timerInterval = 0.0001
-        sut.setupTimer()
 
         let expectation = XCTestExpectation(description: "Expect watchSubscriptions to be called multiple times")
         expectation.expectedFulfillmentCount = 3
@@ -68,6 +63,8 @@ class SubscriptionWatcherTests: XCTestCase {
         mockRequester.onWatchSubscriptions = {
             expectation.fulfill()
         }
+
+        try await sut.start()
 
         wait(for: [expectation], timeout: 0.5)
     }

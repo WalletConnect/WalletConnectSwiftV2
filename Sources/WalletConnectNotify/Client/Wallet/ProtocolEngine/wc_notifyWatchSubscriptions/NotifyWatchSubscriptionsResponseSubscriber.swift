@@ -49,27 +49,28 @@ class NotifyWatchSubscriptionsResponseSubscriber {
 
                 logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
 
-                guard subscriptions.count > 0 else { return }
-                // TODO: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
-                notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
-                
-                for subscription in newSubscriptions {
-                    let symKey = try SymmetricKey(hex: subscription.symKey)
-                    try groupKeychainStorage.add(symKey, forKey: subscription.topic)
-                    try kms.setSymmetricKey(symKey, for: subscription.topic)
+                if subscriptions.count > 0 {
+                    // TODO: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
+                    notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
+
+                    for subscription in newSubscriptions {
+                        let symKey = try SymmetricKey(hex: subscription.symKey)
+                        try groupKeychainStorage.add(symKey, forKey: subscription.topic)
+                        try kms.setSymmetricKey(symKey, for: subscription.topic)
+                    }
+
+                    try await networkingInteractor.batchSubscribe(topics: newSubscriptions.map { $0.topic })
+
+                    try Task.checkCancellation()
+
+                    var logProperties = [String: String]()
+                    for (index, subscription) in newSubscriptions.enumerated() {
+                        let key = "subscription_\(index + 1)"
+                        logProperties[key] = subscription.topic
+                    }
+
+                    logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(newSubscriptions.count)", properties: logProperties)
                 }
-
-                try await networkingInteractor.batchSubscribe(topics: newSubscriptions.map { $0.topic })
-
-                try Task.checkCancellation()
-
-                var logProperties = [String: String]()
-                for (index, subscription) in newSubscriptions.enumerated() {
-                    let key = "subscription_\(index + 1)"
-                    logProperties[key] = subscription.topic
-                }
-
-                logger.debug("Updated Subscriptions with Watch Subscriptions Update, number of subscriptions: \(newSubscriptions.count)", properties: logProperties)
             }
     }
 

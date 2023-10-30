@@ -8,6 +8,7 @@ public struct NotifySubscription: DatabaseObject {
     public let scope: [String: ScopeValue]
     public let expiry: Date
     public let symKey: String
+    public let appAuthenticationKey: String
 
     public var databaseId: String {
         return topic

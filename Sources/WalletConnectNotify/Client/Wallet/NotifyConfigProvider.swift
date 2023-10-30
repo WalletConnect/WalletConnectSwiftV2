@@ -3,11 +3,13 @@ import Foundation
 actor NotifyConfigProvider {
 
     private let projectId: String
+    private let explorerHost: String
 
     private var cache: [String: NotifyConfig] = [:]
 
-    init(projectId: String) {
+    init(projectId: String, explorerHost: String) {
         self.projectId = projectId
+        self.explorerHost = explorerHost
     }
 
     func resolveNotifyConfig(appDomain: String) async -> NotifyConfig {
@@ -16,7 +18,7 @@ actor NotifyConfigProvider {
         }
 
         do {
-            let httpClient = HTTPNetworkClient(host: "explorer-api.walletconnect.com")
+            let httpClient = HTTPNetworkClient(host: explorerHost)
             let request = NotifyConfigAPI.notifyDApps(projectId: projectId, appDomain: appDomain)
             let response = try await httpClient.request(NotifyConfigResponse.self, at: request)
             let config = response.data

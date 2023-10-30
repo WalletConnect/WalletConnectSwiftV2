@@ -7,7 +7,6 @@ class DeleteNotifySubscriptionRequester {
     private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let webDidResolver: NotifyWebDidResolver
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
@@ -16,7 +15,6 @@ class DeleteNotifySubscriptionRequester {
         keyserver: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        webDidResolver: NotifyWebDidResolver,
         kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
         notifyStorage: NotifyStorage
@@ -24,7 +22,6 @@ class DeleteNotifySubscriptionRequester {
         self.keyserver = keyserver
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
-        self.webDidResolver = webDidResolver
         self.kms = kms
         self.logger = logger
         self.notifyStorage = notifyStorage
@@ -37,10 +34,10 @@ class DeleteNotifySubscriptionRequester {
         else { throw Errors.notifySubscriptionNotFound}
 
         let protocolMethod = NotifyDeleteProtocolMethod()
-        let dappAuthenticationKey = try await webDidResolver.resolveAuthenticationKey(domain: subscription.metadata.url)
+        let dappAuthenticationKey = try DIDKey(did: subscription.appAuthenticationKey)
 
         let wrapper = try createJWTWrapper(
-            dappPubKey: DIDKey(rawData: dappAuthenticationKey),
+            dappPubKey: dappAuthenticationKey,
             reason: NotifyDeleteParams.userDisconnected.message,
             app: DIDWeb(host: subscription.metadata.url),
             account: subscription.account
@@ -57,11 +54,7 @@ class DeleteNotifySubscriptionRequester {
         logger.debug("Subscription removed, topic: \(topic)")
 
         kms.deleteSymmetricKey(for: topic)
-    }
-
-
-
-    
+    } 
 }
 
 private extension DeleteNotifySubscriptionRequester {

@@ -2,7 +2,7 @@ import Foundation
 
 public struct NotifyClientFactory {
 
-    public static func create(projectId: String, groupIdentifier: String, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, crypto: CryptoProvider, notifyHost: String) -> NotifyClient {
+    public static func create(projectId: String, groupIdentifier: String, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, crypto: CryptoProvider, notifyHost: String, explorerHost: String) -> NotifyClient {
         let logger = ConsoleLogger(prefix: "🔔",loggingLevel: .debug)
         let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
@@ -20,7 +20,8 @@ public struct NotifyClientFactory {
             pairingRegisterer: pairingRegisterer,
             pushClient: pushClient,
             crypto: crypto,
-            notifyHost: notifyHost
+            notifyHost: notifyHost,
+            explorerHost: explorerHost
         )
     }
 
@@ -35,7 +36,8 @@ public struct NotifyClientFactory {
         pairingRegisterer: PairingRegisterer,
         pushClient: PushClient,
         crypto: CryptoProvider,
-        notifyHost: String
+        notifyHost: String,
+        explorerHost: String
     ) -> NotifyClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let subscriptionStore = KeyedDatabase<NotifySubscription>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifySubscription)
@@ -45,16 +47,16 @@ public struct NotifyClientFactory {
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = NotifyWebDidResolver()
-        let deleteNotifySubscriptionRequester = DeleteNotifySubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, webDidResolver: webDidResolver, kms: kms, logger: logger, notifyStorage: notifyStorage)
+        let deleteNotifySubscriptionRequester = DeleteNotifySubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, kms: kms, logger: logger, notifyStorage: notifyStorage)
         let resubscribeService = NotifyResubscribeService(networkInteractor: networkInteractor, notifyStorage: notifyStorage, logger: logger)
 
-        let notifyConfigProvider = NotifyConfigProvider(projectId: projectId)
+        let notifyConfigProvider = NotifyConfigProvider(projectId: projectId, explorerHost: explorerHost)
 
         let notifySubscribeRequester = NotifySubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver, notifyConfigProvider: notifyConfigProvider)
 
         let notifySubscribeResponseSubscriber = NotifySubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifyConfigProvider: notifyConfigProvider)
 
-        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, webDidResolver: webDidResolver, identityClient: identityClient, networkingInteractor: networkInteractor, notifyConfigProvider: notifyConfigProvider, logger: logger, notifyStorage: notifyStorage)
+        let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, identityClient: identityClient, networkingInteractor: networkInteractor, notifyConfigProvider: notifyConfigProvider, logger: logger, notifyStorage: notifyStorage)
 
         let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, notifyConfigProvider: notifyConfigProvider, notifyStorage: notifyStorage)
 

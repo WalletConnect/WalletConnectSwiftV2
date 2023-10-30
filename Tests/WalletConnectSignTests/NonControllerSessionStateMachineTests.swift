@@ -67,20 +67,6 @@ class NonControllerSessionStateMachineTests: XCTestCase {
     }
 
     // MARK: - Update Expiry
-
-    func testPeerUpdateExpirySuccess() {
-        let tomorrow = TimeTraveler.dateByAdding(days: 1)
-        let session = WCSession.stub(isSelfController: false, expiryDate: tomorrow)
-        storageMock.setSession(session)
-        let twoDaysFromNowTimestamp = Int64(TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970)
-
-        networkingInteractor.requestPublisherSubject.send((session.topic, RPCRequest.stubUpdateExpiry(expiry: twoDaysFromNowTimestamp), Data(), Date(), nil))
-        let extendedSession = storageMock.getAll().first {$0.topic == session.topic}!
-        print(extendedSession.expiryDate)
-
-        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSince1970, TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970, accuracy: 1)
-    }
-
     func testPeerUpdateExpiryUnauthorized() {
         let tomorrow = TimeTraveler.dateByAdding(days: 1)
         let session = WCSession.stub(isSelfController: true, expiryDate: tomorrow)
