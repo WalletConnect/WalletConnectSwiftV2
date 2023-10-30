@@ -1,42 +1,115 @@
 import UserNotifications
 import WalletConnectNotify
-import os
+import Intents
 
 class NotificationService: UNNotificationServiceExtension {
 
     var contentHandler: ((UNNotificationContent) -> Void)?
-    var bestAttemptContent: UNMutableNotificationContent?
+    var bestAttemptContent: UNNotificationContent?
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
-        bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        if let bestAttemptContent = bestAttemptContent {
-            let topic = bestAttemptContent.userInfo["topic"] as! String
-            let ciphertext = bestAttemptContent.userInfo["blob"] as! String
-            NSLog("Push decryption, topic=%@", topic)
+        self.bestAttemptContent = request.content
+
+        if let content = bestAttemptContent,
+           let topic = content.userInfo["topic"] as? String,
+           let ciphertext = content.userInfo["blob"] as? String {
+
             do {
                 let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
                 let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
-                bestAttemptContent.title = pushMessage.title
-                bestAttemptContent.body = pushMessage.body
-                contentHandler(bestAttemptContent)
-                return
+                let updatedContent = try handle(content: content, pushMessage: pushMessage, topic: topic)
+
+                let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
+                mutableContent.title = pushMessage.title
+                mutableContent.body = pushMessage.body
+
+                contentHandler(mutableContent)
             }
             catch {
-                NSLog("Push decryption, error=%@", error.localizedDescription)
-                bestAttemptContent.title = ""
-                bestAttemptContent.body = error.localizedDescription
+                let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+                mutableContent.title = "Error"
+                mutableContent.body = error.localizedDescription
+
+                contentHandler(mutableContent)
             }
-            contentHandler(bestAttemptContent)
         }
     }
 
     override func serviceExtensionTimeWillExpire() {
         // Called just before the extension will be terminated by the system.
         // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
-        if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
+        if let contentHandler = contentHandler, let bestAttemptContent = bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
     }
+}
 
+private extension NotificationService {
+
+    func handle(content: UNNotificationContent, pushMessage: NotifyMessage, topic: String) throws -> UNNotificationContent {
+        let iconUrl = try pushMessage.icon.asURL()
+
+        let senderThumbnailImageData = try Data(contentsOf: iconUrl)
+        let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
+        let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
+        let senderAvatar = INImage(imageData: senderThumbnailImageFileData)
+
+        var personNameComponents = PersonNameComponents()
+        personNameComponents.nickname = pushMessage.title
+
+        let senderPerson = INPerson(
+            personHandle: INPersonHandle(value: topic, type: .unknown),
+            nameComponents: personNameComponents,
+            displayName: pushMessage.title,
+            image: senderAvatar,
+            contactIdentifier: nil,
+            customIdentifier: topic,
+            isMe: false,
+            suggestionType: .none
+        )
+
+        let selfPerson = INPerson(
+            personHandle: INPersonHandle(value: "0", type: .unknown),
+            nameComponents: nil,
+            displayName: nil,
+            image: nil,
+            contactIdentifier: nil,
+            customIdentifier: nil,
+            isMe: true,
+            suggestionType: .none
+        )
+
+        let incomingMessagingIntent = INSendMessageIntent(
+            recipients: [selfPerson],
+            outgoingMessageType: .outgoingMessageText,
+            content: pushMessage.body,
+            speakableGroupName: nil,
+            conversationIdentifier: pushMessage.type,
+            serviceName: nil,
+            sender: senderPerson,
+            attachments: []
+        )
+
+        incomingMessagingIntent.setImage(senderAvatar, forParameterNamed: \.sender)
+
+        let interaction = INInteraction(intent: incomingMessagingIntent, response: nil)
+        interaction.direction = .incoming
+        interaction.donate(completion: nil)
+
+        return try content.updating(from: incomingMessagingIntent)
+    }
+
+    func downloadAttachment(data: Data, fileName: String) throws -> URL {
+        let fileManager = FileManager.default
+        let tmpSubFolderName = ProcessInfo.processInfo.globallyUniqueString
+        let tmpSubFolderURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(tmpSubFolderName, isDirectory: true)
+
+        try fileManager.createDirectory(at: tmpSubFolderURL, withIntermediateDirectories: true, attributes: nil)
+
+        let fileURL = tmpSubFolderURL.appendingPathComponent(fileName)
+        try data.write(to: fileURL)
+
+        return fileURL
+    }
 }

@@ -36,9 +36,10 @@ class NotifySubscribeRequester {
 
         logger.debug("Subscribing for Notify, dappUrl: \(appDomain)")
 
-        let config = try await notifyConfigProvider.resolveNotifyConfig(appDomain: appDomain)
+        let config = await notifyConfigProvider.resolveNotifyConfig(appDomain: appDomain)
 
-        let peerPublicKey = try await webDidResolver.resolveAgreementKey(domain: appDomain)
+        let didDoc = try await webDidResolver.resolveDidDoc(appDomain: appDomain)
+        let peerPublicKey = try webDidResolver.resolveAgreementKey(didDoc: didDoc)
         let subscribeTopic = peerPublicKey.rawRepresentation.sha256().toHexString()
 
         let keysY = try generateAgreementKeys(peerPublicKey: peerPublicKey)
