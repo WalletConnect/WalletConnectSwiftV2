@@ -34,13 +34,7 @@ final class AuthTests: XCTestCase {
         let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
         let keyValueStorage = RuntimeKeyValueStorage()
         let keychain = KeychainStorageMock()
-        let relayClient = RelayClientFactory.create(
-            relayHost: InputConfig.relayHost,
-            projectId: InputConfig.projectId,
-            keyValueStorage: keyValueStorage,
-            keychainStorage: keychain,
-            socketFactory: DefaultSocketFactory(),
-            logger: logger)
+        let relayClient = RelayClientFactory.create(relayHost: InputConfig.relayHost, projectId: InputConfig.projectId, keyValueStorage: RuntimeKeyValueStorage(), keychainStorage: keychain, socketFactory: WalletConnectSocketClientFactory(), logger: logger)
 
         let networkingClient = NetworkingClientFactory.create(
             relayClient: relayClient,

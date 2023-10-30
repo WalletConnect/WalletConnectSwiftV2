@@ -30,7 +30,6 @@ public class Networking {
     /// - Parameters:
     ///   - relayHost: relay host
     ///   - projectId: project id
-    ///   - socketFactory: web socket factory
     ///   - socketConnectionType: socket connection type
     static public func configure(
         relayHost: String = "relay.walletconnect.com",

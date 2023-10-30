@@ -15,14 +15,14 @@ private class RelayKeychainStorageMock: KeychainStorageProtocol {
 }
 
 class WebSocketFactoryMock: WebSocketFactory {
-    private let webSocket: WebSocket
+    private let webSocket: WebSocketClient
     
-    init(webSocket: WebSocket) {
+    init(webSocket: WebSocketClient) {
         self.webSocket = webSocket
     }
     
     func create(with url: URL) -> WebSocketConnecting {
-        return webSocket
+        return webSocket as! WebSocketConnecting
     }
 }
 
@@ -57,7 +57,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             projectId: InputConfig.projectId,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            socketFactory: DefaultSocketFactory(),
+            socketFactory: webSocketFactory,
             socketConnectionType: .manual,
             logger: logger
         )

@@ -1,7 +1,5 @@
 import Foundation
 
-#if DEBUG
-
 extension Listing {
     static let stubList: [Listing] = [
         Listing(
@@ -63,5 +61,3 @@ extension Listing {
         )
     ]
 }
-
-#endif

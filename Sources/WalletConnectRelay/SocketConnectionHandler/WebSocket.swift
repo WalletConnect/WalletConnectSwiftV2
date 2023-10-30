@@ -6,8 +6,10 @@ public protocol WebSocketConnecting: AnyObject {
     var onDisconnect: ((Error?) -> Void)? { get set }
     var onText: ((String) -> Void)? { get set }
     var request: URLRequest { get set }
+    
     func connect()
     func disconnect()
+    func reconnect()
     func write(string: String, completion: (() -> Void)?)
 }
 

@@ -1,7 +1,6 @@
 //     
 import Foundation
 
-
 public struct RelayClientFactory {
 
     public static func create(
@@ -28,7 +27,6 @@ public struct RelayClientFactory {
         )
     }
 
-
     public static func create(
         relayHost: String,
         projectId: String,
@@ -50,6 +48,7 @@ public struct RelayClientFactory {
             projectId: projectId,
             socketAuthenticator: socketAuthenticator
         )
+
         let dispatcher = Dispatcher(
             socketFactory: socketFactory,
             relayUrlFactory: relayUrlFactory,
