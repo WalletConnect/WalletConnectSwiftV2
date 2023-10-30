@@ -30,7 +30,7 @@ final class ModalSheetInteractorMock: ModalSheetInteractor {
         let sessionProposal = Session.Proposal(
             id: "",
             pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: ni;)),
+            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
             requiredNamespaces: [:],
             optionalNamespaces: nil,
             sessionProperties: nil,
