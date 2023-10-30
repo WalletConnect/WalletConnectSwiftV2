@@ -55,7 +55,8 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecSuccess:
             return item as? Data
         case errSecItemNotFound:
-            return nil
+            // TODO: Replace with nil once migration period ends
+            return try tryMigrateAttrAccessible(key: key)
         default:
             throw KeychainError(status)
         }
@@ -100,11 +101,46 @@ public final class KeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,
             kSecAttrAccount: key
         ]
+    }
+
+    private func tryMigrateAttrAccessible(key: String) throws -> Data? {
+        var query = buildBaseServiceQuery(for: key)
+        query[kSecReturnData] = true
+        query[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+
+        var item: CFTypeRef?
+        let status = secItem.copyMatching(query as CFDictionary, &item)
+
+        switch status {
+        case errSecSuccess: // Migration needed
+            guard let data = item as? Data else { return nil }
+            
+            // Fetching old value
+            var deleteQuery = buildBaseServiceQuery(for: key)
+            deleteQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+
+            // Deleting old value
+            let status = secItem.delete(deleteQuery as CFDictionary)
+
+            guard status == errSecSuccess || status == errSecItemNotFound else {
+                throw KeychainError(status)
+            }
+
+            // Replacing with new value
+            try add(data: data, forKey: key)
+
+            // Continue `readData` execution
+            return item as? Data
+        case errSecItemNotFound:
+            return nil
+        default:
+            throw KeychainError(status)
+        }
     }
 }
