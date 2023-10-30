@@ -84,7 +84,7 @@ public class NotifyClient {
     public func unregister(account: Account) async throws {
         try await identityService.unregister(account: account)
         notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
-        notifyStorage.clearDatabase(account: account)
+        try notifyStorage.clearDatabase(account: account)
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()
     }
@@ -102,7 +102,8 @@ public class NotifyClient {
     }
 
     public func getActiveSubscriptions(account: Account) -> [NotifySubscription] {
-        return notifyStorage.getSubscriptions(account: account)
+        // TODO: Handle or remove error
+        return (try? notifyStorage.getSubscriptions(account: account)) ?? []
     }
 
     public func getMessageHistory(topic: String) -> [NotifyMessageRecord] {

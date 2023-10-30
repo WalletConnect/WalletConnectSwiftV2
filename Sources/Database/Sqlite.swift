@@ -5,10 +5,12 @@ public final class Sqlite {
 
     private var db: OpaquePointer?
 
+    public init() { }
+
     /// Opening A New Database Connection
     /// - Parameter path: Path to database
     public func openDatabase(path: String) throws {
-        guard sqlite3_open(path, &db) == SQLITE_OK else {
+        guard sqlite3_open_v2(path, &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
             throw SQLiteError.openDatabase(path: path)
         }
         var error: UnsafeMutablePointer<CChar>?

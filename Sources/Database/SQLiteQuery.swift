@@ -2,24 +2,45 @@ import Foundation
 
 public struct SqliteQuery {
 
-    public static func replace(table: String, row: SqliteRow) -> String {
-        let encoder = row.encode()
+    public static func replace(table: String, rows: [SqliteRow]) throws -> String {
+        var values: [String] = []
 
-        let arguments = encoder.values
+        for row in rows {
+            values.append(row.encode().values
+                .map { "'\($0.value)'" }
+                .joined(separator: ", "))
+        }
+
+        guard let first = rows.first else {
+            throw Errors.rowsNotFound
+        }
+
+        let formattedArguments = first.encode().values
             .map { $0.argument }
             .joined(separator: ", ")
 
-        let values = encoder.values
-            .map { $0.value }
-            .joined(separator: ", ")
+        let formattedValues = values
+            .map { "(\($0))" }
+            .joined(separator: ",\n")
 
         return """
-            REPLACE INTO \(table) (\(arguments))
-            VALUES (\(values))
+            REPLACE INTO \(table) (\(formattedArguments)) VALUES
+            \(formattedValues);
         """
     }
 
     public static func select(table: String) -> String {
-        return "SELECT * FROM \(table)"
+        return "SELECT * FROM \(table);"
+    }
+
+    public static func delete(table: String, where argument: String, equals value: String) -> String {
+        return "DELETE FROM \(table) WHERE \(argument) = '\(value)';"
+    }
+}
+
+extension SqliteQuery {
+
+    enum Errors: Error {
+        case rowsNotFound
     }
 }

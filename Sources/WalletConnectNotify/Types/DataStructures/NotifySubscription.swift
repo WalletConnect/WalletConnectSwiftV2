@@ -23,6 +23,7 @@ public struct NotifySubscription: DatabaseObject, SqliteRow {
         self.scope = try decoder.decodeCodable(at: 4)
         self.expiry = try decoder.decodeDate(at: 5)
         self.symKey = try decoder.decodeString(at: 6)
+        self.appAuthenticationKey = try decoder.decodeString(at: 7)
     }
 
     public func encode() -> SqliteRowEncoder {
@@ -34,7 +35,30 @@ public struct NotifySubscription: DatabaseObject, SqliteRow {
         encoder.encodeCodable(scope, for: "scope")
         encoder.encodeDate(expiry, for: "expiry")
         encoder.encodeString(symKey, for: "symKey")
+        encoder.encodeString(appAuthenticationKey, for: "appAuthenticationKey")
         return encoder
+    }
+
+    init(topic: String, account: Account, relay: RelayProtocolOptions, metadata: AppMetadata, scope: [String : ScopeValue], expiry: Date, symKey: String, appAuthenticationKey: String) {
+        self.topic = topic
+        self.account = account
+        self.relay = relay
+        self.metadata = metadata
+        self.scope = scope
+        self.expiry = expiry
+        self.symKey = symKey
+        self.appAuthenticationKey = appAuthenticationKey
+    }
+
+    init(subscription: NotifySubscription, scope: [String : ScopeValue], expiry: Date) {
+        self.topic = subscription.topic
+        self.account = subscription.account
+        self.relay = subscription.relay
+        self.metadata = subscription.metadata
+        self.symKey = subscription.symKey
+        self.appAuthenticationKey = subscription.appAuthenticationKey
+        self.scope = scope
+        self.expiry = expiry
     }
 }
 

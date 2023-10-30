@@ -12,6 +12,7 @@ public struct NotifyClientFactory {
         return NotifyClientFactory.create(
             projectId: projectId,
             keyserverURL: keyserverURL,
+            groupIdentifier: groupIdentifier,
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
@@ -28,6 +29,7 @@ public struct NotifyClientFactory {
     static func create(
         projectId: String,
         keyserverURL: URL,
+        groupIdentifier: String,
         logger: ConsoleLogging,
         keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
@@ -43,7 +45,8 @@ public struct NotifyClientFactory {
         let subscriptionStore = KeyedDatabase<NotifySubscription>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifySubscription)
         let messagesStore = KeyedDatabase<NotifyMessageRecord>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifyMessagesRecords)
         let notifyAccountProvider = NotifyAccountProvider()
-        let notifyStorage = NotifyStorage(subscriptionStore: subscriptionStore, messagesStore: messagesStore, accountProvider: notifyAccountProvider)
+        let database = NotifyDatabase(appGroup: groupIdentifier, database: "notify.db", sqlite: Sqlite(), logger: logger)
+        let notifyStorage = NotifyStorage(database: database, subscriptionStore: subscriptionStore, messagesStore: messagesStore, accountProvider: notifyAccountProvider)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = NotifyWebDidResolver()

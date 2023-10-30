@@ -40,7 +40,7 @@ class NotifyWatchSubscriptionsResponseSubscriber {
                 let account = watchSubscriptionPayloadRequest.subscriptionAccount
                 // TODO: varify signature with notify server diddoc authentication key
 
-                let oldSubscriptions = notifyStorage.getSubscriptions(account: account)
+                let oldSubscriptions = try notifyStorage.getSubscriptions(account: account)
                 let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
 
                 try Task.checkCancellation()
@@ -51,7 +51,7 @@ class NotifyWatchSubscriptionsResponseSubscriber {
 
                 if subscriptions.count > 0 {
                     // TODO: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
-                    notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
+                    try notifyStorage.replaceAllSubscriptions(newSubscriptions)
 
                     for subscription in newSubscriptions {
                         let symKey = try SymmetricKey(hex: subscription.symKey)
