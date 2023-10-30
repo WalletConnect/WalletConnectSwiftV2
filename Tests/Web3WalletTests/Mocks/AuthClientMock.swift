@@ -24,7 +24,7 @@ final class AuthClientMock: AuthClientProtocol {
             id: .left(""),
             topic: "",
             payload: AuthPayload(requestParams: requestParams, iat: ""),
-            requester: AppMetadata(name: "", description: "", url: "", icons: [])
+            requester: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))
         )
     }
     
