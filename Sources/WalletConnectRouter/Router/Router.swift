@@ -1,9 +1,17 @@
 import UIKit
 
+@_exported import WalletConnectRouter
+
 public struct WalletConnectRouter {
     public static func goBack(uri: String) {
-        DispatchQueue.main.async {
-            UIApplication.shared.open(URL(string: uri)!)
+        if #available(iOS 17, *) {
+            DispatchQueue.main.async {
+                if let url = URL(string: uri) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        } else {
+            Router.goBack()
         }
     }
 }
