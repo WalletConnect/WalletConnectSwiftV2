@@ -33,7 +33,7 @@ let package = Package(
             targets: ["WalletConnectPush"]),
         .library(
             name: "WalletConnectRouter",
-            targets: ["WalletConnectRouter"]),
+            targets: ["WalletConnectRouter", "WalletConnectRouterLegacy"]),
         .library(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
@@ -121,7 +121,12 @@ let package = Package(
             dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "WalletConnectRouter",
-            dependencies: []),
+            dependencies: [],
+            path: "Sources/WalletConnectRouter/Router"),
+        .target(
+            name: "WalletConnectRouterLegacy",
+            dependencies: [],
+            path: "Sources/WalletConnectRouter/RouterLegacy"),
         .target(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),

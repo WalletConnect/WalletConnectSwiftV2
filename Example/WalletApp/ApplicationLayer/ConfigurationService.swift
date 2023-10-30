@@ -13,7 +13,8 @@ final class ConfigurationService {
             name: "Example Wallet",
             description: "wallet description",
             url: "example.wallet",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"]
+            icons: ["https://avatars.githubusercontent.com/u/37784886"], 
+            redirect: AppMetadata.Redirect(native: "walletapp://", universal: nil)
         )
 
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)

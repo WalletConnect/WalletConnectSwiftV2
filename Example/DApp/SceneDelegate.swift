@@ -19,7 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
             url: "wallet.connect",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"]
+            icons: ["https://avatars.githubusercontent.com/u/37784886"],
+            redirect: AppMetadata.Redirect(native: "dapp://", universal: nil)
         )
         
         WalletConnectModal.configure(

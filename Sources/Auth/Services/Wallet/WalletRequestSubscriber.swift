@@ -36,10 +36,10 @@ class WalletRequestSubscriber {
         pairingRegisterer.register(method: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
-                
+
                 pairingRegisterer.setReceived(pairingTopic: payload.topic)
                 
-                let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
+                let request = AuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams, requester: payload.request.requester.metadata)
                 
                 Task(priority: .high) {
                     let assertionId = payload.decryptedPayload.sha256().toHexString()

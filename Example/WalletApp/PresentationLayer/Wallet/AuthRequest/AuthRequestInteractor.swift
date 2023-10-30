@@ -1,5 +1,7 @@
 import Foundation
+
 import Web3Wallet
+import WalletConnectRouter
 
 final class AuthRequestInteractor {
 
@@ -16,10 +18,16 @@ final class AuthRequestInteractor {
             privateKey: Data(hex: importAccount.privateKey),
             type: .eip191)
         try await Web3Wallet.instance.respond(requestId: request.id, signature: signature, from: account)
+        
+        /* Redirect */
+        WalletConnectRouter.goBack(uri: request.requester.redirect.native)
     }
 
     func reject(request: AuthRequest) async throws {
         try await Web3Wallet.instance.reject(requestId: request.id)
+        
+        /* Redirect */
+        WalletConnectRouter.goBack(uri: request.requester.redirect.native)
     }
 
     func formatted(request: AuthRequest, account: Account) -> String {
