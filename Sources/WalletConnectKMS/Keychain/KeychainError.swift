@@ -13,6 +13,15 @@ public enum KeychainError: Error, LocalizedError {
         }
     }
 
+    public var status: OSStatus {
+        switch self {
+        case .itemNotFound:
+            return errSecItemNotFound
+        case .other(let status):
+            return status
+        }
+    }
+
     public var errorDescription: String? {
         switch self {
         case .itemNotFound:
