@@ -93,7 +93,7 @@ public class KeyManagementService: KeyManagementServiceProtocol {
     public func getPrivateKey(for publicKey: AgreementPublicKey) throws -> AgreementPrivateKey? {
         do {
             return try keychain.read(key: publicKey.hexRepresentation) as AgreementPrivateKey
-        } catch let error where (error as? KeychainError)?.status == errSecItemNotFound {
+        } catch KeychainError.itemNotFound {
             return nil
         } catch {
             throw error

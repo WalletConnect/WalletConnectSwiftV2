@@ -25,14 +25,13 @@ public struct ClientIdStorage: ClientIdStoring {
         do {
             let publicPart = try getPublicPart()
             return try getPrivatePart(for: publicPart)
-        } catch {
-            guard let error = error as? KeychainError, error.status == errSecItemNotFound else {
-                throw error
-            }
+        } catch Errors.privatePartNotFound, Errors.publicPartNotFound {
             let privateKey = SigningPrivateKey()
             try setPrivatePart(privateKey)
             setPublicPart(privateKey.publicKey)
             return privateKey
+        } catch {
+            throw error
         }
     }
 
@@ -79,8 +78,10 @@ private extension ClientIdStorage {
     func getPrivatePart(for publicPart: SigningPublicKey) throws -> SigningPrivateKey {
         do {
             return try keychain.read(key: publicPart.storageId)
-        } catch {
+        } catch KeychainError.itemNotFound {
             throw Errors.privatePartNotFound
+        } catch {
+            throw error
         }
     }
 
