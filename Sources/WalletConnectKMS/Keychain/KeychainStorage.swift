@@ -55,8 +55,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecSuccess:
             return item as? Data
         case errSecItemNotFound:
-            // TODO: Replace with nil once migration period ends
-            return try tryMigrateAttrAccessible(key: key)
+            return tryMigrateAttrAccessible(key: key) // TODO: Replace with nil once migration period ends
         default:
             throw KeychainError(status)
         }
@@ -109,38 +108,23 @@ public final class KeychainStorage: KeychainStorageProtocol {
         ]
     }
 
-    private func tryMigrateAttrAccessible(key: String) throws -> Data? {
-        var query = buildBaseServiceQuery(for: key)
-        query[kSecReturnData] = true
-        query[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+    private func tryMigrateAttrAccessible(key: String) -> Data? {
+        var updateQuery = buildBaseServiceQuery(for: key)
+        updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+
+        let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
+        let status = secItem.update(updateQuery as CFDictionary, attributes as CFDictionary)
+
+        guard status == errSecSuccess else {
+            return nil
+        }
+
+        var readQuery = buildBaseServiceQuery(for: key)
+        readQuery[kSecReturnData] = true
 
         var item: CFTypeRef?
-        let status = secItem.copyMatching(query as CFDictionary, &item)
+        _ = secItem.copyMatching(readQuery as CFDictionary, &item)
 
-        switch status {
-        case errSecSuccess: // Migration needed
-            guard let data = item as? Data else { return nil }
-            
-            // Fetching old value
-            var deleteQuery = buildBaseServiceQuery(for: key)
-            deleteQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-
-            // Deleting old value
-            let status = secItem.delete(deleteQuery as CFDictionary)
-
-            guard status == errSecSuccess || status == errSecItemNotFound else {
-                throw KeychainError(status)
-            }
-
-            // Replacing with new value
-            try add(data: data, forKey: key)
-
-            // Continue `readData` execution
-            return item as? Data
-        case errSecItemNotFound:
-            return nil
-        default:
-            throw KeychainError(status)
-        }
+        return item as? Data
     }
 }

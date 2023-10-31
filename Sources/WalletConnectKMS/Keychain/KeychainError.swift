@@ -1,22 +1,22 @@
 import Foundation
 
 // TODO: Integrate with WalletConnectError
-struct KeychainError: Error, LocalizedError {
+public struct KeychainError: Error, LocalizedError {
 
-    let status: OSStatus
+    public let status: OSStatus
 
-    init(_ status: OSStatus) {
+    public init(_ status: OSStatus) {
         self.status = status
     }
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         return "OSStatus: \(status), message: \(status.message)"
     }
 }
 
 extension KeychainError: CustomStringConvertible {
 
-    var description: String {
+    public var description: String {
         status.message
     }
 }

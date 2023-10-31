@@ -26,6 +26,9 @@ public struct ClientIdStorage: ClientIdStoring {
             let publicPart = try getPublicPart()
             return try getPrivatePart(for: publicPart)
         } catch {
+            guard let error = error as? KeychainError, error.status == errSecItemNotFound else {
+                throw error
+            }
             let privateKey = SigningPrivateKey()
             try setPrivatePart(privateKey)
             setPublicPart(privateKey.publicKey)
