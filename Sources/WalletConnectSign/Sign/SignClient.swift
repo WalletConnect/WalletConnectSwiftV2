@@ -157,10 +157,10 @@ public final class SignClient: SignClientProtocol {
          cleanupService: SignCleanupService,
          pairingClient: PairingClient,
          appRequestService: AppRequestService,
-              appRespondSubscriber: AppRespondSubscriber,
-              walletRequestSubscriber: WalletRequestSubscriber,
-              walletRespondService: WalletRespondService,
-              pendingRequestsProvider: PendingRequestsProvider
+         appRespondSubscriber: AppRespondSubscriber,
+         walletRequestSubscriber: WalletRequestSubscriber,
+         walletRespondService: WalletRespondService,
+         pendingRequestsProvider: PendingRequestsProvider
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
