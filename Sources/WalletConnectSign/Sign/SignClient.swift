@@ -115,6 +115,13 @@ public final class SignClient: SignClientProtocol {
     private let appProposeService: AppProposeService
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
+    
+    //Auth
+    private let appRequestService: AppRequestService
+    private let appRespondSubscriber: AppRespondSubscriber
+    private let walletRequestSubscriber: WalletRequestSubscriber
+    private let walletRespondService: WalletRespondService
+    private let pendingRequestsProvider: PendingRequestsProvider
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
@@ -148,7 +155,12 @@ public final class SignClient: SignClientProtocol {
          disconnectService: DisconnectService,
          historyService: HistoryService,
          cleanupService: SignCleanupService,
-         pairingClient: PairingClient
+         pairingClient: PairingClient,
+         appRequestService: AppRequestService,
+              appRespondSubscriber: AppRespondSubscriber,
+              walletRequestSubscriber: WalletRequestSubscriber,
+              walletRespondService: WalletRespondService,
+              pendingRequestsProvider: PendingRequestsProvider
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -166,6 +178,11 @@ public final class SignClient: SignClientProtocol {
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
+        self.appRequestService = appRequestService
+        self.walletRequestSubscriber = walletRequestSubscriber
+        self.walletRespondService = walletRespondService
+        self.appRespondSubscriber = appRespondSubscriber
+        self.pendingRequestsProvider = pendingRequestsProvider
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -237,6 +254,7 @@ public final class SignClient: SignClientProtocol {
         logger.debug("Requesting Authentication on existing pairing")
         let pairingURI = try await pairingClient.create()
         try await appRequestService.request(params: params, topic: pairingURI.topic)
+        return pairingURI
     }
 
     /// For wallet to receive a session proposal from a dApp
