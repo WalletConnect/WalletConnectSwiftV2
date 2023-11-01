@@ -232,6 +232,13 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
+
+    public func authenticate(_ params: RequestParams) async throws -> WalletConnectURI? {
+        logger.debug("Requesting Authentication on existing pairing")
+        let pairingURI = try await pairingClient.create()
+        try await appRequestService.request(params: params, topic: pairingURI.topic)
+    }
+
     /// For wallet to receive a session proposal from a dApp
     /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
