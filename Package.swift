@@ -49,9 +49,6 @@ let package = Package(
         .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
-        .library(
-            name: "Database", // TODO: Remove library
-            targets: ["Database"]),
 
     ],
     dependencies: [
