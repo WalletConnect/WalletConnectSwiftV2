@@ -145,7 +145,7 @@ private extension NotifyDatabase {
                     icon TEXT NOT NULL,
                     url TEXT NOT NULL,
                     type TEXT NOT NULL,
-                    publishedAt TEXT NOT NULL,
+                    publishedAt TEXT NOT NULL
                 );
             """)
 

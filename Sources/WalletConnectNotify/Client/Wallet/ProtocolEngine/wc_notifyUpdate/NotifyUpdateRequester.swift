@@ -35,7 +35,7 @@ class NotifyUpdateRequester: NotifyUpdateRequesting {
     func update(topic: String, scope: Set<String>) async throws {
         logger.debug("NotifyUpdateRequester: updating subscription for topic: \(topic)")
 
-        guard let subscription = try notifyStorage.getSubscription(topic: topic) else { throw Errors.noSubscriptionForGivenTopic }
+        guard let subscription = notifyStorage.getSubscription(topic: topic) else { throw Errors.noSubscriptionForGivenTopic }
 
         let dappAuthenticationKey = try DIDKey(did: subscription.appAuthenticationKey)
 

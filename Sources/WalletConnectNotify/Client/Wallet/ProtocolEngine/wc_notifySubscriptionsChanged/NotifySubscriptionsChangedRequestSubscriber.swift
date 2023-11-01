@@ -51,7 +51,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
 
                 // TODO: varify signature with notify server diddoc authentication key
 
-                let oldSubscriptions = try notifyStorage.getSubscriptions(account: account)
+                let oldSubscriptions = notifyStorage.getSubscriptions(account: account)
                 let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
 
                 subscriptionChangedSubject.send(newSubscriptions)
