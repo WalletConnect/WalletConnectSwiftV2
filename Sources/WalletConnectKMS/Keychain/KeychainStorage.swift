@@ -75,7 +75,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecSuccess:
             return
         case errSecItemNotFound:
-            tryMigrateAttrAccessibleOnUpdate(data: data, key: key) // TODO: Remove once migration period ends
+            try tryMigrateAttrAccessibleOnUpdate(data: data, key: key) // TODO: Remove once migration period ends
         default:
             throw KeychainError(status)
         }
@@ -133,7 +133,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         return item as? Data
     }
 
-    private func tryMigrateAttrAccessibleOnUpdate(data: Data, key: String) {
+    private func tryMigrateAttrAccessibleOnUpdate(data: Data, key: String) throws {
         var updateAccessQuery = buildBaseServiceQuery(for: key)
         updateAccessQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
@@ -141,12 +141,16 @@ public final class KeychainStorage: KeychainStorageProtocol {
         let accessStatus = secItem.update(updateAccessQuery as CFDictionary, accessAttributes as CFDictionary)
 
         guard accessStatus == errSecSuccess else {
-            return
+            throw KeychainError.itemNotFound
         }
 
         let updateQuery = buildBaseServiceQuery(for: key)
         let updateAttributes = [kSecValueData: data]
 
-        _ = secItem.update(updateQuery as CFDictionary, updateAttributes as CFDictionary)
+        let updateStatus = secItem.update(updateQuery as CFDictionary, updateAttributes as CFDictionary)
+
+        guard updateStatus == errSecSuccess else {
+            throw KeychainError.itemNotFound
+        }
     }
 }
