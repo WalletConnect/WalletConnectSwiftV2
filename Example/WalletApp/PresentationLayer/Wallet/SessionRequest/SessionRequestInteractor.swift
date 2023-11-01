@@ -1,5 +1,7 @@
 import Foundation
+
 import Web3Wallet
+import WalletConnectRouter
 
 final class SessionRequestInteractor {
     func approve(sessionRequest: Request, importAccount: ImportAccount) async throws {
@@ -10,6 +12,12 @@ final class SessionRequestInteractor {
                 requestId: sessionRequest.id,
                 response: .response(result)
             )
+            
+            /* Redirect */
+            let session = getSession(topic: sessionRequest.topic)
+            if let uri = session?.peer.redirect.native {
+                WalletConnectRouter.goBack(uri: uri)
+            }
         } catch {
             throw error
         }
@@ -21,6 +29,12 @@ final class SessionRequestInteractor {
             requestId: sessionRequest.id,
             response: .error(.init(code: 0, message: ""))
         )
+        
+        /* Redirect */
+        let session = getSession(topic: sessionRequest.topic)
+        if let uri = session?.peer.redirect.native {
+            WalletConnectRouter.goBack(uri: uri)
+        }
     }
     
     func getSession(topic: String) -> Session? {

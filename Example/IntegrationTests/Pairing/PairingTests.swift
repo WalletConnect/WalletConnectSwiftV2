@@ -63,7 +63,7 @@ final class PairingTests: XCTestCase {
         appPairingClient = pairingClient
         
         appAuthClient = AuthClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "dapp://", universal: nil)),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
             logger: notifyLogger,
@@ -88,7 +88,7 @@ final class PairingTests: XCTestCase {
             logger: notifyLogger
         )
         appAuthClient = AuthClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: nil)),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
             logger: notifyLogger,
