@@ -102,8 +102,7 @@ public class NotifyClient {
     }
 
     public func getActiveSubscriptions(account: Account) -> [NotifySubscription] {
-        // TODO: Handle or remove error
-        return (try? notifyStorage.getSubscriptions(account: account)) ?? []
+        return notifyStorage.getSubscriptions(account: account)
     }
 
     public func getMessageHistory(topic: String) -> [NotifyMessageRecord] {
@@ -115,7 +114,7 @@ public class NotifyClient {
     }
 
     public func deleteNotifyMessage(id: String) {
-        notifyStorage.deleteMessage(id: id)
+        try? notifyStorage.deleteMessage(id: id)
     }
 
     public func register(deviceToken: Data) async throws {

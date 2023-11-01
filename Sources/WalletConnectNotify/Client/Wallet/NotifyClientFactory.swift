@@ -42,11 +42,9 @@ public struct NotifyClientFactory {
         explorerHost: String
     ) -> NotifyClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let subscriptionStore = KeyedDatabase<NotifySubscription>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifySubscription)
-        let messagesStore = KeyedDatabase<NotifyMessageRecord>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifyMessagesRecords)
         let notifyAccountProvider = NotifyAccountProvider()
         let database = NotifyDatabase(appGroup: groupIdentifier, database: "notify.db", sqlite: Sqlite(), logger: logger)
-        let notifyStorage = NotifyStorage(database: database, subscriptionStore: subscriptionStore, messagesStore: messagesStore, accountProvider: notifyAccountProvider)
+        let notifyStorage = NotifyStorage(database: database, accountProvider: notifyAccountProvider)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = NotifyWebDidResolver()

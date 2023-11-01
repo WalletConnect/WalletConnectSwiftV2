@@ -33,6 +33,10 @@ public struct SqliteQuery {
         return "SELECT * FROM \(table);"
     }
 
+    public static func select(table: String, where argument: String, equals value: String) -> String {
+        return "SELECT * FROM \(table) WHERE \(argument) = '\(value);"
+    }
+
     public static func delete(table: String, where argument: String, equals value: String) -> String {
         return "DELETE FROM \(table) WHERE \(argument) = '\(value)';"
     }

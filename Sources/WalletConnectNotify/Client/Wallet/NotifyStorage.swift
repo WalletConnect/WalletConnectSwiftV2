@@ -16,7 +16,6 @@ final class NotifyStorage: NotifyStoring {
 
     private var publishers = Set<AnyCancellable>()
 
-    private let messagesStore: KeyedDatabase<NotifyMessageRecord>
     private let database: NotifyDatabase
 
     private let newSubscriptionSubject = PassthroughSubject<NotifySubscription, Never>()
@@ -43,9 +42,8 @@ final class NotifyStorage: NotifyStoring {
         return subscriptionsSubject.eraseToAnyPublisher()
     }
 
-    init(database: NotifyDatabase, subscriptionStore: KeyedDatabase<NotifySubscription>, messagesStore: KeyedDatabase<NotifyMessageRecord>, accountProvider: NotifyAccountProvider) {
+    init(database: NotifyDatabase, accountProvider: NotifyAccountProvider) {
         self.database = database
-        self.messagesStore = messagesStore
         self.accountProvider = accountProvider
 
         setupSubscriptions()
@@ -54,15 +52,15 @@ final class NotifyStorage: NotifyStoring {
     // MARK: Subscriptions
 
     func getAllSubscriptions() -> [NotifySubscription] {
-        return (try? database.getAllSubscriptions()) ?? []
+        return database.getAllSubscriptions()
     }
 
-    func getSubscriptions(account: Account) throws -> [NotifySubscription] {
-        return try database.getSubscriptions(account: account)
+    func getSubscriptions(account: Account) -> [NotifySubscription] {
+        return database.getSubscriptions(account: account)
     }
 
-    func getSubscription(topic: String) throws -> NotifySubscription? {
-        return try database.getSubscription(topic: topic)
+    func getSubscription(topic: String) -> NotifySubscription? {
+        return database.getSubscription(topic: topic)
     }
 
     func setSubscription(_ subscription: NotifySubscription) throws {
@@ -80,8 +78,8 @@ final class NotifyStorage: NotifyStoring {
     }
 
     func clearDatabase(account: Account) throws {
-        for subscription in try getSubscriptions(account: account) {
-            deleteMessages(topic: subscription.topic)
+        for subscription in getSubscriptions(account: account) {
+            try database.deleteMessages(topic: subscription.topic)
         }
         try database.deleteSubscription(account: account)
     }
@@ -102,21 +100,19 @@ final class NotifyStorage: NotifyStoring {
     }
 
     func getMessages(topic: String) -> [NotifyMessageRecord] {
-        return messagesStore.getAll(for: topic)
-            .sorted{$0.publishedAt > $1.publishedAt}
+        return database.getMessages(topic: topic)
     }
 
-    func deleteMessages(topic: String) {
-        messagesStore.deleteAll(for: topic)
+    func deleteMessages(topic: String) throws {
+        try database.deleteMessages(topic: topic)
     }
 
-    func deleteMessage(id: String) {
-        guard let result = messagesStore.find(id: id) else { return }
-        messagesStore.delete(id: id, for: result.key)
+    func deleteMessage(id: String) throws {
+        try database.deleteMessage(id: id)
     }
 
-    func setMessage(_ record: NotifyMessageRecord) {
-        messagesStore.set(element: record, for: record.topic)
+    func setMessage(_ message: NotifyMessageRecord) throws {
+        try database.save(message: message)
     }
 }
 
@@ -127,13 +123,13 @@ private extension NotifyStorage {
     }
 
     func setupSubscriptions() {
-        messagesStore.onUpdate = { [unowned self] in
-            messagesSubject.send(messagesStore.getAll())
+        database.onMessagesUpdate = { [unowned self] in
+            messagesSubject.send(database.getAllMessages())
         }
 
         database.onSubscriptionsUpdate = { [unowned self] in
             let account = try accountProvider.getCurrentAccount()
-            subscriptionsSubject.send(try getSubscriptions(account: account))
+            subscriptionsSubject.send(getSubscriptions(account: account))
         }
     }
 }

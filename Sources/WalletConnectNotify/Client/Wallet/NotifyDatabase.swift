@@ -6,6 +6,7 @@ final class NotifyDatabase {
 
     enum Table {
         static let subscriptions = "NotifySubscription"
+        static let messages = "NotifyMessage"
     }
 
     private let appGroup: String
@@ -14,6 +15,7 @@ final class NotifyDatabase {
     private let logger: ConsoleLogging
 
     var onSubscriptionsUpdate: (() throws -> Void)?
+    var onMessagesUpdate: (() throws -> Void)?
 
     init(appGroup: String, database: String, sqlite: Sqlite, logger: ConsoleLogging) {
         self.appGroup = appGroup
@@ -23,6 +25,8 @@ final class NotifyDatabase {
 
         prepareDatabase()
     }
+
+    // MARK: - NotifySubscriptions
 
     func save(subscription: NotifySubscription) throws {
         try save(subscriptions: [subscription])
@@ -34,17 +38,22 @@ final class NotifyDatabase {
         try onSubscriptionsUpdate?()
     }
 
-    func getSubscription(topic: String) throws -> NotifySubscription? {
-        return try getAllSubscriptions().first(where: { $0.topic == topic })
+    func getSubscription(topic: String) -> NotifySubscription? {
+        let sql = SqliteQuery.select(table: Table.subscriptions, where: "topic", equals: topic)
+        let subscriptions: [NotifySubscription]? = try? query(sql: sql)
+        return subscriptions?.first
     }
 
-    func getAllSubscriptions() throws -> [NotifySubscription] {
+    func getAllSubscriptions() -> [NotifySubscription] {
         let sql = SqliteQuery.select(table: Table.subscriptions)
-        return try query(sql: sql)
+        let subscriptions: [NotifySubscription]? = try? query(sql: sql)
+        return subscriptions ?? []
     }
 
-    func getSubscriptions(account: Account) throws -> [NotifySubscription] {
-        return try getAllSubscriptions().filter { $0.account == account }
+    func getSubscriptions(account: Account) -> [NotifySubscription] {
+        let sql = SqliteQuery.select(table: Table.subscriptions, where: "account", equals: account.absoluteString)
+        let subscriptions: [NotifySubscription]? = try? query(sql: sql)
+        return subscriptions ?? []
     }
 
     func deleteSubscription(topic: String) throws {
@@ -57,6 +66,42 @@ final class NotifyDatabase {
         let sql = SqliteQuery.delete(table: Table.subscriptions, where: "account", equals: account.absoluteString)
         try execute(sql: sql)
         try onSubscriptionsUpdate?()
+    }
+
+    // MARK: - NotifyMessageRecord
+
+    func getAllMessages() -> [NotifyMessageRecord] {
+        let sql = SqliteQuery.select(table: Table.messages)
+        let messages: [NotifyMessageRecord]? = try? query(sql: sql)
+        return messages ?? []
+    }
+
+    func getMessages(topic: String) -> [NotifyMessageRecord] {
+        let sql = SqliteQuery.select(table: Table.messages, where: "topic", equals: topic)
+        let messages: [NotifyMessageRecord]? = try? query(sql: sql)
+        return messages ?? []
+    }
+
+    func deleteMessages(topic: String) throws {
+        let sql = SqliteQuery.delete(table: Table.messages, where: "topic", equals: topic)
+        try execute(sql: sql)
+        try onMessagesUpdate?()
+    }
+
+    func deleteMessage(id: String) throws {
+        let sql = SqliteQuery.delete(table: Table.messages, where: "id", equals: id)
+        try execute(sql: sql)
+        try onMessagesUpdate?()
+    }
+
+    func save(message: NotifyMessageRecord) throws {
+        try save(messages: [message])
+    }
+
+    func save(messages: [NotifyMessageRecord]) throws {
+        let sql = try SqliteQuery.replace(table: Table.messages, rows: messages)
+        try execute(sql: sql)
+        try onMessagesUpdate?()
     }
 }
 
@@ -77,8 +122,9 @@ private extension NotifyDatabase {
         do {
             defer { sqlite.closeConnection() }
             try sqlite.openDatabase(path: path)
+            
             try sqlite.execute(sql: """
-                CREATE TABLE IF NOT EXISTS NotifySubscription (
+                CREATE TABLE IF NOT EXISTS \(Table.subscriptions) (
                     topic TEXT PRIMARY KEY,
                     account TEXT NOT NULL,
                     relay TEXT NOT NULL,
@@ -89,6 +135,20 @@ private extension NotifyDatabase {
                     appAuthenticationKey TEXT NOT NULL
                 );
             """)
+
+            try sqlite.execute(sql: """
+                CREATE TABLE IF NOT EXISTS \(Table.messages) (
+                    id TEXT PRIMARY KEY,
+                    topic TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL,
+                    icon TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    publishedAt TEXT NOT NULL,
+                );
+            """)
+
             logger.debug("SQlite database created at path \(path)")
         } catch {
             logger.error("SQlite database creation error: \(error.localizedDescription)")

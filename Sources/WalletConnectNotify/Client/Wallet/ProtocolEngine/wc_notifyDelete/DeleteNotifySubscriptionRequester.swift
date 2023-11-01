@@ -30,7 +30,7 @@ class DeleteNotifySubscriptionRequester {
     func delete(topic: String) async throws {
         logger.debug("Will delete notify subscription")
 
-        guard let subscription = try notifyStorage.getSubscription(topic: topic)
+        guard let subscription = notifyStorage.getSubscription(topic: topic)
         else { throw Errors.notifySubscriptionNotFound}
 
         let protocolMethod = NotifyDeleteProtocolMethod()
@@ -47,7 +47,7 @@ class DeleteNotifySubscriptionRequester {
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         try notifyStorage.deleteSubscription(topic: topic)
-        notifyStorage.deleteMessages(topic: topic)
+        try notifyStorage.deleteMessages(topic: topic)
 
         networkingInteractor.unsubscribe(topic: topic)
 
