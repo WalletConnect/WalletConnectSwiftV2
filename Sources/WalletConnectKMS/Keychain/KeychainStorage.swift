@@ -55,7 +55,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecSuccess:
             return item as? Data
         case errSecItemNotFound:
-            return nil
+            return tryMigrateAttrAccessible(key: key) // TODO: Replace with nil once migration period ends
         default:
             throw KeychainError(status)
         }
@@ -100,11 +100,31 @@ public final class KeychainStorage: KeychainStorageProtocol {
     private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
         return [
             kSecClass: kSecClassGenericPassword,
-            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,
             kSecAttrAccount: key
         ]
+    }
+
+    private func tryMigrateAttrAccessible(key: String) -> Data? {
+        var updateQuery = buildBaseServiceQuery(for: key)
+        updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+
+        let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
+        let status = secItem.update(updateQuery as CFDictionary, attributes as CFDictionary)
+
+        guard status == errSecSuccess else {
+            return nil
+        }
+
+        var readQuery = buildBaseServiceQuery(for: key)
+        readQuery[kSecReturnData] = true
+
+        var item: CFTypeRef?
+        _ = secItem.copyMatching(readQuery as CFDictionary, &item)
+
+        return item as? Data
     }
 }

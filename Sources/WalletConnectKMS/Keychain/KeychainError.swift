@@ -1,23 +1,41 @@
 import Foundation
 
-// TODO: Integrate with WalletConnectError
-struct KeychainError: Error, LocalizedError {
+public enum KeychainError: Error, LocalizedError {
+    case itemNotFound
+    case other(OSStatus)
 
-    let status: OSStatus
-
-    init(_ status: OSStatus) {
-        self.status = status
+    public init(_ status: OSStatus) {
+        switch status {
+        case errSecItemNotFound:
+            self = .itemNotFound
+        default:
+            self = .other(status)
+        }
     }
 
-    var errorDescription: String? {
-        return "OSStatus: \(status), message: \(status.message)"
+    public var status: OSStatus {
+        switch self {
+        case .itemNotFound:
+            return errSecItemNotFound
+        case .other(let status):
+            return status
+        }
+    }
+
+    public var errorDescription: String? {
+        switch self {
+        case .itemNotFound:
+            return "Keychain item not found"
+        case .other(let status):
+            return "OSStatus: \(status), message: \(status.message)"
+        }
     }
 }
 
 extension KeychainError: CustomStringConvertible {
 
-    var description: String {
-        status.message
+    public var description: String {
+        return errorDescription ?? ""
     }
 }
 
