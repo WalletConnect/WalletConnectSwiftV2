@@ -3,13 +3,11 @@ import Combine
 
 protocol NotifyStoring {
     func getAllSubscriptions() -> [NotifySubscription]
-    func getSubscriptions(account: Account) throws -> [NotifySubscription]
-    func getSubscription(topic: String) throws -> NotifySubscription?
+    func getSubscriptions(account: Account) -> [NotifySubscription]
+    func getSubscription(topic: String) -> NotifySubscription?
     func setSubscription(_ subscription: NotifySubscription) throws
-    func replaceAllSubscriptions(_ subscriptions: [NotifySubscription]) throws
     func deleteSubscription(topic: String) throws
     func clearDatabase(account: Account) throws
-    func updateSubscription(_ subscription: NotifySubscription, scope: [String: ScopeValue], expiry: UInt64) throws
 }
 
 final class NotifyStorage: NotifyStoring {

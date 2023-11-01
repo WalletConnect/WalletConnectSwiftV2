@@ -9,17 +9,13 @@ final class NotifyDatabase {
         static let messages = "NotifyMessage"
     }
 
-    private let appGroup: String
-    private let database: String
     private let sqlite: Sqlite
     private let logger: ConsoleLogging
 
     var onSubscriptionsUpdate: (() throws -> Void)?
     var onMessagesUpdate: (() throws -> Void)?
 
-    init(appGroup: String, database: String, sqlite: Sqlite, logger: ConsoleLogging) {
-        self.appGroup = appGroup
-        self.database = database
+    init(sqlite: Sqlite, logger: ConsoleLogging) {
         self.sqlite = sqlite
         self.logger = logger
 
@@ -107,21 +103,10 @@ final class NotifyDatabase {
 
 private extension NotifyDatabase {
 
-    var path: String {
-        guard let path = FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
-            .appendingPathComponent(database) else {
-
-            fatalError("Database path not exists")
-        }
-
-        return path.absoluteString
-    }
-
     func prepareDatabase() {
         do {
             defer { sqlite.closeConnection() }
-            try sqlite.openDatabase(path: path)
+            try sqlite.openDatabase()
             
             try sqlite.execute(sql: """
                 CREATE TABLE IF NOT EXISTS \(Table.subscriptions) (
@@ -149,21 +134,21 @@ private extension NotifyDatabase {
                 );
             """)
 
-            logger.debug("SQlite database created at path \(path)")
+            logger.debug("SQlite database created")
         } catch {
             logger.error("SQlite database creation error: \(error.localizedDescription)")
         }
     }
 
     func execute(sql: String) throws {
-        try sqlite.openDatabase(path: path)
+        try sqlite.openDatabase()
         defer { sqlite.closeConnection() }
 
         try sqlite.execute(sql: sql)
     }
 
     func query<T: SqliteRow>(sql: String) throws -> [T] {
-        try sqlite.openDatabase(path: path)
+        try sqlite.openDatabase()
         defer { sqlite.closeConnection() }
 
         return try sqlite.query(sql: sql)
