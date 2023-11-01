@@ -47,8 +47,9 @@ public struct WalletConnectURI: Equatable {
     public init?(deeplinkUri: URL) {
         if let deeplinkUri = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") {
             self.init(string: deeplinkUri)
+        } else {
+            return nil
         }
-        return nil
     }
 
     private var relayQuery: String {
@@ -76,15 +77,17 @@ extension WalletConnectURI {
     public init?(connectionOptions: UIScene.ConnectionOptions) {
         if let uri = connectionOptions.urlContexts.first?.url.query?.replacingOccurrences(of: "uri=", with: "") {
             self.init(string: uri)
+        } else {
+            return nil
         }
-        return nil
     }
     
     public init?(urlContext: UIOpenURLContext) {
         if let uri = urlContext.url.query?.replacingOccurrences(of: "uri=", with: "") {
             self.init(string: uri)
+        } else {
+            return nil
         }
-        return nil
     }
 }
 

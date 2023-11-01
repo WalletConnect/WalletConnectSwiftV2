@@ -55,7 +55,7 @@ final class AuthTests: XCTestCase {
             networkingClient: networkingClient)
 
         let authClient = AuthClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""]),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: nil)),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
             logger: logger,

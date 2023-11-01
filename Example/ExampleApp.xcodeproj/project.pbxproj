@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -231,6 +231,7 @@
 		A74D32BA2A1E25AD00CB8536 /* QueryParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74D32B92A1E25AD00CB8536 /* QueryParameters.swift */; };
 		C5133A78294125CC00A8314C /* Web3 in Frameworks */ = {isa = PBXBuildFile; productRef = C5133A77294125CC00A8314C /* Web3 */; };
 		C53AA4362941251C008EA57C /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
+		C54C24902AEB1B5600DA4BF6 /* WalletConnectRouter in Frameworks */ = {isa = PBXBuildFile; productRef = C54C248F2AEB1B5600DA4BF6 /* WalletConnectRouter */; };
 		C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347A295DD7140004314A /* AuthRequestModule.swift */; };
 		C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347B295DD7140004314A /* AuthRequestPresenter.swift */; };
 		C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347C295DD7140004314A /* AuthRequestRouter.swift */; };
@@ -750,6 +751,7 @@
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
 				A5B6C0F52A6EAB2800927332 /* WalletConnectNotify in Frameworks */,
 				C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */,
+				C54C24902AEB1B5600DA4BF6 /* WalletConnectRouter in Frameworks */,
 				84943C7D2A9BA328007EBAC2 /* Mixpanel in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2058,6 +2060,7 @@
 				84943C7C2A9BA328007EBAC2 /* Mixpanel */,
 				A59D25ED2AB3672700D7EA3A /* AsyncButton */,
 				A5F1526E2ACDC46B00D745A6 /* Web3ModalUI */,
+				C54C248F2AEB1B5600DA4BF6 /* WalletConnectRouter */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -3448,6 +3451,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
+		};
+		C54C248F2AEB1B5600DA4BF6 /* WalletConnectRouter */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectRouter;
 		};
 		C55D349829630D440004314A /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;

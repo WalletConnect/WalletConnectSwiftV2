@@ -1,6 +1,7 @@
 import Foundation
 
 import Web3Wallet
+import WalletConnectRouter
 
 final class SessionProposalInteractor {
     func approve(proposal: Session.Proposal, account: Account) async throws {
@@ -28,9 +29,15 @@ final class SessionProposalInteractor {
             accounts: supportedAccounts
         )
         try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
+        
+        /* Redirect */
+        WalletConnectRouter.goBack(uri: proposal.proposer.redirect.native)
     }
 
     func reject(proposal: Session.Proposal) async throws {
         try await Web3Wallet.instance.reject(proposalId: proposal.id, reason: .userRejected)
+        
+        /* Redirect */
+        WalletConnectRouter.goBack(uri: proposal.proposer.redirect.native)
     }
 }

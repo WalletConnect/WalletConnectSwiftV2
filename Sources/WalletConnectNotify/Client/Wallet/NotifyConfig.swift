@@ -26,10 +26,10 @@ struct NotifyConfig: Codable {
     var metadata: AppMetadata {
         return AppMetadata(
             name: name,
-            description:
-                description,
+            description: description,
             url: appDomain,
-            icons: [image_url?.sm, image_url?.md, image_url?.lg].compactMap { $0 }
+            icons: [image_url?.sm, image_url?.md, image_url?.lg].compactMap { $0 }, 
+            redirect: AppMetadata.Redirect(native: "", universal: nil)
         )
     }
 }
