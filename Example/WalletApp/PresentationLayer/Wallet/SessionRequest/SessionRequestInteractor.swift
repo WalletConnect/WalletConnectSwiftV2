@@ -15,7 +15,7 @@ final class SessionRequestInteractor {
             
             /* Redirect */
             let session = getSession(topic: sessionRequest.topic)
-            if let uri = session?.peer.redirect.native {
+            if let uri = session?.peer.redirect?.native {
                 WalletConnectRouter.goBack(uri: uri)
             }
         } catch {
@@ -32,7 +32,7 @@ final class SessionRequestInteractor {
         
         /* Redirect */
         let session = getSession(topic: sessionRequest.topic)
-        if let uri = session?.peer.redirect.native {
+        if let uri = session?.peer.redirect?.native {
             WalletConnectRouter.goBack(uri: uri)
         }
     }

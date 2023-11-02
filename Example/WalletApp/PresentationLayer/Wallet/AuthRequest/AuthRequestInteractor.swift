@@ -20,14 +20,18 @@ final class AuthRequestInteractor {
         try await Web3Wallet.instance.respond(requestId: request.id, signature: signature, from: account)
         
         /* Redirect */
-        WalletConnectRouter.goBack(uri: request.requester.redirect.native)
+        if let uri = request.requester.redirect?.native {
+            WalletConnectRouter.goBack(uri: uri)
+        }
     }
 
     func reject(request: AuthRequest) async throws {
         try await Web3Wallet.instance.reject(requestId: request.id)
         
         /* Redirect */
-        WalletConnectRouter.goBack(uri: request.requester.redirect.native)
+        if let uri = request.requester.redirect?.native {
+            WalletConnectRouter.goBack(uri: uri)
+        }
     }
 
     func formatted(request: AuthRequest, account: Account) -> String {

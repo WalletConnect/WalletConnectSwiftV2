@@ -44,7 +44,7 @@ public struct AppMetadata: Codable, Equatable {
     public let icons: [String]
 
     /// Redirect links which could be manually used on wallet side.
-    public let redirect: Redirect
+    public let redirect: Redirect?
 
     /**
      Creates a new metadata object with the specified information.
@@ -61,7 +61,7 @@ public struct AppMetadata: Codable, Equatable {
         description: String,
         url: String,
         icons: [String],
-        redirect: Redirect
+        redirect: Redirect?
     ) {
         self.name = name
         self.description = description
