@@ -13,7 +13,7 @@ public struct AppMetadata: Codable, Equatable {
 
     public struct Redirect: Codable, Equatable {
         /// Native deeplink URL string.
-        public let native: String
+        public let native: String?
 
         /// Universal link URL string.
         public let universal: String?
@@ -61,7 +61,7 @@ public struct AppMetadata: Codable, Equatable {
         description: String,
         url: String,
         icons: [String],
-        redirect: Redirect?
+        redirect: Redirect
     ) {
         self.name = name
         self.description = description
