@@ -9,11 +9,6 @@ public final class MemorySqlite: Sqlite {
         guard sqlite3_open_v2(":memory:", &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
             throw SQLiteError.openDatabaseMemory
         }
-        var error: UnsafeMutablePointer<CChar>?
-        guard sqlite3_exec(db, "PRAGMA journal_mode=WAL;", nil, nil, &error) == SQLITE_OK else {
-            let message = error.map { String(cString: $0) }
-            throw SQLiteError.exec(error: message)
-        }
     }
 
     public func openDatabase() throws {

@@ -15,11 +15,6 @@ public final class DiskSqlite: Sqlite {
         guard sqlite3_open_v2(path, &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
             throw SQLiteError.openDatabase(path: path)
         }
-        var error: UnsafeMutablePointer<CChar>?
-        guard sqlite3_exec(db, "PRAGMA journal_mode=WAL;", nil, nil, &error) == SQLITE_OK else {
-            let message = error.map { String(cString: $0) }
-            throw SQLiteError.exec(error: message)
-        }
     }
 
     public func query<Row: SqliteRow>(sql: String) throws -> [Row] {
