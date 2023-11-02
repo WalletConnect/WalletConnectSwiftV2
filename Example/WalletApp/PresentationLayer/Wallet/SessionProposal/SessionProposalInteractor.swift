@@ -31,13 +31,17 @@ final class SessionProposalInteractor {
         try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
         
         /* Redirect */
-        WalletConnectRouter.goBack(uri: proposal.proposer.redirect.native)
+        if let uri = proposal.proposer.redirect?.native {
+            WalletConnectRouter.goBack(uri: uri)
+        }
     }
 
     func reject(proposal: Session.Proposal) async throws {
         try await Web3Wallet.instance.reject(proposalId: proposal.id, reason: .userRejected)
         
         /* Redirect */
-        WalletConnectRouter.goBack(uri: proposal.proposer.redirect.native)
+        if let uri = proposal.proposer.redirect?.native {
+            WalletConnectRouter.goBack(uri: uri)
+        }
     }
 }
