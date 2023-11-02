@@ -13,7 +13,7 @@ public struct AppMetadata: Codable, Equatable {
 
     public struct Redirect: Codable, Equatable {
         /// Native deeplink URL string.
-        public let native: String
+        public let native: String?
 
         /// Universal link URL string.
         public let universal: String?
@@ -44,7 +44,7 @@ public struct AppMetadata: Codable, Equatable {
     public let icons: [String]
 
     /// Redirect links which could be manually used on wallet side.
-    public let redirect: Redirect
+    public let redirect: Redirect?
 
     /**
      Creates a new metadata object with the specified information.
