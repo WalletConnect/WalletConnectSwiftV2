@@ -95,6 +95,25 @@ public final class SignClient: SignClientProtocol {
         sessionsPublisherSubject.eraseToAnyPublisher()
     }
 
+
+    //------------------------------------AUTH---------------------------------------
+    /// Publisher that sends authentication requests
+    ///
+    /// Wallet should subscribe on events in order to receive auth requests.
+    public var authRequestPublisher: AnyPublisher<(request: SignAuthRequest, context: VerifyContext?), Never> {
+        authRequestPublisherSubject.eraseToAnyPublisher()
+    }
+
+    /// Publisher that sends authentication responses
+    ///
+    /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
+    ///
+    /// Emited result may be an error.
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
+        authResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    //---------------------------------------------------------------------------------
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -135,6 +154,8 @@ public final class SignClient: SignClientProtocol {
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+    private var authRequestPublisherSubject = PassthroughSubject<(request: SignAuthRequest, context: VerifyContext?), Never>()
 
     private var publishers = Set<AnyCancellable>()
 
@@ -249,6 +270,7 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
+    //---------------------------------------AUTH------------------------------------
 
     public func authenticate(_ params: RequestParams) async throws -> WalletConnectURI? {
         logger.debug("Requesting Authentication on existing pairing")
@@ -256,6 +278,37 @@ public final class SignClient: SignClientProtocol {
         try await appRequestService.request(params: params, topic: pairingURI.topic)
         return pairingURI
     }
+
+
+    public func authenticate(_ params: RequestParams, topic: String) async throws {
+        try pairingClient.validatePairingExistance(topic)
+        logger.debug("Requesting Authentication on existing pairing")
+        try await appRequestService.request(params: params, topic: topic)
+    }
+
+
+    /// For a wallet to respond on authentication request
+    /// - Parameters:
+    ///   - requestId: authentication request id
+    ///   - signature: CACAO signature of requested message
+    public func respond(requestId: RPCID, signature: CacaoSignature, from account: Account) async throws {
+        try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
+    }
+
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
+    public func reject(requestId: RPCID) async throws {
+        try await walletRespondService.respondError(requestId: requestId)
+    }
+
+
+    /// Query pending authentication requests
+    /// - Returns: Pending authentication requests
+    public func getPendingRequests() throws -> [(SignAuthRequest, VerifyContext?)] {
+        return try pendingRequestsProvider.getPendingRequests()
+    }
+
+    //-----------------------------------------------------------------------------------
 
     /// For wallet to receive a session proposal from a dApp
     /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
@@ -456,6 +509,17 @@ public final class SignClient: SignClientProtocol {
         }
         sessionEngine.onSessionsUpdate = { [unowned self] sessions in
             sessionsPublisherSubject.send(sessions)
+        }
+
+
+        // Auth
+
+        appRespondSubscriber.onResponse = { [unowned self] (id, result) in
+            authResponsePublisherSubject.send((id, result))
+        }
+
+        walletRequestSubscriber.onRequest = { [unowned self] request in
+            authRequestPublisherSubject.send(request)
         }
     }
 
