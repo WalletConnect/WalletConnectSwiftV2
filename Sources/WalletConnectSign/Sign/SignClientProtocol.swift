@@ -18,6 +18,7 @@ public protocol SignClientProtocol {
     func reject(proposalId: String, reason: RejectionReason) async throws
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws
     func extend(topic: String) async throws
+    func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws
     func respond(topic: String, requestId: RPCID, response: RPCResult) async throws
     func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws
     func pair(uri: WalletConnectURI) async throws
@@ -26,6 +27,7 @@ public protocol SignClientProtocol {
     func cleanup() async throws
     
     func getPendingRequests(topic: String?) -> [(request: Request, context: VerifyContext?)]
+    func getPendingAuthRequests() throws -> [(WalletConnectSign.AuthenticationRequest, VerifyContext?)] 
     func getPendingProposals(topic: String?) -> [(proposal: Session.Proposal, context: VerifyContext?)]
     func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)?
 }

@@ -11,7 +11,7 @@ class WalletRequestSubscriber {
     private let verifyClient: VerifyClientProtocol
     private let verifyContextStore: CodableStore<VerifyContext>
 
-    var onRequest: (((request: SignAuthRequest, context: VerifyContext?)) -> Void)?
+    var onRequest: (((request: AuthenticationRequest, context: VerifyContext?)) -> Void)?
     
     init(
         networkingInteractor: NetworkInteracting,
@@ -39,7 +39,7 @@ class WalletRequestSubscriber {
                 
                 pairingRegisterer.setReceived(pairingTopic: payload.topic)
                 
-                let request = SignAuthRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
+                let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
                 
                 Task(priority: .high) {
                     let assertionId = payload.decryptedPayload.sha256().toHexString()

@@ -178,7 +178,31 @@ public class Web3WalletClient {
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
         try authClient.formatMessage(payload: payload, address: address)
     }
-    
+
+    //---------------------------------------AUTH------------------------------------
+    /// For a wallet to respond on authentication request
+    /// - Parameters:
+    ///   - requestId: authentication request id
+    ///   - signature: CACAO signature of requested message
+    public func respondSessionAuthenticated(requestId: RPCID, signature: WalletConnectSign.CacaoSignature, from account: Account) async throws {
+        try await signClient.respondSessionAuthenticated(requestId: requestId, signature: signature, account: account)
+    }
+
+//    /// For wallet to reject authentication request
+//    /// - Parameter requestId: authentication request id
+//    public func reject(requestId: RPCID) async throws {
+//        try await walletRespondService.respondError(requestId: requestId)
+//    }
+//
+//
+    /// Query pending authentication requests
+    /// - Returns: Pending authentication requests
+    public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
+        return try signClient.getPendingAuthRequests()
+    }
+    //---------------------------------------------------
+
+
     /// For a wallet to respond on authentication request
     /// - Parameters:
     ///   - requestId: authentication request id

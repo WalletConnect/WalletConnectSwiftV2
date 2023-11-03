@@ -12,12 +12,12 @@ class PendingRequestsProvider {
         self.verifyContextStore = verifyContextStore
     }
 
-    public func getPendingRequests() throws -> [(SignAuthRequest, VerifyContext?)] {
-        let pendingRequests: [SignAuthRequest] = rpcHistory.getPending()
+    public func getPendingRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
+        let pendingRequests: [AuthenticationRequest] = rpcHistory.getPending()
             .filter {$0.request.method == "wc_authRequest"}
             .compactMap {
                 guard let params = try? $0.request.params?.get(AuthRequestParams.self) else { return nil }
-                return SignAuthRequest(id: $0.request.id!, topic: $0.topic, payload: params.payloadParams)
+                return AuthenticationRequest(id: $0.request.id!, topic: $0.topic, payload: params.payloadParams)
             }
         
         return pendingRequests.map { ($0, try? verifyContextStore.get(key: $0.id.string)) }

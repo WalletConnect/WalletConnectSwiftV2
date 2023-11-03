@@ -100,7 +100,7 @@ public final class SignClient: SignClientProtocol {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<(request: SignAuthRequest, context: VerifyContext?), Never> {
+    public var authRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -155,7 +155,7 @@ public final class SignClient: SignClientProtocol {
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
-    private var authRequestPublisherSubject = PassthroughSubject<(request: SignAuthRequest, context: VerifyContext?), Never>()
+    private var authRequestPublisherSubject = PassthroughSubject<(request: AuthenticationRequest, context: VerifyContext?), Never>()
 
     private var publishers = Set<AnyCancellable>()
 
@@ -291,7 +291,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func respond(requestId: RPCID, signature: CacaoSignature, from account: Account) async throws {
+    public func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
         try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
     }
 
@@ -304,7 +304,7 @@ public final class SignClient: SignClientProtocol {
 
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
-    public func getPendingRequests() throws -> [(SignAuthRequest, VerifyContext?)] {
+    public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
         return try pendingRequestsProvider.getPendingRequests()
     }
 
@@ -510,14 +510,9 @@ public final class SignClient: SignClientProtocol {
         sessionEngine.onSessionsUpdate = { [unowned self] sessions in
             sessionsPublisherSubject.send(sessions)
         }
-
-
-        // Auth
-
         appRespondSubscriber.onResponse = { [unowned self] (id, result) in
             authResponsePublisherSubject.send((id, result))
         }
-
         walletRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
         }
