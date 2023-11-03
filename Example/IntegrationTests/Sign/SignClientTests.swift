@@ -4,6 +4,7 @@ import JSONRPC
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
 @testable import WalletConnectRelay
+@testable import WalletConnectUtils
 import WalletConnectPairing
 import WalletConnectNetworking
 
@@ -42,7 +43,10 @@ final class SignClientTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             pairingClient: pairingClient,
-            networkingClient: networkingClient
+            networkingClient: networkingClient,
+            iatProvider: IATProviderMock(),
+            projectId: InputConfig.projectId,
+            crypto: DefaultCryptoProvider()
         )
 
         let clientId = try! networkingClient.getClientId()
@@ -100,7 +104,7 @@ final class SignClientTests: XCTestCase {
         wallet.onSessionProposal = { [unowned self] proposal in
             Task(priority: .high) {
                 do {
-                    try await wallet.client.reject(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
+                    try await wallet.client.rejectSession(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
                     store.rejectedProposal = proposal
                 } catch { XCTFail("\(error)") }
             }

@@ -180,6 +180,7 @@ public class Web3WalletClient {
     }
 
     //---------------------------------------AUTH------------------------------------
+    // TODO - add publishers for authenticated session
     /// For a wallet to respond on authentication request
     /// - Parameters:
     ///   - requestId: authentication request id

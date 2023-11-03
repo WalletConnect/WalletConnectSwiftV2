@@ -54,7 +54,10 @@ final class XPlatformW3WTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             pairingClient: pairingClient,
-            networkingClient: networkingClient
+            networkingClient: networkingClient,
+            iatProvider: DefaultIATProvider(),
+            projectId: InputConfig.projectId,
+            crypto: DefaultCryptoProvider()
         )
 
         let authClient = AuthClientFactory.create(
