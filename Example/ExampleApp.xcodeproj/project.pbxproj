@@ -63,7 +63,6 @@
 		84E6B84E29787A8000428BAF /* PNDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
 		A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507BE1929E8032E0038EF70 /* EIP55Tests.swift */; };
-		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50D53C12ABA055700A4FD8B /* NotifyPreferencesModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */; };
 		A50D53C22ABA055700A4FD8B /* NotifyPreferencesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */; };
 		A50D53C32ABA055700A4FD8B /* NotifyPreferencesRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BE2ABA055700A4FD8B /* NotifyPreferencesRouter.swift */; };
@@ -441,7 +440,6 @@
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
 		A507BE1929E8032E0038EF70 /* EIP55Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIP55Tests.swift; sourceTree = "<group>"; };
-		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesModule.swift; sourceTree = "<group>"; };
 		A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesPresenter.swift; sourceTree = "<group>"; };
 		A50D53BE2ABA055700A4FD8B /* NotifyPreferencesRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesRouter.swift; sourceTree = "<group>"; };
@@ -818,7 +816,6 @@
 		767DC83328997F7600080FA9 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				A50C036428AAD32200FE72D3 /* ClientDelegate.swift */,
 				767DC83428997F8E00080FA9 /* EthSendTransaction.swift */,
 				84AA01DA28CF0CD7005D48D8 /* XCTest.swift */,
 			);
@@ -2386,7 +2383,6 @@
 				84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */,
 				7694A5262874296A0001257E /* RegistryTests.swift in Sources */,
 				A541959F2934BFEF0035AD19 /* SignerTests.swift in Sources */,
-				A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */,
 				A5321C2B2A250367006CADC3 /* HistoryTests.swift in Sources */,
 				A58A1ECC29BF458600A82A20 /* ENSResolverTests.swift in Sources */,
 				A5E03DFA286465C700888481 /* SignClientTests.swift in Sources */,

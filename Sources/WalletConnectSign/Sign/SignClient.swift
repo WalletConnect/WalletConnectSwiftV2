@@ -174,43 +174,6 @@ public final class SignClient: SignClientProtocol {
     // MARK: - Public interface
 
     /// For a dApp to propose a session to a wallet.
-    /// Function will create pairing and propose session or propose a session on existing pairing.
-    /// - Parameters:
-    ///   - requiredNamespaces: required namespaces for a session
-    ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
-    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    @available(*, deprecated, message: "use Pair.instance.create() and connect(requiredNamespaces: [String: ProposalNamespace]): instead")
-    public func connect(
-        requiredNamespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: ProposalNamespace]? = nil,
-        sessionProperties: [String: String]? = nil,
-        topic: String? = nil
-    ) async throws -> WalletConnectURI? {
-        logger.debug("Connecting Application")
-        if let topic = topic {
-            try pairingClient.validatePairingExistance(topic)
-            try await appProposeService.propose(
-                pairingTopic: topic,
-                namespaces: requiredNamespaces,
-                optionalNamespaces: optionalNamespaces,
-                sessionProperties: sessionProperties,
-                relay: RelayProtocolOptions(protocol: "irn", data: nil)
-            )
-            return nil
-        } else {
-            let pairingURI = try await pairingClient.create()
-            try await appProposeService.propose(
-                pairingTopic: pairingURI.topic,
-                namespaces: requiredNamespaces,
-                optionalNamespaces: optionalNamespaces,
-                sessionProperties: sessionProperties,
-                relay: RelayProtocolOptions(protocol: "irn", data: nil)
-            )
-            return pairingURI
-        }
-    }
-
-    /// For a dApp to propose a session to a wallet.
     /// Function will propose a session on existing pairing.
     /// - Parameters:
     ///   - requiredNamespaces: required namespaces for a session
@@ -232,6 +195,7 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
+<<<<<<< HEAD
     /// For wallet to receive a session proposal from a dApp
     /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
     /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
@@ -244,6 +208,40 @@ public final class SignClient: SignClientProtocol {
         try await pairingClient.pair(uri: uri)
     }
 
+=======
+    //---------------------------------------AUTH-----------------------------------
+
+    public func authenticate(_ params: RequestParams, topic: String) async throws {
+        try pairingClient.validatePairingExistance(topic)
+        logger.debug("Requesting Authentication on existing pairing")
+        try await appRequestService.request(params: params, topic: topic)
+    }
+
+
+    /// For a wallet to respond on authentication request
+    /// - Parameters:
+    ///   - requestId: authentication request id
+    ///   - signature: CACAO signature of requested message
+    public func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+        try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
+    }
+
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
+    public func rejectSession(requestId: RPCID) async throws {
+        try await walletRespondService.respondError(requestId: requestId)
+    }
+
+
+    /// Query pending authentication requests
+    /// - Returns: Pending authentication requests
+    public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
+        return try pendingRequestsProvider.getPendingRequests()
+    }
+
+    //-----------------------------------------------------------------------------------
+
+>>>>>>> 9f705cc6 (refactor sign client tests)
     /// For a wallet to approve a session proposal.
     /// - Parameters:
     ///   - proposalId: Session Proposal id
@@ -335,13 +333,6 @@ public final class SignClient: SignClientProtocol {
     /// - Returns: All sessions
     public func getSessions() -> [Session] {
         sessionEngine.getSessions()
-    }
-
-    /// Query pairings
-    /// - Returns: All pairings
-    @available(*, deprecated, message: "use Pair.instance.getPairings(uri: WalletConnectURI): instead")
-    public func getPairings() -> [Pairing] {
-        pairingClient.getPairings()
     }
 
     /// Query pending requests
