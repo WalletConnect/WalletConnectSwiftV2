@@ -37,11 +37,15 @@ struct ModalContainerView: View {
         )
         .edgesIgnoringSafeArea(.all)
         .transform {
-            if #available(iOS 14.0, *) {
-                $0.ignoresSafeArea(.keyboard, edges: .bottom)
-            } else {
+            #if os(iOS)
+                if #available(iOS 14.0, *) {
+                    $0.ignoresSafeArea(.keyboard, edges: .bottom)
+                } else {
+                    $0
+                }
+            #else
                 $0
-            }
+            #endif
         }
         .onChangeBackported(of: showModal, perform: { newValue in
             if newValue == false {
