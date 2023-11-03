@@ -22,7 +22,6 @@ public protocol SignClientProtocol {
     func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws
     func respond(topic: String, requestId: RPCID, response: RPCResult) async throws
     func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws
-    func pair(uri: WalletConnectURI) async throws
     func disconnect(topic: String) async throws
     func getSessions() -> [Session]
     func cleanup() async throws
