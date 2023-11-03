@@ -270,15 +270,7 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
-    //---------------------------------------AUTH------------------------------------
-
-    public func authenticate(_ params: RequestParams) async throws -> WalletConnectURI? {
-        logger.debug("Requesting Authentication on existing pairing")
-        let pairingURI = try await pairingClient.create()
-        try await appRequestService.request(params: params, topic: pairingURI.topic)
-        return pairingURI
-    }
-
+    //---------------------------------------AUTH-----------------------------------
 
     public func authenticate(_ params: RequestParams, topic: String) async throws {
         try pairingClient.validatePairingExistance(topic)
@@ -524,3 +516,15 @@ public final class SignClient: SignClientProtocol {
         }.store(in: &publishers)
     }
 }
+
+#if DEBUG
+//TODO - remove after Sign Client tests refactor
+extension SignClient {
+    func authenticate(_ params: RequestParams) async throws -> WalletConnectURI? {
+        logger.debug("Requesting Authentication on existing pairing")
+        let pairingURI = try await pairingClient.create()
+        try await appRequestService.request(params: params, topic: pairingURI.topic)
+        return pairingURI
+    }
+}
+#endif

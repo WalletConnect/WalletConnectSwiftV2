@@ -735,4 +735,30 @@ final class SignClientTests: XCTestCase {
         try await wallet.client.pair(uri: uri!)
         wait(for: [settlementFailedExpectation], timeout: 1)
     }
+
+
+    func testSessionAuthenticated() async throws {
+        let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
+        let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
+
+        wallet.onSessionProposal = { [unowned self] proposal in
+            Task(priority: .high) {
+                do {
+                    try await wallet.client.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                } catch {
+                    XCTFail("\(error)")
+                }
+            }
+        }
+        dapp.onSessionSettled = { _ in
+            dappSettlementExpectation.fulfill()
+        }
+        wallet.onSessionSettled = { _ in
+            walletSettlementExpectation.fulfill()
+        }
+
+        let uri = try await dapp.client.connect(requiredNamespaces: requiredNamespaces)
+        try await wallet.client.pair(uri: uri!)
+        wait(for: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
+    }
 }
