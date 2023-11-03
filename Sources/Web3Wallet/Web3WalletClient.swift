@@ -95,8 +95,8 @@ public class Web3WalletClient {
     /// - Parameters:
     ///   - proposalId: Session Proposal id
     ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
-    public func reject(proposalId: String, reason: RejectionReason) async throws {
-        try await signClient.reject(proposalId: proposalId, reason: reason)
+    public func rejectSession(proposalId: String, reason: RejectionReason) async throws {
+        try await signClient.rejectSession(proposalId: proposalId, reason: reason)
     }
     
     /// For wallet to reject authentication request
@@ -188,13 +188,13 @@ public class Web3WalletClient {
         try await signClient.respondSessionAuthenticated(requestId: requestId, signature: signature, account: account)
     }
 
-//    /// For wallet to reject authentication request
-//    /// - Parameter requestId: authentication request id
-//    public func reject(requestId: RPCID) async throws {
-//        try await walletRespondService.respondError(requestId: requestId)
-//    }
-//
-//
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
+    public func rejectSession(requestId: RPCID) async throws {
+        try await signClient.rejectSession(requestId: requestId)
+    }
+
+
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {

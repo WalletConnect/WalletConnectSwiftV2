@@ -1,6 +1,6 @@
 import Foundation
 
-actor AppRequestService {
+actor SessionAuthRequestService {
     private let networkingInteractor: NetworkInteracting
     private let appMetadata: AppMetadata
     private let kms: KeyManagementService
@@ -23,7 +23,7 @@ actor AppRequestService {
         let pubKey = try kms.createX25519KeyPair()
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
         let requester = AuthRequestParams.Requester(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
-        let payload = SignAuthPayload(requestParams: params, iat: iatProvader.iat)
+        let payload = AuthenticationPayload(requestParams: params, iat: iatProvader.iat)
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
         let request = RPCRequest(method: "wc_authRequest", params: params)
         try kms.setPublicKey(publicKey: pubKey, for: responseTopic)

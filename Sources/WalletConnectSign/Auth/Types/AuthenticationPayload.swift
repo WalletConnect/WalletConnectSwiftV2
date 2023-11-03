@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SignAuthPayload: Codable, Equatable {
+public struct AuthenticationPayload: Codable, Equatable {
     public let domain: String
     public let aud: String
     public let version: String
@@ -51,7 +51,7 @@ public struct SignAuthPayload: Codable, Equatable {
     }
 }
 
-private extension SignAuthPayload {
+private extension AuthenticationPayload {
 
     enum Errors: Error {
         case invalidChainID

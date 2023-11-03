@@ -136,7 +136,7 @@ public final class SignClient: SignClientProtocol {
     private let cleanupService: SignCleanupService
     
     //Auth
-    private let appRequestService: AppRequestService
+    private let appRequestService: SessionAuthRequestService
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
@@ -177,7 +177,7 @@ public final class SignClient: SignClientProtocol {
          historyService: HistoryService,
          cleanupService: SignCleanupService,
          pairingClient: PairingClient,
-         appRequestService: AppRequestService,
+         appRequestService: SessionAuthRequestService,
          appRespondSubscriber: AppRespondSubscriber,
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
@@ -297,7 +297,7 @@ public final class SignClient: SignClientProtocol {
 
     /// For wallet to reject authentication request
     /// - Parameter requestId: authentication request id
-    public func reject(requestId: RPCID) async throws {
+    public func rejectSession(requestId: RPCID) async throws {
         try await walletRespondService.respondError(requestId: requestId)
     }
 
@@ -334,7 +334,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - proposalId: Session Proposal id
     ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
-    public func reject(proposalId: String, reason: RejectionReason) async throws {
+    public func rejectSession(proposalId: String, reason: RejectionReason) async throws {
         try await approveEngine.reject(proposerPubKey: proposalId, reason: reason.internalRepresentation())
     }
 
