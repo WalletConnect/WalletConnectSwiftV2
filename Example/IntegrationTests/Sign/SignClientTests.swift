@@ -491,7 +491,7 @@ final class SignClientTests: XCTestCase {
         dapp.sessionSettlePublisher.sink { settledSession in
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
-        wallet.sessionEventPublisher.sink { _ in
+        wallet.sessionSettlePublisher.sink { _ in
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
@@ -560,7 +560,7 @@ final class SignClientTests: XCTestCase {
         dapp.sessionSettlePublisher.sink { [unowned self] _ in
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
-        wallet.sessionEventPublisher.sink { _ in
+        wallet.sessionSettlePublisher.sink { _ in
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
@@ -619,7 +619,7 @@ final class SignClientTests: XCTestCase {
         dapp.sessionSettlePublisher.sink { _ in
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
-        wallet.sessionEventPublisher.sink { _ in
+        wallet.sessionSettlePublisher.sink { _ in
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
