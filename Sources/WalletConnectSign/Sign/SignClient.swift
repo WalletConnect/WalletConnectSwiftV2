@@ -195,53 +195,7 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
-<<<<<<< HEAD
-    /// For wallet to receive a session proposal from a dApp
-    /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
-    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
-    ///
-    /// Should Error:
-    /// - When URI has invalid format or missing params
-    /// - When topic is already in use
-    @available(*, deprecated, message: "use Pair.instance.pair(uri: WalletConnectURI): instead")
-    public func pair(uri: WalletConnectURI) async throws {
-        try await pairingClient.pair(uri: uri)
-    }
 
-=======
-    //---------------------------------------AUTH-----------------------------------
-
-    public func authenticate(_ params: RequestParams, topic: String) async throws {
-        try pairingClient.validatePairingExistance(topic)
-        logger.debug("Requesting Authentication on existing pairing")
-        try await appRequestService.request(params: params, topic: topic)
-    }
-
-
-    /// For a wallet to respond on authentication request
-    /// - Parameters:
-    ///   - requestId: authentication request id
-    ///   - signature: CACAO signature of requested message
-    public func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
-        try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
-    }
-
-    /// For wallet to reject authentication request
-    /// - Parameter requestId: authentication request id
-    public func rejectSession(requestId: RPCID) async throws {
-        try await walletRespondService.respondError(requestId: requestId)
-    }
-
-
-    /// Query pending authentication requests
-    /// - Returns: Pending authentication requests
-    public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
-        return try pendingRequestsProvider.getPendingRequests()
-    }
-
-    //-----------------------------------------------------------------------------------
-
->>>>>>> 9f705cc6 (refactor sign client tests)
     /// For a wallet to approve a session proposal.
     /// - Parameters:
     ///   - proposalId: Session Proposal id

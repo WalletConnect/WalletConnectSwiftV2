@@ -108,11 +108,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-<<<<<<< HEAD
-                    try await wallet.client.reject(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
-=======
-                    try await wallet.rejectSession(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
->>>>>>> 9f705cc6 (refactor sign client tests)
+                    try await wallet.reject(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
                     store.rejectedProposal = proposal
                 } catch { XCTFail("\(error)") }
             }
