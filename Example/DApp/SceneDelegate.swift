@@ -5,8 +5,6 @@ import WalletConnectRelay
 import WalletConnectNetworking
 import WalletConnectModal
 
-import ComposableArchitecture
-
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 

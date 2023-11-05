@@ -26,6 +26,8 @@
 	</array>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Enable camera access to be able to scan QR codes.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
