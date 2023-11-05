@@ -11,6 +11,7 @@ final class SessionAccountPresenter: ObservableObject {
     @Published var showResponse = false
     @Published var showError = false
     @Published var errorMessage = String.empty
+    @Published var showRequestSent = false
     
     private let interactor: SessionAccountInteractor
     private let router: SessionAccountRouter
@@ -93,7 +94,11 @@ extension SessionAccountPresenter {
     }
     
     private func openWallet() {
-        UIApplication.shared.open(URL(string: "walletapp://wc?requestSent")!)
+        if let nativeUri = session.peer.redirect?.native {
+            UIApplication.shared.open(URL(string: "\(nativeUri)wc?requestSent")!)
+        } else {
+            showRequestSent.toggle()
+        }
     }
 }
 

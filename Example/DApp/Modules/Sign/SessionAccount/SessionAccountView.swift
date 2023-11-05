@@ -46,6 +46,9 @@ struct SessionAccountView: View {
             .alert(presenter.errorMessage, isPresented: $presenter.showError) {
                 Button("OK", role: .cancel) {}
             }
+            .alert("Request sent. Check your wallet.", isPresented: $presenter.showRequestSent) {
+                Button("OK", role: .cancel) {}
+            }
         }
     }
     
