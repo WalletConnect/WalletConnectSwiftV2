@@ -38,7 +38,7 @@ class NotifyMessageSubscriber {
 
             let dappPubKey = try DIDKey(did: claims.iss)
             let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
-            notifyStorage.setMessage(record)
+            try notifyStorage.setMessage(record)
             notifyMessagePublisherSubject.send(record)
 
             let receiptPayload = NotifyMessageReceiptPayload(

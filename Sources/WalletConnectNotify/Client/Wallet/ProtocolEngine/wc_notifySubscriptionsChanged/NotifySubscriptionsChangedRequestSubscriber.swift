@@ -63,7 +63,7 @@ class NotifySubscriptionsChangedRequestSubscriber {
                 logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
 
                 if subscriptions.count > 0 {
-                    notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
+                    try notifyStorage.replaceAllSubscriptions(newSubscriptions)
 
                     for subscription in newSubscriptions {
                         let symKey = try SymmetricKey(hex: subscription.symKey)

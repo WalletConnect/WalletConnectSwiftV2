@@ -3,4 +3,5 @@
 @_exported import WalletConnectPush
 @_exported import WalletConnectIdentity
 @_exported import WalletConnectSigner
+@_exported import Database
 #endif
