@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "subscriptions_empty_background.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
