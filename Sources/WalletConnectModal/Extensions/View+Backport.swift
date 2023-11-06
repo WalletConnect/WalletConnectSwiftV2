@@ -2,6 +2,9 @@ import Combine
 import SwiftUI
 
 extension View {
+    
+    #if os(iOS)
+    
     /// A backwards compatible wrapper for iOS 14 `onChange`
     @ViewBuilder
     func onChangeBackported<T: Equatable>(of value: T, perform: @escaping (T) -> Void) -> some View {
@@ -13,4 +16,15 @@ extension View {
             }
         }
     }
+    
+    #elseif os(macOS)
+    
+    @ViewBuilder
+    func onChangeBackported<T: Equatable>(of value: T, perform: @escaping (T) -> Void) -> some View {
+        self.onReceive(Just(value)) { value in
+            perform(value)
+        }
+    }
+    
+    #endif
 }

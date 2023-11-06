@@ -22,7 +22,7 @@ struct GetAWalletView: View {
                             
                             Spacer()
                             
-                            Image(systemName: "chevron.right")
+                            Image(sfSymbolName: "chevron.right")
                                 .font(.system(.footnote).weight(.semibold))
                         }
                     }

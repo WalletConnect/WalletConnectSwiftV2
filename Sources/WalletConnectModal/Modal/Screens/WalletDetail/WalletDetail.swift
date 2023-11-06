@@ -18,9 +18,9 @@ struct WalletDetail: View {
                     HStack {
                         switch item {
                         case .native:
-                            Image(systemName: "iphone")
+                            Image(sfSymbolName: "iphone")
                         case .browser:
-                            Image(systemName: "safari")
+                            Image(sfSymbolName: "safari")
                         }
                         Text(item.rawValue.capitalized)
                     }
@@ -181,7 +181,7 @@ struct WalletDetail: View {
                     .foregroundColor(.foreground2)
                     .font(.system(size: 14).weight(.semibold))
                 
-                Image(systemName: "chevron.right")
+                Image(sfSymbolName: "chevron.right")
                     .foregroundColor(.foreground2)
             }
         }

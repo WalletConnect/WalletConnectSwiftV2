@@ -94,7 +94,7 @@ struct PreviewWeb3ModalPicker: View {
         ) { item in
                 
             HStack {
-                Image(systemName: "iphone")
+                Image(sfSymbolName: "iphone")
                 Text(item.rawValue.capitalized)
             }
             .font(.system(size: 14).weight(.semibold))
