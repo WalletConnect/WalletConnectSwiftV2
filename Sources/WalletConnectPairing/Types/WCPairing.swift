@@ -12,6 +12,7 @@ public struct WCPairing: SequenceObject {
     public private (set) var expiryDate: Date
     public private (set) var active: Bool
     public private (set) var requestReceived: Bool
+    public private (set) var methods: [[String]]?
 
     #if DEBUG
     public static var dateInitializer: () -> Date = Date.init
@@ -50,6 +51,7 @@ public struct WCPairing: SequenceObject {
         self.active = false
         self.requestReceived = false
         self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
+        self.methods = uri.methods
     }
 
     public mutating func activate() {
