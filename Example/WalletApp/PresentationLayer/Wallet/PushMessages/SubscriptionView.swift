@@ -1,4 +1,5 @@
 import SwiftUI
+import Web3ModalUI
 
 struct SubscriptionView: View {
 
@@ -140,20 +141,21 @@ struct SubscriptionView: View {
     }
 
     func emptyStateView() -> some View {
-        VStack(spacing: 10) {
-            Image(systemName: "bell.badge.fill")
-                .resizable()
-                .frame(width: 32, height: 32)
-                .aspectRatio(contentMode: .fit)
-                .foregroundColor(.grey50)
+        VStack(spacing: 0) {
+            Image("subscription_empty_icon")
+                .padding(.bottom, 24)
 
-            Text("Notifications from connected apps will appear here. To enable notifications, visit the app in your browser and look for a \(Image(systemName: "bell.fill")) notifications toggle \(Image(systemName: "switch.2"))")
-                .foregroundColor(.grey50)
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
+            Text("You’re ready to go")
+                .font(.large700)
+                .foregroundColor(.Foreground100)
+                .padding(.bottom, 8)
+
+            Text("All new notifications will appear here.")
+                .font(.paragraph500)
+                .foregroundColor(.Foreground150)
         }
-        .padding(20)
+        .frame(maxWidth: .infinity)
+        .frame(height: 410)
     }
 }
 
