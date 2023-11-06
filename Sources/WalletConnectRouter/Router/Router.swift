@@ -1,7 +1,5 @@
 import UIKit
 
-@_exported import WalletConnectRouter
-
 public struct WalletConnectRouter {
     public static func goBack(uri: String) {
         if #available(iOS 17, *) {
