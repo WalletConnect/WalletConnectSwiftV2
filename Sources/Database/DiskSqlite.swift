@@ -14,13 +14,18 @@ public final class DiskSqlite: Sqlite {
     }
 
     public func openDatabase() throws {
-        defer { lock.lock() }
+        defer { lock.unlock() }
+        lock.lock()
+
         guard sqlite3_open_v2(path, &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
             throw SQLiteError.openDatabase(path: path)
         }
     }
 
     public func query<Row: SqliteRow>(sql: String) throws -> [Row] {
+        defer { lock.unlock() }
+        lock.lock()
+
         var queryStatement: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &queryStatement, nil) == SQLITE_OK else {
             throw SQLiteError.queryPrepare(statement: sql)
@@ -36,6 +41,9 @@ public final class DiskSqlite: Sqlite {
     }
 
     public func execute(sql: String) throws {
+        defer { lock.unlock() }
+        lock.lock()
+
         var error: UnsafeMutablePointer<CChar>?
         guard sqlite3_exec(db, sql, nil, nil, &error) == SQLITE_OK else {
             let message = error.map { String(cString: $0) }
@@ -45,6 +53,8 @@ public final class DiskSqlite: Sqlite {
 
     public func closeConnection() {
         defer { lock.unlock() }
+        lock.lock()
+
         sqlite3_close(db)
     }
 }
