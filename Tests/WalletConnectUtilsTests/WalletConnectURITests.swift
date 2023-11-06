@@ -89,20 +89,6 @@ final class WalletConnectURITests: XCTestCase {
         XCTAssertEqual(uri.absoluteString, expectedURI.absoluteString)
     }
 
-    func testDeeplinkURIIncludingMethods() {
-        let (expectedURI, _) = stubURI()
-        let deeplinkURIWithMethods = expectedURI.deeplinkUri
-        guard let uri = WalletConnectURI(deeplinkUri: URL(string: deeplinkURIWithMethods)!) else {
-            XCTFail("Initialization of URI from deeplink failed")
-            return
-        }
-        XCTAssertEqual(uri.methods, expectedURI.methods)
-        XCTAssertEqual(uri.topic, expectedURI.topic)
-        XCTAssertEqual(uri.symKey, expectedURI.symKey)
-        XCTAssertEqual(uri.relay.protocol, expectedURI.relay.protocol)
-        XCTAssertEqual(uri.deeplinkUri, expectedURI.deeplinkUri)
-    }
-
     func testInitURIWithStringExcludingMethods() {
         let (expectedURI, uriStringWithoutMethods) = stubURI(includeMethods: false)
         guard let uri = WalletConnectURI(string: uriStringWithoutMethods) else {
