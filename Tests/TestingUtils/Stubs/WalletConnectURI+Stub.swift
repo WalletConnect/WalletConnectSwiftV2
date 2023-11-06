@@ -4,10 +4,12 @@ import WalletConnectUtils
 extension WalletConnectURI {
 
     public static func stub(isController: Bool = false) -> WalletConnectURI {
-        WalletConnectURI(
+        let methods = [["wc_sessionPropose", "wc_sessionAuthenticated"], ["wc_authRequest"]]
+        return WalletConnectURI(
             topic: String.generateTopic(),
             symKey: SymmetricKey().hexRepresentation,
-            relay: RelayProtocolOptions(protocol: "", data: nil)
+            relay: RelayProtocolOptions(protocol: "", data: nil),
+            methods: methods
         )
     }
 }

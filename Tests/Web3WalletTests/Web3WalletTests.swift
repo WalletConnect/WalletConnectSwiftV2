@@ -154,7 +154,7 @@ final class Web3WalletTests: XCTestCase {
     }
     
     func testRejectSessionCalled() async {
-        try! await web3WalletClient.reject(proposalId: "", reason: .userRejected)
+        try! await web3WalletClient.rejectSession(proposalId: "", reason: .userRejected)
         XCTAssertTrue(signClient.rejectCalled)
     }
     

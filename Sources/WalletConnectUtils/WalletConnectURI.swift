@@ -5,9 +5,10 @@ public struct WalletConnectURI: Equatable {
     public let version: String
     public let symKey: String
     public let relay: RelayProtocolOptions
+    public let methods: [[String]]?
 
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
+        return "wc:\(topic)@\(version)?\(queryString)"
     }
 
     public var deeplinkUri: String {
@@ -15,12 +16,23 @@ public struct WalletConnectURI: Equatable {
             .addingPercentEncoding(withAllowedCharacters: .rfc3986) ?? absoluteString
     }
 
-    public init(topic: String, symKey: String, relay: RelayProtocolOptions) {
+    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [[String]]) {
         self.version = "2"
         self.topic = topic
         self.symKey = symKey
         self.relay = relay
+        self.methods = methods
     }
+
+    #if DEBUG
+    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [[String]]? = nil) {
+        self.version = "2"
+        self.topic = topic
+        self.symKey = symKey
+        self.relay = relay
+        self.methods = methods
+    }
+    #endif
 
     public init?(string: String) {
         guard let components = Self.parseURIComponents(from: string) else {
@@ -36,14 +48,18 @@ public struct WalletConnectURI: Equatable {
         else {
             return nil
         }
+
         let relayData = query?["relay-data"]
+        let methodsString = query?["methods"]
+        let methods = methodsString?.components(separatedBy: "],[").map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "[]")).components(separatedBy: ",") }
 
         self.version = version
         self.topic = topic
         self.symKey = symKey
         self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
+        self.methods = methods
     }
-    
+
     public init?(deeplinkUri: URL) {
         if let deeplinkUri = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") {
             self.init(string: deeplinkUri)
@@ -51,22 +67,31 @@ public struct WalletConnectURI: Equatable {
         return nil
     }
 
-    private var relayQuery: String {
-        var query = "relay-protocol=\(relay.protocol)"
+    private var queryString: String {
+        var parts = ["symKey=\(symKey)", "relay-protocol=\(relay.protocol)"]
         if let relayData = relay.data {
-            query = "\(query)&relay-data=\(relayData)"
+            parts.append("relay-data=\(relayData)")
         }
-        return query
+        if let methods = methods {
+            let encodedMethods = methods.map { "[\($0.joined(separator: ","))]" }.joined(separator: ",")
+            parts.append("methods=\(encodedMethods)")
+        }
+        return parts.joined(separator: "&")
     }
 
     private static func parseURIComponents(from string: String) -> URLComponents? {
         guard string.hasPrefix("wc:") else {
             return nil
         }
-        let urlString = !string.hasPrefix("wc://") ? string.replacingOccurrences(of: "wc:", with: "wc://") : string
+        var urlString = string
+        if !string.hasPrefix("wc://") {
+            urlString = string.replacingOccurrences(of: "wc:", with: "wc://")
+        }
         return URLComponents(string: urlString)
     }
 }
+
+
 
 #if canImport(UIKit)
 

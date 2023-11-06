@@ -207,7 +207,7 @@ public final class SignClient: SignClientProtocol {
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
-        pairingClient.register(supportedMethods: [SessionProposeProtocolMethod().method, SessionAuthenticatedProtocolMethod().method])
+        registerMethods()
     }
 
     // MARK: - Public interface
@@ -476,5 +476,9 @@ public final class SignClient: SignClientProtocol {
         networkingClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
+    }
+
+    private func registerMethods() {
+        Task { await pairingClient.register(supportedMethods: [SessionProposeProtocolMethod().method, SessionAuthenticatedProtocolMethod().method])}
     }
 }
