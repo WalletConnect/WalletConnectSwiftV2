@@ -5,7 +5,7 @@ final class NotifyAccountProvider {
         case currentAccountNotFound
     }
 
-    private var currentAccount: Account?
+    private(set) var currentAccount: Account?
 
     func setAccount(_ account: Account) {
         self.currentAccount = account

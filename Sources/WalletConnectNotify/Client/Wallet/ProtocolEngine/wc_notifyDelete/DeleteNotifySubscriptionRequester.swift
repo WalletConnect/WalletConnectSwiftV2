@@ -47,7 +47,7 @@ class DeleteNotifySubscriptionRequester {
         try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         try notifyStorage.deleteSubscription(topic: topic)
-        notifyStorage.deleteMessages(topic: topic)
+        try notifyStorage.deleteMessages(topic: topic)
 
         networkingInteractor.unsubscribe(topic: topic)
 

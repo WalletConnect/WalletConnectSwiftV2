@@ -8,10 +8,13 @@ public struct NotifyClientFactory {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
+        let databasePath = databasePath(appGroup: groupIdentifier, database: "notify.db")
+        let sqlite = DiskSqlite(path: databasePath)
 
         return NotifyClientFactory.create(
             projectId: projectId,
             keyserverURL: keyserverURL,
+            sqlite: sqlite,
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
@@ -28,6 +31,7 @@ public struct NotifyClientFactory {
     static func create(
         projectId: String,
         keyserverURL: URL,
+        sqlite: Sqlite,
         logger: ConsoleLogging,
         keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
@@ -40,10 +44,9 @@ public struct NotifyClientFactory {
         explorerHost: String
     ) -> NotifyClient {
         let kms = KeyManagementService(keychain: keychainStorage)
-        let subscriptionStore = KeyedDatabase<NotifySubscription>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifySubscription)
-        let messagesStore = KeyedDatabase<NotifyMessageRecord>(storage: keyValueStorage, identifier: NotifyStorageIdntifiers.notifyMessagesRecords)
         let notifyAccountProvider = NotifyAccountProvider()
-        let notifyStorage = NotifyStorage(subscriptionStore: subscriptionStore, messagesStore: messagesStore, accountProvider: notifyAccountProvider)
+        let database = NotifyDatabase(sqlite: sqlite, logger: logger)
+        let notifyStorage = NotifyStorage(database: database, accountProvider: notifyAccountProvider)
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = NotifyWebDidResolver()
@@ -91,5 +94,16 @@ public struct NotifyClientFactory {
             notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber,
             subscriptionWatcher: subscriptionWatcher
         )
+    }
+
+    static func databasePath(appGroup: String, database: String) -> String {
+        guard let path = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
+            .appendingPathComponent(database) else {
+
+            fatalError("Database path not exists")
+        }
+
+        return path.absoluteString
     }
 }
