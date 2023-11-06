@@ -1,6 +1,6 @@
 import Foundation
 
-actor WalletRespondService {
+actor AuthResponder {
     enum Errors: Error {
         case recordForIdNotFound
         case malformedAuthRequestParams
@@ -42,7 +42,7 @@ actor WalletRespondService {
         let responseParams = AuthResponseParams(h: header, p: payload, s: signature)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: AuthRequestProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
         
         pairingRegisterer.activate(
             pairingTopic: topic,

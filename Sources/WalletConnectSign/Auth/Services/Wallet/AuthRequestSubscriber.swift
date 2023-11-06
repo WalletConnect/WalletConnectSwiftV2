@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-class WalletRequestSubscriber {
+class AuthRequestSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let kms: KeyManagementServiceProtocol
@@ -33,7 +33,7 @@ class WalletRequestSubscriber {
     }
     
     private func subscribeForRequest() {
-        pairingRegisterer.register(method: AuthRequestProtocolMethod())
+        pairingRegisterer.register(method: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<AuthRequestParams>) in
                 logger.debug("WalletRequestSubscriber: Received request")
                 

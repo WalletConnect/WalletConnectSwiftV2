@@ -20,6 +20,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let deletePairingService: DeletePairingService
     private let resubscribeService: PairingResubscribeService
     private let expirationService: ExpirationService
+    private var registeredMethods: [[String]] = []
 
     private let cleanupService: PairingCleanupService
 
@@ -80,6 +81,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
 
     public func create()  async throws -> WalletConnectURI {
         return try await appPairService.create()
+    }
+
+    public func register(supportedMethods: [String]) {
+        registeredMethods.append(supportedMethods)
     }
 
     public func activate(pairingTopic: String, peerMetadata: AppMetadata?) {

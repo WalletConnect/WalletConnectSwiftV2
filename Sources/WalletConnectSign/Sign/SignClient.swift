@@ -138,8 +138,8 @@ public final class SignClient: SignClientProtocol {
     //Auth
     private let appRequestService: SessionAuthRequestService
     private let appRespondSubscriber: AppRespondSubscriber
-    private let walletRequestSubscriber: WalletRequestSubscriber
-    private let walletRespondService: WalletRespondService
+    private let authRequestSubscriber: AuthRequestSubscriber
+    private let authResponder: AuthResponder
     private let pendingRequestsProvider: PendingRequestsProvider
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
@@ -179,8 +179,8 @@ public final class SignClient: SignClientProtocol {
          pairingClient: PairingClient,
          appRequestService: SessionAuthRequestService,
          appRespondSubscriber: AppRespondSubscriber,
-         walletRequestSubscriber: WalletRequestSubscriber,
-         walletRespondService: WalletRespondService,
+         authRequestSubscriber: AuthRequestSubscriber,
+         authResponder: AuthResponder,
          pendingRequestsProvider: PendingRequestsProvider
     ) {
         self.logger = logger
@@ -200,13 +200,14 @@ public final class SignClient: SignClientProtocol {
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
         self.appRequestService = appRequestService
-        self.walletRequestSubscriber = walletRequestSubscriber
-        self.walletRespondService = walletRespondService
+        self.authRequestSubscriber = authRequestSubscriber
+        self.authResponder = authResponder
         self.appRespondSubscriber = appRespondSubscriber
         self.pendingRequestsProvider = pendingRequestsProvider
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
+        pairingClient.register(supportedMethods: [SessionProposeProtocolMethod().method, SessionAuthenticatedProtocolMethod().method])
     }
 
     // MARK: - Public interface
@@ -239,6 +240,23 @@ public final class SignClient: SignClientProtocol {
         try pairingClient.validatePairingExistance(topic)
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: topic)
+
+        let testNamespace = [
+            "eip155": ProposalNamespace(
+                chains: [
+                    Blockchain("eip155:1")!,
+                ],
+                methods: [
+                    "personal_sign",
+                ], events: []
+            )]
+        try await appProposeService.propose(
+            pairingTopic: topic,
+            namespaces: testNamespace,
+            optionalNamespaces: nil,
+            sessionProperties: nil,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
     }
 
 
@@ -247,13 +265,13 @@ public final class SignClient: SignClientProtocol {
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
     public func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
-        try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
+        try await authResponder.respond(requestId: requestId, signature: signature, account: account)
     }
 
     /// For wallet to reject authentication request
     /// - Parameter requestId: authentication request id
     public func rejectSession(requestId: RPCID) async throws {
-        try await walletRespondService.respondError(requestId: requestId)
+        try await authResponder.respondError(requestId: requestId)
     }
 
 
@@ -449,7 +467,7 @@ public final class SignClient: SignClientProtocol {
         appRespondSubscriber.onResponse = { [unowned self] (id, result) in
             authResponsePublisherSubject.send((id, result))
         }
-        walletRequestSubscriber.onRequest = { [unowned self] request in
+        authRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
         }
     }
