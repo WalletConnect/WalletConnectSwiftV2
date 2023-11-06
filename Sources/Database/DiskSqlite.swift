@@ -7,11 +7,14 @@ public final class DiskSqlite: Sqlite {
 
     private var db: OpaquePointer?
 
+    private let lock = NSLock()
+
     public init(path: String) {
         self.path = path
     }
 
     public func openDatabase() throws {
+        defer { lock.lock() }
         guard sqlite3_open_v2(path, &db, SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
             throw SQLiteError.openDatabase(path: path)
         }
@@ -41,6 +44,7 @@ public final class DiskSqlite: Sqlite {
     }
 
     public func closeConnection() {
+        defer { lock.unlock() }
         sqlite3_close(db)
     }
 }
