@@ -74,9 +74,11 @@ final class NotifyTests: XCTestCase {
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        let sqlite = try! MemorySqlite()
         // Note:- prod project_id do not exists on staging, we can use gmDappProjectId
         let client = NotifyClientFactory.create(projectId: InputConfig.gmDappProjectId,
-                                                keyserverURL: keyserverURL,
+                                                keyserverURL: keyserverURL, 
+                                                sqlite: sqlite,
                                                 logger: notifyLogger,
                                                 keyValueStorage: keyValueStorage,
                                                 keychainStorage: keychain,

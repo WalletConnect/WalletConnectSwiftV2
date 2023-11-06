@@ -84,7 +84,7 @@ public class NotifyClient {
     public func unregister(account: Account) async throws {
         try await identityService.unregister(account: account)
         notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
-        notifyStorage.clearDatabase(account: account)
+        try notifyStorage.clearDatabase(account: account)
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()
     }
@@ -114,7 +114,7 @@ public class NotifyClient {
     }
 
     public func deleteNotifyMessage(id: String) {
-        notifyStorage.deleteMessage(id: id)
+        try? notifyStorage.deleteMessage(id: id)
     }
 
     public func register(deviceToken: Data) async throws {
