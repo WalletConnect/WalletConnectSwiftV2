@@ -190,6 +190,7 @@ private extension ApproveEngine {
                 if let methods = pairing.methods,
                    methods.flatMap({ $0 })
                     .contains(SessionAuthenticatedProtocolMethod().method) {
+                    logger.debug("Ignoring Session Proposal")
                     // respond with an error?
                     return
                 }

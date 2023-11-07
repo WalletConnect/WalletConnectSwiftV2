@@ -787,4 +787,39 @@ final class SignClientTests: XCTestCase {
         try await walletPairingClient.pair(uri: uri)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
+
+    func testEIP1271SessionAuthenticated() async throws {
+
+        let account = Account(chainIdentifier: "eip155:1", address: "0x2faf83c542b68f1b4cdc0e770e8cb9f567b08f71")!
+
+        let responseExpectation = expectation(description: "successful response delivered")
+        let uri = try! await dappPairingClient.create()
+        try! await dapp.authenticate(RequestParams(
+            domain: "localhost",
+            chainId: "eip155:1",
+            nonce: "1665443015700",
+            aud: "http://localhost:3000/",
+            nbf: nil,
+            exp: "2022-10-11T23:03:35.700Z",
+            statement: nil,
+            requestId: nil,
+            resources: nil
+        ), topic: uri.topic)
+
+        try await walletPairingClient.pair(uri: uri)
+
+        wallet.authRequestPublisher.sink { [unowned self] request in
+            Task(priority: .high) {
+                let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
+                try! await wallet.respondSessionAuthenticated(requestId: request.0.id, signature: signature, account: account)
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
 }
