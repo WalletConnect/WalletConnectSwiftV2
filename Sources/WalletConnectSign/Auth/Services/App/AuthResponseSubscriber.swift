@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-class AppRespondSubscriber {
+class AuthResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory

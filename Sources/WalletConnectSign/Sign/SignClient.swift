@@ -137,7 +137,7 @@ public final class SignClient: SignClientProtocol {
     
     //Auth
     private let appRequestService: SessionAuthRequestService
-    private let appRespondSubscriber: AppRespondSubscriber
+    private let authResposeSubscriber: AuthResponseSubscriber
     private let authRequestSubscriber: AuthRequestSubscriber
     private let authResponder: AuthResponder
     private let pendingRequestsProvider: PendingRequestsProvider
@@ -178,7 +178,7 @@ public final class SignClient: SignClientProtocol {
          cleanupService: SignCleanupService,
          pairingClient: PairingClient,
          appRequestService: SessionAuthRequestService,
-         appRespondSubscriber: AppRespondSubscriber,
+         appRespondSubscriber: AuthResponseSubscriber,
          authRequestSubscriber: AuthRequestSubscriber,
          authResponder: AuthResponder,
          pendingRequestsProvider: PendingRequestsProvider
@@ -202,7 +202,7 @@ public final class SignClient: SignClientProtocol {
         self.appRequestService = appRequestService
         self.authRequestSubscriber = authRequestSubscriber
         self.authResponder = authResponder
-        self.appRespondSubscriber = appRespondSubscriber
+        self.authResposeSubscriber = appRespondSubscriber
         self.pendingRequestsProvider = pendingRequestsProvider
 
         setUpConnectionObserving()
@@ -267,7 +267,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func respondSessionAuthenticated(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+    public func respondSessionAuthenticate(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
         try await authResponder.respond(requestId: requestId, signature: signature, account: account)
     }
 
@@ -467,7 +467,7 @@ public final class SignClient: SignClientProtocol {
         sessionEngine.onSessionsUpdate = { [unowned self] sessions in
             sessionsPublisherSubject.send(sessions)
         }
-        appRespondSubscriber.onResponse = { [unowned self] (id, result) in
+        authResposeSubscriber.onResponse = { [unowned self] (id, result) in
             authResponsePublisherSubject.send((id, result))
         }
         authRequestSubscriber.onRequest = { [unowned self] request in
