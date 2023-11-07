@@ -97,22 +97,26 @@ final class NotifyTests: XCTestCase {
         walletNotifyClientA = makeWalletClient()
     }
 
-    func testWalletCreatesSubscription() async {
+    func testWalletCreatesSubscription() async throws {
         let expectation = expectation(description: "expects to create notify subscription")
+        expectation.assertForOverFulfill = false
+
+        var subscription: NotifySubscription?
 
         walletNotifyClientA.subscriptionsPublisher
-            .sink { [unowned self] subscriptions in
-                guard let subscription = subscriptions.first else { return }
-                Task(priority: .high) {
-                    try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
-                    expectation.fulfill()
-                }
+            .sink { subscriptions in
+                subscription = subscriptions.first
+                expectation.fulfill()
             }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
+        try await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+
+        if let subscription {
+            try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
+        }
     }
 
     func testNotifyWatchSubscriptions() async throws {
