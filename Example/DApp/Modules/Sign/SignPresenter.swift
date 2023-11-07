@@ -1,7 +1,8 @@
 import UIKit
 import Combine
 
-import WalletConnectModal
+import Web3Modal
+import WalletConnectSign
 
 final class SignPresenter: ObservableObject {
     @Published var accountsDetails = [AccountDetails]()
@@ -43,12 +44,12 @@ final class SignPresenter: ObservableObject {
     
     func connectWalletWithW3M() {
         Task {
-            WalletConnectModal.set(sessionParams: .init(
+            Web3Modal.set(sessionParams: .init(
                 requiredNamespaces: Proposal.requiredNamespaces,
                 optionalNamespaces: Proposal.optionalNamespaces
             ))
         }
-        WalletConnectModal.present(from: nil)
+        Web3Modal.present(from: nil)
     }
     
     @MainActor

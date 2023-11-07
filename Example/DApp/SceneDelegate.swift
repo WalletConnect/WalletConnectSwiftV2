@@ -1,9 +1,9 @@
 import UIKit
-import SwiftUI
+
+import Web3Modal
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
-import WalletConnectModal
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -19,13 +19,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             description: "WalletConnect DApp sample",
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "dapp://", universal: nil)
+            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: nil)
         )
         
-        WalletConnectModal.configure(
-            projectId: InputConfig.projectId, 
-            metadata: metadata,
-            accentColor: .green
+        Web3Modal.configure(
+            projectId: InputConfig.projectId,
+            metadata: metadata
         )
         
         setupWindow(scene: scene)

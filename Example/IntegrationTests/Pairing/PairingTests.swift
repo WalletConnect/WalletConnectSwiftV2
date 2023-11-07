@@ -63,7 +63,7 @@ final class PairingTests: XCTestCase {
         appPairingClient = pairingClient
         
         appAuthClient = AuthClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "dapp://", universal: nil)),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "wcdapp://", universal: nil)),
             projectId: InputConfig.projectId,
             crypto: DefaultCryptoProvider(),
             logger: notifyLogger,
