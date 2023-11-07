@@ -221,8 +221,9 @@ final class NotifyTests: XCTestCase {
                 }
             }.store(in: &publishers)
 
-        walletNotifyClientA.notifyMessagePublisher
-            .sink { [unowned self] notifyMessageRecord in
+        walletNotifyClientA.messagesPublisher
+            .sink { [unowned self] messages in
+                guard let notifyMessageRecord = messages.first else { return }
                 XCTAssertEqual(notifyMessageRecord.message, notifyMessage)
 
                 Task(priority: .high) {

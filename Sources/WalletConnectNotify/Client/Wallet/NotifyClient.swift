@@ -9,8 +9,8 @@ public class NotifyClient {
         return notifyStorage.subscriptionsPublisher
     }
 
-    public var notifyMessagePublisher: AnyPublisher<NotifyMessageRecord, Never> {
-        return notifyMessageSubscriber.notifyMessagePublisher
+    public var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
+        return notifyStorage.messagesPublisher
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
@@ -123,6 +123,10 @@ public class NotifyClient {
 
     public func isIdentityRegistered(account: Account) -> Bool {
         return identityService.isIdentityRegistered(account: account)
+    }
+
+    public func subscriptionsPublisher(account: Account) -> AnyPublisher<[NotifySubscription], Never> {
+        return notifyStorage.subscriptionsPublisher(account: account)
     }
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
