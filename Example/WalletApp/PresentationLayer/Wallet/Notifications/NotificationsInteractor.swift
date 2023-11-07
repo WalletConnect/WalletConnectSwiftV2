@@ -5,7 +5,7 @@ import Combine
 final class NotificationsInteractor {
 
     var subscriptionsPublisher: AnyPublisher<[NotifySubscription], Never> {
-        return Notify.instance.subscriptionsPublisher
+        return Notify.instance.subscriptionsPublisher(account: importAccount.account)
     }
 
     private let importAccount: ImportAccount

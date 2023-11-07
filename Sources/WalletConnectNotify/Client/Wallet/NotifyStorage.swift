@@ -40,6 +40,10 @@ final class NotifyStorage: NotifyStoring {
         return subscriptionsSubject.eraseToAnyPublisher()
     }
 
+    var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
+        return messagesSubject.eraseToAnyPublisher()
+    }
+
     init(database: NotifyDatabase, accountProvider: NotifyAccountProvider) {
         self.database = database
         self.accountProvider = accountProvider
@@ -87,6 +91,12 @@ final class NotifyStorage: NotifyStoring {
         let updated = NotifySubscription(subscription: subscription, scope: scope, expiry: expiry)
         try database.save(subscription: updated)
         updateSubscriptionSubject.send(updated)
+    }
+
+    func subscriptionsPublisher(account: Account) -> AnyPublisher<[NotifySubscription], Never> {
+        return subscriptionsSubject
+            .map { $0.filter { $0.account == account } }
+            .eraseToAnyPublisher()
     }
 
     // MARK: Messages
