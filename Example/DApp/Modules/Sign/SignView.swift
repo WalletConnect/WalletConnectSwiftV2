@@ -48,10 +48,12 @@ struct SignView: View {
                     } else {
                         VStack {
                             ForEach(presenter.accountsDetails, id: \.chain) { account in
-                                networkItem(title: account.account, icon: String(account.chain.split(separator: ":").first ?? ""), id: account.chain)
-                                    .onTapGesture {
-                                        presenter.presentSessionAccount(sessionAccount: account)
-                                    }
+                                Button {
+                                    presenter.presentSessionAccount(sessionAccount: account)
+                                } label: {
+                                    networkItem(title: account.account, icon: String(account.chain.split(separator: ":").first ?? ""), id: account.chain)
+                                }
+                                .accessibilityIdentifier(account.account)
                             }
                         }
                         .padding(12)
@@ -128,6 +130,8 @@ struct SignView: View {
                 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(title)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(Color(red: 228/255, green: 231/255, blue: 231/255))
                     

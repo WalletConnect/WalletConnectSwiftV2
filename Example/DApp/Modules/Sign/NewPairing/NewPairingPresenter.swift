@@ -9,7 +9,7 @@ final class NewPairingPresenter: ObservableObject {
     private let interactor: NewPairingInteractor
     private let router: NewPairingRouter
 
-    private var walletConnectUri: WalletConnectURI
+    var walletConnectUri: WalletConnectURI
     
     private var subscriptions = Set<AnyCancellable>()
 

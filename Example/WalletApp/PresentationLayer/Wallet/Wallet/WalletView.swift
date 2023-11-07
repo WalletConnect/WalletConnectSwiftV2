@@ -81,6 +81,7 @@ struct WalletView: View {
                                     .frame(width: 56, height: 56)
                             }
                             .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+                            .accessibilityIdentifier("copy")
                             
                             Button {
                                 presenter.onScanUri()

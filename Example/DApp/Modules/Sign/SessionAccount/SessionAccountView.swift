@@ -152,7 +152,7 @@ struct SessionAccountView: View {
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(12)
                 
-                ForEach(methods, id: \.self) { method in
+                ForEach(Array(methods.enumerated()), id: \.offset) { index, method in
                     Button {
                         presenter.onMethod(method: method)
                     } label: {
@@ -174,6 +174,7 @@ struct SessionAccountView: View {
                         .padding(.bottom, 12)
                         .padding(.horizontal, 8)
                     }
+                    .accessibilityIdentifier("method-\(index)")
                 }
             }
         }

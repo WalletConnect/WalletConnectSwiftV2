@@ -51,6 +51,11 @@ struct NewPairingView: View {
                     }
                     .padding(.top, 16)
                     
+                    Text(presenter.walletConnectUri.absoluteString)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
+                        .opacity(0)
+                    
                     Spacer()
                 }
             }
