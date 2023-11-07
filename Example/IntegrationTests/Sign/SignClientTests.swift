@@ -15,7 +15,9 @@ final class SignClientTests: XCTestCase {
     var wallet: SignClient!
     var walletPairingClient: PairingClient!
     private var publishers = Set<AnyCancellable>()
-
+    let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
+    let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
+    let eip1271Signature = "0xc1505719b2504095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c"
 
     static private func makeClients(name: String) -> (PairingClient, SignClient) {
         let logger = ConsoleLogger(prefix: name, loggingLevel: .debug)
@@ -88,7 +90,7 @@ final class SignClientTests: XCTestCase {
         dapp.sessionSettlePublisher.sink { _ in
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
-        dapp.sessionSettlePublisher.sink { _ in
+        wallet.sessionSettlePublisher.sink { _ in
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
@@ -759,7 +761,30 @@ final class SignClientTests: XCTestCase {
     }
 
 
-    func testSessionAuthenticated() async throws {
+    func testEIP191SessionAuthenticated() async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
 
+        wallet.authRequestPublisher.sink { [unowned self] request in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
+                let payload = try! request.0.payload.cacaoPayload(address: walletAccount.address)
+                let signature = try! signer.sign(payload: payload, privateKey: prvKey, type: .eip191)
+                try! await wallet.respondSessionAuthenticated(requestId: request.0.id, signature: signature, account: walletAccount)
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+
+
+        dapp.enableAuthenticatedSessions()
+        let uri = try! await dappPairingClient.create()
+        try await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+        try await walletPairingClient.pair(uri: uri)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 }

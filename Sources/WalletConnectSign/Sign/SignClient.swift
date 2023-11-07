@@ -207,7 +207,6 @@ public final class SignClient: SignClientProtocol {
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
-        registerMethods()
     }
 
     // MARK: - Public interface
@@ -257,6 +256,10 @@ public final class SignClient: SignClientProtocol {
             sessionProperties: nil,
             relay: RelayProtocolOptions(protocol: "irn", data: nil)
         )
+    }
+
+    public func enableAuthenticatedSessions() {
+        registerMethods()
     }
 
 

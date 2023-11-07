@@ -190,6 +190,7 @@ private extension ApproveEngine {
                 if let methods = pairing.methods,
                    methods.flatMap({ $0 })
                     .contains(SessionAuthenticatedProtocolMethod().method) {
+                    // respond with an error?
                     return
                 }
                 handleSessionProposeRequest(payload: payload)
