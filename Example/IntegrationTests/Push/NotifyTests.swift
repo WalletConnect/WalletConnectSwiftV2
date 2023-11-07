@@ -112,7 +112,7 @@ final class NotifyTests: XCTestCase {
         try await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
 
         if let subscription {
             try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
@@ -123,20 +123,23 @@ final class NotifyTests: XCTestCase {
         let expectation = expectation(description: "expects client B to receive subscription created by client A")
         expectation.assertForOverFulfill = false
 
+        var subscription: NotifySubscription?
+
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
-            guard let subscription = subscriptions.first else { return }
-            Task(priority: .high) {
-                try await clientB.deleteSubscription(topic: subscription.topic)
-                expectation.fulfill()
-            }
+            subscription = subscriptions.first
+            expectation.fulfill()
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+
+        if let subscription {
+            try await clientB.deleteSubscription(topic: subscription.topic)
+        }
     }
 
     func testNotifySubscriptionChanged() async throws {
@@ -156,7 +159,7 @@ final class NotifyTests: XCTestCase {
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
 
         try await clientB.deleteSubscription(topic: subscription.topic)
     }
@@ -186,12 +189,12 @@ final class NotifyTests: XCTestCase {
         try await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [created], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [created], timeout: InputConfig.defaultTimeout)
 
         let updateScope = Set([subscription.scope.keys.first!])
         try await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
 
-        wait(for: [updated], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [updated], timeout: InputConfig.defaultTimeout)
 
         let updatedScope = Set(subscription.scope.filter { $0.value.enabled == true }.keys)
         XCTAssertEqual(updatedScope, updateScope)
@@ -241,7 +244,7 @@ final class NotifyTests: XCTestCase {
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
     }
 
 }
