@@ -58,14 +58,10 @@ struct WalletList: View {
                     
                     if wallets.count > numberOfColumns * 2 {
                         viewAllItem()
-                            .transform {
-                                #if os(iOS)
-                                    $0.onTapGesture {
-                                        withAnimation {
-                                            navigateTo(.viewAll)
-                                        }
-                                    }
-                                #endif
+                            .onTapGestureBackported {
+                                withAnimation {
+                                    navigateTo(.viewAll)
+                                }
                             }
                     }
                 }
@@ -181,19 +177,15 @@ struct WalletList: View {
                 .padding(.horizontal, 12)
         }
         .frame(maxWidth: 80, maxHeight: 96)
-        .transform {
-            #if os(iOS)
-                $0.onTapGesture {
-                    withAnimation {
-                        navigateTo(.walletDetail(wallet))
-                        
-                        // Small delay to let detail screen present before actually deeplinking
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            onListingTap(wallet)
-                        }
-                    }
+        .onTapGestureBackported {
+            withAnimation {
+                navigateTo(.walletDetail(wallet))
+                
+                // Small delay to let detail screen present before actually deeplinking
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    onListingTap(wallet)
                 }
-            #endif
+            }
         }
     }
 }
