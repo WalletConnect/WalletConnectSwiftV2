@@ -38,8 +38,14 @@ let package = Package(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
         .library(
+            name: "WalletConnectSync",
+            targets: ["WalletConnectSync"]),
+        .library(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
+        .library(
+            name: "WalletConnectHistory",
+            targets: ["WalletConnectHistory"]),
         .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
