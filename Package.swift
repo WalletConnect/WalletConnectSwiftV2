@@ -38,14 +38,8 @@ let package = Package(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
         .library(
-            name: "WalletConnectSync",
-            targets: ["WalletConnectSync"]),
-        .library(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
-        .library(
-            name: "WalletConnectHistory",
-            targets: ["WalletConnectHistory"]),
         .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
@@ -132,7 +126,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "Database",
-            dependencies: []),
+            dependencies: ["WalletConnectUtils"]),
         .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],
