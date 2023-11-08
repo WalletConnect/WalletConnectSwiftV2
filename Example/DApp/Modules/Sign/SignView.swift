@@ -129,15 +129,25 @@ struct SignView: View {
                     .frame(width: 40, height: 40)
                 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(title)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(red: 228/255, green: 231/255, blue: 231/255))
+                    HStack {
+                        Text(title)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(red: 228/255, green: 231/255, blue: 231/255))
+                        
+                        Spacer()
+                    }
                     
-                    Text(id)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
+                    HStack {
+                        Text(id)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
+                        
+                        Spacer()
+                    }
                 }
                 
                 Spacer()

@@ -45,13 +45,9 @@ final class SessionAccountPresenter: ObservableObject {
             Task {
                 do {
                     try await Sign.instance.request(params: request)
-                    /* Redirect
-                    // Commented for UITests purpose
-                    
                     DispatchQueue.main.async { [weak self] in
                         self?.openWallet()
                     }
-                    */
                 } catch {
                     showError.toggle()
                     errorMessage = error.localizedDescription
