@@ -194,5 +194,9 @@ Pod::Spec.new do |spec|
     ss.source_files = 'Sources/WalletConnectModal/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectSign'
     ss.dependency 'DSF_QRCode', '~> 16.1.1'
+    ss.ios.deployment_target = ios_deployment_target
+    ss.tvos.deployment_target = tvos_deployment_target
+    # TODO: Re-add macOS support once
+    ss.osx.deployment_target = ''
   end
 end

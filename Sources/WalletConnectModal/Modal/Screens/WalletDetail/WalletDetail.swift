@@ -31,7 +31,7 @@ struct WalletDetail: View {
                     .contentShape(Rectangle())
                     .padding(.horizontal, 8)
                     .padding(.vertical, 8)
-                    .onTapGesture {
+                    .onTapGestureBackported {
                         withAnimation(.easeInOut(duration: 0.15)) {
                             viewModel.preferredPlatform = item
                         }
@@ -185,7 +185,7 @@ struct WalletDetail: View {
                     .foregroundColor(.foreground2)
             }
         }
-        .onTapGesture {
+        .onTapGestureBackported {
             viewModel.handle(.didTapAppStore)
         }
     }
