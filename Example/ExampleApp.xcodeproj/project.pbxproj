@@ -3380,7 +3380,7 @@
 			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
 			requirement = {
 				kind = exactVersion;
-				version = 1.0.8;
+				version = 1.0.9;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
