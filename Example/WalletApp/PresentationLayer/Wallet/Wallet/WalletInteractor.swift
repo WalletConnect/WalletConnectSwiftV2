@@ -7,6 +7,10 @@ final class WalletInteractor {
     var sessionsPublisher: AnyPublisher<[Session], Never> {
         return Web3Wallet.instance.sessionsPublisher
     }
+    
+    var deletePairingPublisher: AnyPublisher<String, Never> {
+        return Web3Wallet.instance.deletePairingPublisher
+    }
 
     func getSessions() -> [Session] {
         return Web3Wallet.instance.getSessions()

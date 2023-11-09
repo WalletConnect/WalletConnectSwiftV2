@@ -1,6 +1,9 @@
 import Foundation
+import Combine
 
 public protocol PairingInteracting {
+    var deleteResponsePublisher: AnyPublisher<String, Never> { get }
+        
     func pair(uri: WalletConnectURI) async throws
 
     func create()  async throws -> WalletConnectURI

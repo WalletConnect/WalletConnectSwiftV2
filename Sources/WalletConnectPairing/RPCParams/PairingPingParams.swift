@@ -1,5 +1,3 @@
 import Foundation
 
-struct PairingPingParams: Codable {
-
-}
+struct PairingPingParams: Codable {}

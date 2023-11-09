@@ -2,6 +2,12 @@ import SwiftUI
 
 struct ConnectedSheetView: View {
     let title: String
+    let description: String
+    
+    init(title: String, description: String = "You can go back to your browser now") {
+        self.title = title
+        self.description = description
+    }
     
     var body: some View {
         ZStack {
@@ -25,7 +31,7 @@ struct ConnectedSheetView: View {
                     .padding(.top, 168)
                 
                 
-                Text("You can go back to your browser now")
+                Text(description)
                     .foregroundColor(Color(red: 0.47, green: 0.53, blue: 0.53))
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                 

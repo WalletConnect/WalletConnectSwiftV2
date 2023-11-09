@@ -62,6 +62,11 @@ public class Web3WalletClient {
     public var sessionResponsePublisher: AnyPublisher<Response, Never> {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
     }
+    
+    /// Publisher that sends session topic when pairing was deleted
+    public var deletePairingPublisher: AnyPublisher<String, Never> {
+        pairingClient.deleteResponsePublisher.eraseToAnyPublisher()
+    }
 
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol

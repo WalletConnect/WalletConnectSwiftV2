@@ -2,6 +2,7 @@ import UIKit
 import Combine
 
 import Auth
+import WalletConnectSign
 
 final class AuthPresenter: ObservableObject {
     enum SigningState {
@@ -50,6 +51,33 @@ final class AuthPresenter: ObservableObject {
             }
         }
     }
+    
+    @MainActor
+    func deletePairing() {
+        Task {
+            if let topic = walletConnectUri?.topic {
+                try await Auth.instance.disconnect(topic: topic)
+                showSigningState.toggle()
+                if let walletUri = URL(string: "walletapp://") {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.open(walletUri)
+                    }
+                }
+            }
+        }
+    }
+    
+    func generateQR() {
+        Task { @MainActor in
+            let uri = try! await Pair.instance.create()
+            walletConnectUri = uri
+            try await Auth.instance.request(.stub(), topic: uri.topic)
+            let qrCodeImage = QRCodeGenerator.generateQRCode(from: uri.absoluteString)
+            DispatchQueue.main.async {
+                self.qrCodeImageData = qrCodeImage.pngData()
+            }
+        }
+    }
 }
 
 // MARK: - Private functions
@@ -60,7 +88,6 @@ extension AuthPresenter {
             switch result {
             case .success(let cacao): 
                 self?.signingState = .signed(cacao)
-                self?.generateQR()
                 self?.showSigningState.toggle()
                 
             case .failure(let error): 
@@ -69,18 +96,6 @@ extension AuthPresenter {
             }
         }
         .store(in: &subscriptions)
-    }
-    
-    private func generateQR() {
-        Task { @MainActor in
-            let uri = try! await Pair.instance.create()
-            walletConnectUri = uri
-            try await Auth.instance.request(.stub(), topic: uri.topic)
-            let qrCodeImage = QRCodeGenerator.generateQRCode(from: uri.absoluteString)
-            DispatchQueue.main.async {
-                self.qrCodeImageData = qrCodeImage.pngData()
-            }
-        }
     }
 }
 

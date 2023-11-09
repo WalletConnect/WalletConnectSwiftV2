@@ -63,7 +63,7 @@ struct AuthView: View {
             .onAppear {
                 presenter.onAppear()
             }
-            .sheet(isPresented: $presenter.showSigningState) {
+            .sheet(isPresented: $presenter.showSigningState, onDismiss: presenter.generateQR) {
                 ZStack {
                     Color(red: 25/255, green: 26/255, blue: 26/255)
                         .ignoresSafeArea()
@@ -118,6 +118,41 @@ struct AuthView: View {
                                 .background(.green)
                                 .cornerRadius(16)
                                 .padding(.top, 16)
+                            
+                            Button {
+                                presenter.deletePairing()
+                            } label: {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(.white.opacity(0.02))
+                                    
+                                    HStack {
+                                        ZStack {
+                                            Circle()
+                                                .fill(.white.opacity(0.05))
+                                                .frame(width: 32, height: 32)
+                                            
+                                            Circle()
+                                                .fill(.white.opacity(0.1))
+                                                .frame(width: 30, height: 30)
+                                            
+                                            Image("exit")
+                                                .resizable()
+                                                .frame(width: 14, height: 14)
+                                        }
+                                        
+                                        Text("Disconnect")
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 12)
+                                }
+                                .frame(height: 56)
+                                
+                            }
+                            .padding(20)
                             
                         case .none:
                             EmptyView()

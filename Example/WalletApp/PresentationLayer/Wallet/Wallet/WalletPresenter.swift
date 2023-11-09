@@ -19,7 +19,7 @@ final class WalletPresenter: ObservableObject {
     @Published var showPairingLoading = false
     @Published var showError = false
     @Published var errorMessage = "Error"
-    @Published var showConnectedSheet = false
+    @Published var showAuthDisconnectedSheet = false
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -98,6 +98,13 @@ extension WalletPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] sessions in
                 self?.sessions = sessions
+            }
+            .store(in: &disposeBag)
+        
+        interactor.deletePairingPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.showAuthDisconnectedSheet.toggle()
             }
             .store(in: &disposeBag)
         

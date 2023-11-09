@@ -35,9 +35,11 @@ public class AuthClient: AuthClientProtocol {
     // MARK: - Private Properties
 
     private let pairingRegisterer: PairingRegisterer
+    private let pairingClient: PairingInteracting
 
     private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthRequest, context: VerifyContext?), Never>()
+    
     private let appRequestService: AppRequestService
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletRequestSubscriber: WalletRequestSubscriber
@@ -51,7 +53,8 @@ public class AuthClient: AuthClientProtocol {
          pendingRequestsProvider: PendingRequestsProvider,
          logger: ConsoleLogging,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
-         pairingRegisterer: PairingRegisterer
+         pairingRegisterer: PairingRegisterer,
+         pairingClient: PairingInteracting
     ) {
         self.appRequestService = appRequestService
         self.walletRequestSubscriber = walletRequestSubscriber
@@ -61,6 +64,7 @@ public class AuthClient: AuthClientProtocol {
         self.logger = logger
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.pairingRegisterer = pairingRegisterer
+        self.pairingClient = pairingClient
         setUpPublishers()
     }
 
@@ -92,6 +96,10 @@ public class AuthClient: AuthClientProtocol {
     public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
         return try pendingRequestsProvider.getPendingRequests()
     }
+    
+    public func disconnect(topic: String) async throws {
+        return try await pairingClient.disconnect(topic: topic)
+    }
 
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
         return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(address: address))
@@ -101,7 +109,6 @@ public class AuthClient: AuthClientProtocol {
         appRespondSubscriber.onResponse = { [unowned self] (id, result) in
             authResponsePublisherSubject.send((id, result))
         }
-
         walletRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
         }

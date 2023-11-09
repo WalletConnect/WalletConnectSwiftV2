@@ -6,7 +6,8 @@ public struct AuthClientFactory {
         projectId: String,
         crypto: CryptoProvider,
         networkingClient: NetworkingInteractor,
-        pairingRegisterer: PairingRegisterer
+        pairingRegisterer: PairingRegisterer,
+        pairingClient: PairingClient
     ) -> AuthClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults.standard
@@ -22,6 +23,7 @@ public struct AuthClientFactory {
             keychainStorage: keychainStorage,
             networkingClient: networkingClient,
             pairingRegisterer: pairingRegisterer,
+            pairingClient: pairingClient,
             iatProvider: iatProvider
         )
     }
@@ -35,6 +37,7 @@ public struct AuthClientFactory {
         keychainStorage: KeychainStorageProtocol,
         networkingClient: NetworkingInteractor,
         pairingRegisterer: PairingRegisterer,
+        pairingClient: PairingInteracting,
         iatProvider: IATProvider
     ) -> AuthClient {
         let kms = KeyManagementService(keychain: keychainStorage)
@@ -59,7 +62,8 @@ public struct AuthClientFactory {
             pendingRequestsProvider: pendingRequestsProvider,
             logger: logger,
             socketConnectionStatusPublisher: networkingClient.socketConnectionStatusPublisher,
-            pairingRegisterer: pairingRegisterer
+            pairingRegisterer: pairingRegisterer, 
+            pairingClient: pairingClient
         )
     }
 }

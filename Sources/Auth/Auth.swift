@@ -28,7 +28,8 @@ public class Auth {
             projectId: Networking.projectId,
             crypto: config.crypto,
             networkingClient: Networking.interactor,
-            pairingRegisterer: Pair.registerer
+            pairingRegisterer: Pair.registerer,
+            pairingClient: Pair.instance as! PairingClient
         )
     }()
 
