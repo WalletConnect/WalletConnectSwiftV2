@@ -36,8 +36,8 @@ final class AuthRequestPresenter: ObservableObject {
 
     @MainActor
     func onApprove() async throws {
-        try await interactor.approve(request: request, importAccount: importAccount)
-        showSignedSheet.toggle()
+        let showConnected = try await interactor.approve(request: request, importAccount: importAccount)
+        showConnected ? showSignedSheet.toggle() : router.dismiss()
     }
 
     @MainActor

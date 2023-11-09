@@ -4,7 +4,7 @@ import Web3Wallet
 import WalletConnectRouter
 
 final class SessionRequestInteractor {
-    func approve(sessionRequest: Request, importAccount: ImportAccount) async throws {
+    func approve(sessionRequest: Request, importAccount: ImportAccount) async throws -> Bool {
         do {
             let result = try Signer.sign(request: sessionRequest, importAccount: importAccount)
             try await Web3Wallet.instance.respond(
@@ -17,6 +17,9 @@ final class SessionRequestInteractor {
             let session = getSession(topic: sessionRequest.topic)
             if let uri = session?.peer.redirect?.native {
                 WalletConnectRouter.goBack(uri: uri)
+                return false
+            } else {
+                return true
             }
         } catch {
             throw error

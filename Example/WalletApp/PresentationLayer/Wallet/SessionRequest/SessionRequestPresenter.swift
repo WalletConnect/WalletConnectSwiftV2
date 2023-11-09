@@ -43,8 +43,8 @@ final class SessionRequestPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
-            try await interactor.approve(sessionRequest: sessionRequest, importAccount: importAccount)
-            showSignedSheet.toggle()
+            let showConnected = try await interactor.approve(sessionRequest: sessionRequest, importAccount: importAccount)
+            showConnected ? showSignedSheet.toggle() : router.dismiss()
         } catch {
             errorMessage = error.localizedDescription
             showError.toggle()

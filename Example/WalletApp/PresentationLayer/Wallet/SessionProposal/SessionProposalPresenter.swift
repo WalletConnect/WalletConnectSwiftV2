@@ -35,8 +35,8 @@ final class SessionProposalPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
-            try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
-            showConnectedSheet.toggle()
+            let showConnected = try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
+            showConnected ? showConnectedSheet.toggle() : router.dismiss()
         } catch {
             errorMessage = error.localizedDescription
             showError.toggle()
