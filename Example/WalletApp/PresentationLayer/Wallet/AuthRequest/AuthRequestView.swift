@@ -103,6 +103,12 @@ struct AuthRequestView: View {
                 Spacer()
             }
         }
+        .sheet(
+            isPresented: $presenter.showSignedSheet,
+            onDismiss: presenter.onSignedSheetDismiss
+        ) {
+            ConnectedSheetView(title: "Request is signed")
+        }
         .edgesIgnoringSafeArea(.all)
     }
     

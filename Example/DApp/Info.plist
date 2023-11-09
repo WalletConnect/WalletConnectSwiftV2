@@ -9,7 +9,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>dapp</string>
+				<string>wcdapp</string>
 			</array>
 		</dict>
 	</array>

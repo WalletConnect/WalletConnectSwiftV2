@@ -15,6 +15,8 @@ final class AuthRequestPresenter: ObservableObject {
         return interactor.formatted(request: request, account: importAccount.account)
     }
     
+    @Published var showSignedSheet = false
+    
     private var disposeBag = Set<AnyCancellable>()
 
     init(
@@ -34,13 +36,17 @@ final class AuthRequestPresenter: ObservableObject {
 
     @MainActor
     func onApprove() async throws {
-        try await interactor.approve(request: request, importAccount: importAccount)
-        router.dismiss()
+        let showConnected = try await interactor.approve(request: request, importAccount: importAccount)
+        showConnected ? showSignedSheet.toggle() : router.dismiss()
     }
 
     @MainActor
     func onReject() async throws {
         try await interactor.reject(request: request)
+        router.dismiss()
+    }
+    
+    func onSignedSheetDismiss() {
         router.dismiss()
     }
 }

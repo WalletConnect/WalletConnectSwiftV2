@@ -11,7 +11,7 @@ final class AuthRequestInteractor {
         self.messageSigner = messageSigner
     }
 
-    func approve(request: AuthRequest, importAccount: ImportAccount) async throws {
+    func approve(request: AuthRequest, importAccount: ImportAccount) async throws -> Bool {
         let account = importAccount.account
         let signature = try messageSigner.sign(
             payload: request.payload.cacaoPayload(address: account.address),
@@ -22,6 +22,9 @@ final class AuthRequestInteractor {
         /* Redirect */
         if let uri = request.requester.redirect?.native {
             WalletConnectRouter.goBack(uri: uri)
+            return false
+        } else {
+            return true
         }
     }
 

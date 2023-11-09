@@ -19,6 +19,7 @@ final class WalletPresenter: ObservableObject {
     @Published var showPairingLoading = false
     @Published var showError = false
     @Published var errorMessage = "Error"
+    @Published var showConnectedSheet = false
     
     private var disposeBag = Set<AnyCancellable>()
 
