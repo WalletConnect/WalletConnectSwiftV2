@@ -5,7 +5,8 @@ on:
     types: [ published ]
 jobs:
   set-user-agent:
-    runs-on: macos-latest
+    runs-on: 
+      group: apple-silicon
     steps:
       - uses: actions/checkout@v2
         with:
