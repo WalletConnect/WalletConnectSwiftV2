@@ -143,6 +143,12 @@ struct SessionProposalView: View {
         .alert(presenter.errorMessage, isPresented: $presenter.showError) {
             Button("OK", role: .cancel) {}
         }
+        .sheet(
+            isPresented: $presenter.showConnectedSheet,
+            onDismiss: presenter.onConnectedSheetDismiss
+        ) {
+            ConnectedSheetView(title: "Connected")
+        }
         .edgesIgnoringSafeArea(.all)
     }
 

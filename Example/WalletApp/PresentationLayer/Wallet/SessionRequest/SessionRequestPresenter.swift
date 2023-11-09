@@ -20,6 +20,7 @@ final class SessionRequestPresenter: ObservableObject {
     
     @Published var showError = false
     @Published var errorMessage = "Error"
+    @Published var showSignedSheet = false
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -43,7 +44,7 @@ final class SessionRequestPresenter: ObservableObject {
     func onApprove() async throws {
         do {
             try await interactor.approve(sessionRequest: sessionRequest, importAccount: importAccount)
-            router.dismiss()
+            showSignedSheet.toggle()
         } catch {
             errorMessage = error.localizedDescription
             showError.toggle()
@@ -53,6 +54,10 @@ final class SessionRequestPresenter: ObservableObject {
     @MainActor
     func onReject() async throws {
         try await interactor.reject(sessionRequest: sessionRequest)
+        router.dismiss()
+    }
+    
+    func onSignedSheetDismiss() {
         router.dismiss()
     }
 }
