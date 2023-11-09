@@ -62,7 +62,8 @@ final class AuthTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             networkingClient: networkingClient,
-            pairingRegisterer: pairingClient,
+            pairingRegisterer: pairingClient, 
+            pairingClient: pairingClient,
             iatProvider: iatProvider)
 
         let clientId = try! networkingClient.getClientId()

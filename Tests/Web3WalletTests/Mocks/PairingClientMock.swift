@@ -4,6 +4,10 @@ import Combine
 @testable import WalletConnectPairing
 
 final class PairingClientMock: PairingClientProtocol {
+    var deleteResponsePublisher: AnyPublisher<String, Never> {
+        return Result.Publisher("").eraseToAnyPublisher()
+    }
+    
     var pairCalled = false
     var disconnectPairingCalled = false
     

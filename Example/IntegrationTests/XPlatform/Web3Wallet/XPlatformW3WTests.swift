@@ -65,7 +65,8 @@ final class XPlatformW3WTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             networkingClient: networkingClient,
-            pairingRegisterer: pairingClient,
+            pairingRegisterer: pairingClient, 
+            pairingClient: pairingClient,
             iatProvider: DefaultIATProvider())
 
         w3wClient = Web3WalletClientFactory.create(

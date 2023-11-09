@@ -70,7 +70,8 @@ final class PairingTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             networkingClient: networkingInteractor,
-            pairingRegisterer: pairingClient,
+            pairingRegisterer: pairingClient, 
+            pairingClient: pairingClient,
             iatProvider: IATProviderMock())
     }
 
@@ -95,7 +96,8 @@ final class PairingTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             networkingClient: networkingInteractor,
-            pairingRegisterer: pairingClient,
+            pairingRegisterer: pairingClient, 
+            pairingClient: pairingClient,
             iatProvider: IATProviderMock())
     }
 
