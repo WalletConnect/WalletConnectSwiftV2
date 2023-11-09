@@ -3,7 +3,7 @@ import SwiftUI
 
 extension View {
     
-    #if os(iOS)
+    #if os(iOS) || os(tvOS)
     
     /// A backwards compatible wrapper for iOS 14 `onChange`
     @ViewBuilder
@@ -26,5 +26,25 @@ extension View {
         }
     }
     
+    #endif
+    
+    #if os(iOS) || os(macOS)
+    
+    @ViewBuilder
+    func onTapGestureBackported(count: Int = 1, perform action: @escaping () -> Void) -> some View {
+        self
+    }
+        
+    #elseif os(tvOS)
+
+    @ViewBuilder
+    func onTapGestureBackported(count: Int = 1, perform action: @escaping () -> Void) -> some View {
+        if #available(tvOS 16.0, *) {
+            self.onTapGesture(count: count, perform: action)
+        } else {
+            self
+        }
+    }
+
     #endif
 }

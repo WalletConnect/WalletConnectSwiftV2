@@ -104,7 +104,7 @@ struct PreviewWeb3ModalPicker: View {
             .contentShape(Rectangle())
             .padding(.horizontal, 8)
             .padding(.vertical, 8)
-            .onTapGesture {
+            .onTapGestureBackported {
                 withAnimation(.easeInOut(duration: 0.15)) {
                     selectedItem = item
                 }
