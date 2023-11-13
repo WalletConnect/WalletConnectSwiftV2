@@ -20,6 +20,15 @@ struct SettingsView: View {
             }
 
             Section {
+                Button {
+                    viewModel.browserPressed()
+                } label: {
+                    Text("Browser")
+                        .frame(maxWidth: .infinity)
+                }
+            }
+
+            Section {
                 AsyncButton {
                     try await viewModel.logoutPressed()
                 } label: {

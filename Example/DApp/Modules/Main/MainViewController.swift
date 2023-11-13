@@ -21,8 +21,6 @@ final class MainViewController: UITabBarController {
     }
 
     private func setupTabs() {
-        tabBar.unselectedItemTintColor = .white
-        
         let viewControllers = presenter.viewControllers
 
         for (index, viewController) in viewControllers.enumerated() {
