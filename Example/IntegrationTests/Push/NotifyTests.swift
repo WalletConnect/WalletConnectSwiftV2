@@ -95,6 +95,7 @@ final class NotifyTests: XCTestCase {
     override func setUp() {
         pk = try! EthereumPrivateKey()
         walletNotifyClientA = makeWalletClient()
+        publishers.removeAll()
     }
 
     func testWalletCreatesSubscription() async throws {
