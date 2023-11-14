@@ -62,10 +62,6 @@ extension SubscriptionPresenter: SceneViewModel {
         return .never
     }
 
-    var navigationBarStyle: NavigationBarStyle {
-        return .clear
-    }
-
     var rightBarButtonItem: UIBarButtonItem? {
         return UIBarButtonItem(
             image: UIImage(systemName: "gearshape"),
