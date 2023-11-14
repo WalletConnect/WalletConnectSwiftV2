@@ -281,3 +281,12 @@ private extension SessionEngine {
         onEventReceived?(topic, event.publicRepresentation(), payload.request.chainId)
     }
 }
+
+extension SessionEngine.Errors: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case let .sessionNotFound(topic):   return "Session with topic <\(topic)> not found"
+        case .sessionRequestExpired:        return "Session request expired"
+        }
+    }
+}
