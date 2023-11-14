@@ -22,6 +22,7 @@ class NotificationService: UNNotificationServiceExtension {
 
                 let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
                 mutableContent.title = pushMessage.title
+                mutableContent.subtitle = pushMessage.url
                 mutableContent.body = pushMessage.body
 
                 contentHandler(mutableContent)
