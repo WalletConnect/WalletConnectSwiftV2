@@ -53,13 +53,15 @@ final class AuthPresenter: ObservableObject {
     }
     
     @MainActor
-    func deletePairing() async {
-        if let topic = walletConnectUri?.topic {
-            try await Auth.instance.disconnect(topic: topic)
-            showSigningState.toggle()
-            if let walletUri = URL(string: "walletapp://") {
-                DispatchQueue.main.async {
-                    UIApplication.shared.open(walletUri)
+    func deletePairing() {
+        Task {
+            if let topic = walletConnectUri?.topic {
+                try await Auth.instance.disconnect(topic: topic)
+                showSigningState.toggle()
+                if let walletUri = URL(string: "walletapp://") {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.open(walletUri)
+                    }
                 }
             }
         }
