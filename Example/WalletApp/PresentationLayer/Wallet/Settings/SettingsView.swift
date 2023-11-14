@@ -52,6 +52,7 @@ struct SettingsView: View {
                         RoundedRectangle(cornerRadius: Radius.m)
                             .stroke(Color.red, lineWidth: 1)
                     )
+                    .padding(.bottom, 24)
                 }
                 .padding(.horizontal, 20)
             }
@@ -87,6 +88,7 @@ struct SettingsView: View {
                         .font(.paragraph700)
 
                     Image("copy_small")
+                        .foregroundColor(.Foreground100)
 
                     Spacer()
                 }
@@ -100,14 +102,14 @@ struct SettingsView: View {
                     .padding(.horizontal, 12)
                     .padding(.bottom, 16)
             }
-            .background(Color.black.opacity(0.05).cornerRadius(12))
+            .background(Color.Foreground100.opacity(0.05).cornerRadius(12))
         }
         .frame(maxWidth: .infinity)
     }
 
     func separator() -> some View {
             Rectangle()
-                .foregroundColor(.black.opacity(0.03))
+                .foregroundColor(.Foreground100.opacity(0.05))
                 .frame(maxWidth: .infinity)
                 .frame(height: 1)
                 .padding(.top, 8)
