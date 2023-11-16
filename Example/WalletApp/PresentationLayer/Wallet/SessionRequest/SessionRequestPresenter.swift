@@ -58,6 +58,10 @@ final class SessionRequestPresenter: ObservableObject {
     }
     
     func onSignedSheetDismiss() {
+        dismiss()
+    }
+    
+    func dismiss() {
         router.dismiss()
     }
 }
