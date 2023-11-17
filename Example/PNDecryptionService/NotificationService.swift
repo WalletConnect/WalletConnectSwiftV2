@@ -1,6 +1,7 @@
 import UserNotifications
 import WalletConnectNotify
 import Intents
+import Mixpanel
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -17,13 +18,15 @@ class NotificationService: UNNotificationServiceExtension {
 
             do {
                 let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
-                let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+                let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
                 let updatedContent = try handle(content: content, pushMessage: pushMessage, topic: topic)
 
                 let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
                 mutableContent.title = pushMessage.title
                 mutableContent.subtitle = pushMessage.url
                 mutableContent.body = pushMessage.body
+
+                logMessage(message: pushMessage, account: account, topic: topic)
 
                 contentHandler(mutableContent)
             }
@@ -112,5 +115,34 @@ private extension NotificationService {
         try data.write(to: fileURL)
 
         return fileURL
+    }
+
+    func logMessage(message: NotifyMessage, account: Account, topic: String) {
+        let keychain = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+        
+        guard let clientId: String = try? keychain.read(key: "clientId") else {
+            return
+        }
+
+        guard let token = InputConfig.mixpanelToken, !token.isEmpty  else { return }
+
+        Mixpanel.initialize(token: token, trackAutomaticEvents: true)
+
+        let mixpanel = Mixpanel.mainInstance()
+        mixpanel.alias = account.absoluteString
+        mixpanel.identify(distinctId: clientId)
+        mixpanel.people.set(properties: ["$name": account.absoluteString, "account": account.absoluteString])
+
+        Mixpanel.mainInstance().track(
+            event: "APNS message received",
+            properties: [
+                "title": message.title,
+                "body": message.body,
+                "icon": message.icon,
+                "url": message.url,
+                "type": message.type,
+                "topic": topic
+            ]
+        )
     }
 }
