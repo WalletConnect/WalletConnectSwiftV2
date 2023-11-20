@@ -12,13 +12,20 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         self.bestAttemptContent = request.content
 
+        log("APNS: didReceive(_:) fired")
+
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
            let ciphertext = content.userInfo["blob"] as? String {
 
+            log("APNS: topic and blob found")
+
             do {
                 let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
                 let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+
+                log("APNS: message decrypted", account: account, topic: topic, message: pushMessage)
+
                 let updatedContent = try handle(content: content, pushMessage: pushMessage, topic: topic)
 
                 let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
@@ -26,11 +33,15 @@ class NotificationService: UNNotificationServiceExtension {
                 mutableContent.subtitle = pushMessage.url
                 mutableContent.body = pushMessage.body
 
-                logMessage(message: pushMessage, account: account, topic: topic)
+                log("APNS: message handled", account: account, topic: topic, message: pushMessage)
 
                 contentHandler(mutableContent)
+
+                log("APNS: content handled", account: account, topic: topic, message: pushMessage)
             }
             catch {
+                log("APNS: error: \(error.localizedDescription)")
+
                 let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
                 mutableContent.title = "Error"
                 mutableContent.body = error.localizedDescription
@@ -117,7 +128,7 @@ private extension NotificationService {
         return fileURL
     }
 
-    func logMessage(message: NotifyMessage, account: Account, topic: String) {
+    func log(_ event: String, account: Account? = nil, topic: String? = nil, message: NotifyMessage? = nil) {
         let keychain = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
         
         guard let clientId: String = try? keychain.read(key: "clientId") else {
@@ -128,20 +139,23 @@ private extension NotificationService {
 
         Mixpanel.initialize(token: token, trackAutomaticEvents: true)
 
-        let mixpanel = Mixpanel.mainInstance()
-        mixpanel.alias = account.absoluteString
-        mixpanel.identify(distinctId: clientId)
-        mixpanel.people.set(properties: ["$name": account.absoluteString, "account": account.absoluteString])
+        if let account {
+            let mixpanel = Mixpanel.mainInstance()
+            mixpanel.alias = account.absoluteString
+            mixpanel.identify(distinctId: clientId)
+            mixpanel.people.set(properties: ["$name": account.absoluteString, "account": account.absoluteString])
+        }
 
         Mixpanel.mainInstance().track(
-            event: "APNS message received",
+            event: event,
             properties: [
-                "title": message.title,
-                "body": message.body,
-                "icon": message.icon,
-                "url": message.url,
-                "type": message.type,
-                "topic": topic
+                "title": message?.title,
+                "body": message?.body,
+                "icon": message?.icon,
+                "url": message?.url,
+                "type": message?.type,
+                "topic": topic,
+                "source": "NotificationService"
             ]
         )
     }
