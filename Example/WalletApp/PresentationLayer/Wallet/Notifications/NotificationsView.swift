@@ -15,35 +15,51 @@ struct NotificationsView: View {
             List {
                 Section {
                     if selectedIndex == 0 {
-                        notifications()
+                        if presenter.subscriptionViewModels.isEmpty {
+                            emptySubscriptionsView()
+                        } else {
+                            notifications()
+                        }
                     } else {
                         discover()
                     }
                 } header: {
-                    HStack {
-                        SegmentedPicker(["Notifications", "Discover"],
-                                        selectedIndex: Binding(
-                                            get: { selectedIndex },
-                                            set: { selectedIndex = $0 ?? 0 }),
-                                        content: { item, isSelected in
-                            Text(item)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(isSelected ? Color.primary : Color.secondary )
-                                .padding(.trailing, 32)
-                                .padding(.vertical, 8)
-                        }, selection: {
-                            VStack(spacing: 0) {
-                                Spacer()
-                                Rectangle()
-                                    .fill(.Blue100)
-                                    .frame(height: 2)
+                    VStack(spacing: 0) {
+                        HStack {
+                            SegmentedPicker(["Subscriptions", "Discover"],
+                                            selectedIndex: Binding(
+                                                get: { selectedIndex },
+                                                set: { selectedIndex = $0 ?? 0 }),
+                                            content: { item, isSelected in
+                                Text(item)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(isSelected ? Color.primary : Color.secondary )
                                     .padding(.trailing, 32)
-                            }
-                        })
+                                    .padding(.vertical, 8)
+                            }, selection: {
+                                VStack(spacing: 0) {
+                                    Spacer()
+                                    Rectangle()
+                                        .fill(.Blue100)
+                                        .frame(height: 2)
+                                        .padding(.trailing, 32)
+                                }
+                            })
+                            .padding(.horizontal, 20)
+                            .animation(.easeInOut(duration: 0.3))
+
+                            Spacer()
+                        }
+
+                        Rectangle()
+                            .foregroundColor(Color.Foreground100.opacity(0.05))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 1)
                     }
-                    .animation(.easeInOut(duration: 0.3))
                     .listRowBackground(Color.clear)
                 }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
             }
             .listStyle(PlainListStyle())
         }
@@ -57,28 +73,37 @@ struct NotificationsView: View {
             discoverListRow(listing: listing)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 16, leading: 20, bottom: 0, trailing: 20))
         }
     }
 
     private func emptySubscriptionsView() -> some View {
-        VStack(spacing: 10) {
-            Spacer()
-
-            Image(systemName: "bell.badge.fill")
+        ZStack {
+            Image("subscriptions_empty_background")
                 .resizable()
-                .frame(width: 32, height: 32)
-                .aspectRatio(contentMode: .fit)
-                .foregroundColor(.grey50)
+                .frame(maxWidth: .infinity)
+                .ignoresSafeArea()
 
-            Text("Notifications from connected apps will appear here. To enable notifications, visit the app in your browser and look for a \(Image(systemName: "bell.fill")) notifications toggle \(Image(systemName: "switch.2"))")
-                .foregroundColor(.grey50)
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
+            VStack(spacing: 0) {
+                Image("subscriptions_empty_icon")
 
-            Spacer()
+                Text("Add your first app")
+                    .foregroundColor(.Foreground100)
+                    .font(.large700)
+                    .padding(.bottom, 8.0)
+
+                Text("Head over to “Discover” and\nsubscribe to one of our apps to start\nreceiving notifications")
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.Foreground200)
+                    .font(.paragraph500)
+                    .padding(.bottom, 16.0)
+
+                Button("Discover apps") {
+                    selectedIndex = 1
+                }
+                .buttonStyle(W3MButtonStyle(size: .m, variant: .main))
+            }
         }
-        .padding(20)
     }
 
     private func notifications() -> some View {

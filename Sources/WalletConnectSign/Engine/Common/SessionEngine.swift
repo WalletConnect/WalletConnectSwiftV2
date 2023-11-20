@@ -3,7 +3,6 @@ import Combine
 
 final class SessionEngine {
     enum Errors: Error {
-        case sessionNotFound(topic: String)
         case sessionRequestExpired
     }
 
@@ -73,7 +72,7 @@ final class SessionEngine {
 
     func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws {
         guard sessionStore.hasSession(forTopic: topic) else {
-            throw Errors.sessionNotFound(topic: topic)
+            throw WalletConnectError.noSessionMatchingTopic(topic)
         }
 
         let protocolMethod = SessionRequestProtocolMethod()
@@ -279,5 +278,13 @@ private extension SessionEngine {
             try await networkingInteractor.respondSuccess(topic: payload.topic, requestId: payload.id, protocolMethod: protocolMethod)
         }
         onEventReceived?(topic, event.publicRepresentation(), payload.request.chainId)
+    }
+}
+
+extension SessionEngine.Errors: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .sessionRequestExpired:    return "Session request expired"
+        }
     }
 }

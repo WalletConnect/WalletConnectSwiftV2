@@ -1,15 +1,14 @@
 import UIKit
+
+import Web3Modal
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
-import WalletConnectModal
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
     var window: UIWindow?
 
-    private let signCoordinator = SignCoordinator()
-    private let authCoordinator = AuthCoordinator()
+    private let app = Application()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
@@ -20,13 +19,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             description: "WalletConnect DApp sample",
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "dapp://", universal: nil)
+            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: nil)
         )
         
-        WalletConnectModal.configure(
+        Web3Modal.configure(
             projectId: InputConfig.projectId, 
-            metadata: metadata,
-            accentColor: .green
+            metadata: metadata
         )
         
         setupWindow(scene: scene)
@@ -36,16 +34,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
 
-        let tabController = UITabBarController()
-        tabController.viewControllers = [
-            signCoordinator.navigationController,
-            authCoordinator.navigationController
-        ]
+        let viewController = MainModule.create(app: app)
 
-        signCoordinator.start()
-        authCoordinator.start()
-
-        window?.rootViewController = tabController
+        window?.rootViewController = viewController
         window?.makeKeyAndVisible()
     }
 }

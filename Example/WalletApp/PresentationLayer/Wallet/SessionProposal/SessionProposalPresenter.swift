@@ -13,6 +13,7 @@ final class SessionProposalPresenter: ObservableObject {
     
     @Published var showError = false
     @Published var errorMessage = "Error"
+    @Published var showConnectedSheet = false
     
     private var disposeBag = Set<AnyCancellable>()
 
@@ -34,8 +35,8 @@ final class SessionProposalPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
-            try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
-            router.dismiss()
+            let showConnected = try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
+            showConnected ? showConnectedSheet.toggle() : router.dismiss()
         } catch {
             errorMessage = error.localizedDescription
             showError.toggle()
@@ -51,6 +52,10 @@ final class SessionProposalPresenter: ObservableObject {
             errorMessage = error.localizedDescription
             showError.toggle()
         }
+    }
+    
+    func onConnectedSheetDismiss() {
+        router.dismiss()
     }
 }
 
