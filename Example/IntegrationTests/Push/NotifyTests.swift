@@ -236,7 +236,11 @@ final class NotifyTests: XCTestCase {
         walletNotifyClientA.messagesPublisher
             .sink { messages in
                 guard let newNotifyMessageRecord = messages.first else { return }
-                XCTAssertEqual(newNotifyMessageRecord.message, notifyMessage)
+                // ID's is not equal because server generates a new one
+                XCTAssertEqual(newNotifyMessageRecord.message.title, notifyMessage.title)
+                XCTAssertEqual(newNotifyMessageRecord.message.body, notifyMessage.body)
+                XCTAssertEqual(newNotifyMessageRecord.message.icon, notifyMessage.icon)
+                XCTAssertEqual(newNotifyMessageRecord.message.type, notifyMessage.type)
                 notifyMessageRecord = newNotifyMessageRecord
                 messageExpectation.fulfill()
         }.store(in: &publishers)
