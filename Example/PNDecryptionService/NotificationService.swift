@@ -1,6 +1,7 @@
 import UserNotifications
 import WalletConnectNotify
 import Intents
+import Mixpanel
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -11,13 +12,20 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         self.bestAttemptContent = request.content
 
+        log("didReceive(_:) fired")
+
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
            let ciphertext = content.userInfo["blob"] as? String {
 
+            log("topic and blob found")
+
             do {
                 let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
-                let pushMessage = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+                let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+
+                log("message decrypted", account: account, topic: topic, message: pushMessage)
+
                 let updatedContent = try handle(content: content, pushMessage: pushMessage, topic: topic)
 
                 let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
@@ -25,9 +33,15 @@ class NotificationService: UNNotificationServiceExtension {
                 mutableContent.subtitle = pushMessage.url
                 mutableContent.body = pushMessage.body
 
+                log("message handled", account: account, topic: topic, message: pushMessage)
+
                 contentHandler(mutableContent)
+
+                log("content handled", account: account, topic: topic, message: pushMessage)
             }
             catch {
+                log("error: \(error.localizedDescription)")
+
                 let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
                 mutableContent.title = "Error"
                 mutableContent.body = error.localizedDescription
@@ -112,5 +126,37 @@ private extension NotificationService {
         try data.write(to: fileURL)
 
         return fileURL
+    }
+
+    func log(_ event: String, account: Account? = nil, topic: String? = nil, message: NotifyMessage? = nil) {
+        let keychain = GroupKeychainStorage(serviceIdentifier: "group.com.walletconnect.sdk")
+        
+        guard let clientId: String = try? keychain.read(key: "clientId") else {
+            return
+        }
+
+        guard let token = InputConfig.mixpanelToken, !token.isEmpty  else { return }
+
+        Mixpanel.initialize(token: token, trackAutomaticEvents: true)
+
+        if let account {
+            let mixpanel = Mixpanel.mainInstance()
+            mixpanel.alias = account.absoluteString
+            mixpanel.identify(distinctId: clientId)
+            mixpanel.people.set(properties: ["$name": account.absoluteString, "account": account.absoluteString])
+        }
+
+        Mixpanel.mainInstance().track(
+            event: "💬 APNS: " + event,
+            properties: [
+                "title": message?.title,
+                "body": message?.body,
+                "icon": message?.icon,
+                "url": message?.url,
+                "type": message?.type,
+                "topic": topic,
+                "source": "NotificationService"
+            ]
+        )
     }
 }

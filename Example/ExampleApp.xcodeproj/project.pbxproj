@@ -36,7 +36,6 @@
 		8487A9482A83AD680003D5AF /* LoggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8487A9472A83AD680003D5AF /* LoggingService.swift */; };
 		84943C7B2A9BA206007EBAC2 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 84943C7A2A9BA206007EBAC2 /* Mixpanel */; };
 		84943C7D2A9BA328007EBAC2 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 84943C7C2A9BA328007EBAC2 /* Mixpanel */; };
-		84943C7F2A9BA48C007EBAC2 /* ProfilingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84943C7E2A9BA48C007EBAC2 /* ProfilingService.swift */; };
 		849D7A93292E2169006A2BD4 /* NotifyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849D7A92292E2169006A2BD4 /* NotifyTests.swift */; };
 		84A6E3C32A386BBC008A0571 /* Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A6E3C22A386BBC008A0571 /* Publisher.swift */; };
 		84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA01DA28CF0CD7005D48D8 /* XCTest.swift */; };
@@ -54,6 +53,8 @@
 		84E6B84E29787A8000428BAF /* PNDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
 		A507BE1A29E8032E0038EF70 /* EIP55Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507BE1929E8032E0038EF70 /* EIP55Tests.swift */; };
+		A50B6A362B06683800162B01 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE25D293F56D6004840D1 /* InputConfig.swift */; };
+		A50B6A382B06697B00162B01 /* ProfilingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B6A372B06697B00162B01 /* ProfilingService.swift */; };
 		A50C036528AAD32200FE72D3 /* ClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50C036428AAD32200FE72D3 /* ClientDelegate.swift */; };
 		A50D53C12ABA055700A4FD8B /* NotifyPreferencesModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */; };
 		A50D53C22ABA055700A4FD8B /* NotifyPreferencesPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */; };
@@ -160,6 +161,7 @@
 		A5A0843F29D2F625000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
 		A5A0844029D2F626000B9B17 /* DefaultCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A0843B29D2F60A000B9B17 /* DefaultCryptoProvider.swift */; };
 		A5A4FC772840C12C00BBEC1E /* RegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A4FC762840C12C00BBEC1E /* RegressionTests.swift */; };
+		A5A650CA2B062A1400F9AD4B /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = A5A650C92B062A1400F9AD4B /* Mixpanel */; };
 		A5A8E47A293A1C9B00FEB97D /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */; };
 		A5A8E47D293A1CFE00FEB97D /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */; };
 		A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59CF4F5292F83D50031A42F /* DefaultSignerFactory.swift */; };
@@ -389,7 +391,7 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		84E6B85229787A8000428BAF /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
@@ -427,7 +429,6 @@
 		847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPlatformW3WTests.swift; sourceTree = "<group>"; };
 		8487A92E2A7BD2F30003D5AF /* XPlatformProtocolTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = XPlatformProtocolTests.xctestplan; path = ../XPlatformProtocolTests.xctestplan; sourceTree = "<group>"; };
 		8487A9472A83AD680003D5AF /* LoggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingService.swift; sourceTree = "<group>"; };
-		84943C7E2A9BA48C007EBAC2 /* ProfilingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilingService.swift; sourceTree = "<group>"; };
 		849A4F18298281E300E61ACE /* WalletAppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletAppRelease.entitlements; sourceTree = "<group>"; };
 		849A4F19298281F100E61ACE /* PNDecryptionServiceRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PNDecryptionServiceRelease.entitlements; sourceTree = "<group>"; };
 		849D7A92292E2169006A2BD4 /* NotifyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyTests.swift; sourceTree = "<group>"; };
@@ -454,6 +455,7 @@
 		84F568C32795832A00D0A289 /* EthereumTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumTransaction.swift; sourceTree = "<group>"; };
 		84FE684528ACDB4700C893FF /* RequestParams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestParams.swift; sourceTree = "<group>"; };
 		A507BE1929E8032E0038EF70 /* EIP55Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EIP55Tests.swift; sourceTree = "<group>"; };
+		A50B6A372B06697B00162B01 /* ProfilingService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilingService.swift; sourceTree = "<group>"; };
 		A50C036428AAD32200FE72D3 /* ClientDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientDelegate.swift; sourceTree = "<group>"; };
 		A50D53BC2ABA055700A4FD8B /* NotifyPreferencesModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesModule.swift; sourceTree = "<group>"; };
 		A50D53BD2ABA055700A4FD8B /* NotifyPreferencesPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyPreferencesPresenter.swift; sourceTree = "<group>"; };
@@ -731,6 +733,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5A650CA2B062A1400F9AD4B /* Mixpanel in Frameworks */,
 				A5B6C0F72A6EAB3200927332 /* WalletConnectNotify in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1408,6 +1411,7 @@
 				A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */,
 				A5417BBD299BFC3E00B469F3 /* ImportAccount.swift */,
 				A5C20228287EB34C007E3188 /* AccountStorage.swift */,
+				C56EE25D293F56D6004840D1 /* InputConfig.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -1658,7 +1662,6 @@
 			isa = PBXGroup;
 			children = (
 				C579FEB82AFCDF83008855EB /* Views */,
-				C56EE25D293F56D6004840D1 /* InputConfig.swift */,
 				84B8154D2991099000FAD54E /* BuildConfiguration.swift */,
 				C56EE267293F56D6004840D1 /* Style */,
 				C56EE2A1293F6B9E004840D1 /* Helpers */,
@@ -1721,10 +1724,10 @@
 				C56EE280293F5757004840D1 /* Application.swift */,
 				C56EE27F293F5757004840D1 /* AppDelegate.swift */,
 				C56EE281293F5757004840D1 /* SceneDelegate.swift */,
+				A50B6A372B06697B00162B01 /* ProfilingService.swift */,
 				84DB38F22983CDAE00BFEE37 /* PushRegisterer.swift */,
 				A51811972A52E21A00A52B15 /* ConfigurationService.swift */,
 				8487A9472A83AD680003D5AF /* LoggingService.swift */,
-				84943C7E2A9BA48C007EBAC2 /* ProfilingService.swift */,
 			);
 			path = ApplicationLayer;
 			sourceTree = "<group>";
@@ -2031,6 +2034,7 @@
 			name = PNDecryptionService;
 			packageProductDependencies = (
 				A5B6C0F62A6EAB3200927332 /* WalletConnectNotify */,
+				A5A650C92B062A1400F9AD4B /* Mixpanel */,
 			);
 			productName = PNDecryptionService;
 			productReference = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */;
@@ -2364,6 +2368,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84E6B84A29787A8000428BAF /* NotificationService.swift in Sources */,
+				A50B6A362B06683800162B01 /* InputConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2597,13 +2602,13 @@
 				A5D610CA2AB3249100C20083 /* ListingViewModel.swift in Sources */,
 				84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */,
 				A5D610CE2AB3594100C20083 /* ListingsAPI.swift in Sources */,
-				84943C7F2A9BA48C007EBAC2 /* ProfilingService.swift in Sources */,
 				C5B2F6FB297055B0000DBA0E /* ETHSigner.swift in Sources */,
 				C56EE274293F56D7004840D1 /* SceneViewController.swift in Sources */,
 				A5D610D42AB35BED00C20083 /* FailableDecodable.swift in Sources */,
 				A56AC8F22AD88A5A001C8FAA /* Sequence.swift in Sources */,
 				847BD1E5298A806800076C90 /* NotificationsPresenter.swift in Sources */,
 				A50D53C12ABA055700A4FD8B /* NotifyPreferencesModule.swift in Sources */,
+				A50B6A382B06697B00162B01 /* ProfilingService.swift in Sources */,
 				A5B4F7C52ABB20AE0099AF7C /* SubscriptionRouter.swift in Sources */,
 				C55D3496295DFA750004314A /* WelcomeInteractor.swift in Sources */,
 				C5B2F6FC297055B0000DBA0E /* SOLSigner.swift in Sources */,
@@ -3499,6 +3504,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5AE354528A1A2AC0059AE8A /* XCRemoteSwiftPackageReference "Web3" */;
 			productName = Web3;
+		};
+		A5A650C92B062A1400F9AD4B /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84943C792A9BA206007EBAC2 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
 		};
 		A5B6C0F02A6EAB0800927332 /* WalletConnectNotify */ = {
 			isa = XCSwiftPackageProductDependency;
