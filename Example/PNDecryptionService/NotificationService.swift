@@ -12,19 +12,19 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         self.bestAttemptContent = request.content
 
-        log("APNS: didReceive(_:) fired")
+        log("didReceive(_:) fired")
 
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
            let ciphertext = content.userInfo["blob"] as? String {
 
-            log("APNS: topic and blob found")
+            log("topic and blob found")
 
             do {
                 let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
                 let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
 
-                log("APNS: message decrypted", account: account, topic: topic, message: pushMessage)
+                log("message decrypted", account: account, topic: topic, message: pushMessage)
 
                 let updatedContent = try handle(content: content, pushMessage: pushMessage, topic: topic)
 
@@ -33,14 +33,14 @@ class NotificationService: UNNotificationServiceExtension {
                 mutableContent.subtitle = pushMessage.url
                 mutableContent.body = pushMessage.body
 
-                log("APNS: message handled", account: account, topic: topic, message: pushMessage)
+                log("message handled", account: account, topic: topic, message: pushMessage)
 
                 contentHandler(mutableContent)
 
-                log("APNS: content handled", account: account, topic: topic, message: pushMessage)
+                log("content handled", account: account, topic: topic, message: pushMessage)
             }
             catch {
-                log("APNS: error: \(error.localizedDescription)")
+                log("error: \(error.localizedDescription)")
 
                 let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
                 mutableContent.title = "Error"
@@ -147,7 +147,7 @@ private extension NotificationService {
         }
 
         Mixpanel.mainInstance().track(
-            event: event,
+            event: "💬 APNS: " + event,
             properties: [
                 "title": message?.title,
                 "body": message?.body,
