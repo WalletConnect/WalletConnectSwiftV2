@@ -9,7 +9,7 @@ public struct AuthClientFactory {
         pairingRegisterer: PairingRegisterer
     ) -> AuthClient {
         let logger = ConsoleLogger(loggingLevel: .off)
-        let keyValueStorage = UserDefaults.standard
+        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         let iatProvider = DefaultIATProvider()
 

@@ -64,6 +64,12 @@ private extension ClientIdStorage {
         }
     }
 
+    func migrateToGroupDefaultsIfNeeded() {
+
+
+        
+    }
+
     func getPublicPart() throws -> SigningPublicKey {
         guard let data = defaults.data(forKey: publicStorageKey) else {
             throw Errors.publicPartNotFound

@@ -6,7 +6,7 @@ public struct PushClientFactory {
                               environment: APNSEnvironment) -> PushClient {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        let keyValueStorage = UserDefaults.standard
+        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
 
         return PushClientFactory.create(
             projectId: projectId,

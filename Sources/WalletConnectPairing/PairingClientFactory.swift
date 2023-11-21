@@ -4,7 +4,7 @@ public struct PairingClientFactory {
 
     public static func create(networkingClient: NetworkingInteractor) -> PairingClient {
         let logger = ConsoleLogger(loggingLevel: .off)
-        let keyValueStorage = UserDefaults.standard
+        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return PairingClientFactory.create(logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient)
     }

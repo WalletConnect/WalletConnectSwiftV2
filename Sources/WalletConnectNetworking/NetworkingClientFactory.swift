@@ -4,7 +4,7 @@ public struct NetworkingClientFactory {
 
     public static func create(relayClient: RelayClient) -> NetworkingInteractor {
         let logger = ConsoleLogger(prefix: "🕸️", loggingLevel: .off)
-        let keyValueStorage = UserDefaults.standard
+        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return NetworkingClientFactory.create(relayClient: relayClient, logger: logger, keychainStorage: keychainStorage, keyValueStorage: keyValueStorage)
     }

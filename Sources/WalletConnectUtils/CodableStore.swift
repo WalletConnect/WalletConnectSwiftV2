@@ -4,6 +4,7 @@ import Combine
 public final class CodableStore<T> where T: Codable {
     private let defaults: KeyValueStorage
     private let prefix: String
+    private let migrationQueue = DispatchQueue(label: "com.walletconnect.CodableStore.migration")
 
     public var storeUpdatePublisher: AnyPublisher<Void, Never> {
         storeUpdatePublisherSubject.eraseToAnyPublisher()
@@ -68,22 +69,23 @@ public final class CodableStore<T> where T: Codable {
 
 
     private func migrateIfNeeded() {
-        let migrationKey = "hasMigratedToGroup"
-        if defaults as? UserDefaults != UserDefaults.standard && !defaults.bool(forKey: migrationKey) {
-            let oldStore = CodableStore<T>(defaults: UserDefaults.standard, identifier: prefix)
+        migrationQueue.sync {
+            let migrationKey = "hasMigratedToGroup_\(prefix)"
+            if defaults as? UserDefaults != UserDefaults.standard && !defaults.bool(forKey: migrationKey) {
+                let oldStore = CodableStore<T>(defaults: UserDefaults.standard, identifier: prefix)
 
-            let oldItemsDictionary = oldStore.dictionaryForIdentifier()
+                let oldItemsDictionary = oldStore.dictionaryForIdentifier()
 
-            for (key, value) in oldItemsDictionary {
-                if let data = value as? Data {
-                    defaults.set(data, forKey: key)
+                for (key, value) in oldItemsDictionary {
+                    if let data = value as? Data {
+                        defaults.set(data, forKey: key)
+                    }
                 }
+
+                defaults.set(true, forKey: migrationKey)
+
+                storeUpdatePublisherSubject.send()
             }
-
-            defaults.set(true, forKey: migrationKey)
-
-            storeUpdatePublisherSubject.send()
         }
     }
-
 }
