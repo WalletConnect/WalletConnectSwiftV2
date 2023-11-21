@@ -11,9 +11,9 @@ public struct SignClientFactory {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public static func create(metadata: AppMetadata, pairingClient: PairingClient, networkingClient: NetworkingInteractor) -> SignClient {
+    public static func create(metadata: AppMetadata, pairingClient: PairingClient, networkingClient: NetworkingInteractor, groupIdentifier: String) -> SignClient {
         let logger = ConsoleLogger(loggingLevel: .debug)
-        let keyValueStorage = UserDefaults.standard
+        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return SignClientFactory.create(metadata: metadata, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, pairingClient: pairingClient, networkingClient: networkingClient)
     }

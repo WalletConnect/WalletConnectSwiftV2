@@ -13,6 +13,7 @@ public final class CodableStore<T> where T: Codable {
     public init(defaults: KeyValueStorage, identifier: String) {
         self.defaults = defaults
         self.prefix = identifier
+        migrateIfNeeded()
     }
 
     public func set(_ item: T, forKey key: String) {
@@ -64,4 +65,25 @@ public final class CodableStore<T> where T: Codable {
         return defaults.dictionaryRepresentation()
             .filter { $0.key.hasPrefix("\(prefix).") }
     }
+
+
+    private func migrateIfNeeded() {
+        let migrationKey = "hasMigratedToGroup"
+        if defaults as? UserDefaults != UserDefaults.standard && !defaults.bool(forKey: migrationKey) {
+            let oldStore = CodableStore<T>(defaults: UserDefaults.standard, identifier: prefix)
+
+            let oldItemsDictionary = oldStore.dictionaryForIdentifier()
+
+            for (key, value) in oldItemsDictionary {
+                if let data = value as? Data {
+                    defaults.set(data, forKey: key)
+                }
+            }
+
+            defaults.set(true, forKey: migrationKey)
+
+            storeUpdatePublisherSubject.send()
+        }
+    }
+
 }
