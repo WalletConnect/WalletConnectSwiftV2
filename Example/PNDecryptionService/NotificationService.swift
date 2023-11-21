@@ -26,7 +26,7 @@ class NotificationService: UNNotificationServiceExtension {
 
                 log("message decrypted", account: account, topic: topic, message: pushMessage)
 
-                let updatedContent = try handle(content: content, pushMessage: pushMessage, topic: topic)
+                let updatedContent = handle(content: content, pushMessage: pushMessage, topic: topic)
 
                 let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
                 mutableContent.title = pushMessage.title
@@ -62,57 +62,62 @@ class NotificationService: UNNotificationServiceExtension {
 
 private extension NotificationService {
 
-    func handle(content: UNNotificationContent, pushMessage: NotifyMessage, topic: String) throws -> UNNotificationContent {
-        let iconUrl = try pushMessage.icon.asURL()
+    func handle(content: UNNotificationContent, pushMessage: NotifyMessage, topic: String) -> UNNotificationContent {
+        do {
+            let iconUrl = try pushMessage.icon.asURL()
 
-        let senderThumbnailImageData = try Data(contentsOf: iconUrl)
-        let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
-        let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
-        let senderAvatar = INImage(imageData: senderThumbnailImageFileData)
+            let senderThumbnailImageData = try Data(contentsOf: iconUrl)
+            let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
+            let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
+            let senderAvatar = INImage(imageData: senderThumbnailImageFileData)
 
-        var personNameComponents = PersonNameComponents()
-        personNameComponents.nickname = pushMessage.title
+            var personNameComponents = PersonNameComponents()
+            personNameComponents.nickname = pushMessage.title
 
-        let senderPerson = INPerson(
-            personHandle: INPersonHandle(value: topic, type: .unknown),
-            nameComponents: personNameComponents,
-            displayName: pushMessage.title,
-            image: senderAvatar,
-            contactIdentifier: nil,
-            customIdentifier: topic,
-            isMe: false,
-            suggestionType: .none
-        )
+            let senderPerson = INPerson(
+                personHandle: INPersonHandle(value: topic, type: .unknown),
+                nameComponents: personNameComponents,
+                displayName: pushMessage.title,
+                image: senderAvatar,
+                contactIdentifier: nil,
+                customIdentifier: topic,
+                isMe: false,
+                suggestionType: .none
+            )
 
-        let selfPerson = INPerson(
-            personHandle: INPersonHandle(value: "0", type: .unknown),
-            nameComponents: nil,
-            displayName: nil,
-            image: nil,
-            contactIdentifier: nil,
-            customIdentifier: nil,
-            isMe: true,
-            suggestionType: .none
-        )
+            let selfPerson = INPerson(
+                personHandle: INPersonHandle(value: "0", type: .unknown),
+                nameComponents: nil,
+                displayName: nil,
+                image: nil,
+                contactIdentifier: nil,
+                customIdentifier: nil,
+                isMe: true,
+                suggestionType: .none
+            )
 
-        let incomingMessagingIntent = INSendMessageIntent(
-            recipients: [selfPerson],
-            outgoingMessageType: .outgoingMessageText,
-            content: pushMessage.body,
-            speakableGroupName: nil,
-            conversationIdentifier: pushMessage.type,
-            serviceName: nil,
-            sender: senderPerson,
-            attachments: []
-        )
+            let incomingMessagingIntent = INSendMessageIntent(
+                recipients: [selfPerson],
+                outgoingMessageType: .outgoingMessageText,
+                content: pushMessage.body,
+                speakableGroupName: nil,
+                conversationIdentifier: pushMessage.type,
+                serviceName: nil,
+                sender: senderPerson,
+                attachments: []
+            )
 
-        incomingMessagingIntent.setImage(senderAvatar, forParameterNamed: \.sender)
+            incomingMessagingIntent.setImage(senderAvatar, forParameterNamed: \.sender)
 
-        let interaction = INInteraction(intent: incomingMessagingIntent, response: nil)
-        interaction.direction = .incoming
-        interaction.donate(completion: nil)
+            let interaction = INInteraction(intent: incomingMessagingIntent, response: nil)
+            interaction.direction = .incoming
+            interaction.donate(completion: nil)
 
-        return try content.updating(from: incomingMessagingIntent)
+            return try content.updating(from: incomingMessagingIntent)
+        } 
+        catch {
+            return content
+        }
     }
 
     func downloadAttachment(data: Data, fileName: String) throws -> URL {
