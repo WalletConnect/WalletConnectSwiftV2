@@ -6,7 +6,11 @@ import Web3Wallet
 final class ConfigurationService {
 
     func configure(importAccount: ImportAccount) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(
+            groupIdentifier: "group.com.walletconnect.sdk",
+            projectId: InputConfig.projectId,
+            socketFactory: DefaultSocketFactory()
+        )
         Networking.instance.setLogging(level: .debug)
 
         let metadata = AppMetadata(

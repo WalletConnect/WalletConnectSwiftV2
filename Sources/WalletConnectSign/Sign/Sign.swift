@@ -21,23 +21,12 @@ public class Sign {
     /// Sign client instance
     public static var instance: SignClient = {
         return SignClientFactory.create(
-            metadata: Sign.metadata ?? Pair.metadata,
+            metadata: Pair.metadata,
             pairingClient: Pair.instance as! PairingClient,
-            networkingClient: Networking.instance as! NetworkingInteractor
+            networkingClient: Networking.instance as! NetworkingInteractor,
+            groupIdentifier: Networking.groupIdentifier
         )
     }()
 
-    @available(*, deprecated, message: "Remove after clients migration")
-    private static var metadata: AppMetadata?
-
     private init() { }
-
-    /// Sign instance config method
-    /// - Parameters:
-    ///   - metadata: App metadata
-    @available(*, deprecated, message: "Use Pair.configure(metadata:) instead")
-    static public func configure(metadata: AppMetadata) {
-        Pair.configure(metadata: metadata)
-        Sign.metadata = metadata
-    }
 }

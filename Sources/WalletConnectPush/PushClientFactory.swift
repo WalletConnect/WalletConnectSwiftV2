@@ -1,9 +1,12 @@
 import Foundation
 
 public struct PushClientFactory {
-    public static func create(projectId: String,
-                              pushHost: String,
-                              environment: APNSEnvironment) -> PushClient {
+    public static func create(
+        projectId: String,
+        pushHost: String,
+        groupIdentifier: String,
+        environment: APNSEnvironment
+    ) -> PushClient {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard

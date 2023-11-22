@@ -11,7 +11,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let app = Application()
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(
+            groupIdentifier: "group.com.walletconnect.sdk",
+            projectId: InputConfig.projectId,
+            socketFactory: DefaultSocketFactory()
+        )
         Auth.configure(crypto: DefaultCryptoProvider())
         
         let metadata = AppMetadata(
@@ -23,7 +27,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         )
         
         Web3Modal.configure(
-            projectId: InputConfig.projectId, 
+            projectId: InputConfig.projectId,
+            chainId: Blockchain("eip155:1")!,
             metadata: metadata
         )
         

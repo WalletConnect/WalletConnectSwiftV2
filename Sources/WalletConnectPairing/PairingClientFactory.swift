@@ -2,14 +2,22 @@ import Foundation
 
 public struct PairingClientFactory {
 
-    public static func create(networkingClient: NetworkingInteractor) -> PairingClient {
+    public static func create(
+        networkingClient: NetworkingInteractor,
+        groupIdentifier: String
+    ) -> PairingClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return PairingClientFactory.create(logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient)
     }
 
-    public static func create(logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, networkingClient: NetworkingInteractor) -> PairingClient {
+    public static func create(
+        logger: ConsoleLogging,
+        keyValueStorage: KeyValueStorage,
+        keychainStorage: KeychainStorageProtocol,
+        networkingClient: NetworkingInteractor
+    ) -> PairingClient {
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: PairStorageIdentifiers.pairings.rawValue)))
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
