@@ -71,21 +71,25 @@ public final class CodableStore<T> where T: Codable {
     private func migrateIfNeeded() {
         migrationQueue.sync {
             let migrationKey = "hasMigratedToGroup_\(prefix)"
-            if defaults as? UserDefaults != UserDefaults.standard && !defaults.bool(forKey: migrationKey) {
-                let oldStore = CodableStore<T>(defaults: UserDefaults.standard, identifier: prefix)
-
-                let oldItemsDictionary = oldStore.dictionaryForIdentifier()
-
-                for (key, value) in oldItemsDictionary {
-                    if let data = value as? Data {
-                        defaults.set(data, forKey: key)
-                    }
-                }
-
-                defaults.set(true, forKey: migrationKey)
-
-                storeUpdatePublisherSubject.send()
+            guard let groupDefaults = defaults as? UserDefaults,
+                  groupDefaults != UserDefaults.standard,
+                  !groupDefaults.bool(forKey: migrationKey) else {
+                return
             }
+
+            let oldStore = CodableStore<T>(defaults: UserDefaults.standard, identifier: prefix)
+            let oldItemsDictionary = oldStore.dictionaryForIdentifier()
+
+            for (key, value) in oldItemsDictionary {
+                if let data = value as? Data {
+                    groupDefaults.set(data, forKey: key)
+                    UserDefaults.standard.removeObject(forKey: key)
+                }
+            }
+
+            groupDefaults.set(true, forKey: migrationKey)
+            storeUpdatePublisherSubject.send()
         }
     }
+
 }

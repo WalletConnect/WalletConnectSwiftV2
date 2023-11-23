@@ -8,6 +8,7 @@ public protocol ClientIdStoring {
 public struct ClientIdStorage: ClientIdStoring {
     private let oldStorageKey = "com.walletconnect.iridium.client_id"
     private let publicStorageKey = "com.walletconnect.iridium.client_id.public"
+    private static let migrationQueue = DispatchQueue(label: "com.walletconnect.iridium.clientIdStorageMigration")
 
     private let defaults: KeyValueStorage
     private let keychain: KeychainStorageProtocol
@@ -50,8 +51,10 @@ private extension ClientIdStorage {
     }
 
     func migrateIfNeeded() {
-        migratePublicKeyToGroupUserDefaultsIfNeeded()
-        migrateFromKeychainToKeyValueStorageIfNeeded()
+        ClientIdStorage.migrationQueue.sync {
+            migratePublicKeyToGroupUserDefaultsIfNeeded()
+            migrateFromKeychainToKeyValueStorageIfNeeded()
+        }
     }
 
     func migrateFromKeychainToKeyValueStorageIfNeeded() {
@@ -79,6 +82,7 @@ private extension ClientIdStorage {
 
         groupDefaults.set(pubKeyRaw, forKey: publicStorageKey)
         groupDefaults.set(true, forKey: migrationKey)
+        UserDefaults.standard.removeObject(forKey: publicStorageKey)
         logger.debug("Public key migrated to group UserDefaults")
     }
 
