@@ -34,7 +34,7 @@ public actor VerifyClient: VerifyClientProtocol {
     }
     
     nonisolated public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
-        guard isScam == nil else {
+        guard isScam != true else {
             return VerifyContext(
                 origin: origin,
                 validation: .scam
