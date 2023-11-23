@@ -1,27 +1,25 @@
 import Foundation
 
 public struct NotifyMessageRecord: Codable, Equatable, SqliteRow {
-    public let id: String
     public let topic: String
     public let message: NotifyMessage
     public let publishedAt: Date
 
-    public var databaseId: String {
-        return id
+    public var id: String {
+        return message.id
     }
 
-    public init(id: String, topic: String, message: NotifyMessage, publishedAt: Date) {
-        self.id = id
+    public init(topic: String, message: NotifyMessage, publishedAt: Date) {
         self.topic = topic
         self.message = message
         self.publishedAt = publishedAt
     }
 
     public init(decoder: SqliteRowDecoder) throws {
-        self.id = try decoder.decodeString(at: 0)
         self.topic = try decoder.decodeString(at: 1)
 
         self.message = NotifyMessage(
+            id: try decoder.decodeString(at: 0),
             title: try decoder.decodeString(at: 2),
             body: try decoder.decodeString(at: 3),
             icon: try decoder.decodeString(at: 4),
@@ -34,7 +32,7 @@ public struct NotifyMessageRecord: Codable, Equatable, SqliteRow {
 
     public func encode() -> SqliteRowEncoder {
         var encoder = SqliteRowEncoder()
-        encoder.encodeString(id, for: "id")
+        encoder.encodeString(message.id, for: "id")
         encoder.encodeString(topic, for: "topic")
         encoder.encodeString(message.title, for: "title")
         encoder.encodeString(message.body, for: "body")

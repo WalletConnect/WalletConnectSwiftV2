@@ -16,11 +16,11 @@ public class NotifyDecryptionService {
         self.serializer = Serializer(kms: kms, logger: ConsoleLogger(prefix: "🔐", loggingLevel: .off))
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) throws -> NotifyMessage {
+    public func decryptMessage(topic: String, ciphertext: String) throws -> (NotifyMessage, Account) {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
         guard let params = rpcRequest.params else { throw Errors.malformedNotifyMessage }
         let wrapper = try params.get(NotifyMessagePayload.Wrapper.self)
         let (messagePayload, _) = try NotifyMessagePayload.decodeAndVerify(from: wrapper)
-        return messagePayload.message
+        return (messagePayload.message, messagePayload.account)
     }
 }

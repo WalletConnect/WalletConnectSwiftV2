@@ -52,7 +52,7 @@ struct NotificationsView: View {
                         }
 
                         Rectangle()
-                            .foregroundColor(.black.opacity(0.03))
+                            .foregroundColor(Color.Foreground100.opacity(0.05))
                             .frame(maxWidth: .infinity)
                             .frame(height: 1)
                     }

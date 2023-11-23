@@ -10,17 +10,17 @@ struct DAppEngine {
     // Main screen
 
     var connectButton: XCUIElement {
-        instance.buttons["Connect"]
+        instance.buttons["Connect with Sign API"]
     }
 
     // Accounts screen
 
     var accountRow: XCUIElement {
-        instance.tables.cells.containing("0x").firstMatch
+        instance.buttons.containing("0x").firstMatch
     }
     
     var methodRow: XCUIElement {
-        instance.tables.cells.firstMatch
+        instance.firstMatch.buttons.element(matching: .button, identifier: "method-0")
     }
 
     // Pairing screen
@@ -30,6 +30,6 @@ struct DAppEngine {
     }
 
     var copyURIButton: XCUIElement {
-        instance.buttons["Copy"]
+        instance.buttons["Copy link"]
     }
 }

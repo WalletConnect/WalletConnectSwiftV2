@@ -38,6 +38,10 @@ final class SettingsPresenter: ObservableObject {
         return deviceToken
     }
 
+    func browserPressed() {
+        router.presentBrowser()
+    }
+
     func logoutPressed() async throws {
         guard let account = accountStorage.importAccount?.account else { return }
         try await interactor.notifyUnregister(account: account)

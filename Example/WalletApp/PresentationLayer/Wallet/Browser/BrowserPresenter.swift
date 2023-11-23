@@ -38,7 +38,7 @@ extension BrowserPresenter: SceneViewModel {
     }
 
     var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode {
-        return .always
+        return .never
     }
 }
 

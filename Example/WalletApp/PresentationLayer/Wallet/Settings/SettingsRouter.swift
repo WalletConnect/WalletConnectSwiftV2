@@ -13,4 +13,9 @@ final class SettingsRouter {
     @MainActor func presentWelcome() async {
         WelcomeModule.create(app: app).present()
     }
+
+    func presentBrowser() {
+        BrowserModule.create(app: app)
+            .push(from: viewController)
+    }
 }

@@ -4,7 +4,7 @@ import Web3Wallet
 import WalletConnectRouter
 
 final class SessionProposalInteractor {
-    func approve(proposal: Session.Proposal, account: Account) async throws {
+    func approve(proposal: Session.Proposal, account: Account) async throws -> Bool {
         // Following properties are used to support all the required and optional namespaces for the testing purposes
         let supportedMethods = Set(proposal.requiredNamespaces.flatMap { $0.value.methods } + (proposal.optionalNamespaces?.flatMap { $0.value.methods } ?? []))
         let supportedEvents = Set(proposal.requiredNamespaces.flatMap { $0.value.events } + (proposal.optionalNamespaces?.flatMap { $0.value.events } ?? []))
@@ -29,10 +29,12 @@ final class SessionProposalInteractor {
             accounts: supportedAccounts
         )
         try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
-        
-        /* Redirect */
+
         if let uri = proposal.proposer.redirect?.native {
             WalletConnectRouter.goBack(uri: uri)
+            return false
+        } else {
+            return true
         }
     }
 

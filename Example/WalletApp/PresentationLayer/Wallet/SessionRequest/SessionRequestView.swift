@@ -97,7 +97,15 @@ struct SessionRequestView: View {
                 Spacer()
             }
             .alert(presenter.errorMessage, isPresented: $presenter.showError) {
-                Button("OK", role: .cancel) {}
+                Button("OK", role: .cancel) {
+                    presenter.dismiss()
+                }
+            }
+            .sheet(
+                isPresented: $presenter.showSignedSheet,
+                onDismiss: presenter.onSignedSheetDismiss
+            ) {
+                ConnectedSheetView(title: "Request is signed")
             }
         }
         .edgesIgnoringSafeArea(.all)
