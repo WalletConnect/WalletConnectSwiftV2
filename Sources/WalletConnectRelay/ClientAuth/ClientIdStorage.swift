@@ -50,24 +50,36 @@ private extension ClientIdStorage {
     }
 
     func migrateIfNeeded() {
+        migratePublicKeyToGroupUserDefaultsIfNeeded()
+        migrateFromKeychainToKeyValueStorageIfNeeded()
+    }
+
+    func migrateFromKeychainToKeyValueStorageIfNeeded() {
         guard let privateKey: SigningPrivateKey = try? keychain.read(key: oldStorageKey) else {
             return
         }
-
         do {
             try setPrivatePart(privateKey)
             setPublicPart(privateKey.publicKey)
             try keychain.delete(key: oldStorageKey)
-            logger.debug("ClientID migrated")
+            logger.debug("Keychain data migrated to group UserDefaults")
         } catch {
             logger.debug("ClientID migration failed with: \(error.localizedDescription)")
         }
     }
 
-    func migrateToGroupDefaultsIfNeeded() {
+    private func migratePublicKeyToGroupUserDefaultsIfNeeded() {
+        let migrationKey = "com.walletconnect.has_migrated_public_key_to_group"
+        guard let groupDefaults = defaults as? UserDefaults,
+              groupDefaults != UserDefaults.standard,
+              !groupDefaults.bool(forKey: migrationKey),
+              let pubKeyRaw = UserDefaults.standard.data(forKey: publicStorageKey) else {
+            return
+        }
 
-
-        
+        groupDefaults.set(pubKeyRaw, forKey: publicStorageKey)
+        groupDefaults.set(true, forKey: migrationKey)
+        logger.debug("Public key migrated to group UserDefaults")
     }
 
     func getPublicPart() throws -> SigningPublicKey {
