@@ -32,7 +32,7 @@ class NotifyMessageSubscriber {
             logger.debug("Decoded Notify Message: \(payload.topic)", properties: ["topic": payload.topic, "messageBody": messagePayload.message.body, "messageTitle": messagePayload.message.title, "publishedAt": payload.publishedAt.description, "id": payload.id.string])
 
             let dappPubKey = try DIDKey(did: claims.iss)
-            let record = NotifyMessageRecord(id: payload.id.string, topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
+            let record = NotifyMessageRecord(topic: payload.topic, message: messagePayload.message, publishedAt: payload.publishedAt)
             try notifyStorage.setMessage(record)
 
             let receiptPayload = NotifyMessageReceiptPayload(
