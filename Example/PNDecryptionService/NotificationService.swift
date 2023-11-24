@@ -7,6 +7,8 @@ class NotificationService: UNNotificationServiceExtension {
 
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNNotificationContent?
+    private let notifyTags: [UInt] = [1]
+    private let w3wTags: [UInt] = [1]
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
@@ -16,40 +18,51 @@ class NotificationService: UNNotificationServiceExtension {
 
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
-           let ciphertext = content.userInfo["blob"] as? String {
+           let ciphertext = content.userInfo["message"] as? String,
+           let tag = content.userInfo["tag"] as? UInt {
 
-            log("topic and blob found")
-
-            do {
-                let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
-                let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
-
-                log("message decrypted", account: account, topic: topic, message: pushMessage)
-
-                let updatedContent = handle(content: content, pushMessage: pushMessage, topic: topic)
-
-                let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
-                mutableContent.title = pushMessage.title
-                mutableContent.subtitle = pushMessage.url
-                mutableContent.body = pushMessage.body
-
-                log("message handled", account: account, topic: topic, message: pushMessage)
-
-                contentHandler(mutableContent)
-
-                log("content handled", account: account, topic: topic, message: pushMessage)
-            }
-            catch {
-                log("error: \(error.localizedDescription)")
-
-                let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
-                mutableContent.title = "Error"
-                mutableContent.body = error.localizedDescription
-
-                contentHandler(mutableContent)
+            if notifyTags.contains(tag) {
+                Task {
+                    let mutableContent = await handleNotifyMessage(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
+                    contentHandler(mutableContent)
+                }
+            } else if w3wTags.contains(tag) {
+                // Handle other tags
+            } else {
+                // Handle default case
             }
         }
     }
+
+
+    private func handleNotifyMessage(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) async -> UNMutableNotificationContent {
+        do {
+            let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
+            let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+
+            log("message decrypted", account: account, topic: topic, message: pushMessage)
+
+            let updatedContent = handle(content: content, pushMessage: pushMessage, topic: topic)
+
+            let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
+            mutableContent.title = pushMessage.title
+            mutableContent.subtitle = pushMessage.url
+            mutableContent.body = pushMessage.body
+
+            log("message handled", account: account, topic: topic, message: pushMessage)
+
+            return mutableContent
+        } catch {
+            log("error: \(error.localizedDescription)")
+
+            let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+            mutableContent.title = "Error"
+            mutableContent.body = error.localizedDescription
+
+            return mutableContent
+        }
+    }
+
 
     override func serviceExtensionTimeWillExpire() {
         // Called just before the extension will be terminated by the system.
@@ -58,6 +71,8 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent)
         }
     }
+
+
 }
 
 private extension NotificationService {

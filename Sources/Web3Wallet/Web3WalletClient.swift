@@ -212,8 +212,8 @@ public class Web3WalletClient {
         try authClient.getPendingRequests()
     }
     
-    public func registerPushClient(deviceToken: Data) async throws {
-        try await pushClient.register(deviceToken: deviceToken)
+    public func registerPushClient(deviceToken: Data, enableEncrypted: Bool = false) async throws {
+        try await pushClient.register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }
     
     /// Delete all stored data such as: pairings, sessions, keys
