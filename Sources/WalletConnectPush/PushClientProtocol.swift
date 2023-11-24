@@ -7,7 +7,7 @@ public protocol PushClientProtocol {
 #endif
 }
 
-extension PushClientProtocol {
+public extension PushClientProtocol {
     func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
         try await register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }
