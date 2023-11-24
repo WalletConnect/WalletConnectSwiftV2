@@ -14,7 +14,7 @@ public class PushClient: PushClientProtocol {
         self.logger = logger
     }
 
-    public func register(deviceToken: Data) async throws {
+    public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
         try await registerService.register(deviceToken: deviceToken)
     }
 
