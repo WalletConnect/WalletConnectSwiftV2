@@ -23,21 +23,17 @@ class NotificationService: UNNotificationServiceExtension {
            let tag = content.userInfo["tag"] as? UInt {
 
             if notifyTags.contains(tag) {
-                Task {
-                    let mutableContent = await handleNotifyNotification(content: content, topic: topic, ciphertext: ciphertext)
-                    contentHandler(mutableContent)
-                }
+                let mutableContent = handleNotifyNotification(content: content, topic: topic, ciphertext: ciphertext)
+                contentHandler(mutableContent)
             } else if w3wTags.contains(tag) {
-                Task {
-                    let mutableContent = await handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
-                }
+                let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
             } else {
                 // Handle default case
             }
         }
     }
 
-    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) async -> UNMutableNotificationContent {
+    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) -> UNMutableNotificationContent {
 
 
         let web3WalletDecryptionService = Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
@@ -46,11 +42,10 @@ class NotificationService: UNNotificationServiceExtension {
 
         let metadata = web3WalletDecryptionService.getMetadata(topic: topic)
 
-
     }
 
 
-    private func handleNotifyNotification(content: UNNotificationContent, topic: String, ciphertext: String) async -> UNMutableNotificationContent {
+    private func handleNotifyNotification(content: UNNotificationContent, topic: String, ciphertext: String) -> UNMutableNotificationContent {
         do {
             let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
             let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)

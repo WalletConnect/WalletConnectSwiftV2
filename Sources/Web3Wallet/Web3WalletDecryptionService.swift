@@ -1,6 +1,6 @@
 import Foundation
 
-public class Web3WalletDecryptionService {
+public final class Web3WalletDecryptionService {
 
     private let signDecryptionService: SignDecryptionService
 
