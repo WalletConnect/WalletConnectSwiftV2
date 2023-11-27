@@ -27,8 +27,8 @@ public struct PushClientFactory {
         environment: APNSEnvironment
     ) -> PushClient {
         let sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.timeoutIntervalForRequest = 5.0
-        sessionConfiguration.timeoutIntervalForResource = 5.0
+        sessionConfiguration.timeoutIntervalForRequest = 10.0
+        sessionConfiguration.timeoutIntervalForResource = 10.0
         let session = URLSession(configuration: sessionConfiguration)
 
         let logger = ConsoleLogger(prefix: "👂🏻", loggingLevel: .off)

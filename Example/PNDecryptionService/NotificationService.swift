@@ -16,6 +16,7 @@ class NotificationService: UNNotificationServiceExtension {
         self.bestAttemptContent = request.content
 
         log("didReceive(_:) fired")
+        
 
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
@@ -27,6 +28,7 @@ class NotificationService: UNNotificationServiceExtension {
                 contentHandler(mutableContent)
             } else if w3wTags.contains(tag) {
                 let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
+                contentHandler(mutableContent)
             } else {
                 // Handle default case
             }
@@ -35,13 +37,27 @@ class NotificationService: UNNotificationServiceExtension {
 
     private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) -> UNMutableNotificationContent {
 
+        do {
+            let web3WalletDecryptionService = try Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
 
-        let web3WalletDecryptionService = Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
+//            let rpcRequest = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
 
-        let rpcRequest = web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
+            let metadata = web3WalletDecryptionService.getMetadata(topic: topic)
 
-        let metadata = web3WalletDecryptionService.getMetadata(topic: topic)
+            let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
 
+            mutableContent.title = "rpcRequest.method"
+
+            mutableContent.subtitle = metadata?.url ?? ""
+
+            return mutableContent
+        } catch {
+            let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+            mutableContent.title = "Error"
+            mutableContent.body = error.localizedDescription
+
+            return mutableContent
+        }
     }
 
 
