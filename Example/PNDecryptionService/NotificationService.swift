@@ -1,4 +1,5 @@
 import UserNotifications
+import Web3Wallet
 import WalletConnectNotify
 import Intents
 import Mixpanel
@@ -7,8 +8,8 @@ class NotificationService: UNNotificationServiceExtension {
 
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNNotificationContent?
-    private let notifyTags: [UInt] = [1]
-    private let w3wTags: [UInt] = [1]
+    private let notifyTags: [UInt] = [4002]
+    private let w3wTags: [UInt] = [1100, 1108, 3000]
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
@@ -23,19 +24,33 @@ class NotificationService: UNNotificationServiceExtension {
 
             if notifyTags.contains(tag) {
                 Task {
-                    let mutableContent = await handleNotifyMessage(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
+                    let mutableContent = await handleNotifyNotification(content: content, topic: topic, ciphertext: ciphertext)
                     contentHandler(mutableContent)
                 }
             } else if w3wTags.contains(tag) {
-                // Handle other tags
+                Task {
+                    let mutableContent = await handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
+                }
             } else {
                 // Handle default case
             }
         }
     }
 
+    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) async -> UNMutableNotificationContent {
 
-    private func handleNotifyMessage(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) async -> UNMutableNotificationContent {
+
+        let web3WalletDecryptionService = Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
+
+        let rpcRequest = web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
+
+        let metadata = web3WalletDecryptionService.getMetadata(topic: topic)
+
+
+    }
+
+
+    private func handleNotifyNotification(content: UNNotificationContent, topic: String, ciphertext: String) async -> UNMutableNotificationContent {
         do {
             let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
             let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
