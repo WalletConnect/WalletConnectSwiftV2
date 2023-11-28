@@ -8,10 +8,11 @@ public struct RelayClientFactory {
         relayHost: String,
         projectId: String,
         socketFactory: WebSocketFactory,
+        groupIdentifier: String,
         socketConnectionType: SocketConnectionType
     ) -> RelayClient {
 
-        let keyValueStorage = UserDefaults.standard
+        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
 
