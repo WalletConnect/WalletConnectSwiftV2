@@ -8,34 +8,32 @@ class NotificationService: UNNotificationServiceExtension {
 
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNNotificationContent?
-    private let notifyTags: [UInt] = [4002]
-    private let w3wTags: [UInt] = [1100, 1108, 3000]
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         self.contentHandler = contentHandler
         self.bestAttemptContent = request.content
 
         log("didReceive(_:) fired")
-        
 
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
            let ciphertext = content.userInfo["message"] as? String,
            let tag = content.userInfo["tag"] as? UInt {
 
-            if notifyTags.contains(tag) {
+            if let w3wRequestMethod = Web3WalletDecryptionService.getRequestMethod(tag: tag) {
+                let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, requestMethod: w3wRequestMethod, ciphertext: ciphertext)
+                contentHandler(mutableContent)
+            } else if NotifyDecryptionService.canHandle(tag: tag) {
                 let mutableContent = handleNotifyNotification(content: content, topic: topic, ciphertext: ciphertext)
                 contentHandler(mutableContent)
-            } else if w3wTags.contains(tag) {
-                let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
-                contentHandler(mutableContent)
             } else {
-                // Handle default case
+                let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+                mutableContent.title = "Error: unknown message tag"
             }
         }
     }
 
-    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) -> UNMutableNotificationContent {
+    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, requestMethod: Web3WalletDecryptionService.RequestMethod, ciphertext: String) -> UNMutableNotificationContent {
 
         do {
             let web3WalletDecryptionService = try Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
@@ -46,9 +44,14 @@ class NotificationService: UNNotificationServiceExtension {
 
             let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
 
-            mutableContent.title = "rpcRequest.method"
-
-            mutableContent.subtitle = metadata?.url ?? ""
+            switch requestMethod {
+            case .sessionProposal:
+                mutableContent.title = "session proposal"
+            case .sessionRequest:
+                mutableContent.title = "session request"
+            case .authRequest:
+                mutableContent.title = "auth request"
+            }
 
             return mutableContent
         } catch {

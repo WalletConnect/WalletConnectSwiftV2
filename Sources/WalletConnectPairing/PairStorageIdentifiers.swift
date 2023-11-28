@@ -1,5 +1,5 @@
 import Foundation
 
-enum PairStorageIdentifiers: String {
+public enum PairStorageIdentifiers: String {
     case pairings = "com.walletconnect.sdk.pairingSequences"
 }
