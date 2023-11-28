@@ -56,6 +56,7 @@ public class Networking {
         Relay.configure(
             relayHost: relayHost,
             projectId: projectId,
+            groupIdentifier: groupIdentifier,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType)
     }
