@@ -14,7 +14,7 @@ public struct RelayClientFactory {
 
         let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
 
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
 
         let logger = ConsoleLogger(prefix: "🚄" ,loggingLevel: .off)
 

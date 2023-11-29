@@ -11,7 +11,7 @@ public struct AuthClientFactory {
     ) -> AuthClient {
         let logger = ConsoleLogger(loggingLevel: .off)
         let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
         let iatProvider = DefaultIATProvider()
 
         return AuthClientFactory.create(
