@@ -3,7 +3,7 @@ import Foundation
 final class SyncClientFactory {
 
     static func create(networkInteractor: NetworkInteracting, bip44: BIP44Provider) -> SyncClient {
-        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
         return create(networkInteractor: networkInteractor, bip44: bip44, keychain: keychain)
     }
 
