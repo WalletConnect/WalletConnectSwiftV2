@@ -11,6 +11,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
     private let service: String
     private let accessGroup: String
+    private let synchronizationQueue = DispatchQueue(label: "com.yourapp.KeychainStorage")
 
     private let secItem: KeychainServiceProtocol
 
@@ -61,15 +62,16 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecSuccess:
             return item as? Data
         case errSecItemNotFound:
-            // Try to update the accessibility attribute first
-            tryUpdateAccessibilityAttributeOnRead(key: key)
-            // Then attempt to migrate to the new access group and return if item exists
-            if let updatedData = try tryToMigrateKeyToNewAccessGroup(key: key) {
-                return updatedData
-            } else {
-                return nil
+            return try synchronizationQueue.sync {
+                // Try to update the accessibility attribute first
+                tryUpdateAccessibilityAttribute(key: key)
+                // Then attempt to migrate to the new access group and return if item exists
+                if let updatedData = try tryToMigrateKeyToNewAccessGroupOnRead(key: key) {
+                    return updatedData
+                } else {
+                    return nil
+                }
             }
-
         default:
             throw KeychainError(status)
         }
@@ -134,7 +136,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
 
-    private func tryUpdateAccessibilityAttributeOnRead(key: String) {
+    private func tryUpdateAccessibilityAttribute(key: String) {
         var updateQuery = buildBaseServiceQuery(for: key)
         updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
@@ -148,7 +150,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    private func tryToMigrateKeyToNewAccessGroup(key: String) throws -> Data? {
+    private func tryToMigrateKeyToNewAccessGroupOnRead(key: String) throws -> Data? {
         // Update the item to include the new access group
         let query = buildBaseServiceQuery(for: key)
         let attributesToUpdate = [
