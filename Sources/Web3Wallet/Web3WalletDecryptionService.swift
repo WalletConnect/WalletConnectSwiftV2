@@ -1,9 +1,6 @@
 import Foundation
 
 public final class Web3WalletDecryptionService {
-    enum Errors: Error {
-        case unknownTag
-    }
     public enum RequestMethod: UInt {
         case sessionRequest = 1108
         case sessionProposal = 1100
@@ -22,8 +19,7 @@ public final class Web3WalletDecryptionService {
         return RequestMethod(rawValue: tag)
     }
 
-    public func decryptMessage(topic: String, ciphertext: String, tag: UInt) throws -> RPCRequest {
-        guard let requestMethod = Self.getRequestMethod(tag: tag) else { throw Errors.unknownTag }
+    public func decryptMessage(topic: String, ciphertext: String, requestMethod: RequestMethod) throws -> RPCRequest {
         switch requestMethod {
         case .sessionProposal, .sessionRequest:
             return try signDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)

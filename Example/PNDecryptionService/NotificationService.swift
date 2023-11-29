@@ -38,7 +38,7 @@ class NotificationService: UNNotificationServiceExtension {
         do {
             let web3WalletDecryptionService = try Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
 
-//            let rpcRequest = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
+            let rpcRequest = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext, requestMethod: requestMethod)
 
 
             let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
