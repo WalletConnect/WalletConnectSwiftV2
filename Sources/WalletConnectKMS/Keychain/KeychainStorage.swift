@@ -63,7 +63,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecItemNotFound:
             // Try to update the accessibility attribute first
             tryUpdateAccessibilityAttributeOnRead(key: key)
-                // Then attempt to migrate to the new access group
+            // Then attempt to migrate to the new access group and return if item exists
             if let updatedData = try tryToMigrateKeyToNewAccessGroup(key: key) {
                 return updatedData
             } else {
@@ -126,7 +126,6 @@ public final class KeychainStorage: KeychainStorageProtocol {
             kSecAttrAccount: key
         ]
 
-        // Add the access group to the query if it's provided
         if let accessGroup = accessGroup {
             query[kSecAttrAccessGroup] = accessGroup
         }
@@ -142,12 +141,10 @@ public final class KeychainStorage: KeychainStorageProtocol {
         let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
         let status = secItem.update(updateQuery as CFDictionary, attributes as CFDictionary)
 
-        print("tryUpdateAccessibilityAttributeOnRead status: \(status.message) \(status.description)")
-
-        if status != errSecSuccess {
-            print("tryUpdateAccessibilityAttributeOnRead status: \(status.message) \(status.description) potentially already migrated")
-        } else if status == errSecSuccess {
-            print("successfuly migrated to kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly")
+        if status == errSecSuccess {
+            print("Successfuly migrated with kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly")
+        } else {
+            print("Item for query not found, item potentially already migrated with kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly")
         }
     }
 
@@ -160,7 +157,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
         let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
 
-        print("migrateKeyToNewAccessGroup status: \(updateStatus) \(updateStatus.message) \(updateStatus.description)")
+        print("Migrate Key To New Access Group status: \(updateStatus)")
         guard updateStatus == errSecSuccess else {
             throw KeychainError(updateStatus)
         }
