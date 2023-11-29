@@ -9,8 +9,10 @@ public struct PushClientFactory {
     ) -> PushClient {
 
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
-        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
-
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
+        
         return PushClientFactory.create(
             projectId: projectId,
             pushHost: pushHost,

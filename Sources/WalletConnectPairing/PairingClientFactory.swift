@@ -7,7 +7,9 @@ public struct PairingClientFactory {
         groupIdentifier: String
     ) -> PairingClient {
         let logger = ConsoleLogger(loggingLevel: .off)
-        let keyValueStorage = UserDefaults(suiteName: groupIdentifier) ?? UserDefaults.standard
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return PairingClientFactory.create(logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, networkingClient: networkingClient)
     }
