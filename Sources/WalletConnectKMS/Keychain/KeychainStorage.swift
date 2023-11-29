@@ -10,12 +10,18 @@ public protocol KeychainStorageProtocol {
 public final class KeychainStorage: KeychainStorageProtocol {
 
     private let service: String
+    private let accessGroup: String
 
     private let secItem: KeychainServiceProtocol
 
-    public init(keychainService: KeychainServiceProtocol = KeychainServiceWrapper(), serviceIdentifier: String) {
+    public init(
+        keychainService: KeychainServiceProtocol = KeychainServiceWrapper(),
+        serviceIdentifier: String,
+        accessGroup: String
+    ) {
         self.secItem = keychainService
-        service = serviceIdentifier
+        self.accessGroup = accessGroup
+        self.service = serviceIdentifier
     }
 
     public func add<T>(_ item: T, forKey key: String) throws where T: GenericPasswordConvertible {
@@ -45,7 +51,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
     public func readData(key: String) throws -> Data? {
-        var query = buildBaseServiceQuery(for: key)
+        var query = buildBaseServiceQuery(for: key, accessGroup: accessGroup)
         query[kSecReturnData] = true
 
         var item: CFTypeRef?
@@ -55,7 +61,14 @@ public final class KeychainStorage: KeychainStorageProtocol {
         case errSecSuccess:
             return item as? Data
         case errSecItemNotFound:
-            return tryMigrateAttrAccessibleOnRead(key: key) // TODO: Replace with nil once migration period ends
+            // Try to update the accessibility attribute first
+            if let updatedData = tryUpdateAccessibilityAttributeOnRead(key: key) {
+                // Then attempt to migrate to the new access group
+                try migrateKeyToNewAccessGroup(key: key, data: updatedData)
+                return updatedData
+            } else {
+                return nil
+            }
         default:
             throw KeychainError(status)
         }
@@ -82,7 +95,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
     public func delete(key: String) throws {
-        let query = buildBaseServiceQuery(for: key)
+        let query = buildBaseServiceQuery(for: key, accessGroup: accessGroup)
 
         let status = secItem.delete(query as CFDictionary)
 
@@ -102,8 +115,8 @@ public final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
-        return [
+    private func buildBaseServiceQuery(for key: String, accessGroup: String? = nil) -> [CFString: Any] {
+        var query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecAttrIsInvisible: true,
@@ -111,26 +124,58 @@ public final class KeychainStorage: KeychainStorageProtocol {
             kSecAttrService: service,
             kSecAttrAccount: key
         ]
+
+        // Add the access group to the query if it's provided
+        if let accessGroup = accessGroup {
+            query[kSecAttrAccessGroup] = accessGroup
+        }
+
+        return query
     }
 
-    private func tryMigrateAttrAccessibleOnRead(key: String) -> Data? {
+
+    private func tryUpdateAccessibilityAttributeOnRead(key: String) -> Data? {
         var updateQuery = buildBaseServiceQuery(for: key)
         updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
         let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
         let status = secItem.update(updateQuery as CFDictionary, attributes as CFDictionary)
 
-        guard status == errSecSuccess else {
+        print("tryUpdateAccessibilityAttributeOnRead status: \(status.message) \(status.description)")
+
+        if status != errSecSuccess {
             return nil
         }
 
+
+        // Try to read the item again with updated accessibility
         var readQuery = buildBaseServiceQuery(for: key)
         readQuery[kSecReturnData] = true
 
         var item: CFTypeRef?
-        _ = secItem.copyMatching(readQuery as CFDictionary, &item)
+        let readStatus = secItem.copyMatching(readQuery as CFDictionary, &item)
 
-        return item as? Data
+        if readStatus == errSecSuccess, let data = item as? Data {
+            return data
+        } else {
+            return nil
+        }
+    }
+
+    private func migrateKeyToNewAccessGroup(key: String, data: Data) throws {
+        // Update the item to include the new access group
+        let query = buildBaseServiceQuery(for: key)
+        let attributesToUpdate = [
+            kSecValueData: data,
+            kSecAttrAccessGroup: accessGroup
+        ] as [CFString: Any]
+
+        let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
+
+        print("migrateKeyToNewAccessGroup status: \(updateStatus) \(updateStatus.message) \(updateStatus.description)")
+        guard updateStatus == errSecSuccess else {
+            throw KeychainError(updateStatus)
+        }
     }
 
     private func tryMigrateAttrAccessibleOnUpdate(data: Data, key: String) throws {
