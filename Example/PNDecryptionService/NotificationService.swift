@@ -40,17 +40,21 @@ class NotificationService: UNNotificationServiceExtension {
 
 //            let rpcRequest = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
 
-            let metadata = web3WalletDecryptionService.getMetadata(topic: topic)
 
             let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
 
+            guard let metadata = web3WalletDecryptionService.getMetadata(topic: topic) else {
+                mutableContent.title = "Error: Cannot get peer's metadata"
+                return mutableContent
+            }
+
             switch requestMethod {
             case .sessionProposal:
-                mutableContent.title = "session proposal"
+                mutableContent.title = "session proposal: \(metadata.name)"
             case .sessionRequest:
-                mutableContent.title = "session request"
+                mutableContent.title = "session request: \(metadata.name)"
             case .authRequest:
-                mutableContent.title = "auth request"
+                mutableContent.title = "auth request: \(metadata.name)"
             }
 
             return mutableContent
