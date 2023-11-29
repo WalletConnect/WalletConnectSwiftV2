@@ -62,13 +62,14 @@ public final class KeychainStorage: KeychainStorageProtocol {
             return item as? Data
         case errSecItemNotFound:
             // Try to update the accessibility attribute first
-            if let updatedData = tryUpdateAccessibilityAttributeOnRead(key: key) {
+            tryUpdateAccessibilityAttributeOnRead(key: key)
                 // Then attempt to migrate to the new access group
-                try migrateKeyToNewAccessGroup(key: key, data: updatedData)
+            if let updatedData = try tryToMigrateKeyToNewAccessGroup(key: key) {
                 return updatedData
             } else {
                 return nil
             }
+
         default:
             throw KeychainError(status)
         }
@@ -134,7 +135,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
 
-    private func tryUpdateAccessibilityAttributeOnRead(key: String) -> Data? {
+    private func tryUpdateAccessibilityAttributeOnRead(key: String) {
         var updateQuery = buildBaseServiceQuery(for: key)
         updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
@@ -144,12 +145,27 @@ public final class KeychainStorage: KeychainStorageProtocol {
         print("tryUpdateAccessibilityAttributeOnRead status: \(status.message) \(status.description)")
 
         if status != errSecSuccess {
-            return nil
+            print("tryUpdateAccessibilityAttributeOnRead status: \(status.message) \(status.description) potentially already migrated")
+        } else if status == errSecSuccess {
+            print("successfuly migrated to kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly")
         }
+    }
 
+    private func tryToMigrateKeyToNewAccessGroup(key: String) throws -> Data? {
+        // Update the item to include the new access group
+        let query = buildBaseServiceQuery(for: key)
+        let attributesToUpdate = [
+            kSecAttrAccessGroup: accessGroup
+        ] as [CFString: Any]
 
+        let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
+
+        print("migrateKeyToNewAccessGroup status: \(updateStatus) \(updateStatus.message) \(updateStatus.description)")
+        guard updateStatus == errSecSuccess else {
+            throw KeychainError(updateStatus)
+        }
         // Try to read the item again with updated accessibility
-        var readQuery = buildBaseServiceQuery(for: key)
+        var readQuery = buildBaseServiceQuery(for: key, accessGroup: accessGroup)
         readQuery[kSecReturnData] = true
 
         var item: CFTypeRef?
@@ -159,22 +175,6 @@ public final class KeychainStorage: KeychainStorageProtocol {
             return data
         } else {
             return nil
-        }
-    }
-
-    private func migrateKeyToNewAccessGroup(key: String, data: Data) throws {
-        // Update the item to include the new access group
-        let query = buildBaseServiceQuery(for: key)
-        let attributesToUpdate = [
-            kSecValueData: data,
-            kSecAttrAccessGroup: accessGroup
-        ] as [CFString: Any]
-
-        let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
-
-        print("migrateKeyToNewAccessGroup status: \(updateStatus) \(updateStatus.message) \(updateStatus.description)")
-        guard updateStatus == errSecSuccess else {
-            throw KeychainError(updateStatus)
         }
     }
 
