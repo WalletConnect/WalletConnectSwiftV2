@@ -141,13 +141,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
         let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
-        let status = secItem.update(updateQuery as CFDictionary, attributes as CFDictionary)
-
-        if status == errSecSuccess {
-            print("Successfuly migrated with kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly")
-        } else {
-            print("Item for query not found, item potentially already migrated with kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly")
-        }
+        let _ = secItem.update(updateQuery as CFDictionary, attributes as CFDictionary)
     }
 
     private func tryToMigrateKeyToNewAccessGroupOnRead(key: String) throws -> Data? {
@@ -189,12 +183,6 @@ public final class KeychainStorage: KeychainStorageProtocol {
             kSecAttrAccessGroup: accessGroup
         ] as [CFString: Any]
 
-        let status = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
-
-        if status == errSecSuccess {
-            print("Successfuly migrated with kSecAttrAccessGroup")
-        } else {
-            print("Item for query not found, item potentially already migrated with kSecAttrAccessGroup")
-        }
+        let _ = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
     }
 }
