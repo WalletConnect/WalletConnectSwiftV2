@@ -3,7 +3,8 @@ import Foundation
 public struct ChatClientFactory {
 
     static func create(keyserverUrl: String, relayClient: RelayClient, networkingInteractor: NetworkingInteractor, syncClient: SyncClient, historyClient: HistoryClient) -> ChatClient {
-        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        fatalError("fix access group")
+        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: "")
         let keyserverURL = URL(string: keyserverUrl)!
         return ChatClientFactory.create(
             keyserverURL: keyserverURL,
