@@ -189,11 +189,12 @@ public final class KeychainStorage: KeychainStorageProtocol {
             kSecAttrAccessGroup: accessGroup
         ] as [CFString: Any]
 
-        let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
+        let status = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
 
-        print("Migrate Key To New Access Group status: \(updateStatus)")
-        guard updateStatus == errSecSuccess else {
-            throw KeychainError(updateStatus)
+        if status == errSecSuccess {
+            print("Successfuly migrated with kSecAttrAccessGroup")
+        } else {
+            print("Item for query not found, item potentially already migrated with kSecAttrAccessGroup")
         }
     }
 }
