@@ -52,7 +52,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
     public func readData(key: String) throws -> Data? {
-        var query = buildBaseServiceQuery(for: key, accessGroup: accessGroup)
+        var query = buildBaseServiceQuery(for: key)
         query[kSecReturnData] = true
 
         var item: CFTypeRef?
@@ -63,9 +63,9 @@ public final class KeychainStorage: KeychainStorageProtocol {
             return item as? Data
         case errSecItemNotFound:
             return try synchronizationQueue.sync {
-                // Try to update the accessibility attribute first
+                // Try to update the accessibility attribute first - migration V1
                 tryUpdateAccessibilityAttribute(key: key)
-                // Then attempt to migrate to the new access group and return if item exists
+                // Then attempt to migrate to the new access group and return if item exists - migration V2
                 if let updatedData = try tryToMigrateKeyToNewAccessGroupOnRead(key: key) {
                     return updatedData
                 } else {
@@ -86,19 +86,23 @@ public final class KeychainStorage: KeychainStorageProtocol {
         let attributes = [kSecValueData: data]
 
         let status = secItem.update(query as CFDictionary, attributes as CFDictionary)
-        
+
         switch status {
         case errSecSuccess:
             return
         case errSecItemNotFound:
-            try tryMigrateAttrAccessibleOnUpdate(data: data, key: key) // TODO: Remove once migration period ends
+            // Try to update the accessibility attribute - migration V1
+            tryUpdateAccessibilityAttribute(key: key)
+            // Then attempt to migrate to the new access group - migration V2
+            try tryToMigrateKeyToNewAccessGroupOnUpdate(data: data, key: key)
         default:
             throw KeychainError(status)
         }
     }
 
+
     public func delete(key: String) throws {
-        let query = buildBaseServiceQuery(for: key, accessGroup: accessGroup)
+        let query = buildBaseServiceQuery(for: key)
 
         let status = secItem.delete(query as CFDictionary)
 
@@ -118,26 +122,22 @@ public final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    private func buildBaseServiceQuery(for key: String, accessGroup: String? = nil) -> [CFString: Any] {
-        var query: [CFString: Any] = [
+    private func buildBaseServiceQuery(for key: String) -> [CFString: Any] {
+        return [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             kSecAttrIsInvisible: true,
             kSecUseDataProtectionKeychain: true,
             kSecAttrService: service,
+            kSecAttrAccessGroup: accessGroup,
             kSecAttrAccount: key
         ]
-
-        if let accessGroup = accessGroup {
-            query[kSecAttrAccessGroup] = accessGroup
-        }
-
-        return query
     }
 
 
     private func tryUpdateAccessibilityAttribute(key: String) {
         var updateQuery = buildBaseServiceQuery(for: key)
+        updateQuery.removeValue(forKey: kSecAttrAccessGroup)
         updateQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
         let attributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
@@ -151,20 +151,10 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
     private func tryToMigrateKeyToNewAccessGroupOnRead(key: String) throws -> Data? {
-        // Update the item to include the new access group
-        let query = buildBaseServiceQuery(for: key)
-        let attributesToUpdate = [
-            kSecAttrAccessGroup: accessGroup
-        ] as [CFString: Any]
+        try tryToMigrateToNewAccessGroup(key: key)
 
-        let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
-
-        print("Migrate Key To New Access Group status: \(updateStatus)")
-        guard updateStatus == errSecSuccess else {
-            throw KeychainError(updateStatus)
-        }
         // Try to read the item again with updated accessibility
-        var readQuery = buildBaseServiceQuery(for: key, accessGroup: accessGroup)
+        var readQuery = buildBaseServiceQuery(for: key)
         readQuery[kSecReturnData] = true
 
         var item: CFTypeRef?
@@ -177,16 +167,9 @@ public final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    private func tryMigrateAttrAccessibleOnUpdate(data: Data, key: String) throws {
-        var updateAccessQuery = buildBaseServiceQuery(for: key)
-        updateAccessQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+    private func tryToMigrateKeyToNewAccessGroupOnUpdate(data: Data, key: String) throws {
 
-        let accessAttributes = [kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
-        let accessStatus = secItem.update(updateAccessQuery as CFDictionary, accessAttributes as CFDictionary)
-
-        guard accessStatus == errSecSuccess else {
-            throw KeychainError.itemNotFound
-        }
+        try tryToMigrateToNewAccessGroup(key: key)
 
         let updateQuery = buildBaseServiceQuery(for: key)
         let updateAttributes = [kSecValueData: data]
@@ -195,6 +178,22 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
         guard updateStatus == errSecSuccess else {
             throw KeychainError.itemNotFound
+        }
+    }
+
+    private func tryToMigrateToNewAccessGroup(key: String) throws {
+        var query = buildBaseServiceQuery(for: key)
+        query.removeValue(forKey: kSecAttrAccessGroup)
+
+        let attributesToUpdate = [
+            kSecAttrAccessGroup: accessGroup
+        ] as [CFString: Any]
+
+        let updateStatus = secItem.update(query as CFDictionary, attributesToUpdate as CFDictionary)
+
+        print("Migrate Key To New Access Group status: \(updateStatus)")
+        guard updateStatus == errSecSuccess else {
+            throw KeychainError(updateStatus)
         }
     }
 }
