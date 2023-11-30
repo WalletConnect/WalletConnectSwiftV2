@@ -145,7 +145,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
     }
 
     private func tryToMigrateKeyToNewAccessGroupOnRead(key: String) throws -> Data? {
-        try tryToMigrateToNewAccessGroup(key: key)
+        tryToMigrateToNewAccessGroup(key: key)
 
         // Try to read the item again with updated accessibility
         var readQuery = buildBaseServiceQuery(for: key)
@@ -163,7 +163,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
 
     private func tryToMigrateKeyToNewAccessGroupOnUpdate(data: Data, key: String) throws {
 
-        try tryToMigrateToNewAccessGroup(key: key)
+        tryToMigrateToNewAccessGroup(key: key)
 
         let updateQuery = buildBaseServiceQuery(for: key)
         let updateAttributes = [kSecValueData: data]
@@ -175,7 +175,7 @@ public final class KeychainStorage: KeychainStorageProtocol {
         }
     }
 
-    private func tryToMigrateToNewAccessGroup(key: String) throws {
+    private func tryToMigrateToNewAccessGroup(key: String) {
         var query = buildBaseServiceQuery(for: key)
         query.removeValue(forKey: kSecAttrAccessGroup)
 
