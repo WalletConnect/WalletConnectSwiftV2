@@ -50,11 +50,11 @@ class NotificationService: UNNotificationServiceExtension {
 
             switch requestMethod {
             case .sessionProposal:
-                mutableContent.title = "session proposal: \(metadata.name)"
+                mutableContent.title = "\(rpcRequest.method): \(metadata.name)"
             case .sessionRequest:
-                mutableContent.title = "session request: \(metadata.name)"
+                mutableContent.title = "\(rpcRequest.method): \(metadata.name)"
             case .authRequest:
-                mutableContent.title = "auth request: \(metadata.name)"
+                mutableContent.title = "\(rpcRequest.method): \(metadata.name)"
             }
 
             return mutableContent
