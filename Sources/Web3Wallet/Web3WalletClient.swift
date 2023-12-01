@@ -63,6 +63,12 @@ public class Web3WalletClient {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
     }
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return signClient.logsPublisher
+            .merge(with: pairingClient.logsPublisher)
+            .eraseToAnyPublisher()
+    }
+
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
