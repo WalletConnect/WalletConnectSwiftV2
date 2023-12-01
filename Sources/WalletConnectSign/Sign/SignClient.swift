@@ -95,6 +95,10 @@ public final class SignClient: SignClientProtocol {
         sessionsPublisherSubject.eraseToAnyPublisher()
     }
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return logger.logsPublisher
+    }
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
