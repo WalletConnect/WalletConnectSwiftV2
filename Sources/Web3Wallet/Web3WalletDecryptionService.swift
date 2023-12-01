@@ -1,6 +1,10 @@
 import Foundation
+import WalletConnectSign
 
 public final class Web3WalletDecryptionService {
+    enum Errors: Error {
+        case unknownTag
+    }
     public enum RequestMethod: UInt {
         case sessionRequest = 1108
         case sessionProposal = 1100
@@ -9,23 +13,15 @@ public final class Web3WalletDecryptionService {
 
     private let signDecryptionService: SignDecryptionService
     private let authDecryptionService: AuthDecryptionService
+    private static let w3wTags: [UInt] = [1108, 1100, 3000]
 
     public init(groupIdentifier: String) throws {
         self.authDecryptionService = try AuthDecryptionService(groupIdentifier: groupIdentifier)
         self.signDecryptionService = try SignDecryptionService(groupIdentifier: groupIdentifier)
     }
 
-    public static func getRequestMethod(tag: UInt) -> RequestMethod? {
-        return RequestMethod(rawValue: tag)
-    }
-
-    public func decryptMessage(topic: String, ciphertext: String, requestMethod: RequestMethod) throws -> RPCRequest {
-        switch requestMethod {
-        case .sessionProposal, .sessionRequest:
-            return try signDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
-        case .authRequest:
-            return try authDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext)
-        }
+    public static func canHandle(tag: UInt) -> Bool {
+        return w3wTags.contains(tag)
     }
 
     public func getMetadata(topic: String) -> AppMetadata? {
@@ -35,4 +31,40 @@ public final class Web3WalletDecryptionService {
             return authDecryptionService.getMetadata(topic: topic)
         }
     }
+
+    public func decryptMessage(topic: String, ciphertext: String, tag: UInt) throws -> DecryptedPayloadProtocol {
+        guard let requestMethod = RequestMethod(rawValue: tag) else { throw Errors.unknownTag }
+        switch requestMethod {
+        case .sessionProposal:
+            let proposal = try signDecryptionService.decryptProposal(topic: topic, ciphertext: ciphertext)
+            return ProposalPayload(proposal: proposal)
+        case .sessionRequest:
+            let request = try signDecryptionService.decryptRequest(topic: topic, ciphertext: ciphertext)
+            return RequestPayload(request: request)
+        case .authRequest:
+            let request = try authDecryptionService.decryptAuthRequest(topic: topic, ciphertext: ciphertext)
+            return AuthRequestPayload(authRequest: request)
+        }
+    }
+
+
+}
+
+public protocol DecryptedPayloadProtocol {
+    var requestMethod: Web3WalletDecryptionService.RequestMethod { get }
+}
+
+public struct RequestPayload: DecryptedPayloadProtocol {
+    public var requestMethod: Web3WalletDecryptionService.RequestMethod { .sessionRequest }
+    var request: Request
+}
+
+public struct ProposalPayload: DecryptedPayloadProtocol {
+    public var requestMethod: Web3WalletDecryptionService.RequestMethod { .sessionProposal }
+    var proposal: Session.Proposal
+}
+
+public struct AuthRequestPayload: DecryptedPayloadProtocol {
+    public var requestMethod: Web3WalletDecryptionService.RequestMethod { .authRequest }
+    var authRequest: AuthRequest
 }

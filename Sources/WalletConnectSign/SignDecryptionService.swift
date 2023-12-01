@@ -3,6 +3,7 @@ import Foundation
 public class SignDecryptionService {
     enum Errors: Error {
         case couldNotInitialiseDefaults
+        case couldNotDecodeTypeFromCiphertext
     }
     private let serializer: Serializing
     private let sessionStorage: WCSessionStorage
@@ -17,9 +18,22 @@ public class SignDecryptionService {
         sessionStorage = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: defaults, identifier: SignStorageIdentifiers.sessions.rawValue)))
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) throws -> RPCRequest {
+    public func decryptProposal(topic: String, ciphertext: String) throws -> Session.Proposal {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
-        return rpcRequest
+        if let proposal = try rpcRequest.params?.get(Session.Proposal.self) {
+            return proposal
+        } else {
+            throw Errors.couldNotDecodeTypeFromCiphertext
+        }
+    }
+
+    public func decryptRequest(topic: String, ciphertext: String) throws -> Request {
+        let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
+        if let request = try rpcRequest.params?.get(Request.self) {
+            return request
+        } else {
+            throw Errors.couldNotDecodeTypeFromCiphertext
+        }
     }
 
     public func getMetadata(topic: String) -> AppMetadata? {

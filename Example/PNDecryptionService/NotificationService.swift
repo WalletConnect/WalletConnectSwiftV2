@@ -20,8 +20,8 @@ class NotificationService: UNNotificationServiceExtension {
            let ciphertext = content.userInfo["message"] as? String,
            let tag = content.userInfo["tag"] as? UInt {
 
-            if let w3wRequestMethod = Web3WalletDecryptionService.getRequestMethod(tag: tag) {
-                let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, requestMethod: w3wRequestMethod, ciphertext: ciphertext)
+            if Web3WalletDecryptionService.canHandle(tag: tag) {
+                let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
                 contentHandler(mutableContent)
             } else if NotifyDecryptionService.canHandle(tag: tag) {
                 let mutableContent = handleNotifyNotification(content: content, topic: topic, ciphertext: ciphertext)
@@ -33,13 +33,12 @@ class NotificationService: UNNotificationServiceExtension {
         }
     }
 
-    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, requestMethod: Web3WalletDecryptionService.RequestMethod, ciphertext: String) -> UNMutableNotificationContent {
+    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) -> UNMutableNotificationContent {
 
         do {
             let web3WalletDecryptionService = try Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
 
-            let rpcRequest = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext, requestMethod: requestMethod)
-
+            let decryptedPayload = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext, tag: tag)
 
             let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
 
@@ -48,13 +47,18 @@ class NotificationService: UNNotificationServiceExtension {
                 return mutableContent
             }
 
-            switch requestMethod {
+            switch decryptedPayload.requestMethod {
             case .sessionProposal:
-                mutableContent.title = "session proposal: \(metadata.name)"
+                mutableContent.title = "New session proposal!"
+                mutableContent.body = "A new session proposal arrived from \(metadata.name), please check your wallet"
             case .sessionRequest:
-                mutableContent.title = "session request: \(metadata.name)"
+                if let payload = decryptedPayload as? RequestPayload {
+                    mutableContent.title = "New session request!"
+                    mutableContent.body =  "A new session request \(payload.requestMethod) arrived from \(metadata.name), please check your wallet"
+                }
             case .authRequest:
-                mutableContent.title = "auth request: \(metadata.name)"
+                mutableContent.title = "New authentication request!"
+                mutableContent.body = "A new authentication request arrived from \(metadata.name), please check your wallet"
             }
 
             return mutableContent

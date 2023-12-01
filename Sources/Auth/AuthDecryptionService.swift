@@ -3,6 +3,7 @@ import Foundation
 public class AuthDecryptionService {
     enum Errors: Error {
         case couldNotInitialiseDefaults
+        case couldNotDecodeTypeFromCiphertext
     }
     private let serializer: Serializing
     private let pairingStorage: PairingStorage
@@ -17,10 +18,14 @@ public class AuthDecryptionService {
         pairingStorage = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: defaults, identifier: PairStorageIdentifiers.pairings.rawValue)))
     }
 
-    public func decryptMessage(topic: String, ciphertext: String) throws -> RPCRequest {
+    public func decryptAuthRequest(topic: String, ciphertext: String) throws -> AuthRequest {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
         setPairingMetadata(rpcRequest: rpcRequest, topic: topic)
-        return rpcRequest
+        if let request = try rpcRequest.params?.get(AuthRequest.self) {
+            return request
+        } else {
+            throw Errors.couldNotDecodeTypeFromCiphertext
+        }
     }
 
     public func getMetadata(topic: String) -> AppMetadata? {
