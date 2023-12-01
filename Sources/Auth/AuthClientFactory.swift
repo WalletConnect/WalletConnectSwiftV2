@@ -6,10 +6,13 @@ public struct AuthClientFactory {
         projectId: String,
         crypto: CryptoProvider,
         networkingClient: NetworkingInteractor,
-        pairingRegisterer: PairingRegisterer
+        pairingRegisterer: PairingRegisterer,
+        groupIdentifier: String
     ) -> AuthClient {
         let logger = ConsoleLogger(loggingLevel: .off)
-        let keyValueStorage = UserDefaults.standard
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         let iatProvider = DefaultIATProvider()
 

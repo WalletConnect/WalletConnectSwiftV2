@@ -42,7 +42,7 @@ struct ModalContainerView_Previews: PreviewProvider {
                 redirect: AppMetadata.Redirect(native: "showcase://", universal: nil)
             )
             
-            Networking.configure(projectId: projectId, socketFactory: WebSocketFactoryMock())
+            Networking.configure(groupIdentifier: "group.com.walletconnect.sdk", projectId: projectId, socketFactory: WebSocketFactoryMock())
             WalletConnectModal.configure(projectId: projectId, metadata: metadata)
         }
         

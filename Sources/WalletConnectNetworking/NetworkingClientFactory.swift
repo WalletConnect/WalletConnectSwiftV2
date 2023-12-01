@@ -2,9 +2,14 @@ import Foundation
 
 public struct NetworkingClientFactory {
 
-    public static func create(relayClient: RelayClient) -> NetworkingInteractor {
+    public static func create(
+        relayClient: RelayClient,
+        groupIdentifier: String
+    ) -> NetworkingInteractor {
         let logger = ConsoleLogger(prefix: "🕸️", loggingLevel: .off)
-        let keyValueStorage = UserDefaults.standard
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
         return NetworkingClientFactory.create(relayClient: relayClient, logger: logger, keychainStorage: keychainStorage, keyValueStorage: keyValueStorage)
     }

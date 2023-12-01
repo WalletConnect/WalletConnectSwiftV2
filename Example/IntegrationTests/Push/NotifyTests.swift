@@ -80,7 +80,6 @@ final class NotifyTests: XCTestCase {
                                                 keyserverURL: keyserverURL, 
                                                 sqlite: sqlite,
                                                 logger: notifyLogger,
-                                                keyValueStorage: keyValueStorage,
                                                 keychainStorage: keychain,
                                                 groupKeychainStorage: KeychainStorageMock(),
                                                 networkInteractor: networkingInteractor,
