@@ -20,8 +20,8 @@ public class SignDecryptionService {
 
     public func decryptProposal(topic: String, ciphertext: String) throws -> Session.Proposal {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
-        if let proposal = try rpcRequest.params?.get(Session.Proposal.self) {
-            return proposal
+        if let proposal = try rpcRequest.params?.get(SessionType.ProposeParams.self) {
+            return proposal.publicRepresentation(pairingTopic: topic)
         } else {
             throw Errors.couldNotDecodeTypeFromCiphertext
         }
