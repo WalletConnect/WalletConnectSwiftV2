@@ -29,7 +29,17 @@ public class SignDecryptionService {
 
     public func decryptRequest(topic: String, ciphertext: String) throws -> Request {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
-        if let request = try rpcRequest.params?.get(Request.self) {
+        if let request = try rpcRequest.params?.get(SessionType.RequestParams.self),
+           let rpcId = rpcRequest.id{
+            let request = Request(
+                id: rpcId,
+                topic: topic,
+                method: request.request.method,
+                params: request.request.params,
+                chainId: request.chainId,
+                expiry: request.request.expiry
+            )
+
             return request
         } else {
             throw Errors.couldNotDecodeTypeFromCiphertext

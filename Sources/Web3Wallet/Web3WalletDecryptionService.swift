@@ -56,15 +56,15 @@ public protocol DecryptedPayloadProtocol {
 
 public struct RequestPayload: DecryptedPayloadProtocol {
     public var requestMethod: Web3WalletDecryptionService.RequestMethod { .sessionRequest }
-    var request: Request
+    public var request: Request
 }
 
 public struct ProposalPayload: DecryptedPayloadProtocol {
     public var requestMethod: Web3WalletDecryptionService.RequestMethod { .sessionProposal }
-    var proposal: Session.Proposal
+    public var proposal: Session.Proposal
 }
 
 public struct AuthRequestPayload: DecryptedPayloadProtocol {
     public var requestMethod: Web3WalletDecryptionService.RequestMethod { .authRequest }
-    var authRequest: AuthRequest
+    public var authRequest: AuthRequest
 }

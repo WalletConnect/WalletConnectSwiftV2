@@ -54,7 +54,7 @@ class NotificationService: UNNotificationServiceExtension {
             case .sessionRequest:
                 if let payload = decryptedPayload as? RequestPayload {
                     mutableContent.title = "New session request!"
-                    mutableContent.body =  "A new session request \(payload.requestMethod) arrived from \(metadata.name), please check your wallet"
+                    mutableContent.body =  "A new session request \(payload.request.method) arrived from \(metadata.name), please check your wallet"
                 }
             case .authRequest:
                 mutableContent.title = "New authentication request!"
