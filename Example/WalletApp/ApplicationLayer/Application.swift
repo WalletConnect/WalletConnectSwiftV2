@@ -1,5 +1,6 @@
 import Foundation
-import WalletConnectChat
+import WalletConnectUtils
+import WalletConnectSigner
 
 final class Application {
     var uri: WalletConnectURI?

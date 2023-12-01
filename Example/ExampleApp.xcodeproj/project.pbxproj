@@ -266,7 +266,6 @@
 		C56EE276293F56D7004840D1 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE26C293F56D6004840D1 /* UIViewController.swift */; };
 		C56EE279293F56D7004840D1 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE268293F56D6004840D1 /* Color.swift */; };
 		C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C56EE27A293F56F8004840D1 /* WalletConnectAuth */; };
-		C56EE27D293F56F8004840D1 /* WalletConnectChat in Frameworks */ = {isa = PBXBuildFile; productRef = C56EE27C293F56F8004840D1 /* WalletConnectChat */; };
 		C56EE288293F5757004840D1 /* ThirdPartyConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE286293F5757004840D1 /* ThirdPartyConfigurator.swift */; };
 		C56EE289293F5757004840D1 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE280293F5757004840D1 /* Application.swift */; };
 		C56EE28A293F5757004840D1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE27F293F5757004840D1 /* AppDelegate.swift */; };
@@ -783,7 +782,6 @@
 			files = (
 				A573C53D29EC366500E3CBFD /* HDWalletKit in Frameworks */,
 				A59D25EE2AB3672700D7EA3A /* AsyncButton in Frameworks */,
-				C56EE27D293F56F8004840D1 /* WalletConnectChat in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
 				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
 				8487A9462A836C3F0003D5AF /* Sentry in Frameworks */,
@@ -2132,7 +2130,6 @@
 			packageProductDependencies = (
 				C56EE254293F569A004840D1 /* Starscream */,
 				C56EE27A293F56F8004840D1 /* WalletConnectAuth */,
-				C56EE27C293F56F8004840D1 /* WalletConnectChat */,
 				C5133A77294125CC00A8314C /* Web3 */,
 				C55D349829630D440004314A /* Web3Wallet */,
 				C5B2F7042970573D000DBA0E /* SolanaSwift */,
@@ -3582,10 +3579,6 @@
 		C56EE27A293F56F8004840D1 /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectAuth;
-		};
-		C56EE27C293F56F8004840D1 /* WalletConnectChat */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnectChat;
 		};
 		C579FEB52AFA86CD008855EB /* Web3Modal */ = {
 			isa = XCSwiftPackageProductDependency;
