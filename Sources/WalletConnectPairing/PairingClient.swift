@@ -23,6 +23,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
 
     private let cleanupService: PairingCleanupService
 
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return logger.logsPublisher
+    }
+
     init(
         pairingStorage: WCPairingStorage,
         appPairService: AppPairService,
