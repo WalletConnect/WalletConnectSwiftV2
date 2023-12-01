@@ -21,8 +21,10 @@ public class AuthDecryptionService {
     public func decryptAuthRequest(topic: String, ciphertext: String) throws -> AuthRequest {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
         setPairingMetadata(rpcRequest: rpcRequest, topic: topic)
-        if let request = try rpcRequest.params?.get(AuthRequest.self) {
-            return request
+        if let params = try rpcRequest.params?.get(AuthRequestParams.self),
+           let id = rpcRequest.id {
+            let authRequest = AuthRequest(id: id, topic: topic, payload: params.payloadParams, requester: params.requester.metadata)
+            return authRequest
         } else {
             throw Errors.couldNotDecodeTypeFromCiphertext
         }
