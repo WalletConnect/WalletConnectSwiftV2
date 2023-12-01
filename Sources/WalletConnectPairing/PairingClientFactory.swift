@@ -26,7 +26,7 @@ public struct PairingClientFactory {
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let appPairService = AppPairService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore)
-        let walletPairService = WalletPairService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore, history: history)
+        let walletPairService = WalletPairService(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore, history: history, logger: logger)
         let pairingRequestsSubscriber = PairingRequestsSubscriber(networkingInteractor: networkingClient, pairingStorage: pairingStore, logger: logger)
         let pairingsProvider = PairingsProvider(pairingStorage: pairingStore)
         let cleanupService = PairingCleanupService(pairingStore: pairingStore, kms: kms)
