@@ -23,8 +23,9 @@ final class NotificationsPresenter: ObservableObject {
     var listingViewModels: [ListingViewModel] {
         return listings
             .map { ListingViewModel(listing: $0) }
-            .sorted(by: 
+            .sorted(by:
                 { subscription(forListing: $0) != nil && subscription(forListing: $1) == nil },
+                { $0.order < $1.order },
                 { $0.title < $1.title }
             )
     }
