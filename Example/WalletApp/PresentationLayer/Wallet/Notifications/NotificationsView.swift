@@ -191,7 +191,7 @@ struct NotificationsView: View {
                     AsyncButton("Subscribed") {
                         try await presenter.unsubscribe(subscription: subscription)
                     }
-                    .buttonStyle(W3MButtonStyle(size: .m, variant: .accent, rightIcon: .Checkmark))
+                    .buttonStyle(W3MButtonStyle(size: .m, variant: .accent, rightIcon: Image.Medium.checkmark))
                     .disabled(true)
                 } else {
                     AsyncButton("Subscribe") {

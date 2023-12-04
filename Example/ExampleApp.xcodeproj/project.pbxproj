@@ -18,6 +18,7 @@
 		84474A0129B9EB74005F520B /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 84474A0029B9EB74005F520B /* Starscream */; };
 		84474A0229B9ECA2005F520B /* DefaultSocketFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5629AEF2877F73000094373 /* DefaultSocketFactory.swift */; };
 		8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */ = {isa = PBXBuildFile; productRef = 8448F1D327E4726F0000B866 /* WalletConnect */; };
+		844AD55F2B1497270062E123 /* Web3Wallet in Frameworks */ = {isa = PBXBuildFile; productRef = 844AD55E2B1497270062E123 /* Web3Wallet */; };
 		845B8D8C2934B36C0084A966 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B8D8B2934B36C0084A966 /* Account.swift */; };
 		847BD1D62989492500076C90 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D12989492500076C90 /* MainViewController.swift */; };
 		847BD1D82989492500076C90 /* MainModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D32989492500076C90 /* MainModule.swift */; };
@@ -731,6 +732,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5A650CA2B062A1400F9AD4B /* Mixpanel in Frameworks */,
+				844AD55F2B1497270062E123 /* Web3Wallet in Frameworks */,
 				A5B6C0F72A6EAB3200927332 /* WalletConnectNotify in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2030,6 +2032,7 @@
 			packageProductDependencies = (
 				A5B6C0F62A6EAB3200927332 /* WalletConnectNotify */,
 				A5A650C92B062A1400F9AD4B /* Mixpanel */,
+				844AD55E2B1497270062E123 /* Web3Wallet */,
 			);
 			productName = PNDecryptionService;
 			productReference = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */;
@@ -3408,6 +3411,10 @@
 		8448F1D327E4726F0000B866 /* WalletConnect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnect;
+		};
+		844AD55E2B1497270062E123 /* Web3Wallet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Web3Wallet;
 		};
 		8487A9432A836C2A0003D5AF /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
