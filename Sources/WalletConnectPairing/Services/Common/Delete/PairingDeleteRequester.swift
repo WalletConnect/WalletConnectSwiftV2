@@ -1,6 +1,6 @@
 import Foundation
 
-class DeletePairingService {
+class PairingDeleteRequester {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStorage: WCPairingStorage
