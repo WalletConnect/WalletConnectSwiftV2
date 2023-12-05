@@ -5,6 +5,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
+    public var pairingDeletePublisher: AnyPublisher<(code: Int, message: String), Never> {
+        pairingDeleteRequestSubscriber.deletePublisherSubject.eraseToAnyPublisher()
+    }
+
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     private let pairingStorage: WCPairingStorage

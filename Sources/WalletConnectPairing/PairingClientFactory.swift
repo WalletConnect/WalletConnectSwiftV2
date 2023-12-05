@@ -35,6 +35,7 @@ public struct PairingClientFactory {
         let appPairActivateService = AppPairActivationService(pairingStorage: pairingStore, logger: logger)
         let expirationService = ExpirationService(pairingStorage: pairingStore, networkInteractor: networkingClient, kms: kms)
         let resubscribeService = PairingResubscribeService(networkInteractor: networkingClient, pairingStorage: pairingStore)
+        let pairingDeleteRequestSubscriber = PairingDeleteRequestSubscriber(networkingInteractor: networkingClient, kms: kms, pairingStorage: pairingStore, logger: logger)
 
         return PairingClient(
             pairingStorage: pairingStore,
@@ -43,6 +44,7 @@ public struct PairingClientFactory {
             logger: logger,
             walletPairService: walletPairService,
             pairingDeleteRequester: pairingDeleteRequester,
+            pairingDeleteRequestSubscriber: pairingDeleteRequestSubscriber,
             resubscribeService: resubscribeService,
             expirationService: expirationService,
             pairingRequestsSubscriber: pairingRequestsSubscriber,
