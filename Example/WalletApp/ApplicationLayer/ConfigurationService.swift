@@ -41,7 +41,9 @@ final class ConfigurationService {
 
         Task {
             do {
-                try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign)
+                let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")
+                let signature = importAccount.onSign(message: params.message)
+                try await Notify.instance.register(params: params, signature: signature)
             } catch {
                 DispatchQueue.main.async {
                     let logMessage = LogMessage(message: "Push Server registration failed with: \(error.localizedDescription)")

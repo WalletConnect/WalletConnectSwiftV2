@@ -22,10 +22,20 @@ public final class IdentityClient {
         self.logger = logger
     }
 
-    public func register(account: Account, domain: String, statement: String, resources: [String], onSign: SigningCallback) async throws -> String {
-        let pubKey = try await identityService.registerIdentity(account: account, domain: domain, statement: statement, resources: resources, onSign: onSign)
+    public func prepareRegistration(account: Account,
+        domain: String,
+        statement: String,
+        resources: [String]) async throws -> IdentityRegistrationParams
+    {
+        let registration = try await identityService.prepareRegistration(account: account, domain: domain, statement: statement, resources: resources)
+        logger.debug("Did prepare registration for \(account)")
+        return registration
+    }
+
+    public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
+        let account = try params.account
+        try await identityService.registerIdentity(params: params, signature: signature)
         logger.debug("Did register an account: \(account)")
-        return pubKey
     }
 
     public func goPublic(account: Account) async throws -> AgreementPublicKey {

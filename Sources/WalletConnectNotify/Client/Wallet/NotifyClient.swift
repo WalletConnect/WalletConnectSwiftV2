@@ -75,9 +75,13 @@ public class NotifyClient {
         self.subscriptionWatcher = subscriptionWatcher
     }
 
-    public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
-        try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        notifyAccountProvider.setAccount(account)
+    public func prepareRegistration(account: Account, domain: String, allApps: Bool = false) async throws -> IdentityRegistrationParams {
+        return try await identityService.prepareRegistration(account: account, domain: domain, allApps: allApps)
+    }
+
+    public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
+        try await identityService.register(params: params, signature: signature)
+        notifyAccountProvider.setAccount(try params.account)
         try await subscriptionWatcher.start()
     }
 

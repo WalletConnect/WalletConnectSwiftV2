@@ -1,5 +1,6 @@
 import Foundation
 
+// TODO: Remove
 final class NotifyIdentityService {
 
     private let keyserverURL: URL
@@ -12,13 +13,17 @@ final class NotifyIdentityService {
         self.logger = logger
     }
 
-    public func register(account: Account, domain: String, isLimited: Bool, onSign: @escaping SigningCallback) async throws {
-        let statement = makeStatement(isLimited: isLimited)
-        _ = try await identityClient.register(account: account,
+    public func prepareRegistration(account: Account, domain: String, allApps: Bool) async throws -> IdentityRegistrationParams {
+        return try await identityClient.prepareRegistration(
+            account: account,
             domain: domain,
-            statement: statement,
-            resources: [keyserverURL.absoluteString],
-            onSign: onSign)
+            statement: makeStatement(allApps: allApps),
+            resources: [keyserverURL.absoluteString]
+        )
+    }
+
+    public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
+        try await identityClient.register(params: params, signature: signature)
     }
 
     public func unregister(account: Account) async throws {
@@ -32,11 +37,11 @@ final class NotifyIdentityService {
 
 private extension NotifyIdentityService {
 
-    func makeStatement(isLimited: Bool) -> String {
-        switch isLimited {
-        case true:
-            return "I further authorize this app to send me notifications. Read more at https://walletconnect.com/notifications"
+    func makeStatement(allApps: Bool) -> String {
+        switch allApps {
         case false:
+            return "I further authorize this app to send me notifications. Read more at https://walletconnect.com/notifications"
+        case true:
             return "I further authorize this app to view and manage my notifications for ALL apps. Read more at https://walletconnect.com/notifications"
         }
     }
