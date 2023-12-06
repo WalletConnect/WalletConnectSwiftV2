@@ -28,6 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         Web3Modal.configure(
             projectId: InputConfig.projectId,
+            chainId: Blockchain("eip155:1"),
             metadata: metadata
         )
         
