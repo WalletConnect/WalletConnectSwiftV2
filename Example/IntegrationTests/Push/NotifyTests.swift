@@ -258,8 +258,17 @@ final class NotifyTests: XCTestCase {
 
 
 private extension NotifyTests {
-    func sign(_ message: String) -> SigningResult {
+    func sign(_ message: String) -> CacaoSignature {
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
-        return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
+        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+    }
+}
+
+private extension NotifyClient {
+
+    func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping (String) -> CacaoSignature) async throws {
+        let params = try await prepareRegistration(account: account, domain: domain)
+        let signature = onSign(params.message)
+        try await register(params: params, signature: signature)
     }
 }

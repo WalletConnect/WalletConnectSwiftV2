@@ -32,10 +32,12 @@ public final class IdentityClient {
         return registration
     }
 
-    public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
+    @discardableResult
+    public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws -> String {
         let account = try params.account
-        try await identityService.registerIdentity(params: params, signature: signature)
+        let pubKey = try await identityService.registerIdentity(params: params, signature: signature)
         logger.debug("Did register an account: \(account)")
+        return pubKey
     }
 
     public func goPublic(account: Account) async throws -> AgreementPublicKey {

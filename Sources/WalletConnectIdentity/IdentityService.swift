@@ -51,11 +51,11 @@ actor IdentityService {
     }
 
     // TODO: Verifications
-    func registerIdentity(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
+    func registerIdentity(params: IdentityRegistrationParams, signature: CacaoSignature) async throws -> String {
         let account = try params.account
 
         if let identityKey = try? storage.getIdentityKey(for: account) {
-            return
+            return identityKey.publicKey.hexRepresentation
         }
 
         let cacaoHeader = CacaoHeader(t: "eip4361")
@@ -64,6 +64,7 @@ actor IdentityService {
         try await networkService.registerIdentity(cacao: cacao)
         try storage.saveIdentityKey(params.privateIdentityKey, for: account)
 
+        return params.privateIdentityKey.publicKey.hexRepresentation
     }
 
     func registerInvite(account: Account) async throws -> AgreementPublicKey {
