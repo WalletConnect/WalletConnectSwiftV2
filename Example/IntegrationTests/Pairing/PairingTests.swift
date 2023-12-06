@@ -23,11 +23,11 @@ final class PairingTests: XCTestCase {
 
     private var publishers = [AnyCancellable]()
 
-    func makeClients(prefix: String) -> (PairingClient, AuthClient) {
+    func makeClients(prefix: String, includeAuth: Bool = true) -> (PairingClient, AuthClient?) {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
-        let logger = ConsoleLogger(prefix: name, loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: prefix, loggingLevel: .debug)
 
         let relayClient = RelayClientFactory.create(
             relayHost: InputConfig.relayHost,
@@ -53,23 +53,27 @@ final class PairingTests: XCTestCase {
         let clientId = try! networkingClient.getClientId()
         logger.debug("My client id is: \(clientId)")
 
-        let authClient = AuthClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            projectId: InputConfig.projectId,
-            crypto: DefaultCryptoProvider(),
-            logger: logger,
-            keyValueStorage: keyValueStorage,
-            keychainStorage: keychain,
-            networkingClient: networkingClient,
-            pairingRegisterer: pairingClient,
-            iatProvider: IATProviderMock())
+        if includeAuth {
+            let authClient = AuthClientFactory.create(
+                metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: nil)),
+                projectId: InputConfig.projectId,
+                crypto: DefaultCryptoProvider(),
+                logger: logger,
+                keyValueStorage: keyValueStorage,
+                keychainStorage: keychain,
+                networkingClient: networkingClient,
+                pairingRegisterer: pairingClient,
+                iatProvider: IATProviderMock())
 
-        return (pairingClient, authClient)
+            return (pairingClient, authClient)
+        } else {
+            return (pairingClient, nil)
+        }
     }
 
     override func setUp() {
         (appPairingClient, appAuthClient) = makeClients(prefix: "🤖 Dapp: ")
-        (walletPairingClient, walletAuthClient) = makeClients(prefix: "🐶 Wallet: ")
+        (walletPairingClient, _) = makeClients(prefix: "🐶 Wallet: ", includeAuth: false)
     }
 
     func testPing() async {
@@ -95,7 +99,7 @@ final class PairingTests: XCTestCase {
 
         let uri = try! await appPairingClient.create()
 
-        try? await walletPairingClient.pair(uri: uri)
+        try! await walletPairingClient.pair(uri: uri)
 
         try! await appAuthClient.request(RequestParams.stub(), topic: uri.topic)
 
