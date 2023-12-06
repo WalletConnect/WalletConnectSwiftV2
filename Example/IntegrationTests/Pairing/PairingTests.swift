@@ -105,18 +105,21 @@ final class PairingTests: XCTestCase {
 
         wait(for: [expectation], timeout: InputConfig.defaultTimeout)
     }
-//
-//    func testDisconnect() {
-//
-//        let expectation = expectation(description: "wallet responds unsupported method for unregistered method")
-//
-//        appAuthClient.authResponsePublisher.sink { (_, response) in
-//            XCTAssertEqual(response, .failure(AuthError(code: 10001)!))
-//            expectation.fulfill()
-//        }.store(in: &publishers)
-//
-//        let uri = try! await appPairingClient.create()
-//
-//        try? await walletPairingClient.pair(uri: uri)
-//    }
+
+    func testDisconnect() async {
+
+        let expectation = expectation(description: "wallet disconnected pairing")
+
+
+        walletPairingClient.pairingDeletePublisher.sink { _ in
+            expectation.fulfill()
+        }.store(in: &publishers)
+
+        let uri = try! await appPairingClient.create()
+
+        try? await walletPairingClient.pair(uri: uri)
+
+        try! await appPairingClient.disconnect(topic: uri.topic)
+        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+    }
 }
