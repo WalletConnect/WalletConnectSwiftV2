@@ -25,7 +25,6 @@ public class Notify {
     /// Wallet's configuration method
     static public func configure(
         pushHost: String = "echo.walletconnect.com",
-        groupIdentifier: String,
         environment: APNSEnvironment,
         crypto: CryptoProvider,
         notifyHost: String = "notify.walletconnect.com",

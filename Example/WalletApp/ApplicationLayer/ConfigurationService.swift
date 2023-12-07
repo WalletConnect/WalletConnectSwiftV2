@@ -24,7 +24,6 @@ final class ConfigurationService {
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
 
         Notify.configure(
-            groupIdentifier: "group.com.walletconnect.sdk",
             environment: BuildConfiguration.shared.apnsEnvironment,
             crypto: DefaultCryptoProvider()
         )

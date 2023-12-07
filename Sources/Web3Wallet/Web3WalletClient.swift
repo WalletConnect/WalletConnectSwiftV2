@@ -218,7 +218,7 @@ public class Web3WalletClient {
         try authClient.getPendingRequests()
     }
     
-    public func registerPushClient(deviceToken: Data, enableEncrypted: Bool = false) async throws {
+    public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
         try await pushClient.register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }
     
@@ -236,7 +236,7 @@ public class Web3WalletClient {
 
 #if DEBUG
 extension Web3WalletClient {
-    public func registerPushClient(deviceToken: String) async throws {
+    public func register(deviceToken: String, enableEncrypted: Bool = false) async throws {
         try await pushClient.register(deviceToken: deviceToken)
     }
 }
