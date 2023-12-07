@@ -63,6 +63,10 @@ public class Web3WalletClient {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
     }
 
+    public var pairingDeletePublisher: AnyPublisher<(code: Int, message: String), Never> {
+        pairingClient.pairingDeletePublisher
+    }
+
     public var logsPublisher: AnyPublisher<Log, Never> {
         return signClient.logsPublisher
             .merge(with: pairingClient.logsPublisher)
