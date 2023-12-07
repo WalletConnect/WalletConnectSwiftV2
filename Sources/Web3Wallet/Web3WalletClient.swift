@@ -236,7 +236,7 @@ public class Web3WalletClient {
 
 #if DEBUG
 extension Web3WalletClient {
-    public func registerPushClient(deviceToken: String) async throws {
+    public func register(deviceToken: String, enableEncrypted: Bool = false) async throws {
         try await pushClient.register(deviceToken: deviceToken)
     }
 }
