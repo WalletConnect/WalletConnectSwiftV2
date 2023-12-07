@@ -75,7 +75,7 @@ public class NotifyClient {
         self.subscriptionWatcher = subscriptionWatcher
     }
 
-    public func prepareRegistration(account: Account, domain: String, allApps: Bool = false) async throws -> IdentityRegistrationParams {
+    public func prepareRegistration(account: Account, domain: String, allApps: Bool = true) async throws -> IdentityRegistrationParams {
         return try await identityService.prepareRegistration(account: account, domain: domain, allApps: allApps)
     }
 
