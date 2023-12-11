@@ -37,8 +37,8 @@ actor AuthResponder {
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let header = CacaoHeader(t: "eip4361")
-        let payload = try authRequestParams.payloadParams.cacaoPayload(address: account.address)
+        let header = CacaoHeader(t: "caip122")
+        let payload = try authRequestParams.payloadParams.cacaoPayload(account: account)
         let responseParams = AuthResponseParams(h: header, p: payload, s: signature)
 
         let response = RPCResponse(id: requestId, result: responseParams)

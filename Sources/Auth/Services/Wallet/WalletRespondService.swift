@@ -37,7 +37,7 @@ actor WalletRespondService {
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let header = CacaoHeader(t: "eip4361")
+        let header = CacaoHeader(t: "caip122")
         let payload = try authRequestParams.payloadParams.cacaoPayload(address: account.address)
         let responseParams = AuthResponseParams(h: header, p: payload, s: signature)
 

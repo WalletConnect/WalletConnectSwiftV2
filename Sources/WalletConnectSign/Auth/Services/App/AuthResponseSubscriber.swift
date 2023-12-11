@@ -47,11 +47,11 @@ class AuthResponseSubscriber {
 
                 guard
                     let address = try? DIDPKH(did: cacao.p.iss).account.address,
-                    let message = try? messageFormatter.formatMessages(from: cacao.p)
+                    let message = try? messageFormatter.formatMessage(from: cacao.p)
                 else { self.onResponse?(requestId, .failure(.malformedResponseParams)); return }
 
                 guard
-                    let recovered = try? messageFormatter.formatMessages(
+                    let recovered = try? messageFormatter.formatMessage(
                         from: requestPayload.payloadParams.cacaoPayload(address: address)
                     ), recovered == message
                 else { self.onResponse?(requestId, .failure(.messageCompromised)); return }

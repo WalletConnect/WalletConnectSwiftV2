@@ -58,7 +58,7 @@ class AppRespondSubscriberTests: XCTestCase {
         }
 
         // subscribe on compromised cacao
-        let cacaoHeader = CacaoHeader(t: "eip4361")
+        let cacaoHeader = CacaoHeader(t: "caip122")
         let cacaoPayload = try! compromissedParams.payloadParams.cacaoPayload(address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")
         let cacaoSignature = CacaoSignature(t: .eip191, s: "")
 

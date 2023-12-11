@@ -7,6 +7,7 @@ import Combine
 ///
 /// Access via `Sign.instance`
 public final class SignClient: SignClientProtocol {
+    
     enum Errors: Error {
         case sessionForTopicNotFound
     }
@@ -289,8 +290,12 @@ public final class SignClient: SignClientProtocol {
         return try pendingRequestsProvider.getPendingRequests()
     }
 
-    public func formatMessages(payload: AuthenticationPayload, addresses: [String]) throws -> [String] {
-        return try MessagesFormatter().formatMessages(payload: payload, addresses: addresses)
+    public func formatAuthMessage(payload: AuthenticationPayload, account: Account) throws -> String {
+        return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(account: account))
+    }
+
+    public func makeAuthObject(authRequest: AuthenticationRequest, signature: WalletConnectUtils.CacaoSignature, account: Account) throws -> AuthObject {
+        thy CacaosProvider().makeCacao(authRequest: authRequest, signature: signature, account: account)
     }
 
     //-----------------------------------------------------------------------------------

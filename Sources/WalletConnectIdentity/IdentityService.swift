@@ -58,7 +58,7 @@ actor IdentityService {
             return identityKey.publicKey.hexRepresentation
         }
 
-        let cacaoHeader = CacaoHeader(t: "eip4361")
+        let cacaoHeader = CacaoHeader(t: "caip122")
         let cacao = Cacao(h: cacaoHeader, p: params.payload, s: signature)
 
         try await networkService.registerIdentity(cacao: cacao)

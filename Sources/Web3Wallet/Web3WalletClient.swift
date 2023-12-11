@@ -74,7 +74,6 @@ public class Web3WalletClient {
     }
 
     // MARK: - Private Properties
-    private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
     private let pairingClient: PairingClientProtocol
     private let pushClient: PushClientProtocol
@@ -82,12 +81,10 @@ public class Web3WalletClient {
     private var account: Account?
 
     init(
-        authClient: AuthClientProtocol,
         signClient: SignClientProtocol,
         pairingClient: PairingClientProtocol,
         pushClient: PushClientProtocol
     ) {
-        self.authClient = authClient
         self.signClient = signClient
         self.pairingClient = pairingClient
         self.pushClient = pushClient
@@ -107,12 +104,6 @@ public class Web3WalletClient {
     ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
     public func rejectSession(proposalId: String, reason: RejectionReason) async throws {
         try await signClient.rejectSession(proposalId: proposalId, reason: reason)
-    }
-    
-    /// For wallet to reject authentication request
-    /// - Parameter requestId: authentication request id
-    public func reject(requestId: RPCID) async throws {
-        try await authClient.reject(requestId: requestId)
     }
 
     /// For the wallet to update session namespaces
@@ -185,8 +176,8 @@ public class Web3WalletClient {
         signClient.getSessions()
     }
     
-    public func formatAuthMessage(payload: AuthenticationPayload, account: Account) throws -> [String] {
-        try signClient.formatMessages(payload: payload, address: account)
+    public func formatAuthMessage(payload: AuthenticationPayload, account: Account) throws -> String {
+        try signClient.formatAuthMessage(payload: payload, account: account)
     }
 
     //---------------------------------------AUTH------------------------------------
@@ -233,14 +224,8 @@ public class Web3WalletClient {
         signClient.getSessionRequestRecord(id: id)
     }
 
-    public func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) -> AuthObject {
-        signClient.makeAuthObject()
-    }
-
-    /// Query pending authentication requests
-    /// - Returns: Pending authentication requests
-    public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
-        try authClient.getPendingRequests()
+    public func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) throws -> AuthObject {
+        try signClient.makeAuthObject(authRequest: authRequest, signature: signature, account: account)
     }
     
     public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {

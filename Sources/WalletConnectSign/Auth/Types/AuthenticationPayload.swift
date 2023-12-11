@@ -28,4 +28,21 @@ public struct AuthenticationPayload: Codable, Equatable {
         self.requestId = requestParams.requestId
         self.resources = requestParams.resources
     }
+
+    func cacaoPayload(account: Account) throws -> CacaoPayload {
+        return CacaoPayload(
+            iss: account.did,
+            domain: domain,
+            aud: aud,
+            version: version,
+            nonce: nonce,
+            iat: iat,
+            nbf: nbf,
+            exp: exp,
+            statement: statement,
+            requestId: requestId,
+            resources: resources
+        )
+    }
 }
+

@@ -39,8 +39,8 @@ class AuthRequestSubscriber {
                 
                 pairingRegisterer.setReceived(pairingTopic: payload.topic)
                 
-                let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams)
-                
+                let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.payloadParams, requester: payload.request.requester.metadata)
+
                 Task(priority: .high) {
                     let assertionId = payload.decryptedPayload.sha256().toHexString()
                     do {
