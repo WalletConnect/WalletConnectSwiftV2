@@ -237,7 +237,10 @@ public final class SignClient: SignClientProtocol {
 
     //---------------------------------------AUTH-----------------------------------
 
-    public func authenticate(_ params: RequestParams, topic: String) async throws {
+    public func authenticate(
+        _ params: RequestParams,
+        topic: String
+    ) async throws {
         try pairingClient.validatePairingExistance(topic)
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: topic)
