@@ -13,12 +13,30 @@ final class AuthRequestInteractor {
 
     func approve(request: AuthRequest, importAccount: ImportAccount) async throws -> Bool {
         let account = importAccount.account
-        let signature = try messageSigner.sign(
-            payload: request.payload.cacaoPayload(address: account.address),
-            privateKey: Data(hex: importAccount.privateKey),
-            type: .eip191)
-        try await Web3Wallet.instance.respond(requestId: request.id, signature: signature, from: account)
-        
+        let SIWEmessages = try Web3Wallet.instance.formatMessages(payload: request.payload, address: [account.address])
+        let signatures = SIWEmessages.map {
+
+        }
+        loop {
+
+            let signature = try messageSigner.sign(
+                payload: request.payload.cacaoPayload(address: account.address),
+                privateKey: Data(hex: importAccount.privateKey),
+                type: .eip191)
+
+            CacaoPayload
+
+            auth = makeAuthObject(signature, request, adddress)
+
+
+            let payload cacaoPayload()
+            let cacao = Cacao(h: <#T##CacaoHeader#>, p: <#T##CacaoPayload#>, s: <#T##CacaoSignature#>)
+            cacaos.append(Cacao)
+        }
+
+
+        try await Web3Wallet.instance.respond(requestId: request.id, signature: auths)
+
         /* Redirect */
         if let uri = request.requester.redirect?.native {
             WalletConnectRouter.goBack(uri: uri)

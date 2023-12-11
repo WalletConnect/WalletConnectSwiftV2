@@ -27,7 +27,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let message = try sut.formatMessage(from: AuthPayload.stub().cacaoPayload(address: address))
+        let message = try sut.formatMessages(from: AuthPayload.stub().cacaoPayload(address: address))
         XCTAssertEqual(message, expectedMessage)
     }
 
@@ -47,7 +47,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let message = try sut.formatMessage(
+        let message = try sut.formatMessages(
             from: AuthPayload.stub(
                 requestParams: RequestParams.stub(statement: nil)
             ).cacaoPayload(address: address)
@@ -69,7 +69,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             """
-        let message = try sut.formatMessage(
+        let message = try sut.formatMessages(
             from: AuthPayload.stub(
                 requestParams: RequestParams.stub(resources: nil)).cacaoPayload(address: address)
             )
@@ -89,7 +89,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             """
-        let message = try sut.formatMessage(
+        let message = try sut.formatMessages(
             from: AuthPayload.stub(
                 requestParams: RequestParams.stub(statement: nil, resources: nil)).cacaoPayload(address: address)
         )

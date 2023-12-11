@@ -272,7 +272,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func respondSessionAuthenticate(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+    public func approveSessionAuthenticate(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
         try await authResponder.respond(requestId: requestId, signature: signature, account: account)
     }
 
@@ -287,6 +287,10 @@ public final class SignClient: SignClientProtocol {
     /// - Returns: Pending authentication requests
     public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
         return try pendingRequestsProvider.getPendingRequests()
+    }
+
+    public func formatMessages(payload: AuthenticationPayload, addresses: [String]) throws -> [String] {
+        return try MessagesFormatter().formatMessages(payload: payload, addresses: addresses)
     }
 
     //-----------------------------------------------------------------------------------

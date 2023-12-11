@@ -6,7 +6,7 @@ import Foundation
 /// https://eips.ethereum.org/EIPS/eip-4361
 public struct RequestParams {
     public let domain: String
-    public let chainId: String
+    public let chains: [String]
     public let nonce: String
     public let aud: String
     public let nbf: String?
@@ -17,7 +17,7 @@ public struct RequestParams {
 
     public init(
         domain: String,
-        chainId: String,
+        chains: [String],
         nonce: String,
         aud: String,
         nbf: String?,
@@ -27,7 +27,7 @@ public struct RequestParams {
         resources: [String]?
     ) {
         self.domain = domain
-        self.chainId = chainId
+        self.chains = chains
         self.nonce = nonce
         self.aud = aud
         self.nbf = nbf
@@ -42,7 +42,7 @@ public struct RequestParams {
 #if DEBUG
 extension RequestParams {
     static func stub(domain: String = "service.invalid",
-                     chainId: String = "eip155:1",
+                     chains: [String] = ["eip155:1"],
                      nonce: String = "32891756",
                      aud: String = "https://service.invalid/login",
                      nbf: String? = nil,
@@ -51,7 +51,7 @@ extension RequestParams {
                      requestId: String? = nil,
                      resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]) -> RequestParams {
         return RequestParams(domain: domain,
-                             chainId: chainId,
+                             chains: chains,
                              nonce: nonce,
                              aud: aud,
                              nbf: nbf,

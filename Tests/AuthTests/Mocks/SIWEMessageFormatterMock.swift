@@ -4,7 +4,7 @@ import Foundation
 class SIWEMessageFormatterMock: SIWECacaoFormatting {
     var formattedMessage: String!
 
-    func formatMessage(from payload: CacaoPayload) throws -> String {
+    func formatMessages(from payload: CacaoPayload) throws -> String {
         return formattedMessage
     }
 }

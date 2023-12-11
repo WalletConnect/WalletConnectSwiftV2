@@ -5,7 +5,7 @@ public struct AuthenticationPayload: Codable, Equatable {
     public let aud: String
     public let version: String
     public let nonce: String
-    public let chainId: String
+    public let chains: [String]
     public let type: String
     public let iat: String
     public let nbf: String?
@@ -16,7 +16,7 @@ public struct AuthenticationPayload: Codable, Equatable {
 
     init(requestParams: RequestParams, iat: String) {
         self.type = "eip4361"
-        self.chainId = requestParams.chainId
+        self.chains = requestParams.chains
         self.domain = requestParams.domain
         self.aud = requestParams.aud
         self.version = "1"
@@ -27,33 +27,5 @@ public struct AuthenticationPayload: Codable, Equatable {
         self.statement = requestParams.statement
         self.requestId = requestParams.requestId
         self.resources = requestParams.resources
-    }
-
-    public func cacaoPayload(address: String) throws -> CacaoPayload {
-        guard
-            let blockchain = Blockchain(chainId),
-            let account = Account(blockchain: blockchain, address: address) else {
-            throw Errors.invalidChainID
-        }
-        return CacaoPayload(
-            iss: account.did,
-            domain: domain,
-            aud: aud,
-            version: version,
-            nonce: nonce,
-            iat: iat,
-            nbf: nbf,
-            exp: exp,
-            statement: statement,
-            requestId: requestId,
-            resources: resources
-        )
-    }
-}
-
-private extension AuthenticationPayload {
-
-    enum Errors: Error {
-        case invalidChainID
     }
 }

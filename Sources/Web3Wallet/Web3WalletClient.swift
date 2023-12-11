@@ -185,8 +185,8 @@ public class Web3WalletClient {
         signClient.getSessions()
     }
     
-    public func formatMessage(payload: AuthPayload, address: String) throws -> String {
-        try authClient.formatMessage(payload: payload, address: address)
+    public func formatMessages(payload: AuthPayload, address: [String]) throws -> [String] {
+        try signClient.formatMessages(payload: payload, address: address)
     }
 
     //---------------------------------------AUTH------------------------------------
@@ -195,8 +195,8 @@ public class Web3WalletClient {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func respondSessionAuthenticate(requestId: RPCID, signature: WalletConnectSign.CacaoSignature, from account: Account) async throws {
-        try await signClient.respondSessionAuthenticate(requestId: requestId, signature: signature, account: account)
+    public func approveSessionAuthenticate(requestId: RPCID, signature: WalletConnectSign.CacaoSignature, from account: Account) async throws {
+        try await signClient.approveSessionAuthenticate(requestId: requestId, signature: signature, account: account)
     }
 
     /// For wallet to reject authentication request
@@ -240,7 +240,11 @@ public class Web3WalletClient {
     public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         signClient.getSessionRequestRecord(id: id)
     }
-    
+
+    public func makeAuthObject(authRequest: AuthRequest, signature: CacaoSignature) -> AuthObject {
+        signClient.makeAuthObject()
+    }
+
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {

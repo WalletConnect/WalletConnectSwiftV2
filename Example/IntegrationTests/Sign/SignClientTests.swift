@@ -796,7 +796,7 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dappPairingClient.create()
         try! await dapp.authenticate(RequestParams(
             domain: "localhost",
-            chainId: "eip155:1",
+            chains: ["eip155:1"],
             nonce: "1665443015700",
             aud: "http://localhost:3000/",
             nbf: nil,
@@ -811,7 +811,7 @@ final class SignClientTests: XCTestCase {
         wallet.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
-                try! await wallet.respondSessionAuthenticate(requestId: request.0.id, signature: signature, account: account)
+                try! await wallet.approveSessionAuthenticate(requestId: request.0.id, signature: signature, account: account)
             }
         }
         .store(in: &publishers)
@@ -833,7 +833,7 @@ final class SignClientTests: XCTestCase {
         wallet.authRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 let invalidSignature = CacaoSignature(t: .eip1271, s: eip1271Signature)
-                try! await wallet.respondSessionAuthenticate(requestId: request.0.id, signature: invalidSignature, account: walletAccount)
+                try! await wallet.approveSessionAuthenticate(requestId: request.0.id, signature: invalidSignature, account: walletAccount)
             }
         }
         .store(in: &publishers)
@@ -878,7 +878,7 @@ final class SignClientTests: XCTestCase {
             Task(priority: .high) {
                 let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
                 let cacaoSignature = CacaoSignature(t: .eip191, s: invalidSignature)
-                try! await wallet.respondSessionAuthenticate(requestId: request.0.id, signature: cacaoSignature, account: walletAccount)
+                try! await wallet.approveSessionAuthenticate(requestId: request.0.id, signature: cacaoSignature, account: walletAccount)
             }
         }
         .store(in: &publishers)

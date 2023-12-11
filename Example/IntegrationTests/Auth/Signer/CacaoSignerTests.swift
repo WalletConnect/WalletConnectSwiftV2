@@ -47,7 +47,7 @@ class CacaoSignerTest: XCTestCase {
     func testCacaoSign() throws {
         let address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
         let cacaoPayload = try payload.cacaoPayload(address: address)
-        let formatted = try SIWECacaoFormatter().formatMessage(from: cacaoPayload)
+        let formatted = try SIWECacaoFormatter().formatMessages(from: cacaoPayload)
         XCTAssertEqual(formatted, message)
         XCTAssertEqual(try signer.sign(payload: cacaoPayload, privateKey: privateKey, type: .eip191), signature)
     }
