@@ -9,8 +9,8 @@ public class NotifyClient {
         return notifyStorage.subscriptionsPublisher
     }
 
-    public var notifyMessagePublisher: AnyPublisher<NotifyMessageRecord, Never> {
-        return notifyMessageSubscriber.notifyMessagePublisher
+    public var messagesPublisher: AnyPublisher<[NotifyMessageRecord], Never> {
+        return notifyStorage.messagesPublisher
     }
 
     public var logsPublisher: AnyPublisher<Log, Never> {
@@ -22,8 +22,9 @@ public class NotifyClient {
 
     public let logger: ConsoleLogging
 
+    private let keyserverURL: URL
     private let pushClient: PushClient
-    private let identityService: NotifyIdentityService
+    private let identityClient: IdentityClient
     private let notifyStorage: NotifyStorage
     private let notifyAccountProvider: NotifyAccountProvider
     private let notifyMessageSubscriber: NotifyMessageSubscriber
@@ -38,8 +39,9 @@ public class NotifyClient {
     private let subscriptionWatcher: SubscriptionWatcher
 
     init(logger: ConsoleLogging,
+         keyserverURL: URL,
          kms: KeyManagementServiceProtocol,
-         identityService: NotifyIdentityService,
+         identityClient: IdentityClient,
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
@@ -57,8 +59,9 @@ public class NotifyClient {
          subscriptionWatcher: SubscriptionWatcher
     ) {
         self.logger = logger
+        self.keyserverURL = keyserverURL
         self.pushClient = pushClient
-        self.identityService = identityService
+        self.identityClient = identityClient
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
         self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
@@ -75,16 +78,25 @@ public class NotifyClient {
         self.subscriptionWatcher = subscriptionWatcher
     }
 
-    public func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping SigningCallback) async throws {
-        try await identityService.register(account: account, domain: domain, isLimited: isLimited, onSign: onSign)
-        notifyAccountProvider.setAccount(account)
+    public func prepareRegistration(account: Account, domain: String, allApps: Bool = true) async throws -> IdentityRegistrationParams {
+        return try await identityClient.prepareRegistration(
+            account: account,
+            domain: domain,
+            statement: makeStatement(allApps: allApps),
+            resources: [keyserverURL.absoluteString]
+        )
+    }
+
+    public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
+        try await identityClient.register(params: params, signature: signature)
+        notifyAccountProvider.setAccount(try params.account)
         try await subscriptionWatcher.start()
     }
 
     public func unregister(account: Account) async throws {
-        try await identityService.unregister(account: account)
+        try await identityClient.unregister(account: account)
         notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
-        notifyStorage.clearDatabase(account: account)
+        try notifyStorage.clearDatabase(account: account)
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()
     }
@@ -114,19 +126,35 @@ public class NotifyClient {
     }
 
     public func deleteNotifyMessage(id: String) {
-        notifyStorage.deleteMessage(id: id)
+        try? notifyStorage.deleteMessage(id: id)
     }
 
-    public func register(deviceToken: Data) async throws {
-        try await pushClient.register(deviceToken: deviceToken)
+    public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
+        try await pushClient.register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }
 
     public func isIdentityRegistered(account: Account) -> Bool {
-        return identityService.isIdentityRegistered(account: account)
+        return identityClient.isIdentityRegistered(account: account)
+    }
+
+    public func subscriptionsPublisher(account: Account) -> AnyPublisher<[NotifySubscription], Never> {
+        return notifyStorage.subscriptionsPublisher(account: account)
     }
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
         return notifyStorage.messagesPublisher(topic: topic)
+    }
+}
+
+private extension NotifyClient {
+
+    func makeStatement(allApps: Bool) -> String {
+        switch allApps {
+        case false:
+            return "I further authorize this app to send me notifications. Read more at https://walletconnect.com/notifications"
+        case true:
+            return "I further authorize this app to view and manage my notifications for ALL apps. Read more at https://walletconnect.com/notifications"
+        }
     }
 }
 

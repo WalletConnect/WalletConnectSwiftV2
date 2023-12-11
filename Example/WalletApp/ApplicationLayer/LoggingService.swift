@@ -49,7 +49,7 @@ final class LoggingService {
                         SentrySDK.capture(error: LoggingError.networking(log.aggregated))
                     case .warn(let log):
                         // Example of setting level to warning
-                        var event = Event(level: .warning)
+                        let event = Event(level: .warning)
                         event.message = SentryMessage(formatted: log.aggregated)
                         SentrySDK.capture(event: event)
                     default:

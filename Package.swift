@@ -33,7 +33,7 @@ let package = Package(
             targets: ["WalletConnectPush"]),
         .library(
             name: "WalletConnectRouter",
-            targets: ["WalletConnectRouter"]),
+            targets: ["WalletConnectRouter", "WalletConnectRouterLegacy"]),
         .library(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
@@ -74,7 +74,7 @@ let package = Package(
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectNotify",
-            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSigner"],
+            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSigner", "Database"],
             path: "Sources/WalletConnectNotify"),
         .target(
             name: "WalletConnectPush",
@@ -120,11 +120,19 @@ let package = Package(
             name: "WalletConnectNetworking",
             dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
+            name: "WalletConnectRouterLegacy",
+            dependencies: [],
+            path: "Sources/WalletConnectRouter/RouterLegacy"),
+        .target(
             name: "WalletConnectRouter",
-            dependencies: []),
+            dependencies: ["WalletConnectRouterLegacy"],
+            path: "Sources/WalletConnectRouter/Router"),
         .target(
             name: "WalletConnectVerify",
             dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
+        .target(
+            name: "Database",
+            dependencies: ["WalletConnectUtils"]),
         .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],

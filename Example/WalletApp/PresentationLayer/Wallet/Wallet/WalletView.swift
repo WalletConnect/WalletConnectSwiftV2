@@ -81,6 +81,7 @@ struct WalletView: View {
                                     .frame(width: 56, height: 56)
                             }
                             .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
+                            .accessibilityIdentifier("copy")
                             
                             Button {
                                 presenter.onScanUri()
@@ -99,6 +100,36 @@ struct WalletView: View {
         }
         .alert(presenter.errorMessage, isPresented: $presenter.showError) {
             Button("OK", role: .cancel) {}
+        }
+        .sheet(isPresented: $presenter.showConnectedSheet) {
+            ZStack {
+                VStack {
+                    Image("connected")
+                    
+                    Spacer()
+                }
+                
+                VStack(spacing: 8) {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 48, height: 4)
+                        .background(Color(red: 0.02, green: 0.17, blue: 0.17).opacity(0.2))
+                        .cornerRadius(100)
+                        .padding(.top, 8)
+                    
+                    Text("Connected")
+                        .foregroundColor(.grey8)
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .padding(.top, 168)
+                    
+                    
+                    Text("You can go back to your browser now")
+                        .foregroundColor(Color(red: 0.47, green: 0.53, blue: 0.53))
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                    
+                    Spacer()
+                }
+            }
         }
         .onAppear {
             presenter.onAppear()

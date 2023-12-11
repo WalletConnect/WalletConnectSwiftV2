@@ -40,7 +40,7 @@ struct ToastView: View {
   
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            Image(systemName: style.iconFileName)
+            Image(sfSymbolName: style.iconFileName)
                 .foregroundColor(style.themeColor)
             Text(message)
                 .font(Font.caption)
@@ -51,7 +51,7 @@ struct ToastView: View {
             Button {
                 onCancelTapped()
             } label: {
-                Image(systemName: "xmark")
+                Image(sfSymbolName: "xmark")
                     .foregroundColor(style.themeColor)
             }
         }

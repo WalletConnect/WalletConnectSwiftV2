@@ -11,7 +11,8 @@ public protocol SignClientProtocol {
     var sessionResponsePublisher: AnyPublisher<Response, Never> { get }
     var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> { get }
     var sessionEventPublisher: AnyPublisher<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never> { get }
-    
+    var logsPublisher: AnyPublisher<Log, Never> {get}
+
     func connect(requiredNamespaces: [String: ProposalNamespace], optionalNamespaces: [String: ProposalNamespace]?, sessionProperties: [String: String]?, topic: String) async throws
     func request(params: Request) async throws
     func approve(proposalId: String, namespaces: [String: SessionNamespace], sessionProperties: [String: String]?) async throws

@@ -28,7 +28,9 @@ public class Sign {
             pairingClient: Pair.instance as! PairingClient,
             projectId: Networking.projectId,
             crypto: config.crypto,
-            networkingClient: Networking.interactor
+            networkingClient: Networking.interactor,
+            groupIdentifier: Networking.groupIdentifier
+
         )
     }()
 

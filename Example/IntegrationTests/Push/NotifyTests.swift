@@ -18,7 +18,7 @@ final class NotifyTests: XCTestCase {
 
     let gmDappDomain = InputConfig.gmDappHost
 
-    let pk = try! EthereumPrivateKey()
+    var pk: EthereumPrivateKey!
 
     var privateKey: Data {
         return Data(pk.rawPrivateKey)
@@ -74,11 +74,12 @@ final class NotifyTests: XCTestCase {
                                                   keychainStorage: keychain,
                                                   environment: .sandbox)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
+        let sqlite = try! MemorySqlite()
         // Note:- prod project_id do not exists on staging, we can use gmDappProjectId
         let client = NotifyClientFactory.create(projectId: InputConfig.gmDappProjectId,
-                                                keyserverURL: keyserverURL,
+                                                keyserverURL: keyserverURL, 
+                                                sqlite: sqlite,
                                                 logger: notifyLogger,
-                                                keyValueStorage: keyValueStorage,
                                                 keychainStorage: keychain,
                                                 groupKeychainStorage: KeychainStorageMock(),
                                                 networkInteractor: networkingInteractor,
@@ -91,57 +92,65 @@ final class NotifyTests: XCTestCase {
     }
 
     override func setUp() {
+        pk = try! EthereumPrivateKey()
         walletNotifyClientA = makeWalletClient()
+        publishers.removeAll()
     }
 
-    func testWalletCreatesSubscription() async {
+    func testWalletCreatesSubscription() async throws {
         let expectation = expectation(description: "expects to create notify subscription")
+        expectation.assertForOverFulfill = false
+
+        var subscription: NotifySubscription?
 
         walletNotifyClientA.subscriptionsPublisher
-            .sink { [unowned self] subscriptions in
-                guard let subscription = subscriptions.first else { return }
-                Task(priority: .high) {
-                    try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
-                    expectation.fulfill()
-                }
+            .sink { subscriptions in
+                subscription = subscriptions.first
+                expectation.fulfill()
             }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
+        try await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+
+        if let subscription {
+            try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
+        }
     }
 
     func testNotifyWatchSubscriptions() async throws {
         let expectation = expectation(description: "expects client B to receive subscription created by client A")
         expectation.assertForOverFulfill = false
 
+        var subscription: NotifySubscription?
+
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
-            guard let subscription = subscriptions.first else { return }
-            Task(priority: .high) {
-                try await clientB.deleteSubscription(topic: subscription.topic)
-                expectation.fulfill()
-            }
+            subscription = subscriptions.first
+            expectation.fulfill()
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
+
+        if let subscription {
+            try await clientB.deleteSubscription(topic: subscription.topic)
+        }
     }
 
     func testNotifySubscriptionChanged() async throws {
         let expectation = expectation(description: "expects client B to receive subscription after both clients are registered and client A creates one")
         expectation.assertForOverFulfill = false
 
-        var subscription: NotifySubscription!
+        var subscription: NotifySubscription?
 
         let clientB = makeWalletClient(prefix: "👐🏼 Wallet B: ")
         clientB.subscriptionsPublisher.sink { subscriptions in
-            guard let newSubscription = subscriptions.first else { return }
-            subscription = newSubscription
+            subscription = subscriptions.first
             expectation.fulfill()
         }.store(in: &publishers)
 
@@ -149,46 +158,49 @@ final class NotifyTests: XCTestCase {
         try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
 
-        try await clientB.deleteSubscription(topic: subscription.topic)
+        if let subscription {
+            try await clientB.deleteSubscription(topic: subscription.topic)
+        }
     }
     
-    func testWalletCreatesAndUpdatesSubscription() async {
-        let expectation = expectation(description: "expects to create and update notify subscription")
-        expectation.assertForOverFulfill = false
+    func testWalletCreatesAndUpdatesSubscription() async throws {
+        let created = expectation(description: "Subscription created")
 
-        var updateScope: Set<String>!
-        var didUpdate = false
+        let updated = expectation(description: "Subscription Updated")
+
+        var isCreated = false
+        var isUpdated = false
+        var subscription: NotifySubscription!
 
         walletNotifyClientA.subscriptionsPublisher
-            .sink { [unowned self] subscriptions in
-                guard 
-                    let subscription = subscriptions.first,
-                    let scope = subscription.scope.keys.first
-                else { return }
+            .sink { subscriptions in
+                subscription = subscriptions.first
 
-                let updatedScope = Set(subscription.scope.filter { $0.value.enabled == true }.keys)
-
-                if !didUpdate {
-                    updateScope = Set([scope])
-                    didUpdate = true
-                    Task(priority: .high) {
-                        try await walletNotifyClientA.update(topic: subscription.topic, scope: Set([scope]))
-                    }
-                }
-                if updateScope == updatedScope {
-                    Task(priority: .high) {
-                        try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
-                        expectation.fulfill()
-                    }
+                if !isCreated {
+                    isCreated = true
+                    created.fulfill()
+                } else if !isUpdated {
+                    isUpdated = true
+                    updated.fulfill()
                 }
             }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
-        try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
+        try await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
+        try await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [created], timeout: InputConfig.defaultTimeout)
+
+        let updateScope = Set([subscription.scope.keys.first!])
+        try await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
+
+        await fulfillment(of: [updated], timeout: InputConfig.defaultTimeout)
+
+        let updatedScope = Set(subscription.scope.filter { $0.value.enabled == true }.keys)
+        XCTAssertEqual(updatedScope, updateScope)
+
+        try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
     }
 
     func testNotifyServerSubscribeAndNotifies() async throws {
@@ -196,6 +208,7 @@ final class NotifyTests: XCTestCase {
         let messageExpectation = expectation(description: "receives a notify message")
 
         var notifyMessage: NotifyMessage!
+        var notifyMessageRecord: NotifyMessageRecord?
 
         var didNotify = false
         walletNotifyClientA.subscriptionsPublisher
@@ -219,28 +232,43 @@ final class NotifyTests: XCTestCase {
                 }
             }.store(in: &publishers)
 
-        walletNotifyClientA.notifyMessagePublisher
-            .sink { [unowned self] notifyMessageRecord in
-                XCTAssertEqual(notifyMessageRecord.message, notifyMessage)
-
-                Task(priority: .high) {
-                    try await walletNotifyClientA.deleteSubscription(topic: notifyMessageRecord.topic)
-                    messageExpectation.fulfill()
-                }
+        walletNotifyClientA.messagesPublisher
+            .sink { messages in
+                guard let newNotifyMessageRecord = messages.first else { return }
+                // ID's is not equal because server generates a new one
+                XCTAssertEqual(newNotifyMessageRecord.message.title, notifyMessage.title)
+                XCTAssertEqual(newNotifyMessageRecord.message.body, notifyMessage.body)
+                XCTAssertEqual(newNotifyMessageRecord.message.icon, notifyMessage.icon)
+                XCTAssertEqual(newNotifyMessageRecord.message.type, notifyMessage.type)
+                notifyMessageRecord = newNotifyMessageRecord
+                messageExpectation.fulfill()
         }.store(in: &publishers)
 
         try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
 
-        wait(for: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [subscribeExpectation, messageExpectation], timeout: InputConfig.defaultTimeout)
+
+        if let notifyMessageRecord {
+            try await walletNotifyClientA.deleteSubscription(topic: notifyMessageRecord.topic)
+        }
     }
 
 }
 
 
 private extension NotifyTests {
-    func sign(_ message: String) -> SigningResult {
+    func sign(_ message: String) -> CacaoSignature {
         let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
-        return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
+        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+    }
+}
+
+private extension NotifyClient {
+
+    func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping (String) -> CacaoSignature) async throws {
+        let params = try await prepareRegistration(account: account, domain: domain)
+        let signature = onSign(params.message)
+        try await register(params: params, signature: signature)
     }
 }

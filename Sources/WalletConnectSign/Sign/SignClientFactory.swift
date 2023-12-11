@@ -16,11 +16,16 @@ public struct SignClientFactory {
         pairingClient: PairingClient,
         projectId: String,
         crypto: CryptoProvider,
-        networkingClient: NetworkingInteractor
+        networkingClient: NetworkingInteractor,
+        groupIdentifier: String
     ) -> SignClient {
-        let logger = ConsoleLogger(loggingLevel: .debug)
-        let keyValueStorage = UserDefaults.standard
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let logger = ConsoleLogger(prefix: "📝", loggingLevel: .debug)
+
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
+
         let iatProvider = DefaultIATProvider()
 
         return SignClientFactory.create(
@@ -46,7 +51,6 @@ public struct SignClientFactory {
         iatProvider: IATProvider,
         projectId: String,
         crypto: CryptoProvider
-
     ) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)

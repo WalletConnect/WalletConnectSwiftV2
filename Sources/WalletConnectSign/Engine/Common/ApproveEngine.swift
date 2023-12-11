@@ -61,6 +61,7 @@ final class ApproveEngine {
     }
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
+        logger.debug("Approving session proposal")
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.wrongRequestParams
         }
@@ -111,6 +112,8 @@ final class ApproveEngine {
         )
 
         _ = try await [proposeResponse, settleRequest]
+
+        logger.debug("Session proposal response and settle request have been sent")
 
         pairingRegisterer.activate(
             pairingTopic: payload.topic,

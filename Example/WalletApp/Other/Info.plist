@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSUserActivityTypes</key>
-    <array>
-        <string>INSendMessageIntent</string>
-    </array>
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleURLTypes</key>
@@ -23,19 +19,21 @@
 	<string>$(CONFIGURATION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>MIXPANEL_TOKEN</key>
+	<string>$(MIXPANEL_TOKEN)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INSendMessageIntent</string>
+	</array>
 	<key>PROJECT_ID</key>
 	<string>$(PROJECT_ID)</string>
-	<key>WALLETAPP_SENTRY_DSN</key>
-	<string>$(WALLETAPP_SENTRY_DSN)</string>
 	<key>SIMULATOR_IDENTIFIER</key>
 	<string>$(SIMULATOR_IDENTIFIER)</string>
-	<key>MIXPANEL_TOKEN</key>
-	<string>$(MIXPANEL_TOKEN)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -53,9 +51,7 @@
 			</array>
 		</dict>
 	</dict>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
+	<key>WALLETAPP_SENTRY_DSN</key>
+	<string>$(WALLETAPP_SENTRY_DSN)</string>
 </dict>
 </plist>

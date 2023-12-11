@@ -51,7 +51,7 @@ class NotifyWatchSubscriptionsResponseSubscriber {
 
                 if subscriptions.count > 0 {
                     // TODO: unsubscribe for oldSubscriptions topics that are not included in new subscriptions
-                    notifyStorage.replaceAllSubscriptions(newSubscriptions, account: account)
+                    try notifyStorage.replaceAllSubscriptions(newSubscriptions)
 
                     for subscription in newSubscriptions {
                         let symKey = try SymmetricKey(hex: subscription.symKey)

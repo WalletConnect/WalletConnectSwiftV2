@@ -24,4 +24,8 @@ struct ListingViewModel: Identifiable {
         let url = listing.dapp_url
         return URL(string: url)?.host
     }
+
+    var order: Int {
+        return listing.order ?? 10000
+    }
 }

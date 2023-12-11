@@ -2,6 +2,9 @@ import Combine
 import SwiftUI
 
 extension View {
+    
+    #if os(iOS) || os(tvOS)
+    
     /// A backwards compatible wrapper for iOS 14 `onChange`
     @ViewBuilder
     func onChangeBackported<T: Equatable>(of value: T, perform: @escaping (T) -> Void) -> some View {
@@ -13,4 +16,35 @@ extension View {
             }
         }
     }
+    
+    #elseif os(macOS)
+    
+    @ViewBuilder
+    func onChangeBackported<T: Equatable>(of value: T, perform: @escaping (T) -> Void) -> some View {
+        self.onReceive(Just(value)) { value in
+            perform(value)
+        }
+    }
+    
+    #endif
+    
+    #if os(iOS) || os(macOS)
+    
+    @ViewBuilder
+    func onTapGestureBackported(count: Int = 1, perform action: @escaping () -> Void) -> some View {
+        self
+    }
+        
+    #elseif os(tvOS)
+
+    @ViewBuilder
+    func onTapGestureBackported(count: Int = 1, perform action: @escaping () -> Void) -> some View {
+        if #available(tvOS 16.0, *) {
+            self.onTapGesture(count: count, perform: action)
+        } else {
+            self
+        }
+    }
+
+    #endif
 }

@@ -81,7 +81,7 @@ public struct ModalSheet: View {
             VStack {
                 if viewModel.destination.hasSearch {
                     HStack {
-                        Image(systemName: "magnifyingglass")
+                        Image(sfSymbolName: "magnifyingglass")
                         TextField("Search", text: $viewModel.searchTerm, onEditingChanged: { editing in
                             self.searchEditing = editing
                         })
@@ -186,7 +186,7 @@ extension ModalSheet {
                 viewModel.onBackButton()
             }
         } label: {
-            Image(systemName: "chevron.backward")
+            Image(sfSymbolName: "chevron.backward")
                 .padding(20)
         }
     }

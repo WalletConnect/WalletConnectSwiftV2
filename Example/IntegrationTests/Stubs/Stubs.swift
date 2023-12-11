@@ -29,7 +29,8 @@ extension AppMetadata {
             name: "WalletConnectSwift",
             description: "WalletConnectSwift",
             url: "https://walletconnect.com",
-            icons: []
+            icons: [],
+            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: nil)
         )
     }
 }

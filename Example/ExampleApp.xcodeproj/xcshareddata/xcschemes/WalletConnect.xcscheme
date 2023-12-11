@@ -160,6 +160,20 @@
                ReferencedContainer = "container:..">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "NO"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ChatTests"
+               BuildableName = "ChatTests"
+               BlueprintName = "ChatTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -185,16 +199,6 @@
                BlueprintIdentifier = "AuthTests"
                BuildableName = "AuthTests"
                BlueprintName = "AuthTests"
-               ReferencedContainer = "container:..">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ChatTests"
-               BuildableName = "ChatTests"
-               BlueprintName = "ChatTests"
                ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>

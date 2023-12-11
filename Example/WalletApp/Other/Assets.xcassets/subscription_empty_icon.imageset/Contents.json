@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "subscription_empty_icon.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

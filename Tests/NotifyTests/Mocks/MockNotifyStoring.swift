@@ -21,7 +21,7 @@ class MockNotifyStoring: NotifyStoring {
         return subscriptions
     }
 
-    func setSubscription(_ subscription: NotifySubscription) async throws {
+    func setSubscription(_ subscription: NotifySubscription) {
         if let index = subscriptions.firstIndex(where: { $0.topic == subscription.topic }) {
             subscriptions[index] = subscription
         } else {
@@ -33,7 +33,7 @@ class MockNotifyStoring: NotifyStoring {
         subscriptions = subscriptions.filter { $0.account != account }
     }
 
-    func deleteSubscription(topic: String) async throws {
+    func deleteSubscription(topic: String) throws {
         subscriptions.removeAll(where: { $0.topic == topic })
     }
 }
