@@ -11,6 +11,7 @@ public protocol SignClientProtocol {
     var sessionResponsePublisher: AnyPublisher<Response, Never> { get }
     var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> { get }
     var sessionEventPublisher: AnyPublisher<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never> { get }
+    var authRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> { get }
     var logsPublisher: AnyPublisher<Log, Never> {get}
 
     func connect(requiredNamespaces: [String: ProposalNamespace], optionalNamespaces: [String: ProposalNamespace]?, sessionProperties: [String: String]?, topic: String) async throws
@@ -21,7 +22,7 @@ public protocol SignClientProtocol {
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws
     func extend(topic: String) async throws
     func approveSessionAuthenticate(requestId: RPCID, signature: CacaoSignature, account: Account) async throws
-    func makeAuthObject()
+    func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) -> AuthObject
     func respond(topic: String, requestId: RPCID, response: RPCResult) async throws
     func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws
     func disconnect(topic: String) async throws

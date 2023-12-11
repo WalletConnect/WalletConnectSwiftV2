@@ -26,8 +26,8 @@ public class Web3WalletClient {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
-        authClient.authRequestPublisher.eraseToAnyPublisher()
+    public var authRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
+        signClient.authRequestPublisher.eraseToAnyPublisher()
     }
     
     /// Publisher that sends sessions on every sessions update
@@ -185,8 +185,8 @@ public class Web3WalletClient {
         signClient.getSessions()
     }
     
-    public func formatMessages(payload: AuthPayload, address: [String]) throws -> [String] {
-        try signClient.formatMessages(payload: payload, address: address)
+    public func formatAuthMessage(payload: AuthenticationPayload, account: Account) throws -> [String] {
+        try signClient.formatMessages(payload: payload, address: account)
     }
 
     //---------------------------------------AUTH------------------------------------
@@ -213,14 +213,6 @@ public class Web3WalletClient {
     }
     //---------------------------------------------------
 
-
-    /// For a wallet to respond on authentication request
-    /// - Parameters:
-    ///   - requestId: authentication request id
-    ///   - signature: CACAO signature of requested message
-    public func respond(requestId: RPCID, signature: CacaoSignature, from account: Account) async throws {
-        try await authClient.respond(requestId: requestId, signature: signature, from: account)
-    }
     
     /// Query pending requests
     /// - Returns: Pending requests received from peer with `wc_sessionRequest` protocol method
@@ -241,7 +233,7 @@ public class Web3WalletClient {
         signClient.getSessionRequestRecord(id: id)
     }
 
-    public func makeAuthObject(authRequest: AuthRequest, signature: CacaoSignature) -> AuthObject {
+    public func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) -> AuthObject {
         signClient.makeAuthObject()
     }
 

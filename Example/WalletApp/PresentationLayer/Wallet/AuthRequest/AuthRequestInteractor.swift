@@ -11,27 +11,27 @@ final class AuthRequestInteractor {
         self.messageSigner = messageSigner
     }
 
-    func approve(request: AuthRequest, importAccount: ImportAccount) async throws -> Bool {
+    
+    func approve(request: AuthenticationRequest, importAccount: ImportAccount) async throws -> Bool {
         let account = importAccount.account
-        let SIWEmessages = try Web3Wallet.instance.formatMessages(payload: request.payload, address: [account.address])
-        let signatures = SIWEmessages.map {
+        let auths = [AuthObject]()
 
-        }
-        loop {
+
+        request.payload.chains.forEach { chain in
+
+            let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: account)
 
             let signature = try messageSigner.sign(
-                payload: request.payload.cacaoPayload(address: account.address),
+                message: SIWEmessages,
                 privateKey: Data(hex: importAccount.privateKey),
                 type: .eip191)
 
-            CacaoPayload
-
-            auth = makeAuthObject(signature, request, adddress)
 
 
-            let payload cacaoPayload()
-            let cacao = Cacao(h: <#T##CacaoHeader#>, p: <#T##CacaoPayload#>, s: <#T##CacaoSignature#>)
-            cacaos.append(Cacao)
+            let auth = Web3Wallet.instance.makeAuthObject(authRequest: request, signature: signature, account: account)
+
+
+            auths.append(auth)
         }
 
 
