@@ -18,4 +18,8 @@ final class PairingClientMock: PairingClientProtocol {
     func getPairings() -> [Pairing] {
         return [Pairing(topic: "", peer: nil, expiryDate: Date())]
     }
+
+    func register(supportedMethods: [String]) async {
+
+    }
 }

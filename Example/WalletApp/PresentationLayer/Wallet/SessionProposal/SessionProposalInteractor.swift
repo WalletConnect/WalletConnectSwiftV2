@@ -31,6 +31,6 @@ final class SessionProposalInteractor {
     }
 
     func reject(proposal: Session.Proposal) async throws {
-        try await Web3Wallet.instance.reject(proposalId: proposal.id, reason: .userRejected)
+        try await Web3Wallet.instance.rejectSession(proposalId: proposal.id, reason: .userRejected)
     }
 }

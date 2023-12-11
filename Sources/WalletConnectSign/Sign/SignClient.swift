@@ -95,6 +95,25 @@ public final class SignClient: SignClientProtocol {
         sessionsPublisherSubject.eraseToAnyPublisher()
     }
 
+
+    //------------------------------------AUTH---------------------------------------
+    /// Publisher that sends authentication requests
+    ///
+    /// Wallet should subscribe on events in order to receive auth requests.
+    public var authRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
+        authRequestPublisherSubject.eraseToAnyPublisher()
+    }
+
+    /// Publisher that sends authentication responses
+    ///
+    /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
+    ///
+    /// Emited result may be an error.
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
+        authResponsePublisherSubject.eraseToAnyPublisher()
+    }
+    //---------------------------------------------------------------------------------
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -115,6 +134,13 @@ public final class SignClient: SignClientProtocol {
     private let appProposeService: AppProposeService
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
+    
+    //Auth
+    private let appRequestService: SessionAuthRequestService
+    private let authResposeSubscriber: AuthResponseSubscriber
+    private let authRequestSubscriber: AuthRequestSubscriber
+    private let authResponder: AuthResponder
+    private let pendingRequestsProvider: PendingRequestsProvider
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
@@ -128,6 +154,8 @@ public final class SignClient: SignClientProtocol {
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+    private var authRequestPublisherSubject = PassthroughSubject<(request: AuthenticationRequest, context: VerifyContext?), Never>()
 
     private var publishers = Set<AnyCancellable>()
 
@@ -148,7 +176,12 @@ public final class SignClient: SignClientProtocol {
          disconnectService: DisconnectService,
          historyService: HistoryService,
          cleanupService: SignCleanupService,
-         pairingClient: PairingClient
+         pairingClient: PairingClient,
+         appRequestService: SessionAuthRequestService,
+         appRespondSubscriber: AuthResponseSubscriber,
+         authRequestSubscriber: AuthRequestSubscriber,
+         authResponder: AuthResponder,
+         pendingRequestsProvider: PendingRequestsProvider
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -166,49 +199,17 @@ public final class SignClient: SignClientProtocol {
         self.cleanupService = cleanupService
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
+        self.appRequestService = appRequestService
+        self.authRequestSubscriber = authRequestSubscriber
+        self.authResponder = authResponder
+        self.authResposeSubscriber = appRespondSubscriber
+        self.pendingRequestsProvider = pendingRequestsProvider
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
     }
 
     // MARK: - Public interface
-
-    /// For a dApp to propose a session to a wallet.
-    /// Function will create pairing and propose session or propose a session on existing pairing.
-    /// - Parameters:
-    ///   - requiredNamespaces: required namespaces for a session
-    ///   - topic: Optional parameter - use it if you already have an established pairing with peer client.
-    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
-    @available(*, deprecated, message: "use Pair.instance.create() and connect(requiredNamespaces: [String: ProposalNamespace]): instead")
-    public func connect(
-        requiredNamespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: ProposalNamespace]? = nil,
-        sessionProperties: [String: String]? = nil,
-        topic: String? = nil
-    ) async throws -> WalletConnectURI? {
-        logger.debug("Connecting Application")
-        if let topic = topic {
-            try pairingClient.validatePairingExistance(topic)
-            try await appProposeService.propose(
-                pairingTopic: topic,
-                namespaces: requiredNamespaces,
-                optionalNamespaces: optionalNamespaces,
-                sessionProperties: sessionProperties,
-                relay: RelayProtocolOptions(protocol: "irn", data: nil)
-            )
-            return nil
-        } else {
-            let pairingURI = try await pairingClient.create()
-            try await appProposeService.propose(
-                pairingTopic: pairingURI.topic,
-                namespaces: requiredNamespaces,
-                optionalNamespaces: optionalNamespaces,
-                sessionProperties: sessionProperties,
-                relay: RelayProtocolOptions(protocol: "irn", data: nil)
-            )
-            return pairingURI
-        }
-    }
 
     /// For a dApp to propose a session to a wallet.
     /// Function will propose a session on existing pairing.
@@ -232,17 +233,58 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
-    /// For wallet to receive a session proposal from a dApp
-    /// Responder should call this function in order to accept peer's pairing and be able to subscribe for future session proposals.
-    /// - Parameter uri: Pairing URI that is commonly presented as a QR code by a dapp.
-    ///
-    /// Should Error:
-    /// - When URI has invalid format or missing params
-    /// - When topic is already in use
-    @available(*, deprecated, message: "use Pair.instance.pair(uri: WalletConnectURI): instead")
-    public func pair(uri: WalletConnectURI) async throws {
-        try await pairingClient.pair(uri: uri)
+    //---------------------------------------AUTH-----------------------------------
+
+    public func authenticate(_ params: RequestParams, topic: String) async throws {
+        try pairingClient.validatePairingExistance(topic)
+        logger.debug("Requesting Authentication on existing pairing")
+        try await appRequestService.request(params: params, topic: topic)
+
+        let testNamespace = [
+            "eip155": ProposalNamespace(
+                chains: [
+                    Blockchain("eip155:1")!,
+                ],
+                methods: [
+                    "personal_sign",
+                ], events: []
+            )]
+        try await appProposeService.propose(
+            pairingTopic: topic,
+            namespaces: testNamespace,
+            optionalNamespaces: nil,
+            sessionProperties: nil,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
     }
+
+    public func enableAuthenticatedSessions() {
+        registerMethods()
+    }
+
+
+    /// For a wallet to respond on authentication request
+    /// - Parameters:
+    ///   - requestId: authentication request id
+    ///   - signature: CACAO signature of requested message
+    public func respondSessionAuthenticate(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+        try await authResponder.respond(requestId: requestId, signature: signature, account: account)
+    }
+
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
+    public func rejectSession(requestId: RPCID) async throws {
+        try await authResponder.respondError(requestId: requestId)
+    }
+
+
+    /// Query pending authentication requests
+    /// - Returns: Pending authentication requests
+    public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
+        return try pendingRequestsProvider.getPendingRequests()
+    }
+
+    //-----------------------------------------------------------------------------------
 
     /// For a wallet to approve a session proposal.
     /// - Parameters:
@@ -256,7 +298,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - proposalId: Session Proposal id
     ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
-    public func reject(proposalId: String, reason: RejectionReason) async throws {
+    public func rejectSession(proposalId: String, reason: RejectionReason) async throws {
         try await approveEngine.reject(proposerPubKey: proposalId, reason: reason.internalRepresentation())
     }
 
@@ -335,13 +377,6 @@ public final class SignClient: SignClientProtocol {
     /// - Returns: All sessions
     public func getSessions() -> [Session] {
         sessionEngine.getSessions()
-    }
-
-    /// Query pairings
-    /// - Returns: All pairings
-    @available(*, deprecated, message: "use Pair.instance.getPairings(uri: WalletConnectURI): instead")
-    public func getPairings() -> [Pairing] {
-        pairingClient.getPairings()
     }
 
     /// Query pending requests
@@ -432,11 +467,21 @@ public final class SignClient: SignClientProtocol {
         sessionEngine.onSessionsUpdate = { [unowned self] sessions in
             sessionsPublisherSubject.send(sessions)
         }
+        authResposeSubscriber.onResponse = { [unowned self] (id, result) in
+            authResponsePublisherSubject.send((id, result))
+        }
+        authRequestSubscriber.onRequest = { [unowned self] request in
+            authRequestPublisherSubject.send(request)
+        }
     }
 
     private func setUpConnectionObserving() {
         networkingClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
+    }
+
+    private func registerMethods() {
+        Task { await pairingClient.register(supportedMethods: [SessionProposeProtocolMethod().method, SessionAuthenticatedProtocolMethod().method])}
     }
 }

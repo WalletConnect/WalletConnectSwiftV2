@@ -186,6 +186,14 @@ private extension ApproveEngine {
     func setupRequestSubscriptions() {
         pairingRegisterer.register(method: SessionProposeProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.ProposeParams>) in
+                guard let pairing = pairingStore.getPairing(forTopic: payload.topic) else { return }
+                if let methods = pairing.methods,
+                   methods.flatMap({ $0 })
+                    .contains(SessionAuthenticatedProtocolMethod().method) {
+                    logger.debug("Ignoring Session Proposal")
+                    // respond with an error?
+                    return
+                }
                 handleSessionProposeRequest(payload: payload)
             }.store(in: &publishers)
 

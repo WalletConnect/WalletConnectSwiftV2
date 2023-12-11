@@ -95,8 +95,8 @@ public class Web3WalletClient {
     /// - Parameters:
     ///   - proposalId: Session Proposal id
     ///   - reason: Reason why the session proposal has been rejected. Conforms to CAIP25.
-    public func reject(proposalId: String, reason: RejectionReason) async throws {
-        try await signClient.reject(proposalId: proposalId, reason: reason)
+    public func rejectSession(proposalId: String, reason: RejectionReason) async throws {
+        try await signClient.rejectSession(proposalId: proposalId, reason: reason)
     }
     
     /// For wallet to reject authentication request
@@ -178,7 +178,32 @@ public class Web3WalletClient {
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
         try authClient.formatMessage(payload: payload, address: address)
     }
-    
+
+    //---------------------------------------AUTH------------------------------------
+    // TODO - add publishers for authenticated session
+    /// For a wallet to respond on authentication request
+    /// - Parameters:
+    ///   - requestId: authentication request id
+    ///   - signature: CACAO signature of requested message
+    public func respondSessionAuthenticate(requestId: RPCID, signature: WalletConnectSign.CacaoSignature, from account: Account) async throws {
+        try await signClient.respondSessionAuthenticate(requestId: requestId, signature: signature, account: account)
+    }
+
+    /// For wallet to reject authentication request
+    /// - Parameter requestId: authentication request id
+    public func rejectSession(requestId: RPCID) async throws {
+        try await signClient.rejectSession(requestId: requestId)
+    }
+
+
+    /// Query pending authentication requests
+    /// - Returns: Pending authentication requests
+    public func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)] {
+        return try signClient.getPendingAuthRequests()
+    }
+    //---------------------------------------------------
+
+
     /// For a wallet to respond on authentication request
     /// - Parameters:
     ///   - requestId: authentication request id

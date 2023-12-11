@@ -94,10 +94,22 @@ final class SignClientMock: SignClientProtocol {
         approveCalled = true
     }
     
-    func reject(proposalId: String, reason: WalletConnectSign.RejectionReason) async throws {
+    func rejectSession(proposalId: String, reason: WalletConnectSign.RejectionReason) async throws {
         rejectCalled = true
     }
-    
+
+    func rejectSession(requestId: JSONRPC.RPCID) async throws {
+        fatalError("TODO")
+    }
+
+    func respondSessionAuthenticated(requestId: JSONRPC.RPCID, signature: WalletConnectUtils.CacaoSignature, account: WalletConnectUtils.Account) async throws {
+        fatalError("TODO")
+    }
+
+    func getPendingAuthRequests() throws -> [(WalletConnectSign.AuthenticationRequest, WalletConnectSign.VerifyContext?)] {
+        fatalError("TODO")
+    }
+
     func update(topic: String, namespaces: [String : WalletConnectSign.SessionNamespace]) async throws {
         updateCalled = true
     }

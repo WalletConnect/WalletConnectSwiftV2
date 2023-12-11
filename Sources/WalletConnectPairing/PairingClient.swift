@@ -82,6 +82,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         return try await appPairService.create()
     }
 
+    public func register(supportedMethods: [String]) async {
+        await appPairService.register(supportedMethods: supportedMethods)
+    }
+
     public func activate(pairingTopic: String, peerMetadata: AppMetadata?) {
         appPairActivateService.activate(for: pairingTopic, peerMetadata: peerMetadata)
     }
