@@ -273,8 +273,8 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func approveSessionAuthenticate(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
-        try await authResponder.respond(requestId: requestId, signature: signature, account: account)
+    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws {
+        try await authResponder.respond(requestId: requestId, auths: auths)
     }
 
     /// For wallet to reject authentication request
@@ -295,7 +295,7 @@ public final class SignClient: SignClientProtocol {
     }
 
     public func makeAuthObject(authRequest: AuthenticationRequest, signature: WalletConnectUtils.CacaoSignature, account: Account) throws -> AuthObject {
-        thy CacaosProvider().makeCacao(authRequest: authRequest, signature: signature, account: account)
+        try CacaosProvider().makeCacao(authRequest: authRequest, signature: signature, account: account)
     }
 
     //-----------------------------------------------------------------------------------

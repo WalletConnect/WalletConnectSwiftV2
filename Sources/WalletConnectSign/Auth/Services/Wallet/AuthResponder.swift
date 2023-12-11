@@ -31,15 +31,13 @@ actor AuthResponder {
         self.pairingRegisterer = pairingRegisterer
     }
 
-    func respond(requestId: RPCID, signature: CacaoSignature, account: Account) async throws {
+    func respond(requestId: RPCID, auths: [AuthObject]) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let header = CacaoHeader(t: "caip122")
-        let payload = try authRequestParams.payloadParams.cacaoPayload(account: account)
-        let responseParams = AuthResponseParams(h: header, p: payload, s: signature)
+        let responseParams = auths
 
         let response = RPCResponse(id: requestId, result: responseParams)
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))

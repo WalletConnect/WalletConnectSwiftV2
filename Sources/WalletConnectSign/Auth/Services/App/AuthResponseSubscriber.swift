@@ -35,7 +35,7 @@ class AuthResponseSubscriber {
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, [Cacao]>)  in
 
                 pairingRegisterer.activate(pairingTopic: payload.topic, peerMetadata: nil)
 
