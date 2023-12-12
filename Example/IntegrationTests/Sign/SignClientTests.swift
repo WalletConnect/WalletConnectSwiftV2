@@ -769,10 +769,10 @@ final class SignClientTests: XCTestCase {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
 
-                let SIWEmessages = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+                let Siwemessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
 
                 let signature = try signer.sign(
-                    message: SIWEmessages,
+                    message: Siwemessage,
                     privateKey: prvKey,
                     type: .eip191)
 
@@ -792,6 +792,48 @@ final class SignClientTests: XCTestCase {
         dapp.enableAuthenticatedSessions()
         let uri = try! await dappPairingClient.create()
         try await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+        try await walletPairingClient.pair(uri: uri)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testEIP191SessionAuthenticatedMultiCacao() async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
+
+                var cacaos = [Cacao]()
+
+                request.payload.chains.forEach { chain in
+
+                    let SiweMessage = try! wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+
+                    let signature = try! signer.sign(
+                        message: SiweMessage,
+                        privateKey: prvKey,
+                        type: .eip191)
+
+                    let cacao = try! wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
+                    cacaos.append(cacao)
+
+                }
+                try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: cacaos)
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success(let session) = result else { XCTFail(); return }
+            XCTAssertEqual(session.accounts.count, 2)
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+
+
+        dapp.enableAuthenticatedSessions()
+        let uri = try! await dappPairingClient.create()
+        try await dapp.authenticate(RequestParams.stub(chains: ["eip155:1", "eip155:137"]), topic: uri.topic)
         try await walletPairingClient.pair(uri: uri)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
