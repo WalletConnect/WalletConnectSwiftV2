@@ -14,7 +14,7 @@ final class AuthRequestInteractor {
     
     func approve(request: AuthenticationRequest, importAccount: ImportAccount) async throws -> Bool {
         let account = importAccount.account
-        let auths = [AuthObject]()
+        var auths = [AuthObject]()
 
 
         request.payload.chains.forEach { chain in

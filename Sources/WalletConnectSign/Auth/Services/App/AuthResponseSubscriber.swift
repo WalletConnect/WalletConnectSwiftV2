@@ -10,7 +10,7 @@ class AuthResponseSubscriber {
     private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
 
-    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, Error>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, AuthError>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -49,7 +49,7 @@ class AuthResponseSubscriber {
                     do {
                         try await recoverAndVerifySignature(caip222Request: payload.request.payloadParams, cacaos: cacaos)
                     } catch {
-                        onResponse?(requestId, .failure(error))
+                        onResponse?(requestId, .failure(error as! AuthError))
                         return
                     }
                     createSession(form: cacaos)
