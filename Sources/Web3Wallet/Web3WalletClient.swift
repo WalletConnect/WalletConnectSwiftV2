@@ -187,7 +187,7 @@ public class Web3WalletClient {
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
     public func approveSessionAuthenticate(requestId: RPCID, auths: [AuthObject]) async throws {
-        try await signClient.approveSessionAuthenticate(requestId: requestId, signature: signature, account: account)
+        try await signClient.approveSessionAuthenticate(requestId: requestId, auths: auths)
     }
 
     /// For wallet to reject authentication request
