@@ -831,7 +831,7 @@ final class SignClientTests: XCTestCase {
 //        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
 //    }
 
-    func testEIP191RespondError() async {
+    func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
         let responseExpectation = expectation(description: "error response delivered")
         dapp.enableAuthenticatedSessions()
         let uri = try! await dappPairingClient.create()
@@ -856,50 +856,27 @@ final class SignClientTests: XCTestCase {
         .store(in: &publishers)
         wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
-//
-//    func testUserRespondError() async {
-//        let responseExpectation = expectation(description: "error response delivered")
-//        dapp.enableAuthenticatedSessions()
-//        let uri = try! await dappPairingClient.create()
-//        try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
-//
-//        try? await walletPairingClient.pair(uri: uri)
-//        wallet.authRequestPublisher.sink { [unowned self] request in
-//            Task(priority: .high) {
-//                try! await wallet.rejectSession(requestId: request.0.id)
-//            }
-//        }
-//        .store(in: &publishers)
-//        dapp.authResponsePublisher.sink { (_, result) in
-//            guard case .failure(let error) = result else { XCTFail(); return }
-//            XCTAssertEqual(error, .userRejeted)
-//            responseExpectation.fulfill()
-//        }
-//        .store(in: &publishers)
-//        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
-//    }
 
-//    func testRespondSignatureVerificationFailed() async {
-//        let responseExpectation = expectation(description: "invalid signature response delivered")
-//        dapp.enableAuthenticatedSessions()
-//        let uri = try! await dappPairingClient.create()
-//        try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
-//
-//        try? await walletPairingClient.pair(uri: uri)
-//        wallet.authRequestPublisher.sink { [unowned self] request in
-//            Task(priority: .high) {
-//                let invalidSignature = "438effc459956b57fcd9f3dac6c675f9cee88abf21acab7305e8e32aa0303a883b06dcbd956279a7a2ca21ffa882ff55cc22e8ab8ec0f3fe90ab45f306938cfa1b"
-//                let cacaoSignature = CacaoSignature(t: .eip191, s: invalidSignature)
-//                try! await wallet.approveSessionAuthenticate(requestId: request.0.id, signature: cacaoSignature, account: walletAccount)
-//            }
-//        }
-//        .store(in: &publishers)
-//        dapp.authResponsePublisher.sink { (_, result) in
-//            guard case .failure(let error) = result else { XCTFail(); return }
-//            XCTAssertEqual(error, .signatureVerificationFailed)
-//            responseExpectation.fulfill()
-//        }
-//        .store(in: &publishers)
-//        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
-//    }
+    func testUserRespondError() async {
+        let responseExpectation = expectation(description: "error response delivered")
+        dapp.enableAuthenticatedSessions()
+        let uri = try! await dappPairingClient.create()
+        try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+
+        try? await walletPairingClient.pair(uri: uri)
+        wallet.authRequestPublisher.sink { [unowned self] request in
+            Task(priority: .high) {
+                try! await wallet.rejectSession(requestId: request.0.id)
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .failure(let error) = result else { XCTFail(); return }
+            XCTAssertEqual(error, .userRejeted)
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
 }

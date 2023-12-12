@@ -12,7 +12,7 @@ class AuthResponseSubscriber {
     private let sessionStore: WCSessionStorage
     private let kms: KeyManagementServiceProtocol
 
-    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, AuthError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<Session, AuthError>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -60,6 +60,8 @@ class AuthResponseSubscriber {
                     }
                     let pairingTopic = "" // TODO - get pairing topic somehow here
                     let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
+
+                    onResponse?(requestId, .success(session))
                 }
 
             }.store(in: &publishers)
