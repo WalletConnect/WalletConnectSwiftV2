@@ -16,8 +16,8 @@ class PendingRequestsProvider {
         let pendingRequests: [AuthenticationRequest] = rpcHistory.getPending()
             .filter {$0.request.method == "wc_sessionAuthenticate"}
             .compactMap {
-                guard let params = try? $0.request.params?.get(AuthRequestParams.self) else { return nil }
-                return AuthenticationRequest(id: $0.request.id!, topic: $0.topic, payload: params.payloadParams, requester: params.requester.metadata)
+                guard let params = try? $0.request.params?.get(SessionAuthenticateRequestParams.self) else { return nil }
+                return AuthenticationRequest(id: $0.request.id!, topic: $0.topic, payload: params.caip222Request, requester: params.requester.metadata)
             }
         
         return pendingRequests.map { ($0, try? verifyContextStore.get(key: $0.id.string)) }

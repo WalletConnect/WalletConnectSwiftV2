@@ -12,6 +12,7 @@ actor AuthResponder {
     private let logger: ConsoleLogging
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
+    private let metadata: AppMetadata
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -20,7 +21,8 @@ actor AuthResponder {
         rpcHistory: RPCHistory,
         verifyContextStore: CodableStore<VerifyContext>,
         walletErrorResponder: WalletErrorResponder,
-        pairingRegisterer: PairingRegisterer
+        pairingRegisterer: PairingRegisterer,
+        metadata: AppMetadata
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -29,6 +31,7 @@ actor AuthResponder {
         self.verifyContextStore = verifyContextStore
         self.walletErrorResponder = walletErrorResponder
         self.pairingRegisterer = pairingRegisterer
+        self.metadata = metadata
     }
 
     func respond(requestId: RPCID, auths: [AuthObject]) async throws {
@@ -37,7 +40,8 @@ actor AuthResponder {
 
         try kms.setAgreementSecret(keys, topic: topic)
 
-        let responseParams = auths
+        let selfParticipant = Participant(publicKey: keys.publicKey.hexRepresentation, metadata: metadata)
+        let responseParams = SessionAuthenticateResponseParams(responder: selfParticipant, caip222Response: auths)
 
         let response = RPCResponse(id: requestId, result: responseParams)
         try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
@@ -55,17 +59,17 @@ actor AuthResponder {
         verifyContextStore.delete(forKey: requestId.string)
     }
 
-    private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {
+    private func getAuthRequestParams(requestId: RPCID) throws -> SessionAuthenticateRequestParams {
         guard let request = rpcHistory.get(recordId: requestId)?.request
         else { throw Errors.recordForIdNotFound }
 
-        guard let authRequestParams = try request.params?.get(AuthRequestParams.self)
+        guard let authRequestParams = try request.params?.get(SessionAuthenticateRequestParams.self)
         else { throw Errors.malformedAuthRequestParams }
 
         return authRequestParams
     }
 
-    private func generateAgreementKeys(requestParams: AuthRequestParams) throws -> (topic: String, keys: AgreementKeys) {
+    private func generateAgreementKeys(requestParams: SessionAuthenticateRequestParams) throws -> (topic: String, keys: AgreementKeys) {
         let peerPubKey = try AgreementPublicKey(hex: requestParams.requester.publicKey)
         let topic = peerPubKey.rawRepresentation.sha256().toHexString()
         let selfPubKey = try kms.createX25519KeyPair()
@@ -73,3 +77,4 @@ actor AuthResponder {
         return (topic, keys)
     }
 }
+

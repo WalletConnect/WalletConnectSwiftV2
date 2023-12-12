@@ -9,6 +9,8 @@ class AuthResponseSubscriber {
     private let messageFormatter: SIWECacaoFormatting
     private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
+    private let sessionStore: WCSessionStorage
+    private let kms: KeyManagementServiceProtocol
 
     var onResponse: ((_ id: RPCID, _ result: Result<Cacao, AuthError>) -> Void)?
 
@@ -17,10 +19,14 @@ class AuthResponseSubscriber {
          rpcHistory: RPCHistory,
          signatureVerifier: MessageVerifier,
          pairingRegisterer: PairingRegisterer,
+         kms: KeyManagementServiceProtocol,
+         sessionStore: WCSessionStorage,
          messageFormatter: SIWECacaoFormatting) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
+        self.kms = kms
+        self.sessionStore = sessionStore
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
         self.pairingRegisterer = pairingRegisterer
@@ -29,30 +35,31 @@ class AuthResponseSubscriber {
 
     private func subscribeForResponse() {
         networkingInteractor.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<AuthRequestParams>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, [Cacao]>)  in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
                 pairingRegisterer.activate(pairingTopic: payload.topic, peerMetadata: nil)
 
                 networkingInteractor.unsubscribe(topic: payload.topic)
 
                 let requestId = payload.id
-                let cacaos = payload.response
+                let cacaos = payload.response.caip222Response
                 let requestPayload = payload.request
 
                 Task {
                     do {
-                        try await recoverAndVerifySignature(caip222Request: payload.request.payloadParams, cacaos: cacaos)
+                        try await recoverAndVerifySignature(caip222Request: payload.request.caip222Request, cacaos: cacaos)
                     } catch {
                         onResponse?(requestId, .failure(error as! AuthError))
                         return
                     }
-                    return createSession(form: cacaos)
+                    let pairingTopic = "" // TODO - get pairing topic somehow here
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
                 }
 
             }.store(in: &publishers)
@@ -89,9 +96,54 @@ class AuthResponseSubscriber {
         }
     }
 
-    private func createSession(form cacaos: [Cacao]) -> Session {
+    private func createSession(from response: SessionAuthenticateResponseParams, selfParticipant: Participant, pairingTopic: String) throws -> Session {
+
+        let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
+        let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: response.responder.publicKey)
+
+        let sessionTopic = agreementKeys.derivedTopic()
+        try kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
+
+        let expiry = Date()
+            .addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
+            .timeIntervalSince1970
+
+        let relay = RelayProtocolOptions(protocol: "irn", data: nil)
+
+        let sessionNamespaces = buildSessionNamespaces()
+        let requiredNamespaces = buildRequiredNamespaces()
+
+        let settleParams = SessionType.SettleParams(
+            relay: relay,
+            controller: selfParticipant,
+            namespaces: sessionNamespaces,
+            sessionProperties: nil,
+            expiry: Int64(expiry)
+        )
+
+        let session = WCSession(
+            topic: sessionTopic,
+            pairingTopic: pairingTopic,
+            timestamp: Date(),
+            selfParticipant: selfParticipant,
+            peerParticipant: response.responder,
+            settleParams: settleParams,
+            requiredNamespaces: requiredNamespaces,
+            acknowledged: false
+        )
+
+        sessionStore.setSession(session)
 
 
+        return session.publicRepresentation()
+    }
+
+    private func buildSessionNamespaces() -> [String: SessionNamespace] {
+        return [:]
+    }
+
+    private func buildRequiredNamespaces() -> [String: ProposalNamespace] {
+        return [:]
     }
 }
 
