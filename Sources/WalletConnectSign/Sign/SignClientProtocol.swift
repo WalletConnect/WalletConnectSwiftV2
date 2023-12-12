@@ -27,7 +27,7 @@ public protocol SignClientProtocol {
     func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws
     func disconnect(topic: String) async throws
     func getSessions() -> [Session]
-    func formatAuthMessage(payload: AuthenticationPayload, account: Account) throws -> String
+    func formatAuthMessage(payload: Caip222Request, account: Account) throws -> String
 
     func cleanup() async throws
     

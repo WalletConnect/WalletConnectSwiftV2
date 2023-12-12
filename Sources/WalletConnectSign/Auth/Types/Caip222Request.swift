@@ -1,6 +1,6 @@
 import Foundation
 
-public struct AuthenticationPayload: Codable, Equatable {
+public struct Caip222Request: Codable, Equatable {
     public let domain: String
     public let aud: String
     public let version: String
@@ -15,7 +15,7 @@ public struct AuthenticationPayload: Codable, Equatable {
     public let resources: [String]?
 
     init(requestParams: RequestParams, iat: String) {
-        self.type = "eip4361"
+        self.type = "caip122"
         self.chains = requestParams.chains
         self.domain = requestParams.domain
         self.aud = requestParams.aud

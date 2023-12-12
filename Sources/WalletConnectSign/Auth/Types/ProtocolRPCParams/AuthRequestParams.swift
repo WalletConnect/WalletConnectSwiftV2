@@ -1,9 +1,9 @@
 import Foundation
 
-/// wc_authRequest RPC method request param
+/// wc_sessionAuthenticate RPC method request param
 struct AuthRequestParams: Codable, Equatable {
     let requester: Requester
-    let payloadParams: AuthenticationPayload
+    let payloadParams: Caip222Request
 }
 
 extension AuthRequestParams {

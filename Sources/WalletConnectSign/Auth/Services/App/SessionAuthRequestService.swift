@@ -24,7 +24,7 @@ actor SessionAuthRequestService {
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
         let protocolMethod = SessionAuthenticatedProtocolMethod()
         let requester = AuthRequestParams.Requester(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
-        let payload = AuthenticationPayload(requestParams: params, iat: iatProvader.iat)
+        let payload = Caip222Request(requestParams: params, iat: iatProvader.iat)
         let params = AuthRequestParams(requester: requester, payloadParams: payload)
         let request = RPCRequest(method: protocolMethod.method, params: params)
         try kms.setPublicKey(publicKey: pubKey, for: responseTopic)

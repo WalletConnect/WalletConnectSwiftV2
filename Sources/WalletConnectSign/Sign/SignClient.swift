@@ -109,7 +109,7 @@ public final class SignClient: SignClientProtocol {
     /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
     ///
     /// Emited result may be an error.
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, Error>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
     //---------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ public final class SignClient: SignClientProtocol {
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, Error>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthenticationRequest, context: VerifyContext?), Never>()
 
     private var publishers = Set<AnyCancellable>()
@@ -290,7 +290,7 @@ public final class SignClient: SignClientProtocol {
         return try pendingRequestsProvider.getPendingRequests()
     }
 
-    public func formatAuthMessage(payload: AuthenticationPayload, account: Account) throws -> String {
+    public func formatAuthMessage(payload: Caip222Request, account: Account) throws -> String {
         return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(account: account))
     }
 

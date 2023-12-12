@@ -8,7 +8,6 @@ public struct Web3WalletClientFactory {
         pushClient: PushClientProtocol
     ) -> Web3WalletClient {
         return Web3WalletClient(
-            authClient: authClient,
             signClient: signClient,
             pairingClient: pairingClient,
             pushClient: pushClient
