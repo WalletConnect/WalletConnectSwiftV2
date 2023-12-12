@@ -49,6 +49,7 @@ class AuthResponseSubscriber {
 
                 let requestId = payload.id
                 let cacaos = payload.response.caip222Response
+                let caip222Request = payload.request.caip222Request
                 let requestPayload = payload.request
 
                 Task {
@@ -59,7 +60,7 @@ class AuthResponseSubscriber {
                         return
                     }
                     let pairingTopic = "" // TODO - get pairing topic somehow here
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, caip222Request: caip222Request)
 
                     onResponse?(requestId, .success(session))
                 }
@@ -79,7 +80,8 @@ class AuthResponseSubscriber {
             guard
                 let recovered = try? messageFormatter.formatMessage(
                     from: caip222Request.cacaoPayload(account: account)
-                ), recovered == message
+                ),
+                recovered == message
             else {
                 throw AuthError.messageCompromised
             }
@@ -98,7 +100,12 @@ class AuthResponseSubscriber {
         }
     }
 
-    private func createSession(from response: SessionAuthenticateResponseParams, selfParticipant: Participant, pairingTopic: String) throws -> Session {
+    private func createSession(
+        from response: SessionAuthenticateResponseParams,
+        selfParticipant: Participant,
+        pairingTopic: String,
+        caip222Request: Caip222Request
+    ) throws -> Session {
 
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: response.responder.publicKey)
@@ -112,8 +119,8 @@ class AuthResponseSubscriber {
 
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
-        let sessionNamespaces = buildSessionNamespaces()
-        let requiredNamespaces = buildRequiredNamespaces()
+        let sessionNamespaces = buildSessionNamespaces(cacaos: response.caip222Response)
+        let requiredNamespaces = buildRequiredNamespaces(caip222Request: caip222Request)
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -140,24 +147,12 @@ class AuthResponseSubscriber {
         return session.publicRepresentation()
     }
 
-    private func buildSessionNamespaces() -> [String: SessionNamespace] {
+    private func buildSessionNamespaces(cacaos: [Cacao]) -> [String: SessionNamespace] {
         return [:]
     }
 
-    private func buildRequiredNamespaces() -> [String: ProposalNamespace] {
+    private func buildRequiredNamespaces(caip222Request: Caip222Request) -> [String: ProposalNamespace] {
         return [:]
     }
 }
 
-extension Sequence {
-    func asyncForEach(_ operation: @escaping (Element) async throws -> Void) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            for element in self {
-                group.addTask {
-                    try await operation(element)
-                }
-            }
-            try await group.waitForAll()
-        }
-    }
-}
