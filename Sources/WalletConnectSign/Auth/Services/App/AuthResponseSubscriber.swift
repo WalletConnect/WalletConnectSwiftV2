@@ -52,7 +52,7 @@ class AuthResponseSubscriber {
                         onResponse?(requestId, .failure(error as! AuthError))
                         return
                     }
-                    createSession(form: cacaos)
+                    return createSession(form: cacaos)
                 }
 
             }.store(in: &publishers)
@@ -89,7 +89,8 @@ class AuthResponseSubscriber {
         }
     }
 
-    private func createSession(form cacaos: [Cacao]) {
+    private func createSession(form cacaos: [Cacao]) -> Session {
+
 
     }
 }

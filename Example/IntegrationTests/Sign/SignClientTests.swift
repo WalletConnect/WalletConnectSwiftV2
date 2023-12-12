@@ -764,13 +764,21 @@ final class SignClientTests: XCTestCase {
     func testEIP191SessionAuthenticated() async throws {
         let responseExpectation = expectation(description: "successful response delivered")
 
-        wallet.authRequestPublisher.sink { [unowned self] request in
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
-                let payload = try! request.0.payload.cacaoPayload(address: walletAccount.address)
-                let signature = try! signer.sign(payload: payload, privateKey: prvKey, type: .eip191)
-                try! await wallet.respondSessionAuthenticate(requestId: request.0.id, signature: signature, account: walletAccount)
+
+                let SIWEmessages = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+
+                let signature = try signer.sign(
+                    message: SIWEmessages,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let auth = try wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
+
+                try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
             }
         }
         .store(in: &publishers)
