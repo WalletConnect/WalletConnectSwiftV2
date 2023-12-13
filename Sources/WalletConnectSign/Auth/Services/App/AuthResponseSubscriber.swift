@@ -50,8 +50,12 @@ class AuthResponseSubscriber {
                 let requestId = payload.id
                 let cacaos = payload.response.caip222Response
                 let caip222Request = payload.request.caip222Request
-                let requestPayload = payload.request
 
+                guard let record = rpcHistory.get(recordId: payload.id) else {
+                    logger.error("record not found")
+                    return
+                }
+                let pairingTopic = record.topic
                 Task {
                     do {
                         try await recoverAndVerifySignature(caip222Request: payload.request.caip222Request, cacaos: cacaos)
@@ -59,7 +63,7 @@ class AuthResponseSubscriber {
                         onResponse?(requestId, .failure(error as! AuthError))
                         return
                     }
-                    let pairingTopic = "" // TODO - get pairing topic somehow here
+                    let pairingTopic = pairingTopic
                     let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, caip222Request: caip222Request)
 
                     onResponse?(requestId, .success(session))
