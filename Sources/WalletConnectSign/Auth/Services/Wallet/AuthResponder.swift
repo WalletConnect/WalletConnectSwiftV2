@@ -133,7 +133,7 @@ actor AuthResponder {
             peerParticipant: peerParticipant,
             settleParams: settleParams,
             requiredNamespaces: requiredNamespaces,
-            acknowledged: false
+            acknowledged: true
         )
 
         sessionStore.setSession(session)

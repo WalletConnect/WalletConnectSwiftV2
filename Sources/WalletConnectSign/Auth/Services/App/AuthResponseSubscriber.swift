@@ -144,7 +144,7 @@ class AuthResponseSubscriber {
             peerParticipant: response.responder,
             settleParams: settleParams,
             requiredNamespaces: requiredNamespaces,
-            acknowledged: false
+            acknowledged: true
         )
 
         sessionStore.setSession(session)

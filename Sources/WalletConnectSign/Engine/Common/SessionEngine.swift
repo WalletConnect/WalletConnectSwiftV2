@@ -61,6 +61,7 @@ final class SessionEngine {
             return
         }
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
+            logger.debug("Invalid namespaces")
             throw WalletConnectError.invalidPermissions
         }
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)

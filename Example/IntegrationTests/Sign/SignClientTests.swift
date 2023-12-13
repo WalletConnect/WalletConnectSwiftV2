@@ -952,6 +952,7 @@ final class SignClientTests: XCTestCase {
             guard case .success(let session) = result else { XCTFail(); return }
 
             Task(priority: .high) {
+                sleep(1)
                 let request = Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
                 try await dapp.request(params: request)
             }
