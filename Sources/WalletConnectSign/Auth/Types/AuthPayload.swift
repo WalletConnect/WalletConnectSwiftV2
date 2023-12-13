@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Caip222Request: Codable, Equatable {
+public struct AuthPayload: Codable, Equatable {
     public let domain: String
     public let aud: String
     public let version: String
@@ -13,6 +13,7 @@ public struct Caip222Request: Codable, Equatable {
     public let statement: String?
     public let requestId: String?
     public let resources: [String]?
+
 
     init(requestParams: RequestParams, iat: String) {
         self.type = "caip122"

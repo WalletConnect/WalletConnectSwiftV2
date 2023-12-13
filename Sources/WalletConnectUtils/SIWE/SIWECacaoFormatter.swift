@@ -27,3 +27,4 @@ public struct SIWECacaoFormatter: SIWECacaoFormatting {
         return message.formatted
     }
 }
+

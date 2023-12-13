@@ -53,18 +53,18 @@ class AuthResponseSubscriber {
 
                 let requestId = payload.id
                 let cacaos = payload.response.caip222Response
-                let caip222Request = payload.request.caip222Request
+                let authRequestPayload = payload.request.authPayload
 
 
                 Task {
                     do {
-                        try await recoverAndVerifySignature(caip222Request: payload.request.caip222Request, cacaos: cacaos)
+                        try await recoverAndVerifySignature(authRequestPayload: payload.request.authPayload, cacaos: cacaos)
                     } catch {
                         onResponse?(requestId, .failure(error as! AuthError))
                         return
                     }
                     let pairingTopic = pairingTopic
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, caip222Request: caip222Request)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, authRequestPayload: authRequestPayload)
 
                     onResponse?(requestId, .success(session))
                 }
@@ -72,7 +72,7 @@ class AuthResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func recoverAndVerifySignature(caip222Request: Caip222Request, cacaos: [Cacao]) async throws {
+    private func recoverAndVerifySignature(authRequestPayload: AuthPayload, cacaos: [Cacao]) async throws {
         try await cacaos.asyncForEach { [unowned self] cacao in
             guard
                 let account = try? DIDPKH(did: cacao.p.iss).account,
@@ -83,7 +83,7 @@ class AuthResponseSubscriber {
 
             guard
                 let recovered = try? messageFormatter.formatMessage(
-                    from: caip222Request.cacaoPayload(account: account)
+                    from: authRequestPayload.cacaoPayload(account: account)
                 ),
                 recovered == message
             else {
@@ -108,7 +108,7 @@ class AuthResponseSubscriber {
         from response: SessionAuthenticateResponseParams,
         selfParticipant: Participant,
         pairingTopic: String,
-        caip222Request: Caip222Request
+        authRequestPayload: AuthPayload
     ) throws -> Session {
 
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
@@ -126,7 +126,7 @@ class AuthResponseSubscriber {
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
         let sessionNamespaces = buildSessionNamespaces(cacaos: response.caip222Response)
-        let requiredNamespaces = buildRequiredNamespaces(caip222Request: caip222Request)
+        let requiredNamespaces = buildRequiredNamespaces(caip222Request: authRequestPayload)
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -159,7 +159,7 @@ class AuthResponseSubscriber {
         return [:]
     }
 
-    private func buildRequiredNamespaces(caip222Request: Caip222Request) -> [String: ProposalNamespace] {
+    private func buildRequiredNamespaces(caip222Request: AuthPayload) -> [String: ProposalNamespace] {
         return [:]
     }
 }

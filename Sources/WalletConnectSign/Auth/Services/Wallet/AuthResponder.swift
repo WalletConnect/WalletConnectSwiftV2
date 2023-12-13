@@ -115,7 +115,7 @@ actor AuthResponder {
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
         let sessionNamespaces = buildSessionNamespaces(cacaos: response.caip222Response)
-        let requiredNamespaces = buildRequiredNamespaces(caip222Request: request.caip222Request)
+        let requiredNamespaces = buildRequiredNamespaces(caip222Request: request.authPayload)
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -148,7 +148,7 @@ actor AuthResponder {
         return [:]
     }
 
-    private func buildRequiredNamespaces(caip222Request: Caip222Request) -> [String: ProposalNamespace] {
+    private func buildRequiredNamespaces(caip222Request: AuthPayload) -> [String: ProposalNamespace] {
         return [:]
     }
 }

@@ -176,7 +176,7 @@ public class Web3WalletClient {
         signClient.getSessions()
     }
     
-    public func formatAuthMessage(payload: Caip222Request, account: Account) throws -> String {
+    public func formatAuthMessage(payload: AuthPayload, account: Account) throws -> String {
         try signClient.formatAuthMessage(payload: payload, account: account)
     }
 

@@ -290,7 +290,7 @@ public final class SignClient: SignClientProtocol {
         return try pendingRequestsProvider.getPendingRequests()
     }
 
-    public func formatAuthMessage(payload: Caip222Request, account: Account) throws -> String {
+    public func formatAuthMessage(payload: AuthPayload, account: Account) throws -> String {
         return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(account: account))
     }
 
