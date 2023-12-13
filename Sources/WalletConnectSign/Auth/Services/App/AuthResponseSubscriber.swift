@@ -126,7 +126,7 @@ class AuthResponseSubscriber {
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
         let sessionNamespaces = buildSessionNamespaces(cacaos: response.caip222Response)
-        let requiredNamespaces = buildRequiredNamespaces(caip222Request: authRequestPayload)
+        let requiredNamespaces = [:]
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -159,8 +159,5 @@ class AuthResponseSubscriber {
         return [:]
     }
 
-    private func buildRequiredNamespaces(caip222Request: AuthPayload) -> [String: ProposalNamespace] {
-        return [:]
-    }
 }
 
