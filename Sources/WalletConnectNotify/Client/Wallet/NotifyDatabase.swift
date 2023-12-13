@@ -29,14 +29,16 @@ final class NotifyDatabase {
     }
 
     func save(subscriptions: [NotifySubscription]) throws {
-        let sql = try SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions)
+        guard let sql = SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions) else { return }
         try execute(sql: sql)
         try onSubscriptionsUpdate?()
     }
 
     func replace(subscriptions: [NotifySubscription]) throws {
         try execute(sql: SqliteQuery.delete(table: Table.subscriptions))
-        try execute(sql: try SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions))
+        if let sql = SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions) {
+            try execute(sql: sql)
+        }
         try onSubscriptionsUpdate?()
     }
 
@@ -101,7 +103,7 @@ final class NotifyDatabase {
     }
 
     func save(messages: [NotifyMessageRecord]) throws {
-        let sql = try SqliteQuery.replace(table: Table.messages, rows: messages)
+        guard let sql = SqliteQuery.replace(table: Table.messages, rows: messages) else { return }
         try execute(sql: sql)
         try onMessagesUpdate?()
     }
