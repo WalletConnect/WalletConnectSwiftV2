@@ -193,13 +193,12 @@ final class NotifyTests: XCTestCase {
 
         await fulfillment(of: [created], timeout: InputConfig.defaultTimeout)
 
-        let updateScope = Set([subscription.scope.keys.first!])
-        try await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
+        try await walletNotifyClientA.update(topic: subscription.topic, scope: [])
 
         await fulfillment(of: [updated], timeout: InputConfig.defaultTimeout)
 
-        let updatedScope = Set(subscription.scope.filter { $0.value.enabled == true }.keys)
-        XCTAssertEqual(updatedScope, updateScope)
+        let updatedScope = subscription.scope.filter { $0.value.enabled == true }
+        XCTAssertTrue(updatedScope.isEmpty)
 
         try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
     }

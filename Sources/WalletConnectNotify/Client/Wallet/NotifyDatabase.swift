@@ -34,6 +34,12 @@ final class NotifyDatabase {
         try onSubscriptionsUpdate?()
     }
 
+    func replace(subscriptions: [NotifySubscription]) throws {
+        try execute(sql: SqliteQuery.delete(table: Table.subscriptions))
+        try execute(sql: try SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions))
+        try onSubscriptionsUpdate?()
+    }
+
     func getSubscription(topic: String) -> NotifySubscription? {
         let sql = SqliteQuery.select(table: Table.subscriptions, where: "topic", equals: topic)
         let subscriptions: [NotifySubscription]? = try? query(sql: sql)
