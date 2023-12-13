@@ -64,7 +64,7 @@ actor AuthResponder {
         )
 
         pairingRegisterer.activate(
-            pairingTopic: sessionTopic,
+            pairingTopic: pairingTopic,
             peerMetadata: sessionAuthenticateRequestParams.requester.metadata
         )
         

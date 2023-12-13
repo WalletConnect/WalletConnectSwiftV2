@@ -43,19 +43,19 @@ class AuthResponseSubscriber {
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
-                pairingRegisterer.activate(pairingTopic: payload.topic, peerMetadata: nil)
-
-                networkingInteractor.unsubscribe(topic: payload.topic)
-
-                let requestId = payload.id
-                let cacaos = payload.response.caip222Response
-                let caip222Request = payload.request.caip222Request
-
                 guard let record = rpcHistory.get(recordId: payload.id) else {
                     logger.error("record not found")
                     return
                 }
                 let pairingTopic = record.topic
+
+                pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
+
+                let requestId = payload.id
+                let cacaos = payload.response.caip222Response
+                let caip222Request = payload.request.caip222Request
+
+
                 Task {
                     do {
                         try await recoverAndVerifySignature(caip222Request: payload.request.caip222Request, cacaos: cacaos)

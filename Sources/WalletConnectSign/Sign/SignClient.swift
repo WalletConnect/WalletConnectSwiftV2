@@ -255,13 +255,13 @@ public final class SignClient: SignClientProtocol {
                     "personal_sign",
                 ], events: []
             )]
-        try await appProposeService.propose(
-            pairingTopic: topic,
-            namespaces: testNamespace,
-            optionalNamespaces: nil,
-            sessionProperties: nil,
-            relay: RelayProtocolOptions(protocol: "irn", data: nil)
-        )
+//        try await appProposeService.propose(
+//            pairingTopic: topic,
+//            namespaces: testNamespace,
+//            optionalNamespaces: nil,
+//            sessionProperties: nil,
+//            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+//        )
     }
 
     public func enableAuthenticatedSessions() {
