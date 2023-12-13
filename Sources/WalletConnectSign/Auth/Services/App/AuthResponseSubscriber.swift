@@ -110,6 +110,8 @@ class AuthResponseSubscriber {
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: response.responder.publicKey)
 
+        let peerParticipant = response.responder
+
         let sessionTopic = agreementKeys.derivedTopic()
         try kms.setAgreementSecret(agreementKeys, topic: sessionTopic)
 
@@ -124,7 +126,7 @@ class AuthResponseSubscriber {
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
-            controller: selfParticipant,
+            controller: peerParticipant,
             namespaces: sessionNamespaces,
             sessionProperties: nil,
             expiry: Int64(expiry)
@@ -142,7 +144,9 @@ class AuthResponseSubscriber {
         )
 
         sessionStore.setSession(session)
-
+        Task {
+            try await networkingInteractor.subscribe(topic: sessionTopic)
+        }
 
         return session.publicRepresentation()
     }

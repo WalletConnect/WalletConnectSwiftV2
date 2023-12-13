@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 actor AuthResponder {
     enum Errors: Error {
@@ -13,6 +14,11 @@ actor AuthResponder {
     private let walletErrorResponder: WalletErrorResponder
     private let pairingRegisterer: PairingRegisterer
     private let metadata: AppMetadata
+    private let sessionStore: WCSessionStorage
+    private let sessionSettledPublisherSubject = PassthroughSubject<Session, Never>()
+    var sessionSettledPublisher: AnyPublisher<Session, Never> {
+        return sessionSettledPublisherSubject.eraseToAnyPublisher()
+    }
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -22,7 +28,8 @@ actor AuthResponder {
         verifyContextStore: CodableStore<VerifyContext>,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
-        metadata: AppMetadata
+        metadata: AppMetadata,
+        sessionStore: WCSessionStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -32,26 +39,37 @@ actor AuthResponder {
         self.walletErrorResponder = walletErrorResponder
         self.pairingRegisterer = pairingRegisterer
         self.metadata = metadata
+        self.sessionStore = sessionStore
     }
 
     func respond(requestId: RPCID, auths: [AuthObject]) async throws {
-        let authRequestParams = try getAuthRequestParams(requestId: requestId)
-        let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
+        let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
+        let (sessionTopic, keys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
-        try kms.setAgreementSecret(keys, topic: topic)
+
+        try kms.setAgreementSecret(keys, topic: sessionTopic)
 
         let selfParticipant = Participant(publicKey: keys.publicKey.hexRepresentation, metadata: metadata)
         let responseParams = SessionAuthenticateResponseParams(responder: selfParticipant, caip222Response: auths)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: topic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: sessionTopic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
         
+
+        let session = try createSession(
+            response: responseParams,
+            pairingTopic: pairingTopic,
+            request: sessionAuthenticateRequestParams,
+            sessionTopic: sessionTopic
+        )
+
         pairingRegisterer.activate(
-            pairingTopic: topic,
-            peerMetadata: authRequestParams.requester.metadata
+            pairingTopic: sessionTopic,
+            peerMetadata: sessionAuthenticateRequestParams.requester.metadata
         )
         
         verifyContextStore.delete(forKey: requestId.string)
+        sessionSettledPublisherSubject.send(session)
     }
 
     func respondError(requestId: RPCID) async throws {
@@ -59,14 +77,15 @@ actor AuthResponder {
         verifyContextStore.delete(forKey: requestId.string)
     }
 
-    private func getAuthRequestParams(requestId: RPCID) throws -> SessionAuthenticateRequestParams {
-        guard let request = rpcHistory.get(recordId: requestId)?.request
+    private func getsessionAuthenticateRequestParams(requestId: RPCID) throws -> (request: SessionAuthenticateRequestParams, topic: String) {
+        guard let record = rpcHistory.get(recordId: requestId)
         else { throw Errors.recordForIdNotFound }
 
+        let request = record.request
         guard let authRequestParams = try request.params?.get(SessionAuthenticateRequestParams.self)
         else { throw Errors.malformedAuthRequestParams }
 
-        return authRequestParams
+        return (request: authRequestParams, topic: record.topic)
     }
 
     private func generateAgreementKeys(requestParams: SessionAuthenticateRequestParams) throws -> (topic: String, keys: AgreementKeys) {
@@ -75,6 +94,62 @@ actor AuthResponder {
         let selfPubKey = try kms.createX25519KeyPair()
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
         return (topic, keys)
+    }
+
+
+    private func createSession(
+        response: SessionAuthenticateResponseParams,
+        pairingTopic: String,
+        request: SessionAuthenticateRequestParams,
+        sessionTopic: String
+    ) throws -> Session {
+
+
+        let selfParticipant = response.responder
+        let peerParticipant = request.requester
+
+        let expiry = Date()
+            .addingTimeInterval(TimeInterval(WCSession.defaultTimeToLive))
+            .timeIntervalSince1970
+
+        let relay = RelayProtocolOptions(protocol: "irn", data: nil)
+
+        let sessionNamespaces = buildSessionNamespaces(cacaos: response.caip222Response)
+        let requiredNamespaces = buildRequiredNamespaces(caip222Request: request.caip222Request)
+
+        let settleParams = SessionType.SettleParams(
+            relay: relay,
+            controller: selfParticipant,
+            namespaces: sessionNamespaces,
+            sessionProperties: nil,
+            expiry: Int64(expiry)
+        )
+
+        let session = WCSession(
+            topic: sessionTopic,
+            pairingTopic: pairingTopic,
+            timestamp: Date(),
+            selfParticipant: selfParticipant,
+            peerParticipant: peerParticipant,
+            settleParams: settleParams,
+            requiredNamespaces: requiredNamespaces,
+            acknowledged: false
+        )
+
+        sessionStore.setSession(session)
+        Task {
+            try await networkingInteractor.subscribe(topic: sessionTopic)
+        }
+
+        return session.publicRepresentation()
+    }
+
+    private func buildSessionNamespaces(cacaos: [Cacao]) -> [String: SessionNamespace] {
+        return [:]
+    }
+
+    private func buildRequiredNamespaces(caip222Request: Caip222Request) -> [String: ProposalNamespace] {
+        return [:]
     }
 }
 
