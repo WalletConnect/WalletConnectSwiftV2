@@ -5,36 +5,25 @@ class NotifySubscriptionsChangedRequestSubscriber {
     private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
-    private let groupKeychainStorage: KeychainStorageProtocol
-    private let notifyStorage: NotifyStorage
+    private let notifySubscriptionsUpdater: NotifySubsctiptionsUpdater
     private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
-    
-    private let subscriptionChangedSubject = PassthroughSubject<[NotifySubscription], Never>()
-
-    var subscriptionChangedPublisher: AnyPublisher<[NotifySubscription], Never> {
-        return subscriptionChangedSubject.eraseToAnyPublisher()
-    }
 
     init(
         keyserver: URL,
         networkingInteractor: NetworkInteracting,
-        kms: KeyManagementServiceProtocol,
         identityClient: IdentityClient,
         logger: ConsoleLogging,
-        groupKeychainStorage: KeychainStorageProtocol,
-        notifyStorage: NotifyStorage,
+        notifySubscriptionsUpdater: NotifySubsctiptionsUpdater,
         notifySubscriptionsBuilder: NotifySubscriptionsBuilder
     ) {
         self.keyserver = keyserver
         self.networkingInteractor = networkingInteractor
-        self.kms = kms
         self.logger = logger
         self.identityClient = identityClient
-        self.groupKeychainStorage = groupKeychainStorage
-        self.notifyStorage = notifyStorage
+        self.notifySubscriptionsUpdater = notifySubscriptionsUpdater
         self.notifySubscriptionsBuilder = notifySubscriptionsBuilder
+
         subscribeForNofifyChangedRequests()
     }
 
@@ -44,54 +33,20 @@ class NotifySubscriptionsChangedRequestSubscriber {
             protocolMethod: NotifySubscriptionsChangedProtocolMethod(),
             requestOfType: NotifySubscriptionsChangedRequestPayload.Wrapper.self,
             errorHandler: logger) { [unowned self] payload in
+
                 logger.debug("Received Subscriptions Changed Request")
 
                 let (jwtPayload, _) = try NotifySubscriptionsChangedRequestPayload.decodeAndVerify(from: payload.request)
-                let account = jwtPayload.account
 
-                // TODO: varify signature with notify server diddoc authentication key
+                let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
 
-                let oldSubscriptions = notifyStorage.getSubscriptions(account: account)
-                let newSubscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(jwtPayload.subscriptions)
-
-                subscriptionChangedSubject.send(newSubscriptions)
-
-                try Task.checkCancellation()
-
-                let subscriptions = oldSubscriptions.difference(from: newSubscriptions)
-
-                logger.debug("Received: \(newSubscriptions.count), changed: \(subscriptions.count)")
-
-                if subscriptions.count > 0 {
-                    try notifyStorage.replaceAllSubscriptions(newSubscriptions)
-
-                    for subscription in newSubscriptions {
-                        let symKey = try SymmetricKey(hex: subscription.symKey)
-                        try groupKeychainStorage.add(symKey, forKey: subscription.topic)
-                        try kms.setSymmetricKey(symKey, for: subscription.topic)
-                    }
-
-                    let topics = newSubscriptions.map { $0.topic }
-
-                    try await networkingInteractor.batchSubscribe(topics: topics)
-
-                    try Task.checkCancellation()
-
-                    var logProperties = ["rpcId": payload.id.string]
-                    for (index, subscription) in newSubscriptions.enumerated() {
-                        let key = "subscription_\(index + 1)"
-                        logProperties[key] = subscription.topic
-                    }
-
-                    logger.debug("Updated Subscriptions by Subscriptions Changed Request", properties: logProperties)
-                }
+                try await notifySubscriptionsUpdater.update(subscriptions: subscriptions, for: jwtPayload.account)
 
                 try await respond(topic: payload.topic, account: jwtPayload.account, rpcId: payload.id, notifyServerAuthenticationKey: jwtPayload.notifyServerAuthenticationKey)
             }
     }
 
     private func respond(topic: String, account: Account, rpcId: RPCID, notifyServerAuthenticationKey: DIDKey) async throws {
-
         let receiptPayload = NotifySubscriptionsChangedResponsePayload(account: account, keyserver: keyserver, notifyServerAuthenticationKey: notifyServerAuthenticationKey)
 
         let wrapper = try identityClient.signAndCreateWrapper(

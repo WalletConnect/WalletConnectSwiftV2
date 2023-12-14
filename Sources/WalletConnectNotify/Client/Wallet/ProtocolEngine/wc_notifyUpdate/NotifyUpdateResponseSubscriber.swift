@@ -2,21 +2,14 @@ import Foundation
 import Combine
 
 class NotifyUpdateResponseSubscriber {
+    
     private let networkingInteractor: NetworkInteracting
-    private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let notifyStorage: NotifyStorage
-    private let nofityConfigProvider: NotifyConfigProvider
 
-    init(networkingInteractor: NetworkInteracting,
-         logger: ConsoleLogging,
-         notifyConfigProvider: NotifyConfigProvider,
-         notifyStorage: NotifyStorage
-    ) {
+    init(networkingInteractor: NetworkInteracting, logger: ConsoleLogging) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.notifyStorage = notifyStorage
-        self.nofityConfigProvider = notifyConfigProvider
+
         subscribeForUpdateResponse()
     }
 
@@ -24,10 +17,6 @@ class NotifyUpdateResponseSubscriber {
 }
 
 private extension NotifyUpdateResponseSubscriber {
-    enum Errors: Error {
-        case subscriptionDoesNotExist
-        case selectedScopeNotFound
-    }
 
     func subscribeForUpdateResponse() {
         networkingInteractor.subscribeOnResponse(

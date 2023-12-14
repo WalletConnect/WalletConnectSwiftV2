@@ -37,6 +37,7 @@ public class NotifyClient {
     private let notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber
     private let notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider
     private let notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber
+    private let notifySubscriptionsUpdater: NotifySubsctiptionsUpdater
     private let subscriptionWatcher: SubscriptionWatcher
 
     init(logger: ConsoleLogging,
@@ -58,6 +59,7 @@ public class NotifyClient {
          notifyWatchSubscriptionsResponseSubscriber: NotifyWatchSubscriptionsResponseSubscriber,
          notifyWatcherAgreementKeysProvider: NotifyWatcherAgreementKeysProvider,
          notifySubscriptionsChangedRequestSubscriber: NotifySubscriptionsChangedRequestSubscriber,
+         notifySubscriptionsUpdater: NotifySubsctiptionsUpdater,
          subscriptionWatcher: SubscriptionWatcher
     ) {
         self.logger = logger
@@ -78,6 +80,7 @@ public class NotifyClient {
         self.notifyWatchSubscriptionsResponseSubscriber = notifyWatchSubscriptionsResponseSubscriber
         self.notifyWatcherAgreementKeysProvider = notifyWatcherAgreementKeysProvider
         self.notifySubscriptionsChangedRequestSubscriber = notifySubscriptionsChangedRequestSubscriber
+        self.notifySubscriptionsUpdater = notifySubscriptionsUpdater
         self.subscriptionWatcher = subscriptionWatcher
     }
 
@@ -184,7 +187,7 @@ private extension NotifyClient {
 extension NotifyClient {
 
     public var subscriptionChangedPublisher: AnyPublisher<[NotifySubscription], Never> {
-        return notifySubscriptionsChangedRequestSubscriber.subscriptionChangedPublisher
+        return notifySubscriptionsUpdater.subscriptionChangedPublisher
     }
 
     public func register(deviceToken: String) async throws {
