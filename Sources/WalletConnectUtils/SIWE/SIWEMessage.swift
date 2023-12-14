@@ -30,19 +30,11 @@ public struct SIWEMessage: Equatable {
     }
 
     public func formatted(includeRecapInTheStatement: Bool = false) -> String {
-        var finalStatement = statementLine
-
-        if includeRecapInTheStatement,
-           let resource = resources?.last,
-           let decodedRecap = decodeUrnToJson(urn: resource),
-            let attValue = decodedRecap["att"] {
-                finalStatement += buildRecapStatement(from: attValue)
-            }
 
         return """
                \(domain) wants you to sign in with your Ethereum account:
                \(address)
-               \(finalStatement)
+               \(getStatementLine(includeRecapInTheStatement: includeRecapInTheStatement))
 
                URI: \(uri)
                Version: \(version)
@@ -50,6 +42,22 @@ public struct SIWEMessage: Equatable {
                Nonce: \(nonce)
                Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
                """
+    }
+
+    private func getStatementLine(includeRecapInTheStatement: Bool) -> String {
+        if includeRecapInTheStatement,
+           let resource = resources?.last,
+              let decodedRecap = decodeUrnToJson(urn: resource),
+           let attValue = decodedRecap["att"] {
+            if let statement = statement {
+                return "\n\(statement) \(buildRecapStatement(from: attValue))"
+            } else {
+                return buildRecapStatement(from: attValue)
+            }
+        } else {
+            guard let statement = statement else { return "" }
+            return "\n\(statement)"
+        }
     }
 
     
@@ -86,7 +94,7 @@ public struct SIWEMessage: Equatable {
 
             if !requestActions.isEmpty {
                 let actionsString = requestActions.joined(separator: ", ")
-                statementParts.append("'\(actionsString)' for '\(resourceKey)'")
+                statementParts.append("'request': \(actionsString) for '\(resourceKey)'")
             }
         }
 
@@ -107,11 +115,6 @@ private extension SIWEMessage {
     var expLine: String {
         guard  let exp = exp else { return "" }
         return "\nExpiration Time: \(exp)"
-    }
-
-    var statementLine: String {
-        guard let statement = statement else { return "" }
-        return "\n\(statement)"
     }
 
     var nbfLine: String {
