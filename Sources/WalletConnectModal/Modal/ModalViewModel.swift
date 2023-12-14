@@ -7,7 +7,7 @@ enum Destination: Equatable {
     case welcome
     case viewAll
     case qr
-    case walletDetail(Listing)
+    case walletDetail(Wallet)
     case getWallet
         
     var contentTitle: String {
@@ -42,17 +42,21 @@ final class ModalViewModel: ObservableObject {
     
     @Published private(set) var destinationStack: [Destination] = [.welcome]
     @Published private(set) var uri: String?
-    @Published private(set) var wallets: [Listing] = []
-    
+    @Published private(set) var wallets: [Wallet] = []
+        
     @Published var searchTerm: String = ""
     
     @Published var toast: Toast?
+    
+    @Published private(set) var isThereMoreWallets: Bool = true
+    private var maxPage = Int.max
+    private var currentPage: Int = 0
     
     var destination: Destination {
         destinationStack.last!
     }
     
-    var filteredWallets: [Listing] {
+    var filteredWallets: [Wallet] {
         wallets
             .sortByRecent()
             .filter(searchTerm: searchTerm)
@@ -119,8 +123,8 @@ final class ModalViewModel: ObservableObject {
         uiApplicationWrapper.openURL(url, nil)
     }
     
-    func onListingTap(_ listing: Listing) {
-        setLastTimeUsed(listing.id)
+    func onWalletTap(_ wallet: Wallet) {
+        setLastTimeUsed(wallet.id)
     }
     
     func onBackButton() {
@@ -162,17 +166,32 @@ final class ModalViewModel: ObservableObject {
     
     @MainActor
     func fetchWallets() async {
+        let entries = 40
+        
         do {
-            let wallets = try await interactor.getListings()
+            guard currentPage <= maxPage else {
+                return
+            }
+            
+            currentPage += 1
+            
+            if currentPage == maxPage {
+                isThereMoreWallets = false
+            }
+        
+            let (total, wallets) = try await interactor.getWallets(page: currentPage, entries: entries)
+            maxPage = Int(Double(total / entries).rounded(.up))
+
             // Small deliberate delay to ensure animations execute properly
             try await Task.sleep(nanoseconds: 500_000_000)
-                
+            
             loadRecentWallets()
             checkWhetherInstalled(wallets: wallets)
             
-            self.wallets = wallets
+            self.wallets.append(contentsOf: wallets
                 .sortByOrder()
                 .sortByInstalled()
+            )
         } catch {
             toast = Toast(style: .error, message: error.localizedDescription)
         }
@@ -181,28 +200,20 @@ final class ModalViewModel: ObservableObject {
 
 // MARK: - Sorting and filtering
 
-private extension Array where Element: Listing {
-    func sortByOrder() -> [Listing] {
+private extension Array where Element: Wallet {
+    func sortByOrder() -> [Wallet] {
         sorted {
-            guard let lhs = $0.order else {
-                return false
-            }
-            
-            guard let rhs = $1.order else {
-                return true
-            }
-            
-            return lhs < rhs
+            $0.order < $1.order
         }
     }
     
-    func sortByInstalled() -> [Listing] {
+    func sortByInstalled() -> [Wallet] {
         sorted { lhs, rhs in
-            if lhs.installed, !rhs.installed {
+            if lhs.isInstalled, !rhs.isInstalled {
                 return true
             }
             
-            if !lhs.installed, rhs.installed {
+            if !lhs.isInstalled, rhs.isInstalled {
                 return false
             }
             
@@ -210,7 +221,7 @@ private extension Array where Element: Listing {
         }
     }
     
-    func sortByRecent() -> [Listing] {
+    func sortByRecent() -> [Wallet] {
         sorted { lhs, rhs in
             guard let lhsLastTimeUsed = lhs.lastTimeUsed else {
                 return false
@@ -224,7 +235,7 @@ private extension Array where Element: Listing {
         }
     }
     
-    func filter(searchTerm: String) -> [Listing] {
+    func filter(searchTerm: String) -> [Wallet] {
         if searchTerm.isEmpty { return self }
         
         return filter {
@@ -236,18 +247,18 @@ private extension Array where Element: Listing {
 // MARK: - Recent & Installed Wallets
 
 private extension ModalViewModel {
-    func checkWhetherInstalled(wallets: [Listing]) {
+    func checkWhetherInstalled(wallets: [Wallet]) {
         guard let schemes = Bundle.main.object(forInfoDictionaryKey: "LSApplicationQueriesSchemes") as? [String] else {
             return
         }
         
         wallets.forEach {
             if
-                let walletScheme = $0.mobile.native,
+                let walletScheme = $0.mobileLink,
                 !walletScheme.isEmpty,
                 schemes.contains(walletScheme.replacingOccurrences(of: "://", with: ""))
             {
-                $0.installed = uiApplicationWrapper.canOpenURL(URL(string: walletScheme)!)
+                $0.isInstalled = uiApplicationWrapper.canOpenURL(URL(string: walletScheme)!)
             }
         }
     }
@@ -270,24 +281,24 @@ private extension ModalViewModel {
 // MARK: - Deeplinking
 
 protocol WalletDeeplinkHandler {
-    func openAppstore(wallet: Listing)
-    func navigateToDeepLink(wallet: Listing, preferUniversal: Bool, preferBrowser: Bool)
+    func openAppstore(wallet: Wallet)
+    func navigateToDeepLink(wallet: Wallet, preferUniversal: Bool, preferBrowser: Bool)
 }
 
 extension ModalViewModel: WalletDeeplinkHandler {
-    func openAppstore(wallet: Listing) {
+    func openAppstore(wallet: Wallet) {
         guard
-            let storeLinkString = wallet.app.ios,
+            let storeLinkString = wallet.appStore,
             let storeLink = URL(string: storeLinkString)
         else { return }
         
         uiApplicationWrapper.openURL(storeLink, nil)
     }
     
-    func navigateToDeepLink(wallet: Listing, preferUniversal: Bool, preferBrowser: Bool) {
+    func navigateToDeepLink(wallet: Wallet, preferUniversal: Bool, preferBrowser: Bool) {
         do {
-            let nativeScheme = preferBrowser ? nil : wallet.mobile.native
-            let universalScheme = preferBrowser ? wallet.desktop.universal : wallet.mobile.universal
+            let nativeScheme = preferBrowser ? nil : wallet.mobileLink
+            let universalScheme = preferBrowser ? wallet.desktopLink : wallet.mobileLink
             
             let nativeUrlString = try formatNativeUrlString(nativeScheme)
             let universalUrlString = try formatUniversalUrlString(universalScheme)
