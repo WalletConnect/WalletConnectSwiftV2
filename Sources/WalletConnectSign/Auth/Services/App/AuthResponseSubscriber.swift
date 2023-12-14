@@ -52,7 +52,7 @@ class AuthResponseSubscriber {
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
 
                 let requestId = payload.id
-                let cacaos = payload.response.caip222Response
+                let cacaos = payload.response.cacaos
                 let authRequestPayload = payload.request.authPayload
 
 
@@ -125,8 +125,7 @@ class AuthResponseSubscriber {
 
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
-        let sessionNamespaces = buildSessionNamespaces(cacaos: response.caip222Response)
-        let requiredNamespaces = [:]
+        let sessionNamespaces = buildSessionNamespaces(cacaos: response.cacaos)
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -143,7 +142,7 @@ class AuthResponseSubscriber {
             selfParticipant: selfParticipant,
             peerParticipant: response.responder,
             settleParams: settleParams,
-            requiredNamespaces: requiredNamespaces,
+            requiredNamespaces: [:],
             acknowledged: true
         )
 

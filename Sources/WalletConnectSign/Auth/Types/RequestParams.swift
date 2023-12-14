@@ -13,7 +13,7 @@ public struct RequestParams {
     public let exp: String?
     public let statement: String?
     public let requestId: String?
-    public let resources: [String]?
+    public var resources: [String]?
     public let methods: [String]?
 
     public init(
@@ -41,7 +41,7 @@ public struct RequestParams {
     }
 
     mutating func addResource(resource: String) {
-        resource.append(resource)
+        resources?.append(resource)
     }
 }
 
@@ -57,7 +57,7 @@ extension RequestParams {
                      statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
                      requestId: String? = nil,
                      resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"],
-                     methods: [String]? = nil) -> RequestParams {
+                     methods: [String]? = ["personal_sign", "eth_sendTransaction"]) -> RequestParams {
         return RequestParams(domain: domain,
                              chains: chains,
                              nonce: nonce,

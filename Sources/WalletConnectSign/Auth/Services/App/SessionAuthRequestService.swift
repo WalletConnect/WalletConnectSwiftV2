@@ -48,7 +48,9 @@ actor SessionAuthRequestService {
     private func createNamespaceRecap(chainNamespace: String, methods: [String]) throws -> String {
         let actions = methods.map{"request/\($0)"}
         let recap = RecapFactory.createRecap(resource: chainNamespace, actions: actions)
-        let jsonData = try JSONEncoder().encode(recap)
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.outputFormatting = .withoutEscapingSlashes
+        let jsonData = try jsonEncoder.encode(recap)
         let base64Encoded = jsonData.base64EncodedString()
         let urn = "urn:recap:\(base64Encoded)"
         return urn
