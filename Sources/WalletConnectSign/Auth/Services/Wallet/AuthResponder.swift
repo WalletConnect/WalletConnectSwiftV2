@@ -47,10 +47,10 @@ actor AuthResponder {
 
     func respond(requestId: RPCID, auths: [AuthObject]) async throws {
         let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
-        let (responseTopic, keys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
+        let (responseTopic, responseKeys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
 
-        try kms.setAgreementSecret(keys, topic: responseTopic)
+        try kms.setAgreementSecret(responseKeys, topic: responseTopic)
 
         let peerParticipant = sessionAuthenticateRequestParams.requester
 
@@ -65,7 +65,7 @@ actor AuthResponder {
         let responseParams = SessionAuthenticateResponseParams(responder: selfParticipant, cacaos: auths)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: sessionKeys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation))
 
 
         let session = try createSession(
