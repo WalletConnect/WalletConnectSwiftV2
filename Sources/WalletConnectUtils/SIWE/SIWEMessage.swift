@@ -30,15 +30,14 @@ public struct SIWEMessage: Equatable {
     }
 
     public func formatted(includeRecapInTheStatement: Bool = false) -> String {
-        var finalStatement = statement ?? ""
+        var finalStatement = statementLine
 
-        if includeRecapInTheStatement, let resources = resources {
-            for resource in resources {
-                if let decodedRecap = decodeUrnToJson(urn: resource) {
-                    finalStatement += buildRecapStatement(from: decodedRecap)
-                }
+        if includeRecapInTheStatement,
+           let resource = resources?.last,
+           let decodedRecap = decodeUrnToJson(urn: resource),
+            let attValue = decodedRecap["att"] {
+                finalStatement += buildRecapStatement(from: attValue)
             }
-        }
 
         return """
                \(domain) wants you to sign in with your Ethereum account:
@@ -74,26 +73,31 @@ public struct SIWEMessage: Equatable {
         }
     }
 
-    private func buildRecapStatement(from decodedRecap: [String: [String: [String: [String]]]]) -> String {
+    private func buildRecapStatement(from decodedRecap: [String: [String: [String]]]) -> String {
         var statementParts: [String] = []
 
         for (resourceKey, actions) in decodedRecap {
-            var actionParts: [String] = []
-            for (actionType, _) in actions {
-                actionParts.append("'\(actionType)'")
+            var requestActions: [String] = []
+
+            for (actionType, _) in actions where actionType.starts(with: "request/") {
+                let action = actionType.replacingOccurrences(of: "request/", with: "")
+                requestActions.append("'\(action)'")
             }
-            let actionsString = actionParts.joined(separator: ", ")
-            if !actionsString.isEmpty {
-                statementParts.append("\(actionsString) for '\(resourceKey)'")
+
+            if !requestActions.isEmpty {
+                let actionsString = requestActions.joined(separator: ", ")
+                statementParts.append("'\(actionsString)' for '\(resourceKey)'")
             }
         }
 
         if !statementParts.isEmpty {
-            return " I further authorize the stated URI to perform the following actions: \(statementParts.joined(separator: "; "))."
+            let formattedStatement = statementParts.joined(separator: "; ")
+            return "I further authorize the stated URI to perform the following actions: (1) \(formattedStatement)."
         } else {
             return ""
         }
     }
+
 
 
 }

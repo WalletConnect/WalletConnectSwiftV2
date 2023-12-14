@@ -43,7 +43,7 @@ extension Account {
 
 extension Account {
     static func stub() -> Account {
-        return Account("eip155:1:0x5F847B18b4a2Dd0F428796E89CaEe71480a2a98e")!
+        return Account("eip155:1:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")!
     }
 }
 
