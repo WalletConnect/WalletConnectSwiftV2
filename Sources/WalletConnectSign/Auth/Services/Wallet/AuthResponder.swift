@@ -42,20 +42,30 @@ actor AuthResponder {
         self.pairingRegisterer = pairingRegisterer
         self.metadata = metadata
         self.sessionStore = sessionStore
+        self.sessionNamespaceBuilder = sessionNamespaceBuilder
     }
 
     func respond(requestId: RPCID, auths: [AuthObject]) async throws {
         let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
-        let (sessionTopic, keys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
+        let (responseTopic, keys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
 
-        try kms.setAgreementSecret(keys, topic: sessionTopic)
+        try kms.setAgreementSecret(keys, topic: responseTopic)
 
-        let selfParticipant = Participant(publicKey: keys.publicKey.hexRepresentation, metadata: metadata)
+        let peerParticipant = sessionAuthenticateRequestParams.requester
+
+        let sessionSelfPubKey = try kms.createX25519KeyPair()
+        let sessionSelfPubKeyHex = sessionSelfPubKey.hexRepresentation
+        let sessionKeys = try kms.performKeyAgreement(selfPublicKey: sessionSelfPubKey, peerPublicKey: peerParticipant.publicKey)
+
+        let sessionTopic = sessionKeys.derivedTopic()
+        try kms.setAgreementSecret(sessionKeys, topic: sessionTopic)
+
+        let selfParticipant = Participant(publicKey: sessionSelfPubKeyHex, metadata: metadata)
         let responseParams = SessionAuthenticateResponseParams(responder: selfParticipant, cacaos: auths)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: sessionTopic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: keys.publicKey.rawRepresentation))
+        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: sessionKeys.publicKey.rawRepresentation))
 
 
         let session = try createSession(
@@ -139,6 +149,7 @@ actor AuthResponder {
 
         sessionStore.setSession(session)
         Task {
+            logger.debug("subscribing to session topic: \(sessionTopic)")
             try await networkingInteractor.subscribe(topic: sessionTopic)
         }
 

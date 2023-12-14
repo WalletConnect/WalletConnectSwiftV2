@@ -94,10 +94,11 @@ public struct SignClientFactory {
 
         let messageVerifierFactory = MessageVerifierFactory(crypto: crypto)
         let signatureVerifier = messageVerifierFactory.create(projectId: projectId)
-        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter)
+        let sessionNameSpaceBuilder = SessionNamespaceBuilder(logger: logger)
+        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory)
         let authRequestSubscriber = AuthRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, verifyClient: verifyClient, verifyContextStore: verifyContextStore)
-        let authResponder = AuthResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, sessionStore: sessionStore)
+        let authResponder = AuthResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, sessionStore: sessionStore, sessionNamespaceBuilder: sessionNameSpaceBuilder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: rpcHistory, verifyContextStore: verifyContextStore)
 
 

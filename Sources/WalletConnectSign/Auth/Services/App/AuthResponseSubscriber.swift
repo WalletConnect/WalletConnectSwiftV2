@@ -151,6 +151,7 @@ class AuthResponseSubscriber {
 
         sessionStore.setSession(session)
         Task {
+            logger.debug("subscribing to session topic: \(sessionTopic)")
             try await networkingInteractor.subscribe(topic: sessionTopic)
         }
 
