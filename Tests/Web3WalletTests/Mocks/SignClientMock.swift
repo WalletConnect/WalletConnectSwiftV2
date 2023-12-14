@@ -4,6 +4,23 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
+    var authRequestPublisher: AnyPublisher<(request: WalletConnectSign.AuthenticationRequest, context: WalletConnectSign.VerifyContext?), Never> {
+        fatalError()
+    }
+
+
+    func approveSessionAuthenticate(requestId: JSONRPC.RPCID, auths: [WalletConnectSign.AuthObject]) async throws {
+        fatalError()
+    }
+    
+    func makeAuthObject(authRequest: WalletConnectSign.AuthenticationRequest, signature: WalletConnectUtils.CacaoSignature, account: WalletConnectUtils.Account) throws -> WalletConnectSign.AuthObject {
+        fatalError()
+    }
+    
+    func formatAuthMessage(payload: WalletConnectSign.AuthPayload, account: WalletConnectUtils.Account) throws -> String {
+        fatalError()
+    }
+    
     private var logsSubject = PassthroughSubject<WalletConnectUtils.Log, Never>()
 
     var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {

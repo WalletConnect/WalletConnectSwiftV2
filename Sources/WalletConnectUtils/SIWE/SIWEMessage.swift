@@ -29,19 +29,73 @@ public struct SIWEMessage: Equatable {
         self.resources = resources
     }
 
-    public var formatted: String {
-        return """
-                \(domain) wants you to sign in with your Ethereum account:
-                \(address)
-                \(statementLine)
+    public func formatted(includeRecapInTheStatement: Bool = false) -> String {
+        var finalStatement = statement ?? ""
 
-                URI: \(uri)
-                Version: \(version)
-                Chain ID: \(chainId)
-                Nonce: \(nonce)
-                Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
-                """
+        if includeRecapInTheStatement, let resources = resources {
+            for resource in resources {
+                if let decodedRecap = decodeUrnToJson(urn: resource) {
+                    finalStatement += buildRecapStatement(from: decodedRecap)
+                }
+            }
+        }
+
+        return """
+               \(domain) wants you to sign in with your Ethereum account:
+               \(address)
+               \(finalStatement)
+
+               URI: \(uri)
+               Version: \(version)
+               Chain ID: \(chainId)
+               Nonce: \(nonce)
+               Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
+               """
     }
+
+    
+
+    private func decodeUrnToJson(urn: String) -> [String: [String: [String: [String]]]]? {
+        // Check if the URN is in the correct format
+        guard urn.starts(with: "urn:recap:") else { return nil }
+
+        // Extract the Base64 encoded JSON part from the URN
+        let base64EncodedJson = urn.replacingOccurrences(of: "urn:recap:", with: "")
+
+        // Decode the Base64 encoded JSON
+        guard let jsonData = Data(base64Encoded: base64EncodedJson) else { return nil }
+
+        // Deserialize the JSON data into the desired dictionary
+        do {
+            let decodedDictionary = try JSONDecoder().decode([String: [String: [String: [String]]]].self, from: jsonData)
+            return decodedDictionary
+        } catch {
+            return nil
+        }
+    }
+
+    private func buildRecapStatement(from decodedRecap: [String: [String: [String: [String]]]]) -> String {
+        var statementParts: [String] = []
+
+        for (resourceKey, actions) in decodedRecap {
+            var actionParts: [String] = []
+            for (actionType, _) in actions {
+                actionParts.append("'\(actionType)'")
+            }
+            let actionsString = actionParts.joined(separator: ", ")
+            if !actionsString.isEmpty {
+                statementParts.append("\(actionsString) for '\(resourceKey)'")
+            }
+        }
+
+        if !statementParts.isEmpty {
+            return " I further authorize the stated URI to perform the following actions: \(statementParts.joined(separator: "; "))."
+        } else {
+            return ""
+        }
+    }
+
+
 }
 
 private extension SIWEMessage {

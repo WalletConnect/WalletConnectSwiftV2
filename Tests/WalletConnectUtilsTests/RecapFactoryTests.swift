@@ -6,7 +6,7 @@ class RecapFactoryTests: XCTestCase {
     func testCreateRecap() {
         // Define the input values
         let resource = "eip155:1"
-        let actions: Set<String> = ["request/eth_sendTransaction", "request/personal_sign"]
+        let actions = ["request/eth_sendTransaction", "request/personal_sign"]
 
         // Call the function
         let recap = RecapFactory.createRecap(resource: resource, actions: actions)

@@ -41,6 +41,12 @@ extension Account {
     }
 }
 
+extension Account {
+    static func stub() -> Account {
+        return Account("eip155:1:0x5F847B18b4a2Dd0F428796E89CaEe71480a2a98e")!
+    }
+}
+
 extension SessionType.SettleParams {
     static func stub() -> SessionType.SettleParams {
         return SessionType.SettleParams(

@@ -1,5 +1,5 @@
 import Foundation
-@testable import Auth
+@testable import WalletConnectSign
 
 extension AuthPayload {
     static func stub(requestParams: RequestParams = RequestParams.stub()) -> AuthPayload {
