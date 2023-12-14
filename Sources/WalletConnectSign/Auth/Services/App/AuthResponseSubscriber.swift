@@ -11,6 +11,7 @@ class AuthResponseSubscriber {
     private var publishers = [AnyCancellable]()
     private let sessionStore: WCSessionStorage
     private let kms: KeyManagementServiceProtocol
+    private let sessionNamespaceBuilder: SessionNamespaceBuilder
 
     var onResponse: ((_ id: RPCID, _ result: Result<Session, AuthError>) -> Void)?
 
@@ -21,7 +22,8 @@ class AuthResponseSubscriber {
          pairingRegisterer: PairingRegisterer,
          kms: KeyManagementServiceProtocol,
          sessionStore: WCSessionStorage,
-         messageFormatter: SIWECacaoFormatting) {
+         messageFormatter: SIWECacaoFormatting,
+         sessionNamespaceBuilder: SessionNamespaceBuilder) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -30,6 +32,7 @@ class AuthResponseSubscriber {
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
         self.pairingRegisterer = pairingRegisterer
+        self.sessionNamespaceBuilder = sessionNamespaceBuilder
         subscribeForResponse()
     }
 
@@ -125,7 +128,7 @@ class AuthResponseSubscriber {
 
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
-        let sessionNamespaces = buildSessionNamespaces(cacaos: response.cacaos)
+        let sessionNamespaces = try sessionNamespaceBuilder.buildSessionNamespaces(cacaos: response.cacaos)
 
         let settleParams = SessionType.SettleParams(
             relay: relay,
@@ -152,10 +155,6 @@ class AuthResponseSubscriber {
         }
 
         return session.publicRepresentation()
-    }
-
-    private func buildSessionNamespaces(cacaos: [Cacao]) -> [String: SessionNamespace] {
-        return [:]
     }
 
 }
