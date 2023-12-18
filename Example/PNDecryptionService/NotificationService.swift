@@ -1,4 +1,5 @@
 import UserNotifications
+import Web3Wallet
 import WalletConnectNotify
 import Intents
 import Mixpanel
@@ -16,40 +17,89 @@ class NotificationService: UNNotificationServiceExtension {
 
         if let content = bestAttemptContent,
            let topic = content.userInfo["topic"] as? String,
-           let ciphertext = content.userInfo["blob"] as? String {
+           let ciphertext = content.userInfo["message"] as? String,
+           let tag = content.userInfo["tag"] as? UInt {
 
-            log("topic and blob found")
-
-            do {
-                let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
-                let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
-
-                log("message decrypted", account: account, topic: topic, message: pushMessage)
-
-                let updatedContent = handle(content: content, pushMessage: pushMessage, topic: topic)
-
-                let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
-                mutableContent.title = pushMessage.title
-                mutableContent.subtitle = pushMessage.url
-                mutableContent.body = pushMessage.body
-
-                log("message handled", account: account, topic: topic, message: pushMessage)
-
+            if Web3WalletDecryptionService.canHandle(tag: tag) {
+                let mutableContent = handleWeb3WalletNotification(content: content, topic: topic, tag: tag, ciphertext: ciphertext)
                 contentHandler(mutableContent)
-
-                log("content handled", account: account, topic: topic, message: pushMessage)
-            }
-            catch {
-                log("error: \(error.localizedDescription)")
-
+            } else if NotifyDecryptionService.canHandle(tag: tag) {
+                let mutableContent = handleNotifyNotification(content: content, topic: topic, ciphertext: ciphertext)
+                contentHandler(mutableContent)
+            } else {
                 let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
-                mutableContent.title = "Error"
-                mutableContent.body = error.localizedDescription
-
-                contentHandler(mutableContent)
+                mutableContent.title = "Error: unknown message tag"
             }
         }
     }
+
+    private func handleWeb3WalletNotification(content: UNNotificationContent, topic: String, tag: UInt, ciphertext: String) -> UNMutableNotificationContent {
+
+        do {
+            let web3WalletDecryptionService = try Web3WalletDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
+
+            let decryptedPayload = try web3WalletDecryptionService.decryptMessage(topic: topic, ciphertext: ciphertext, tag: tag)
+
+            let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+
+            guard let metadata = web3WalletDecryptionService.getMetadata(topic: topic) else {
+                mutableContent.title = "Error: Cannot get peer's metadata"
+                return mutableContent
+            }
+
+            switch decryptedPayload.requestMethod {
+            case .sessionProposal:
+                mutableContent.title = "New session proposal!"
+                mutableContent.body = "A new session proposal arrived from \(metadata.name), please check your wallet"
+            case .sessionRequest:
+                if let payload = decryptedPayload as? RequestPayload {
+                    mutableContent.title = "New session request!"
+                    mutableContent.body =  "A new session request \(payload.request.method) arrived from \(metadata.name), please check your wallet"
+                }
+            case .authRequest:
+                mutableContent.title = "New authentication request!"
+                mutableContent.body = "A new authentication request arrived from \(metadata.name), please check your wallet"
+            }
+
+            return mutableContent
+        } catch {
+            let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+            mutableContent.title = "Error"
+            mutableContent.body = error.localizedDescription
+
+            return mutableContent
+        }
+    }
+
+
+    private func handleNotifyNotification(content: UNNotificationContent, topic: String, ciphertext: String) -> UNMutableNotificationContent {
+        do {
+            let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
+            let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+
+            log("message decrypted", account: account, topic: topic, message: pushMessage)
+
+            let updatedContent = handle(content: content, pushMessage: pushMessage, topic: topic)
+
+            let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
+            mutableContent.title = pushMessage.title
+            mutableContent.subtitle = pushMessage.url
+            mutableContent.body = pushMessage.body
+
+            log("message handled", account: account, topic: topic, message: pushMessage)
+
+            return mutableContent
+        } catch {
+            log("error: \(error.localizedDescription)")
+
+            let mutableContent = content.mutableCopy() as! UNMutableNotificationContent
+            mutableContent.title = "Error"
+            mutableContent.body = error.localizedDescription
+
+            return mutableContent
+        }
+    }
+
 
     override func serviceExtensionTimeWillExpire() {
         // Called just before the extension will be terminated by the system.
@@ -58,6 +108,8 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent)
         }
     }
+
+
 }
 
 private extension NotificationService {

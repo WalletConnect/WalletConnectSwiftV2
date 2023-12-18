@@ -6,7 +6,11 @@ import Web3Wallet
 final class ConfigurationService {
 
     func configure(importAccount: ImportAccount) {
-        Networking.configure(projectId: InputConfig.projectId, socketFactory: DefaultSocketFactory())
+        Networking.configure(
+            groupIdentifier: "group.com.walletconnect.sdk",
+            projectId: InputConfig.projectId,
+            socketFactory: DefaultSocketFactory()
+        )
         Networking.instance.setLogging(level: .debug)
 
         let metadata = AppMetadata(
@@ -20,7 +24,6 @@ final class ConfigurationService {
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
 
         Notify.configure(
-            groupIdentifier: "group.com.walletconnect.sdk",
             environment: BuildConfiguration.shared.apnsEnvironment,
             crypto: DefaultCryptoProvider()
         )
@@ -37,7 +40,9 @@ final class ConfigurationService {
 
         Task {
             do {
-                try await Notify.instance.register(account: importAccount.account, domain: "com.walletconnect", onSign: importAccount.onSign)
+                let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")
+                let signature = importAccount.onSign(message: params.message)
+                try await Notify.instance.register(params: params, signature: signature)
             } catch {
                 DispatchQueue.main.async {
                     let logMessage = LogMessage(message: "Push Server registration failed with: \(error.localizedDescription)")

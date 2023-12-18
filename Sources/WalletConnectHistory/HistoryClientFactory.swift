@@ -3,7 +3,7 @@ import Foundation
 class HistoryClientFactory {
 
     static func create() -> HistoryClient {
-        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let keychain = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: "")
         let keyValueStorage = UserDefaults.standard
         let logger = ConsoleLogger()
         return HistoryClientFactory.create(

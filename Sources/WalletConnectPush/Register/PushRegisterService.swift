@@ -29,7 +29,7 @@ actor PushRegisterService {
         self.environment = environment
     }
 
-    func register(deviceToken: Data) async throws {
+    func register(deviceToken: Data, alwaysRaw: Bool) async throws {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         let pushAuthToken = try pushAuthenticator.createAuthToken()
@@ -40,7 +40,7 @@ actor PushRegisterService {
         do {
             let response = try await httpClient.request(
                 PushResponse.self,
-                at: PushAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: pushAuthToken)
+                at: PushAPI.register(clientId: clientIdMutlibase, token: token, projectId: projectId, environment: environment, auth: pushAuthToken, alwaysRaw: alwaysRaw)
             )
             guard response.status == .success else {
                 throw Errors.registrationFailed
@@ -51,7 +51,7 @@ actor PushRegisterService {
                 logger.debug("Trying fallback")
                 fallback = true
                 await echoHostFallback()
-                try await register(deviceToken: deviceToken)
+                try await register(deviceToken: deviceToken, alwaysRaw: alwaysRaw)
             }
             logger.debug("Push Server registration error: \(error.localizedDescription)")
             throw error
@@ -63,7 +63,7 @@ actor PushRegisterService {
     }
 
 #if DEBUG
-    public func register(deviceToken: String) async throws {
+    public func register(deviceToken: String, alwaysRaw: Bool) async throws {
         let pushAuthToken = try pushAuthenticator.createAuthToken()
         let clientId = try clientIdStorage.getClientId()
         let clientIdMutlibase = try DIDKey(did: clientId).multibase(variant: .ED25519)
@@ -71,7 +71,7 @@ actor PushRegisterService {
         do {
             let response = try await httpClient.request(
                 PushResponse.self,
-                at: PushAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: pushAuthToken)
+                at: PushAPI.register(clientId: clientIdMutlibase, token: deviceToken, projectId: projectId, environment: environment, auth: pushAuthToken, alwaysRaw: alwaysRaw)
             )
             guard response.status == .success else {
                 throw Errors.registrationFailed
@@ -81,7 +81,7 @@ actor PushRegisterService {
             if (error as? HTTPError) == .couldNotConnect && !fallback {
                 fallback = true
                 await echoHostFallback()
-                try await register(deviceToken: deviceToken)
+                try await register(deviceToken: deviceToken, alwaysRaw: alwaysRaw)
             }
             throw error
         }

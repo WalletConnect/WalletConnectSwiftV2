@@ -8,12 +8,15 @@ public struct RelayClientFactory {
         relayHost: String,
         projectId: String,
         socketFactory: WebSocketFactory,
+        groupIdentifier: String,
         socketConnectionType: SocketConnectionType
     ) -> RelayClient {
 
-        let keyValueStorage = UserDefaults.standard
 
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
 
         let logger = ConsoleLogger(prefix: "🚄" ,loggingLevel: .off)
 

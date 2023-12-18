@@ -8,12 +8,19 @@ public class Networking {
     }
 
     public static var interactor: NetworkingInteractor = {
-        guard let _ = Networking.config else {
+        guard let config = Networking.config else {
             fatalError("Error - you must call Networking.configure(_:) before accessing the shared instance.")
         }
 
-        return NetworkingClientFactory.create(relayClient: Relay.instance)
+        return NetworkingClientFactory.create(relayClient: Relay.instance, groupIdentifier: config.groupIdentifier)
     }()
+
+    public static var groupIdentifier: String {
+        guard let config = Networking.config else {
+            fatalError("Error - you must call Networking.configure(_:) before accessing the shared instance.")
+        }
+        return config.groupIdentifier
+    }
 
     public static var projectId: String {
         guard let projectId = config?.projectId else {
@@ -34,12 +41,14 @@ public class Networking {
     ///   - socketConnectionType: socket connection type
     static public func configure(
         relayHost: String = "relay.walletconnect.com",
+        groupIdentifier: String,
         projectId: String,
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic
     ) {
         Networking.config = Networking.Config(
             relayHost: relayHost,
+            groupIdentifier: groupIdentifier,
             projectId: projectId,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType
@@ -47,6 +56,7 @@ public class Networking {
         Relay.configure(
             relayHost: relayHost,
             projectId: projectId,
+            groupIdentifier: groupIdentifier,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType)
     }

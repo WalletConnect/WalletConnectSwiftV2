@@ -4,9 +4,8 @@ public struct NotifyClientFactory {
 
     public static func create(projectId: String, groupIdentifier: String, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, crypto: CryptoProvider, notifyHost: String, explorerHost: String) -> NotifyClient {
         let logger = ConsoleLogger(prefix: "🔔",loggingLevel: .debug)
-        let keyValueStorage = UserDefaults.standard
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
         let databasePath = databasePath(appGroup: groupIdentifier, database: "notify.db")
         let sqlite = DiskSqlite(path: databasePath)
@@ -16,7 +15,6 @@ public struct NotifyClientFactory {
             keyserverURL: keyserverURL,
             sqlite: sqlite,
             logger: logger,
-            keyValueStorage: keyValueStorage,
             keychainStorage: keychainStorage,
             groupKeychainStorage: groupKeychainService,
             networkInteractor: networkInteractor,
@@ -33,7 +31,6 @@ public struct NotifyClientFactory {
         keyserverURL: URL,
         sqlite: Sqlite,
         logger: ConsoleLogging,
-        keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
         groupKeychainStorage: KeychainStorageProtocol,
         networkInteractor: NetworkInteracting,
@@ -72,12 +69,11 @@ public struct NotifyClientFactory {
         let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, kms: kms, identityClient: identityClient, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
         let subscriptionWatcher = SubscriptionWatcher(notifyWatchSubscriptionsRequester: notifyWatchSubscriptionsRequester, logger: logger)
 
-        let identityService = NotifyIdentityService(keyserverURL: keyserverURL, identityClient: identityClient, logger: logger)
-
         return NotifyClient(
             logger: logger,
+            keyserverURL: keyserverURL,
             kms: kms,
-            identityService: identityService,
+            identityClient: identityClient,
             pushClient: pushClient,
             notifyMessageSubscriber: notifyMessageSubscriber,
             notifyStorage: notifyStorage,

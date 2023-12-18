@@ -5,6 +5,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
+    public var pairingDeletePublisher: AnyPublisher<(code: Int, message: String), Never> {
+        pairingDeleteRequestSubscriber.deletePublisherSubject.eraseToAnyPublisher()
+    }
+
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     private let pairingStorage: WCPairingStorage
@@ -17,11 +21,16 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
-    private let deletePairingService: DeletePairingService
+    private let pairingDeleteRequester: PairingDeleteRequester
     private let resubscribeService: PairingResubscribeService
     private let expirationService: ExpirationService
+    private let pairingDeleteRequestSubscriber: PairingDeleteRequestSubscriber
 
     private let cleanupService: PairingCleanupService
+
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return logger.logsPublisher
+    }
 
     init(
         pairingStorage: WCPairingStorage,
@@ -29,7 +38,8 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         networkingInteractor: NetworkInteracting,
         logger: ConsoleLogging,
         walletPairService: WalletPairService,
-        deletePairingService: DeletePairingService,
+        pairingDeleteRequester: PairingDeleteRequester,
+        pairingDeleteRequestSubscriber: PairingDeleteRequestSubscriber,
         resubscribeService: PairingResubscribeService,
         expirationService: ExpirationService,
         pairingRequestsSubscriber: PairingRequestsSubscriber,
@@ -45,7 +55,8 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         self.networkingInteractor = networkingInteractor
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
-        self.deletePairingService = deletePairingService
+        self.pairingDeleteRequester = pairingDeleteRequester
+        self.pairingDeleteRequestSubscriber = pairingDeleteRequestSubscriber
         self.appPairActivateService = appPairActivateService
         self.resubscribeService = resubscribeService
         self.expirationService = expirationService
@@ -108,7 +119,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     }
 
     public func disconnect(topic: String) async throws {
-        try await deletePairingService.delete(topic: topic)
+        try await pairingDeleteRequester.delete(topic: topic)
     }
 
     public func validatePairingExistance(_ topic: String) throws {

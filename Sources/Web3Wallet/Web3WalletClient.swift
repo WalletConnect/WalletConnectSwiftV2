@@ -63,6 +63,16 @@ public class Web3WalletClient {
         signClient.sessionResponsePublisher.eraseToAnyPublisher()
     }
 
+    public var pairingDeletePublisher: AnyPublisher<(code: Int, message: String), Never> {
+        pairingClient.pairingDeletePublisher
+    }
+
+    public var logsPublisher: AnyPublisher<Log, Never> {
+        return signClient.logsPublisher
+            .merge(with: pairingClient.logsPublisher)
+            .eraseToAnyPublisher()
+    }
+
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
@@ -212,8 +222,8 @@ public class Web3WalletClient {
         try authClient.getPendingRequests()
     }
     
-    public func registerPushClient(deviceToken: Data) async throws {
-        try await pushClient.register(deviceToken: deviceToken)
+    public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
+        try await pushClient.register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }
     
     /// Delete all stored data such as: pairings, sessions, keys
@@ -230,7 +240,7 @@ public class Web3WalletClient {
 
 #if DEBUG
 extension Web3WalletClient {
-    public func registerPushClient(deviceToken: String) async throws {
+    public func register(deviceToken: String, enableEncrypted: Bool = false) async throws {
         try await pushClient.register(deviceToken: deviceToken)
     }
 }

@@ -29,7 +29,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.set(deviceTokenString.joined(), forKey: "deviceToken")
 
         Task(priority: .high) {            
-            try await Notify.instance.register(deviceToken: deviceToken)
+            try await Notify.instance.register(deviceToken: deviceToken, enableEncrypted: true)
         }
     }
 

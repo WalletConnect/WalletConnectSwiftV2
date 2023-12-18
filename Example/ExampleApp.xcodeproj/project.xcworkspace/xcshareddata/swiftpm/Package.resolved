@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/mixpanel/mixpanel-swift",
         "state": {
           "branch": "master",
-          "revision": "1ce27d937009d5ecce74dad97d69898ffea49c75",
+          "revision": "c6336881a077d283db6f6d6e2f242977250230bd",
           "version": null
         }
       },
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "14aa6e47b03b820fd2b338728637570b9e969994",
-          "version": "8.12.0"
+          "revision": "74cf23b2946c92550fb1185612077151497e648e",
+          "version": "8.17.1"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/WalletConnect/web3modal-swift",
         "state": {
           "branch": null,
-          "revision": "831410cfd6e68afa7212a5547483fb2d180f0fa7",
-          "version": "1.0.10"
+          "revision": "3295d69d1b12df29a5040578d107f56986b1b399",
+          "version": "1.0.13"
         }
       }
     ]

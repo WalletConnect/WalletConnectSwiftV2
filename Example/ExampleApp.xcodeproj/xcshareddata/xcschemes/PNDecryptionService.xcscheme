@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1410"
+   LastUpgradeVersion = "1500"
    wasCreatedForAppExtension = "YES"
-   version = "1.3">
+   version = "2.0">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "84B767752954554A00E92316"
-               BuildableName = "PushDecryptionService.appex"
-               BlueprintName = "PushDecryptionService"
+               BlueprintIdentifier = "84E6B84629787A8000428BAF"
+               BuildableName = "PNDecryptionService.appex"
+               BlueprintName = "PNDecryptionService"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,9 +29,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-               BuildableName = "WalletConnect Wallet.app"
-               BlueprintName = "Wallet"
+               BlueprintIdentifier = "C56EE21A293F55ED004840D1"
+               BuildableName = "WalletApp.app"
+               BlueprintName = "WalletApp"
                ReferencedContainer = "container:ExampleApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -41,31 +41,21 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES">
-      <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "844749F229B9E5B9005F520B"
-               BuildableName = "RelayIntegrationTests.xctest"
-               BlueprintName = "RelayIntegrationTests"
-               ReferencedContainer = "container:ExampleApp.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
-      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
-      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      selectedDebuggerIdentifier = ""
+      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
       launchStyle = "0"
+      askForAppToLaunch = "Yes"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      allowLocationSimulation = "YES">
+      allowLocationSimulation = "YES"
+      launchAutomaticallySubstyle = "2">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
@@ -76,15 +66,6 @@
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "WalletConnect Wallet.app"
-            BlueprintName = "Wallet"
-            ReferencedContainer = "container:ExampleApp.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -98,21 +79,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "WalletConnect Wallet.app"
-            BlueprintName = "Wallet"
+            BlueprintIdentifier = "C56EE21A293F55ED004840D1"
+            BuildableName = "WalletApp.app"
+            BlueprintName = "WalletApp"
             ReferencedContainer = "container:ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "764E1D3B26F8D3FC00A1FB15"
-            BuildableName = "WalletConnect Wallet.app"
-            BlueprintName = "Wallet"
-            ReferencedContainer = "container:ExampleApp.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

@@ -11,14 +11,30 @@ public struct SignClientFactory {
     ///   - keyValueStorage: by default WalletConnect SDK will store sequences in UserDefaults
     ///
     /// WalletConnect Client is not a singleton but once you create an instance, you should not deinitialize it. Usually only one instance of a client is required in the application.
-    public static func create(metadata: AppMetadata, pairingClient: PairingClient, networkingClient: NetworkingInteractor) -> SignClient {
-        let logger = ConsoleLogger(loggingLevel: .debug)
-        let keyValueStorage = UserDefaults.standard
-        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk")
+    public static func create(
+        metadata: AppMetadata,
+        pairingClient: PairingClient,
+        networkingClient: NetworkingInteractor,
+        groupIdentifier: String
+    ) -> SignClient {
+        let logger = ConsoleLogger(prefix: "📝", loggingLevel: .debug)
+
+        guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
+            fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
+        }
+        let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
+        
         return SignClientFactory.create(metadata: metadata, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, pairingClient: pairingClient, networkingClient: networkingClient)
     }
 
-    static func create(metadata: AppMetadata, logger: ConsoleLogging, keyValueStorage: KeyValueStorage, keychainStorage: KeychainStorageProtocol, pairingClient: PairingClient, networkingClient: NetworkingInteractor) -> SignClient {
+    static func create(
+        metadata: AppMetadata,
+        logger: ConsoleLogging,
+        keyValueStorage: KeyValueStorage,
+        keychainStorage: KeychainStorageProtocol,
+        pairingClient: PairingClient,
+        networkingClient: NetworkingInteractor
+    ) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.pairings.rawValue)))

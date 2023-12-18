@@ -4,6 +4,11 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
+    private var logsSubject = PassthroughSubject<WalletConnectUtils.Log, Never>()
+
+    var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {
+        return logsSubject.eraseToAnyPublisher()
+    }
     var approveCalled = false
     var rejectCalled = false
     var updateCalled = false
