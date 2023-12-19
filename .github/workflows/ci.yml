@@ -80,10 +80,22 @@ jobs:
       shell: bash
       run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
 
-    - name: Danger
-      uses: danger/danger
+    - name: ruby versions
+      run: |
+        ruby --version
+        gem --version
+        bundler --version
+
+    - name: ruby setup
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+        bundler-cache: true
+
+    - name: danger
       env:
         DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: bundle exec danger --verbose
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
