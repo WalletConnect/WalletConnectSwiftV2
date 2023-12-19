@@ -1,6 +1,9 @@
 name: ci
 
 on:
+  push:
+    branches:
+      - feat/danger
   pull_request:
     branches:
       - develop
@@ -76,6 +79,11 @@ jobs:
       if: matrix.type == 'relay-tests'
       shell: bash
       run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
+
+    - name: Danger
+      uses: danger/danger
+      env:
+        DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
