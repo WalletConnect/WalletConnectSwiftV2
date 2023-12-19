@@ -1,9 +1,6 @@
 name: ci
 
 on:
-  push:
-    branches:
-      - feat/danger
   pull_request:
     branches:
       - develop
@@ -78,19 +75,7 @@ jobs:
     - name: Run Relay integration tests
       if: matrix.type == 'relay-tests'
       shell: bash
-      run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}
-
-    - name: ruby versions
-      run: |
-        ruby --version
-        gem --version
-        bundler --version
-
-    - name: ruby setup
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 2.7
-        bundler-cache: true
+      run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}s
 
     - name: danger
       env:
