@@ -17,44 +17,28 @@ final class ModalViewModelTests: XCTestCase {
         
         sut = .init(
             isShown: .constant(true),
-            interactor: ModalSheetInteractorMock(listings: [
-                Listing(
+            interactor: ModalSheetInteractorMock(wallets: [
+                Wallet(
                     id: "1",
                     name: "Sample App",
-                    homepage: "https://example.com",
+                    homepage: "https://example.com/cool",
+                    imageId: "0528ee7e-16d1-4089-21e3-bbfb41933100",
                     order: 1,
-                    imageId: "1",
-                    app: Listing.App(
-                        ios: "https://example.com/download-ios",
-                        browser: "https://example.com/wallet"
-                    ),
-                    mobile: Listing.Links(
-                        native: nil,
-                        universal: "https://example.com/universal"
-                    ),
-                    desktop: Listing.Links(
-                        native: nil,
-                        universal: "https://example.com/universal"
-                    )
+                    mobileLink: "https://example.com/universal/",
+                    desktopLink: "sampleapp://deeplink",
+                    webappLink: "https://sample.com/foo/webapp",
+                    appStore: ""
                 ),
-                Listing(
+                Wallet(
                     id: "2",
                     name: "Awesome App",
-                    homepage: "https://example.com/awesome",
+                    homepage: "https://example.com/cool",
+                    imageId: "5195e9db-94d8-4579-6f11-ef553be95100",
                     order: 2,
-                    imageId: "2",
-                    app: Listing.App(
-                        ios: "https://example.com/download-ios",
-                        browser: "https://example.com/wallet"
-                    ),
-                    mobile: Listing.Links(
-                        native: "awesomeapp://deeplink",
-                        universal: "https://awesome.com/awesome/universal"
-                    ),
-                    desktop: Listing.Links(
-                        native: "awesomeapp://deeplink",
-                        universal: "https://awesome.com/awesome/desktop/universal"
-                    )
+                    mobileLink: "awesomeapp://deeplink",
+                    desktopLink: "awesomeapp://deeplink",
+                    webappLink: "https://awesome.com/awesome/universal/",
+                    appStore: ""
                 ),
             ]),
             uiApplicationWrapper: .init(
@@ -87,9 +71,9 @@ final class ModalViewModelTests: XCTestCase {
         XCTAssertEqual(sut.wallets.map(\.id), ["1", "2"])
         XCTAssertEqual(sut.wallets.map(\.name), ["Sample App", "Awesome App"])
         
-        expectation = XCTestExpectation(description: "Wait for openUrl to be called")
+        expectation = XCTestExpectation(description: "Wait for openUrl to be called using native link")
         
-        sut.navigateToDeepLink(wallet: sut.wallets[0], preferUniversal: true, preferBrowser: false)
+        sut.navigateToDeepLink(wallet: sut.wallets[1], preferBrowser: false)
         XCTWaiter.wait(for: [expectation], timeout: 3)
         
         XCTAssertEqual(
@@ -105,11 +89,12 @@ final class ModalViewModelTests: XCTestCase {
         XCTAssertEqual(
             openURLFuncTest.currentValue,
             URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
+            URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn")!
         )
         
-        expectation = XCTestExpectation(description: "Wait for openUrl to be called using native link")
+        expectation = XCTestExpectation(description: "Wait for openUrl to be called using webapp link")
         
-        sut.navigateToDeepLink(wallet: sut.wallets[1], preferUniversal: true, preferBrowser: false)
+        sut.navigateToDeepLink(wallet: sut.wallets[1], preferBrowser: true)
         XCTWaiter.wait(for: [expectation], timeout: 3)
         
         XCTAssertEqual(

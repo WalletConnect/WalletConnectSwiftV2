@@ -36,28 +36,23 @@ final class WalletDetailViewModel: ObservableObject {
     func handle(_ event: Event) {
         switch event {
         case .onAppear:
-            deeplinkHandler.navigateToDeepLink(
-                wallet: wallet,
-                preferUniversal: true,
-                preferBrowser: preferredPlatform == .browser
-            )
+            deeplinkToWallet()
             
         case .didTapUniversalLink:
-            deeplinkHandler.navigateToDeepLink(
-                wallet: wallet,
-                preferUniversal: true,
-                preferBrowser: preferredPlatform == .browser
-            )
+            deeplinkToWallet()
             
         case .didTapTryAgain:
-            deeplinkHandler.navigateToDeepLink(
-                wallet: wallet,
-                preferUniversal: false,
-                preferBrowser: preferredPlatform == .browser
-            )
+           deeplinkToWallet()
 
         case .didTapAppStore:
             deeplinkHandler.openAppstore(wallet: wallet)
         }
+    }
+    
+    func deeplinkToWallet() {
+        deeplinkHandler.navigateToDeepLink(
+            wallet: wallet,
+            preferBrowser: preferredPlatform == .browser
+        )
     }
 }

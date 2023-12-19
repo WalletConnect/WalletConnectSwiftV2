@@ -6,8 +6,18 @@ final class ExplorerAPITests: XCTestCase {
     
     func testCorrectMappingOfWalletIds() throws {
         
-        let request = ExplorerAPI
-            .getListings(projectId: "123", metadata: .stub(), recommendedIds: ["foo", "bar"], excludedIds: ["boo", "far"])
+        let request = Web3ModalAPI
+            .getWallets(
+                params: .init(
+                    page: 0, 
+                    entries: 0,
+                    search: "",
+                    projectId: "123",
+                    metadata: .stub(),
+                    recommendedIds: ["foo", "bar"],
+                    excludedIds: ["boo", "far"]
+                )
+            )
             .resolve(for: "www.google.com")
         
         XCTAssertEqual(request?.allHTTPHeaderFields?["Referer"], "Wallet Connect")

@@ -282,7 +282,7 @@ private extension ModalViewModel {
 
 protocol WalletDeeplinkHandler {
     func openAppstore(wallet: Wallet)
-    func navigateToDeepLink(wallet: Wallet, preferUniversal: Bool, preferBrowser: Bool)
+    func navigateToDeepLink(wallet: Wallet, preferBrowser: Bool)
 }
 
 extension ModalViewModel: WalletDeeplinkHandler {
@@ -295,22 +295,13 @@ extension ModalViewModel: WalletDeeplinkHandler {
         uiApplicationWrapper.openURL(storeLink, nil)
     }
     
-    func navigateToDeepLink(wallet: Wallet, preferUniversal: Bool, preferBrowser: Bool) {
+    func navigateToDeepLink(wallet: Wallet, preferBrowser: Bool) {
         do {
-            let nativeScheme = preferBrowser ? nil : wallet.mobileLink
-            let universalScheme = preferBrowser ? wallet.desktopLink : wallet.mobileLink
-            
+            let nativeScheme = preferBrowser ? wallet.webappLink : wallet.mobileLink
             let nativeUrlString = try formatNativeUrlString(nativeScheme)
-            let universalUrlString = try formatUniversalUrlString(universalScheme)
             
-            if let nativeUrl = nativeUrlString?.toURL(), !preferUniversal {
+            if let nativeUrl = nativeUrlString?.toURL() {
                 uiApplicationWrapper.openURL(nativeUrl) { success in
-                    if !success {
-                        self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
-                    }
-                }
-            } else if let universalUrl = universalUrlString?.toURL() {
-                uiApplicationWrapper.openURL(universalUrl) { success in
                     if !success {
                         self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
                     }
