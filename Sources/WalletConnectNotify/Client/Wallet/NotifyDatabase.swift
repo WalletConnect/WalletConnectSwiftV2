@@ -110,14 +110,15 @@ private extension NotifyDatabase {
             
             try sqlite.execute(sql: """
                 CREATE TABLE IF NOT EXISTS \(Table.subscriptions) (
-                    topic TEXT PRIMARY KEY,
+                    topic TEXT NOT NULL,
                     account TEXT NOT NULL,
                     relay TEXT NOT NULL,
                     metadata TEXT NOT NULL,
                     scope TEXT NOT NULL,
                     expiry TEXT NOT NULL,
                     symKey TEXT NOT NULL,
-                    appAuthenticationKey TEXT NOT NULL
+                    appAuthenticationKey TEXT NOT NULL,
+                    id TEXT PRIMARY KEY
                 );
             """)
 
