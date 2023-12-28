@@ -9,8 +9,8 @@ final class ExplorerAPITests: XCTestCase {
         let request = Web3ModalAPI
             .getWallets(
                 params: .init(
-                    page: 0, 
-                    entries: 0,
+                    page: 2,
+                    entries: 40,
                     search: "",
                     projectId: "123",
                     metadata: .stub(),
@@ -21,13 +21,16 @@ final class ExplorerAPITests: XCTestCase {
             .resolve(for: "www.google.com")
         
         XCTAssertEqual(request?.allHTTPHeaderFields?["Referer"], "Wallet Connect")
+        XCTAssertEqual(request?.allHTTPHeaderFields?["x-sdk-version"], WalletConnectModal.Config.sdkVersion)
+        XCTAssertEqual(request?.allHTTPHeaderFields?["x-sdk-type"], "wcm")
+        XCTAssertEqual(request?.allHTTPHeaderFields?["x-project-id"], "123")
         
         XCTAssertEqual(request?.url?.queryParameters, [
-            "projectId": "123",
             "recommendedIds": "foo,bar",
+            "page": "2",
+            "entries": "40",
+            "platform": "ios",
             "excludedIds": "boo,far",
-            "sdkVersion": EnvironmentInfo.sdkName,
-            "sdkType": "wcm"
         ])
     }
 }
