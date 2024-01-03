@@ -84,7 +84,11 @@ public struct SIWEMessage: Equatable {
     private func buildRecapStatement(from decodedRecap: [String: [String: [String]]]) -> String {
         var statementParts: [String] = []
 
-        for (resourceKey, actions) in decodedRecap {
+        // sort resources keys for consistancy in the statement
+        let sortedResourceKeys = decodedRecap.keys.sorted()
+
+        for resourceKey in sortedResourceKeys {
+            guard let actions = decodedRecap[resourceKey] else { continue }
             var requestActions: [String] = []
 
             for (actionType, _) in actions where actionType.starts(with: "request/") {
@@ -110,6 +114,8 @@ public struct SIWEMessage: Equatable {
     }
 
 }
+
+
 
 private extension SIWEMessage {
 
