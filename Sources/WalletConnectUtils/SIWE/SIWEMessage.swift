@@ -52,7 +52,7 @@ public struct SIWEMessage: Equatable {
             if let statement = statement {
                 return "\n\(statement) \(buildRecapStatement(from: attValue))"
             } else {
-                return buildRecapStatement(from: attValue)
+                return "\n\(buildRecapStatement(from: attValue))"
             }
         } else {
             guard let statement = statement else { return "" }
@@ -92,6 +92,9 @@ public struct SIWEMessage: Equatable {
                 requestActions.append("'\(action)'")
             }
 
+            // sorting is required as dictionary doesn't guarantee the order of elements
+            requestActions.sort()
+
             if !requestActions.isEmpty {
                 let actionsString = requestActions.joined(separator: ", ")
                 statementParts.append("'request': \(actionsString) for '\(resourceKey)'")
@@ -105,8 +108,6 @@ public struct SIWEMessage: Equatable {
             return ""
         }
     }
-
-
 
 }
 

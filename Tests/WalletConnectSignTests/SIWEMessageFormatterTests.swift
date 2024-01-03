@@ -105,7 +105,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             service.invalid wants you to sign in with your Ethereum account:
             0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
 
-            I accept the ServiceOrg Terms of Service: https://service.invalid/tos I further authorize the stated URI to perform the following actions: (1) 'request': 'personal_sign', 'eth_sendTransaction' for 'eip155'.
+            I accept the ServiceOrg Terms of Service: https://service.invalid/tos I further authorize the stated URI to perform the following actions: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'.
 
             URI: https://service.invalid/login
             Version: 1
@@ -134,7 +134,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             service.invalid wants you to sign in with your Ethereum account:
             0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
 
-            I further authorize the stated URI to perform the following actions: (1) 'request': 'personal_sign', 'eth_sendTransaction' for 'eip155'.
+            I further authorize the stated URI to perform the following actions: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'.
 
             URI: https://service.invalid/login
             Version: 1

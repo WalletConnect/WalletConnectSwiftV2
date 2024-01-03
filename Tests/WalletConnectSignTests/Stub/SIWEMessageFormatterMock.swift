@@ -1,5 +1,5 @@
 import Foundation
-@testable import Auth
+@testable import WalletConnectUtils
 
 class SIWEMessageFormatterMock: SIWECacaoFormatting {
     func formatMessage(from payload: WalletConnectUtils.CacaoPayload, includeRecapInTheStatement: Bool) throws -> String {
