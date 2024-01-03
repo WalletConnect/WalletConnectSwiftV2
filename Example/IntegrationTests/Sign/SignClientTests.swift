@@ -767,7 +767,7 @@ final class SignClientTests: XCTestCase {
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
-                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
                 let Siwemessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
 
@@ -802,20 +802,21 @@ final class SignClientTests: XCTestCase {
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
-                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
                 var cacaos = [Cacao]()
 
                 request.payload.chains.forEach { chain in
 
-                    let SiweMessage = try! wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+                    let account = Account(blockchain: Blockchain(chain)!, address: walletAccount.address)!
+                    let siweMessage = try! wallet.formatAuthMessage(payload: request.payload, account: account)
 
                     let signature = try! signer.sign(
-                        message: SiweMessage,
+                        message: siweMessage,
                         privateKey: prvKey,
                         type: .eip191)
 
-                    let cacao = try! wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
+                    let cacao = try! wallet.makeAuthObject(authRequest: request, signature: signature, account: account)
                     cacaos.append(cacao)
 
                 }
@@ -933,7 +934,7 @@ final class SignClientTests: XCTestCase {
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
-                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
                 let Siwemessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
 

@@ -259,7 +259,7 @@ final class NotifyTests: XCTestCase {
 
 private extension NotifyTests {
     func sign(_ message: String) -> CacaoSignature {
-        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
         return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
     }
 }

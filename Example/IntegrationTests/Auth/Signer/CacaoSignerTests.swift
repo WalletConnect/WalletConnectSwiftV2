@@ -5,7 +5,7 @@ import XCTest
 class CacaoSignerTest: XCTestCase {
 
     let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory())
-        .create(projectId: InputConfig.projectId)
+        .create()
     let verifier = MessageVerifierFactory(crypto: DefaultCryptoProvider()).create(projectId: InputConfig.projectId)
 
     let privateKey = Data(hex: "305c6cde3846927892cd32762f6120539f3ec74c9e3a16b9b798b1e85351ae2a")

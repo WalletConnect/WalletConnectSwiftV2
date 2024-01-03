@@ -29,7 +29,7 @@ final class RegistryTests: XCTestCase {
             iatProvader: DefaultIATProvider(),
             messageFormatter: SIWECacaoFormatter()
         )
-        signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
     }
 
 //    func testRegisterIdentityAndInviteKey() async throws {

@@ -48,7 +48,7 @@ final class SyncTests: XCTestCase {
         client2 = makeClient(indexStore: indexStore2, suffix: "💜")
         syncStore1 = makeSyncStore(client: client1, indexStore: indexStore1)
         syncStore2 = makeSyncStore(client: client2, indexStore: indexStore2)
-        signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
     }
 
     func makeClient(indexStore: SyncIndexStore, suffix: String) -> SyncClient {
