@@ -769,10 +769,10 @@ final class SignClientTests: XCTestCase {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
-                let Siwemessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+                let siweMessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
 
                 let signature = try signer.sign(
-                    message: Siwemessage,
+                    message: siweMessage,
                     privateKey: prvKey,
                     type: .eip191)
 
@@ -827,6 +827,8 @@ final class SignClientTests: XCTestCase {
         dapp.authResponsePublisher.sink { (_, result) in
             guard case .success(let session) = result else { XCTFail(); return }
             XCTAssertEqual(session.accounts.count, 2)
+            XCTAssertEqual(session.namespaces["eip155"]?.methods.count, 2)
+            XCTAssertEqual(session.namespaces["eip155"]?.accounts.count, 2)
             responseExpectation.fulfill()
         }
         .store(in: &publishers)
