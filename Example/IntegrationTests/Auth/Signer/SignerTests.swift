@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import Auth
+@testable import WalletConnectUtils
 import WalletConnectRelay
 
 class SignerTest: XCTestCase {

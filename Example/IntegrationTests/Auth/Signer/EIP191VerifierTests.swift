@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-@testable import Auth
 @testable import WalletConnectSigner
 
 class EIP191VerifierTests: XCTestCase {

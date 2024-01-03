@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import Auth
+@testable import WalletConnectUtils
 @testable import WalletConnectSigner
 import JSONRPC
 

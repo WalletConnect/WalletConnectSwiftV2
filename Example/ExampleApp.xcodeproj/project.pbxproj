@@ -49,7 +49,6 @@
 		84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CEC64528D89D6B00D081A8 /* PairingTests.swift */; };
 		84D2A66628A4F51E0088AE09 /* AuthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2A66528A4F51E0088AE09 /* AuthTests.swift */; };
 		84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DB38F22983CDAE00BFEE37 /* PushRegisterer.swift */; };
-		84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 84DDB4EC28ABB663003D66ED /* WalletConnectAuth */; };
 		84E6B84A29787A8000428BAF /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B84929787A8000428BAF /* NotificationService.swift */; };
 		84E6B84E29787A8000428BAF /* PNDecryptionService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 84E6B84729787A8000428BAF /* PNDecryptionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84FE684628ACDB4700C893FF /* RequestParams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FE684528ACDB4700C893FF /* RequestParams.swift */; };
@@ -265,7 +264,6 @@
 		C56EE275293F56D7004840D1 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE25D293F56D6004840D1 /* InputConfig.swift */; };
 		C56EE276293F56D7004840D1 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE26C293F56D6004840D1 /* UIViewController.swift */; };
 		C56EE279293F56D7004840D1 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE268293F56D6004840D1 /* Color.swift */; };
-		C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C56EE27A293F56F8004840D1 /* WalletConnectAuth */; };
 		C56EE288293F5757004840D1 /* ThirdPartyConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE286293F5757004840D1 /* ThirdPartyConfigurator.swift */; };
 		C56EE289293F5757004840D1 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE280293F5757004840D1 /* Application.swift */; };
 		C56EE28A293F5757004840D1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE27F293F5757004840D1 /* AppDelegate.swift */; };
@@ -768,7 +766,6 @@
 				A5E03DF52864651200888481 /* Starscream in Frameworks */,
 				A50DF19D2A25084A0036EA6C /* WalletConnectHistory in Frameworks */,
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
-				84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */,
 				C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */,
 				A5B6C0F32A6EAB1700927332 /* WalletConnectNotify in Frameworks */,
 				A573C53B29EC365800E3CBFD /* HDWalletKit in Frameworks */,
@@ -789,7 +786,6 @@
 				A5F1526F2ACDC46B00D745A6 /* Web3ModalUI in Frameworks */,
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
 				A5B6C0F52A6EAB2800927332 /* WalletConnectNotify in Frameworks */,
-				C56EE27B293F56F8004840D1 /* WalletConnectAuth in Frameworks */,
 				C54C24902AEB1B5600DA4BF6 /* WalletConnectRouter in Frameworks */,
 				84943C7D2A9BA328007EBAC2 /* Mixpanel in Frameworks */,
 			);
@@ -2100,7 +2096,6 @@
 				A5E03DF42864651200888481 /* Starscream */,
 				A5E03DFE2864662500888481 /* WalletConnect */,
 				A5E03E00286466EA00888481 /* WalletConnectChat */,
-				84DDB4EC28ABB663003D66ED /* WalletConnectAuth */,
 				A5C8BE84292FE20B006CC85C /* Web3 */,
 				C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */,
 				A561C80429DFCD4500DF540D /* WalletConnectSync */,
@@ -2129,7 +2124,6 @@
 			name = WalletApp;
 			packageProductDependencies = (
 				C56EE254293F569A004840D1 /* Starscream */,
-				C56EE27A293F56F8004840D1 /* WalletConnectAuth */,
 				C5133A77294125CC00A8314C /* Web3 */,
 				C55D349829630D440004314A /* Web3Wallet */,
 				C5B2F7042970573D000DBA0E /* SolanaSwift */,
@@ -3436,10 +3430,6 @@
 			package = 84943C792A9BA206007EBAC2 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
 			productName = Mixpanel;
 		};
-		84DDB4EC28ABB663003D66ED /* WalletConnectAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnectAuth;
-		};
 		A50DF19C2A25084A0036EA6C /* WalletConnectHistory */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectHistory;
@@ -3575,10 +3565,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A5D85224286333D500DAF5C3 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;
-		};
-		C56EE27A293F56F8004840D1 /* WalletConnectAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnectAuth;
 		};
 		C579FEB52AFA86CD008855EB /* Web3Modal */ = {
 			isa = XCSwiftPackageProductDependency;

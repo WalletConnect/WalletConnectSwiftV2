@@ -7,6 +7,7 @@ public class SignDecryptionService {
     }
     private let serializer: Serializing
     private let sessionStorage: WCSessionStorage
+    private let pairingStorage: PairingStorage
 
     public init(groupIdentifier: String) throws {
         let keychainStorage = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
@@ -16,6 +17,7 @@ public class SignDecryptionService {
             throw Errors.couldNotInitialiseDefaults
         }
         sessionStorage = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: defaults, identifier: SignStorageIdentifiers.sessions.rawValue)))
+        pairingStorage = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: defaults, identifier: PairStorageIdentifiers.pairings.rawValue)))
     }
 
     public func decryptProposal(topic: String, ciphertext: String) throws -> Session.Proposal {
@@ -46,7 +48,29 @@ public class SignDecryptionService {
         }
     }
 
+    public func decryptAuthRequest(topic: String, ciphertext: String) throws -> AuthenticationRequest {
+        let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
+        setPairingMetadata(rpcRequest: rpcRequest, topic: topic)
+        if let params = try rpcRequest.params?.get(SessionAuthenticateRequestParams.self),
+           let id = rpcRequest.id {
+            let authRequest = AuthenticationRequest(id: id, topic: topic, payload: params.authPayload, requester: params.requester.metadata)
+            return authRequest
+        } else {
+            throw Errors.couldNotDecodeTypeFromCiphertext
+        }
+    }
+
     public func getMetadata(topic: String) -> AppMetadata? {
         sessionStorage.getSession(forTopic: topic)?.peerParticipant.metadata
+    }
+
+    private func setPairingMetadata(rpcRequest: RPCRequest, topic: String) {
+        guard var pairing = pairingStorage.getPairing(forTopic: topic),
+              pairing.peerMetadata == nil,
+              let peerMetadata = try? rpcRequest.params?.get(SessionAuthenticateRequestParams.self).requester.metadata
+        else { return }
+
+        pairing.updatePeerMetadata(peerMetadata)
+        pairingStorage.setPairing(pairing)
     }
 }
