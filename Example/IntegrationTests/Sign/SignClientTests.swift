@@ -902,7 +902,7 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-    func testUserRespondError() async {
+    func testSessionAuthenticateUserRespondError() async {
         let responseExpectation = expectation(description: "error response delivered")
         dapp.enableAuthenticatedSessions()
         let uri = try! await dappPairingClient.create()
@@ -955,7 +955,6 @@ final class SignClientTests: XCTestCase {
             guard case .success(let session) = result else { XCTFail(); return }
 
             Task(priority: .high) {
-                sleep(1)
                 let request = Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
                 try await dapp.request(params: request)
             }
