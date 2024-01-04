@@ -11,17 +11,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 
 jobs:
-  authorize:
-    environment:
-      ${{ (github.event_name == 'pull_request_target' &&
-      github.event.pull_request.head.repo.full_name != github.repository) &&
-      'external' || 'internal' }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo ✓
-
   prepare:
-    needs: authorize
     runs-on: 
       group: apple-silicon
     steps:
@@ -81,6 +71,14 @@ jobs:
       env:
         DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: bundle exec danger --verbose
+
+    - name: Danger
+      env:
+        DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: 
+        rm -rf xcov_report |
+        /opt/homebrew/opt/ruby/bin/bundle install |
+        /opt/homebrew/opt/ruby/bin/bundle exec danger
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
