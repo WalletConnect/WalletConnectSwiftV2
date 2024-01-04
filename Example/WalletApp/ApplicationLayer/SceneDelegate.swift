@@ -1,4 +1,3 @@
-import Auth
 import SafariServices
 import UIKit
 import WalletConnectPairing

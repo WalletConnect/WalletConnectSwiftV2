@@ -14,7 +14,7 @@ final class MainInteractor {
         return Web3Wallet.instance.sessionRequestPublisher
     }
     
-    var requestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
+    var requestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
         return Web3Wallet.instance.authRequestPublisher
     }
 }

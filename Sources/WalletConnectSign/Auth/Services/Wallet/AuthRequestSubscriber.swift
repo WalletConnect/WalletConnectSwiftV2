@@ -35,8 +35,8 @@ class AuthRequestSubscriber {
     private func subscribeForRequest() {
         pairingRegisterer.register(method: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
-                logger.debug("WalletRequestSubscriber: Received request")
-                
+                logger.debug("AuthRequestSubscriber: Received request")
+
                 pairingRegisterer.setReceived(pairingTopic: payload.topic)
                 
                 let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.authPayload, requester: payload.request.requester.metadata)

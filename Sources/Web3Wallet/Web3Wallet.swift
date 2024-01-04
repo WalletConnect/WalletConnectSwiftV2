@@ -46,6 +46,7 @@ public class Web3Wallet {
     ) {
         Pair.configure(metadata: metadata)
         Push.configure(pushHost: pushHost, environment: environment)
+        Sign.configure(crypto: crypto)
         Web3Wallet.config = Web3Wallet.Config(crypto: crypto)
     }
 }

@@ -8,7 +8,7 @@ final class AuthRequestPresenter: ObservableObject {
     private let router: AuthRequestRouter
 
     let importAccount: ImportAccount
-    let request: AuthRequest
+    let request: AuthenticationRequest
     let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
@@ -23,7 +23,7 @@ final class AuthRequestPresenter: ObservableObject {
         importAccount: ImportAccount,
         interactor: AuthRequestInteractor,
         router: AuthRequestRouter,
-        request: AuthRequest,
+        request: AuthenticationRequest,
         context: VerifyContext?
     ) {
         defer { setupInitialState() }
