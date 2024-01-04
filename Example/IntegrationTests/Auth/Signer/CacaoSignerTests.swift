@@ -30,7 +30,7 @@ class CacaoSignerTest: XCTestCase {
         - https://example.com/my-web2-claim.json
         """
 
-    let payload = AuthPayload(requestParams: RequestParams(
+    let payload = AuthPayload(requestParams: AuthRequestParams(
         domain: "service.invalid",
         chains: ["eip155:1"],
         nonce: "32891756",

@@ -22,7 +22,7 @@ actor SessionAuthRequestService {
         self.iatProvader = iatProvader
     }
 
-    func request(params: RequestParams, topic: String) async throws {
+    func request(params: AuthRequestParams, topic: String) async throws {
         var params = params
         let pubKey = try kms.createX25519KeyPair()
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()

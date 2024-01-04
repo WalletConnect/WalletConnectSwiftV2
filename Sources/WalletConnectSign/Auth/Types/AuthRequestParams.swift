@@ -4,7 +4,7 @@ import Foundation
 /// for details read CAIP-74 and EIP-4361 specs
 /// https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-74.md
 /// https://eips.ethereum.org/EIPS/eip-4361
-public struct RequestParams {
+public struct AuthRequestParams {
     public let domain: String
     public let chains: [String]
     public let nonce: String
@@ -47,7 +47,7 @@ public struct RequestParams {
 
 
 #if DEBUG
-extension RequestParams {
+extension AuthRequestParams {
     static func stub(domain: String = "service.invalid",
                      chains: [String] = ["eip155:1"],
                      nonce: String = "32891756",
@@ -57,8 +57,8 @@ extension RequestParams {
                      statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
                      requestId: String? = nil,
                      resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"],
-                     methods: [String]? = ["personal_sign", "eth_sendTransaction"]) -> RequestParams {
-        return RequestParams(domain: domain,
+                     methods: [String]? = ["personal_sign", "eth_sendTransaction"]) -> AuthRequestParams {
+        return AuthRequestParams(domain: domain,
                              chains: chains,
                              nonce: nonce,
                              aud: aud,

@@ -1,7 +1,7 @@
 import Foundation
 @testable import WalletConnectSign
 
-extension RequestParams {
+extension AuthRequestParams {
     static func stub(domain: String = "service.invalid",
                      chains: [String] = ["eip155:1"],
                      nonce: String = "32891756",
@@ -11,8 +11,8 @@ extension RequestParams {
                      statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
                      requestId: String? = nil,
                      resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"],
-                     methods: [String]? = ["personal_sign"]) -> RequestParams {
-        return RequestParams(domain: domain,
+                     methods: [String]? = ["personal_sign"]) -> AuthRequestParams {
+        return AuthRequestParams(domain: domain,
                              chains: chains,
                              nonce: nonce,
                              aud: aud,

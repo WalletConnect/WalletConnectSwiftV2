@@ -215,10 +215,10 @@ public final class SignClient: SignClientProtocol {
     // MARK: - Public interface
 
     /// For a dApp to propose a session to a wallet.
-    /// Function will create pairing and propose session or propose a session on existing pairing.
+    /// Function will create pairing and propose session.
     /// - Parameters:
     ///   - requiredNamespaces: required namespaces for a session
-    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
+    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code.
     public func connect(
         requiredNamespaces: [String: ProposalNamespace],
         optionalNamespaces: [String: ProposalNamespace]? = nil,
@@ -261,56 +261,43 @@ public final class SignClient: SignClientProtocol {
     //---------------------------------------AUTH-----------------------------------
 
     public func authenticate(
-        _ params: RequestParams,
+        _ params: AuthRequestParams,
         topic: String
     ) async throws {
         try pairingClient.validatePairingExistance(topic)
+        try pairingClient.validateMethodSupport(topic: topic, method: "wc_sessionAuthenticate")
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: topic)
 
-        let testNamespace = [
-            "eip155": ProposalNamespace(
-                chains: [
-                    Blockchain("eip155:1")!,
-                ],
-                methods: [
-                    "personal_sign",
-                ], events: []
-            )]
-//        try await appProposeService.propose(
-//            pairingTopic: topic,
-//            namespaces: testNamespace,
-//            optionalNamespaces: nil,
-//            sessionProperties: nil,
-//            relay: RelayProtocolOptions(protocol: "irn", data: nil)
-//        )
+        let namespaces = try ProposalNamespaceBuilder.buildNamespace(from: params)
+        try await appProposeService.propose(
+            pairingTopic: topic,
+            namespaces: [:],
+            optionalNamespaces: namespaces,
+            sessionProperties: nil,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
     }
 
     public func authenticate(
-        _ params: RequestParams
+        _ params: AuthRequestParams
     ) async throws -> WalletConnectURI {
-        let pairingURI = try await pairingClient.create()
+        let pairingURI = try await pairingClient.create(methods: ["wc_sessionAuthenticate"])
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: pairingURI.topic)
 
-        let testNamespace = [
-            "eip155": ProposalNamespace(
-                chains: [
-                    Blockchain("eip155:1")!,
-                ],
-                methods: [
-                    "personal_sign",
-                ], events: []
-            )]
-//        try await appProposeService.propose(
-//            pairingTopic: topic,
-//            namespaces: testNamespace,
-//            optionalNamespaces: nil,
-//            sessionProperties: nil,
-//            relay: RelayProtocolOptions(protocol: "irn", data: nil)
-//        )
+        let namespaces = try ProposalNamespaceBuilder.buildNamespace(from: params)
+        try await appProposeService.propose(
+            pairingTopic: pairingURI.topic,
+            namespaces: [:],
+            optionalNamespaces: namespaces,
+            sessionProperties: nil,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
         return pairingURI
     }
+
+
 
     /// For a wallet to respond on authentication request
     /// - Parameters:

@@ -50,7 +50,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             """
         let message = try sut.formatMessage(
             from: AuthPayload.stub(
-                requestParams: RequestParams.stub(statement: nil)
+                requestParams: AuthRequestParams.stub(statement: nil)
             ).cacaoPayload(account: Account.stub())
         )
         XCTAssertEqual(message, expectedMessage)
@@ -72,7 +72,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             """
         let message = try sut.formatMessage(
             from: AuthPayload.stub(
-                requestParams: RequestParams.stub(resources: nil)).cacaoPayload(account: Account.stub())
+                requestParams: AuthRequestParams.stub(resources: nil)).cacaoPayload(account: Account.stub())
             )
         XCTAssertEqual(message, expectedMessage)
     }
@@ -92,7 +92,7 @@ class SIWEMessageFormatterTests: XCTestCase {
             """
         let message = try sut.formatMessage(
             from: AuthPayload.stub(
-                requestParams: RequestParams.stub(statement: nil, resources: nil)).cacaoPayload(account: Account.stub())
+                requestParams: AuthRequestParams.stub(statement: nil, resources: nil)).cacaoPayload(account: Account.stub())
         )
         XCTAssertEqual(message, expectedMessage)
     }
@@ -119,7 +119,7 @@ class SIWEMessageFormatterTests: XCTestCase {
 
 
         let payload = try AuthPayload.stub(
-            requestParams: RequestParams.stub(resources: [validRecapUrn])
+            requestParams: AuthRequestParams.stub(resources: [validRecapUrn])
         ).cacaoPayload(account: Account.stub())
 
         let message = try sut.formatMessage(from: payload, includeRecapInTheStatement: true)
@@ -147,7 +147,7 @@ class SIWEMessageFormatterTests: XCTestCase {
 
 
         let payload = try AuthPayload.stub(
-            requestParams: RequestParams.stub(statement: nil,resources: [validRecapUrn])
+            requestParams: AuthRequestParams.stub(statement: nil,resources: [validRecapUrn])
         ).cacaoPayload(account: Account.stub())
 
         let message = try sut.formatMessage(from: payload, includeRecapInTheStatement: true)

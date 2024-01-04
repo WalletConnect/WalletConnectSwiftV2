@@ -789,7 +789,7 @@ final class SignClientTests: XCTestCase {
         .store(in: &publishers)
 
 
-        let uri = try await dapp.authenticate(RequestParams.stub())
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -832,7 +832,7 @@ final class SignClientTests: XCTestCase {
         .store(in: &publishers)
 
 
-        let uri = try await dapp.authenticate(RequestParams.stub(chains: ["eip155:1", "eip155:137"]))
+        let uri = try await dapp.authenticate(AuthRequestParams.stub(chains: ["eip155:1", "eip155:137"]))
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -874,8 +874,8 @@ final class SignClientTests: XCTestCase {
 
     func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
         let responseExpectation = expectation(description: "error response delivered")
-        let uri = try! await dapp.authenticate(RequestParams.stub())
-        try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+        let uri = try! await dapp.authenticate(AuthRequestParams.stub())
+        try! await dapp.authenticate(AuthRequestParams.stub(), topic: uri.topic)
 
         try? await walletPairingClient.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
@@ -899,9 +899,9 @@ final class SignClientTests: XCTestCase {
 
     func testSessionAuthenticateUserRespondError() async {
         let responseExpectation = expectation(description: "error response delivered")
-        let uri = try! await dapp.authenticate(RequestParams.stub())
+        let uri = try! await dapp.authenticate(AuthRequestParams.stub())
 
-        try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+        try! await dapp.authenticate(AuthRequestParams.stub(), topic: uri.topic)
 
         try? await walletPairingClient.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] request in
@@ -977,7 +977,7 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
 
 
-        let uri = try await dapp.authenticate(RequestParams.stub())
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
 
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
