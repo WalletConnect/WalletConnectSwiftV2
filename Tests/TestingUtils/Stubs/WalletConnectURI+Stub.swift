@@ -4,7 +4,7 @@ import WalletConnectUtils
 extension WalletConnectURI {
 
     public static func stub(isController: Bool = false) -> WalletConnectURI {
-        let methods = [["wc_sessionPropose", "wc_sessionAuthenticated"], ["wc_authRequest"]]
+        let methods = ["wc_sessionPropose", "wc_sessionAuthenticated"]
         return WalletConnectURI(
             topic: String.generateTopic(),
             symKey: SymmetricKey().hexRepresentation,

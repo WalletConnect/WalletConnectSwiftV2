@@ -4,7 +4,7 @@ actor AppPairService {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let pairingStorage: WCPairingStorage
-    private var registeredMethods: [[String]] = []
+    private var registeredMethods: [String] = []
 
     init(networkingInteractor: NetworkInteracting, kms: KeyManagementServiceProtocol, pairingStorage: WCPairingStorage) {
         self.networkingInteractor = networkingInteractor
@@ -13,7 +13,7 @@ actor AppPairService {
     }
 
     public func register(supportedMethods: [String]) async {
-        registeredMethods.append(supportedMethods)
+        registeredMethods = supportedMethods
     }
 
     func create() async throws -> WalletConnectURI {

@@ -12,7 +12,7 @@ public struct WCPairing: SequenceObject {
     public private (set) var expiryDate: Date
     public private (set) var active: Bool
     public private (set) var requestReceived: Bool
-    public private (set) var methods: [[String]]?
+    public private (set) var methods: [String]?
 
     #if DEBUG
     public static var dateInitializer: () -> Date = Date.init

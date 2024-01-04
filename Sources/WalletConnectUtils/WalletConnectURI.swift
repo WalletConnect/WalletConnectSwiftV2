@@ -5,7 +5,7 @@ public struct WalletConnectURI: Equatable {
     public let version: String
     public let symKey: String
     public let relay: RelayProtocolOptions
-    public let methods: [[String]]?
+    public let methods: [String]?
 
     public var absoluteString: String {
         return "wc:\(topic)@\(version)?\(queryString)"
@@ -16,7 +16,7 @@ public struct WalletConnectURI: Equatable {
             .addingPercentEncoding(withAllowedCharacters: .rfc3986) ?? absoluteString
     }
 
-    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [[String]]) {
+    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [String]) {
         self.version = "2"
         self.topic = topic
         self.symKey = symKey
@@ -25,7 +25,7 @@ public struct WalletConnectURI: Equatable {
     }
 
     #if DEBUG
-    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [[String]]? = nil) {
+    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [String]? = nil) {
         self.version = "2"
         self.topic = topic
         self.symKey = symKey
@@ -51,7 +51,7 @@ public struct WalletConnectURI: Equatable {
 
         let relayData = query?["relay-data"]
         let methodsString = query?["methods"]
-        let methods = methodsString?.components(separatedBy: "],[").map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "[]")).components(separatedBy: ",") }
+        let methods = methodsString?.components(separatedBy: ",")
 
         self.version = version
         self.topic = topic
@@ -74,7 +74,7 @@ public struct WalletConnectURI: Equatable {
             parts.append("relay-data=\(relayData)")
         }
         if let methods = methods {
-            let encodedMethods = methods.map { "[\($0.joined(separator: ","))]" }.joined(separator: ",")
+            let encodedMethods = methods.joined(separator: ",")
             parts.append("methods=\(encodedMethods)")
         }
         return parts.joined(separator: "&")
