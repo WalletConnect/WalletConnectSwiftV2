@@ -1,7 +1,6 @@
 import UIKit
 
 import Web3Modal
-import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
 

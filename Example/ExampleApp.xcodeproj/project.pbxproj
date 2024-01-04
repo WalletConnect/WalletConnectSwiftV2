@@ -176,7 +176,6 @@
 		A5B6C0F32A6EAB1700927332 /* WalletConnectNotify in Frameworks */ = {isa = PBXBuildFile; productRef = A5B6C0F22A6EAB1700927332 /* WalletConnectNotify */; };
 		A5B6C0F52A6EAB2800927332 /* WalletConnectNotify in Frameworks */ = {isa = PBXBuildFile; productRef = A5B6C0F42A6EAB2800927332 /* WalletConnectNotify */; };
 		A5B6C0F72A6EAB3200927332 /* WalletConnectNotify in Frameworks */ = {isa = PBXBuildFile; productRef = A5B6C0F62A6EAB3200927332 /* WalletConnectNotify */; };
-		A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */; };
 		A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7FAC28B6AA7D00707FC6 /* QRCodeGenerator.swift */; };
 		A5C2020B287D9DEE007E3188 /* WelcomeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20206287D9DEE007E3188 /* WelcomeModule.swift */; };
 		A5C2020C287D9DEE007E3188 /* WelcomePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20207287D9DEE007E3188 /* WelcomePresenter.swift */; };
@@ -721,7 +720,6 @@
 				A5D85228286333E300DAF5C3 /* Starscream in Frameworks */,
 				84943C7B2A9BA206007EBAC2 /* Mixpanel in Frameworks */,
 				A573C53929EC365000E3CBFD /* HDWalletKit in Frameworks */,
-				A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1999,7 +1997,6 @@
 			packageProductDependencies = (
 				8448F1D327E4726F0000B866 /* WalletConnect */,
 				A5D85227286333E300DAF5C3 /* Starscream */,
-				A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */,
 				A54195A42934E83F0035AD19 /* Web3 */,
 				A573C53829EC365000E3CBFD /* HDWalletKit */,
 				8487A9432A836C2A0003D5AF /* Sentry */,
@@ -3515,10 +3512,6 @@
 		A5B6C0F62A6EAB3200927332 /* WalletConnectNotify */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectNotify;
-		};
-		A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnectAuth;
 		};
 		A5C8BE84292FE20B006CC85C /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;

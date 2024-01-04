@@ -1,7 +1,6 @@
 import UIKit
 import Combine
 
-import Auth
 
 final class AuthPresenter: ObservableObject {
     enum SigningState {
