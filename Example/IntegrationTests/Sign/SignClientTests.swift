@@ -789,9 +789,7 @@ final class SignClientTests: XCTestCase {
         .store(in: &publishers)
 
 
-        dapp.enableAuthenticatedSessions()
-        let uri = try! await dappPairingClient.create()
-        try await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+        let uri = try await dapp.authenticate(RequestParams.stub())
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -834,9 +832,7 @@ final class SignClientTests: XCTestCase {
         .store(in: &publishers)
 
 
-        dapp.enableAuthenticatedSessions()
-        let uri = try! await dappPairingClient.create()
-        try await dapp.authenticate(RequestParams.stub(chains: ["eip155:1", "eip155:137"]), topic: uri.topic)
+        let uri = try await dapp.authenticate(RequestParams.stub(chains: ["eip155:1", "eip155:137"]))
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -878,8 +874,7 @@ final class SignClientTests: XCTestCase {
 
     func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
         let responseExpectation = expectation(description: "error response delivered")
-        dapp.enableAuthenticatedSessions()
-        let uri = try! await dappPairingClient.create()
+        let uri = try! await dapp.authenticate(RequestParams.stub())
         try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
 
         try? await walletPairingClient.pair(uri: uri)
@@ -904,8 +899,8 @@ final class SignClientTests: XCTestCase {
 
     func testSessionAuthenticateUserRespondError() async {
         let responseExpectation = expectation(description: "error response delivered")
-        dapp.enableAuthenticatedSessions()
-        let uri = try! await dappPairingClient.create()
+        let uri = try! await dapp.authenticate(RequestParams.stub())
+
         try! await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
 
         try? await walletPairingClient.pair(uri: uri)
@@ -982,9 +977,8 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
 
 
-        dapp.enableAuthenticatedSessions()
-        let uri = try! await dappPairingClient.create()
-        try await dapp.authenticate(RequestParams.stub(), topic: uri.topic)
+        let uri = try await dapp.authenticate(RequestParams.stub())
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
     }

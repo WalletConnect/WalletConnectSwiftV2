@@ -286,10 +286,31 @@ public final class SignClient: SignClientProtocol {
 //        )
     }
 
-    public func enableAuthenticatedSessions() {
-        registerMethods()
-    }
+    public func authenticate(
+        _ params: RequestParams
+    ) async throws -> WalletConnectURI {
+        let pairingURI = try await pairingClient.create()
+        logger.debug("Requesting Authentication on existing pairing")
+        try await appRequestService.request(params: params, topic: pairingURI.topic)
 
+        let testNamespace = [
+            "eip155": ProposalNamespace(
+                chains: [
+                    Blockchain("eip155:1")!,
+                ],
+                methods: [
+                    "personal_sign",
+                ], events: []
+            )]
+//        try await appProposeService.propose(
+//            pairingTopic: topic,
+//            namespaces: testNamespace,
+//            optionalNamespaces: nil,
+//            sessionProperties: nil,
+//            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+//        )
+        return pairingURI
+    }
 
     /// For a wallet to respond on authentication request
     /// - Parameters:
@@ -515,9 +536,5 @@ public final class SignClient: SignClientProtocol {
         networkingClient.socketConnectionStatusPublisher.sink { [weak self] status in
             self?.socketConnectionStatusPublisherSubject.send(status)
         }.store(in: &publishers)
-    }
-
-    private func registerMethods() {
-        Task { await pairingClient.register(supportedMethods: [SessionProposeProtocolMethod().method, SessionAuthenticatedProtocolMethod().method])}
     }
 }

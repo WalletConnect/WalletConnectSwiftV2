@@ -16,15 +16,6 @@ public struct WalletConnectURI: Equatable {
             .addingPercentEncoding(withAllowedCharacters: .rfc3986) ?? absoluteString
     }
 
-    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [String]) {
-        self.version = "2"
-        self.topic = topic
-        self.symKey = symKey
-        self.relay = relay
-        self.methods = methods
-    }
-
-    #if DEBUG
     public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [String]? = nil) {
         self.version = "2"
         self.topic = topic
@@ -32,7 +23,6 @@ public struct WalletConnectURI: Equatable {
         self.relay = relay
         self.methods = methods
     }
-    #endif
 
     public init?(string: String) {
         guard let components = Self.parseURIComponents(from: string) else {
