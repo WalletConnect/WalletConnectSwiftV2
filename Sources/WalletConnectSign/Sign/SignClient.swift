@@ -215,6 +215,28 @@ public final class SignClient: SignClientProtocol {
     // MARK: - Public interface
 
     /// For a dApp to propose a session to a wallet.
+    /// Function will create pairing and propose session or propose a session on existing pairing.
+    /// - Parameters:
+    ///   - requiredNamespaces: required namespaces for a session
+    /// - Returns: Pairing URI that should be shared with responder out of bound. Common way is to present it as a QR code. Pairing URI will be nil if you are going to establish a session on existing Pairing and `topic` function parameter was provided.
+    public func connect(
+        requiredNamespaces: [String: ProposalNamespace],
+        optionalNamespaces: [String: ProposalNamespace]? = nil,
+        sessionProperties: [String: String]? = nil
+    ) async throws -> WalletConnectURI {
+        logger.debug("Connecting Application")
+        let pairingURI = try await pairingClient.create()
+        try await appProposeService.propose(
+            pairingTopic: pairingURI.topic,
+            namespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: sessionProperties,
+            relay: RelayProtocolOptions(protocol: "irn", data: nil)
+        )
+        return pairingURI
+    }
+
+    /// For a dApp to propose a session to a wallet.
     /// Function will propose a session on existing pairing.
     /// - Parameters:
     ///   - requiredNamespaces: required namespaces for a session
