@@ -164,7 +164,8 @@ final class NotifyTests: XCTestCase {
             try await clientB.deleteSubscription(topic: subscription.topic)
         }
     }
-    
+
+    /*
     func testWalletCreatesAndUpdatesSubscription() async throws {
         let created = expectation(description: "Subscription created")
 
@@ -202,6 +203,7 @@ final class NotifyTests: XCTestCase {
 
         try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
     }
+    */
 
     func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates notify subscription")

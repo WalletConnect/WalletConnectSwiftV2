@@ -7,7 +7,7 @@ public struct NotifyClientFactory {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
-        let databasePath = databasePath(appGroup: groupIdentifier, database: "notify.db")
+        let databasePath = databasePath(appGroup: groupIdentifier, database: "notify_v\(version).db")
         let sqlite = DiskSqlite(path: databasePath)
 
         return NotifyClientFactory.create(
@@ -101,5 +101,9 @@ public struct NotifyClientFactory {
         }
 
         return path.absoluteString
+    }
+
+    static var version: String {
+        return "1"
     }
 }

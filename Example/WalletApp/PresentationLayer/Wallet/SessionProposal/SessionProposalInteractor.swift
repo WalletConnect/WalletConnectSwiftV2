@@ -11,7 +11,7 @@ final class SessionProposalInteractor {
         
         let supportedRequiredChains = proposal.requiredNamespaces["eip155"]?.chains
         let supportedOptionalChains = proposal.optionalNamespaces?["eip155"]?.chains ?? []
-        let supportedChains = supportedRequiredChains?.union(supportedOptionalChains) ?? []
+        let supportedChains = (supportedRequiredChains ?? []).union(supportedOptionalChains) ?? []
         
         let supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: account.address)! }
         
