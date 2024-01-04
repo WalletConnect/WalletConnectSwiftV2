@@ -46,25 +46,21 @@ jobs:
         key: ${{ runner.os }}-deriveddata-ci-${{ github.event.pull_request.head.sha }}
 
     - name: Untar DerivedDataCache
-      shell: bash
       run: test -f products.tar && tar xPpf products.tar || echo "No artifacts to untar"
 
     # Package Unit tests
     - name: Run tests
       if: matrix.type == 'unit-tests'
-      shell: bash
       run: make unit_tests
 
     # Integration tests
     - name: Run integration tests
       if: matrix.type == 'integration-tests'
-      shell: bash
       run: make integration_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }} CAST_HOST=notify.walletconnect.com EXPLORER_HOST=explorer-api.walletconnect.com GM_DAPP_PROJECT_ID=${{ secrets.GM_DAPP_PROJECT_ID }} GM_DAPP_PROJECT_SECRET=${{ secrets.GM_DAPP_PROJECT_SECRET }} GM_DAPP_HOST=wc-notify-swift-integration-tests-prod.pages.dev JS_CLIENT_API_HOST=test-automation-api.walletconnect.com
 
     # Relay Integration tests
     - name: Run Relay integration tests
       if: matrix.type == 'relay-tests'
-      shell: bash
       run: make relay_tests RELAY_HOST=relay.walletconnect.com PROJECT_ID=${{ secrets.PROJECT_ID }}s
 
     - name: danger
@@ -77,8 +73,9 @@ jobs:
         DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: 
         rm -rf xcov_report |
-        /opt/homebrew/opt/ruby/bin/bundle install |
-        /opt/homebrew/opt/ruby/bin/bundle exec danger
+        bundle install |
+        bundle exec danger
+      shell: zsh {0}
 
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v3
@@ -89,7 +86,6 @@ jobs:
 
     - name: Zip test artifacts
       if: always()
-      shell: bash
       run: test -d "test_results" && zip artifacts.zip -r ./test_results || echo "Nothing to zip"
 
     - name: Upload test artifacts
