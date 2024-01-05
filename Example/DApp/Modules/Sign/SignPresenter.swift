@@ -106,6 +106,14 @@ extension SignPresenter {
                 self.accountsDetails.removeAll()
             }
             .store(in: &subscriptions)
+
+        Sign.instance.sessionsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                self.router.dismiss()
+                self.getSession()
+            }
+            .store(in: &subscriptions)
     }
     
     private func getSession() {
