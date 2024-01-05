@@ -92,9 +92,9 @@ struct AuthView: View {
                                 .cornerRadius(16)
                                 .padding(.top, 16)
                             
-                        case .signed(let cacao):
+                        case .signed(let session):
                             HStack {
-                                Text(cacao.p.iss.split(separator: ":").last ?? "")
+                                Text(session.peer.name)
                                     .lineLimit(1)
                                     .truncationMode(.middle)
                                     .frame(width: 135)
@@ -102,7 +102,7 @@ struct AuthView: View {
                                     .foregroundColor(Color(red: 0.89, green: 0.91, blue: 0.91))
                                 
                                 Button {
-                                    UIPasteboard.general.string = String(cacao.p.iss.split(separator: ":").last ?? "")
+                                    UIPasteboard.general.string = try? String(session.peer.description)
                                 } label: {
                                     Image("copy")
                                         .resizable()

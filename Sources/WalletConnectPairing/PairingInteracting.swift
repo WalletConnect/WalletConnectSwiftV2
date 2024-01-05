@@ -17,3 +17,9 @@ public protocol PairingInteracting {
     func cleanup() throws
 #endif
 }
+
+public extension PairingInteracting {
+    func create() async throws -> WalletConnectURI {
+        return try await create(methods: nil)
+    }
+}

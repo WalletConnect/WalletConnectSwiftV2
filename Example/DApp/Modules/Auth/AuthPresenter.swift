@@ -1,11 +1,12 @@
 import UIKit
 import Combine
+import WalletConnectSign
 
 
 final class AuthPresenter: ObservableObject {
     enum SigningState {
         case none
-        case signed(Cacao)
+        case signed(Session)
         case error(Error)
     }
     
@@ -55,10 +56,10 @@ final class AuthPresenter: ObservableObject {
 extension AuthPresenter {
     @MainActor
     private func setupInitialState() {
-        Auth.instance.authResponsePublisher.sink { [weak self] (_, result) in
+        Sign.instance.authResponsePublisher.sink { [weak self] (_, result) in
             switch result {
-            case .success(let cacao): 
-                self?.signingState = .signed(cacao)
+            case .success(let session):
+                self?.signingState = .signed(session)
                 self?.generateQR()
                 self?.showSigningState.toggle()
                 
@@ -72,9 +73,8 @@ extension AuthPresenter {
     
     private func generateQR() {
         Task { @MainActor in
-            let uri = try! await Pair.instance.create()
+            let uri = try await Sign.instance.authenticate(.stub())
             walletConnectUri = uri
-            try await Auth.instance.request(.stub(), topic: uri.topic)
             let qrCodeImage = QRCodeGenerator.generateQRCode(from: uri.absoluteString)
             DispatchQueue.main.async {
                 self.qrCodeImageData = qrCodeImage.pngData()
@@ -87,7 +87,7 @@ extension AuthPresenter {
 extension AuthPresenter: SceneViewModel {}
 
 // MARK: - Auth request stub
-private extension RequestParams {
+private extension AuthRequestParams {
     static func stub(
         domain: String = "service.invalid",
         chainId: String = "eip155:1",
@@ -98,17 +98,18 @@ private extension RequestParams {
         statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
         requestId: String? = nil,
         resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
-    ) -> RequestParams {
-        return RequestParams(
+    ) -> AuthRequestParams {
+        return AuthRequestParams(
             domain: domain,
-            chainId: chainId,
+            chains: [chainId],
             nonce: nonce,
             aud: aud,
             nbf: nbf,
             exp: exp,
             statement: statement,
             requestId: requestId,
-            resources: resources
+            resources: resources,
+            methods: ["eth_sign", "personal_sign", "eth_signTypedData"]
         )
     }
 }

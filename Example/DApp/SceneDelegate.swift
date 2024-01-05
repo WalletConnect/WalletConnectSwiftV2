@@ -15,8 +15,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )
-        Auth.configure(crypto: DefaultCryptoProvider())
-        
+        Sign.configure(crypto: DefaultCryptoProvider())
+
         let metadata = AppMetadata(
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
