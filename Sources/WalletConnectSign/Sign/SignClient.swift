@@ -260,12 +260,14 @@ public final class SignClient: SignClientProtocol {
 
     //---------------------------------------AUTH-----------------------------------
 
+    /// For a dApp to propose an authenticated session to a wallet.
+    /// Function will propose a session on existing pairing.
     public func authenticate(
         _ params: AuthRequestParams,
         topic: String
     ) async throws {
         try pairingClient.validatePairingExistance(topic)
-        try pairingClient.validateMethodSupport(topic: topic, method: "wc_sessionAuthenticate")
+        try pairingClient.validateMethodSupport(topic: topic, method: SessionAuthenticatedProtocolMethod().method)
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: topic)
 
@@ -279,10 +281,11 @@ public final class SignClient: SignClientProtocol {
         )
     }
 
+    /// For a dApp to propose an authenticated session to a wallet.
     public func authenticate(
         _ params: AuthRequestParams
     ) async throws -> WalletConnectURI {
-        let pairingURI = try await pairingClient.create(methods: ["wc_sessionAuthenticate"])
+        let pairingURI = try await pairingClient.create(methods: [SessionAuthenticatedProtocolMethod().method])
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: pairingURI.topic)
 

@@ -45,7 +45,7 @@ actor AuthResponder {
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
     }
 
-    func respond(requestId: RPCID, auths: [AuthObject]) async throws {
+    func respond(requestId: RPCID, auths: [Cacao]) async throws {
         let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
         let (responseTopic, responseKeys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
