@@ -2,6 +2,9 @@ import Foundation
 import Combine
 
 public class PairingClient: PairingRegisterer, PairingInteracting, PairingClientProtocol {
+    enum Errors: Error {
+        case pairingDoesNotSupportRequiredMethod
+    }
     public var pingResponsePublisher: AnyPublisher<(String), Never> {
         pingResponsePublisherSubject.eraseToAnyPublisher()
     }
@@ -124,6 +127,15 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
 
     public func validatePairingExistance(_ topic: String) throws {
         _ = try pairingsProvider.getPairing(for: topic)
+    }
+
+    public func validateMethodSupport(topic: String, method: String) throws {
+        _ = try pairingsProvider.getPairing(for: topic)
+        let pairing = pairingStorage.getPairing(forTopic: topic)
+        guard let methods = pairing?.methods,
+              methods.contains(method) else {
+            throw Errors.pairingDoesNotSupportRequiredMethod
+        }
     }
 
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
