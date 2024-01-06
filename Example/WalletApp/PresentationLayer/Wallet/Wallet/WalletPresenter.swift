@@ -126,10 +126,14 @@ extension WalletPresenter {
         }
         pair(uri: uri)
     }
-    
+
     private func setUpPairingIndicatorRemoval(topic: String) {
         Web3Wallet.instance.pairingExpirationPublisher.sink { pairing in
             guard pairing.topic == topic else {return}
+            self.showPairingLoading = false
+        }.store(in: &disposeBag)
+
+        Web3Wallet.instance.sessionRequestPublisher.sink { _ in
             self.showPairingLoading = false
         }.store(in: &disposeBag)
     }
