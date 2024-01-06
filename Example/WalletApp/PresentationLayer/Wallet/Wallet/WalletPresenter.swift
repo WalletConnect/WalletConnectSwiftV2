@@ -133,7 +133,7 @@ extension WalletPresenter {
             self.showPairingLoading = false
         }.store(in: &disposeBag)
 
-        Web3Wallet.instance.sessionRequestPublisher.sink { _ in
+        Web3Wallet.instance.sessionProposalPublisher.sink { _ in
             self.showPairingLoading = false
         }.store(in: &disposeBag)
     }
