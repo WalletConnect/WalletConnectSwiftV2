@@ -286,12 +286,7 @@
 		C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5B2F7042970573D000DBA0E /* SolanaSwift */; };
 		C5B2F71029705827000DBA0E /* EthereumTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F568C32795832A00D0A289 /* EthereumTransaction.swift */; };
 		C5B4C4C42AF11C8B00B4274A /* SignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B4C4C32AF11C8B00B4274A /* SignView.swift */; };
-		C5B4C4CF2AF12F1600B4274A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B4C4CE2AF12F1600B4274A /* AuthView.swift */; };
 		C5BE01D12AF661D70064FC88 /* NewPairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01D02AF661D70064FC88 /* NewPairingView.swift */; };
-		C5BE01D72AF691CD0064FC88 /* AuthModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01D62AF691CD0064FC88 /* AuthModule.swift */; };
-		C5BE01D92AF691FE0064FC88 /* AuthPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01D82AF691FE0064FC88 /* AuthPresenter.swift */; };
-		C5BE01DB2AF692060064FC88 /* AuthRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01DA2AF692060064FC88 /* AuthRouter.swift */; };
-		C5BE01DD2AF692100064FC88 /* AuthInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01DC2AF692100064FC88 /* AuthInteractor.swift */; };
 		C5BE01DF2AF692D80064FC88 /* WalletConnectRouter in Frameworks */ = {isa = PBXBuildFile; productRef = C5BE01DE2AF692D80064FC88 /* WalletConnectRouter */; };
 		C5BE01E22AF693080064FC88 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01E12AF693080064FC88 /* Application.swift */; };
 		C5BE01E32AF696540064FC88 /* SceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE264293F56D6004840D1 /* SceneViewController.swift */; };
@@ -645,12 +640,7 @@
 		C5B2F6F42970511B000DBA0E /* SessionRequestInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestInteractor.swift; sourceTree = "<group>"; };
 		C5B2F6F52970511B000DBA0E /* SessionRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRequestView.swift; sourceTree = "<group>"; };
 		C5B4C4C32AF11C8B00B4274A /* SignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignView.swift; sourceTree = "<group>"; };
-		C5B4C4CE2AF12F1600B4274A /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		C5BE01D02AF661D70064FC88 /* NewPairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPairingView.swift; sourceTree = "<group>"; };
-		C5BE01D62AF691CD0064FC88 /* AuthModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModule.swift; sourceTree = "<group>"; };
-		C5BE01D82AF691FE0064FC88 /* AuthPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthPresenter.swift; sourceTree = "<group>"; };
-		C5BE01DA2AF692060064FC88 /* AuthRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRouter.swift; sourceTree = "<group>"; };
-		C5BE01DC2AF692100064FC88 /* AuthInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthInteractor.swift; sourceTree = "<group>"; };
 		C5BE01E12AF693080064FC88 /* Application.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application.swift; sourceTree = "<group>"; };
 		C5BE01ED2AF6C9DF0064FC88 /* SignPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignPresenter.swift; sourceTree = "<group>"; };
 		C5BE01EE2AF6C9DF0064FC88 /* SignModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignModule.swift; sourceTree = "<group>"; };
@@ -1802,18 +1792,6 @@
 			path = Sign;
 			sourceTree = "<group>";
 		};
-		C5B4C4CD2AF12F0B00B4274A /* Auth */ = {
-			isa = PBXGroup;
-			children = (
-				C5BE01D62AF691CD0064FC88 /* AuthModule.swift */,
-				C5BE01D82AF691FE0064FC88 /* AuthPresenter.swift */,
-				C5BE01DA2AF692060064FC88 /* AuthRouter.swift */,
-				C5BE01DC2AF692100064FC88 /* AuthInteractor.swift */,
-				C5B4C4CE2AF12F1600B4274A /* AuthView.swift */,
-			);
-			path = Auth;
-			sourceTree = "<group>";
-		};
 		C5BE01E02AF692F80064FC88 /* ApplicationLayer */ = {
 			isa = PBXGroup;
 			children = (
@@ -1872,7 +1850,6 @@
 			children = (
 				C5BE02062AF777AD0064FC88 /* Main */,
 				C5B4C4C52AF12C2900B4274A /* Sign */,
-				C5B4C4CD2AF12F0B00B4274A /* Auth */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -2312,7 +2289,6 @@
 			files = (
 				C5BE021C2AF79B9A0064FC88 /* SessionAccountRouter.swift in Sources */,
 				C5BE02102AF777AD0064FC88 /* MainModule.swift in Sources */,
-				C5BE01DD2AF692100064FC88 /* AuthInteractor.swift in Sources */,
 				C5B4C4C42AF11C8B00B4274A /* SignView.swift in Sources */,
 				C5BE02042AF7764F0064FC88 /* UIViewController.swift in Sources */,
 				C5BE021E2AF79B9A0064FC88 /* SessionAccountView.swift in Sources */,
@@ -2322,7 +2298,6 @@
 				C5BE020F2AF777AD0064FC88 /* TabPage.swift in Sources */,
 				A5A8E47D293A1CFE00FEB97D /* DefaultSocketFactory.swift in Sources */,
 				C5BE01E52AF697470064FC88 /* Color.swift in Sources */,
-				C5B4C4CF2AF12F1600B4274A /* AuthView.swift in Sources */,
 				A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */,
 				A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */,
 				C5BE02122AF777AD0064FC88 /* MainPresenter.swift in Sources */,
@@ -2333,7 +2308,6 @@
 				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				C5BE021F2AF79B9A0064FC88 /* SessionAccountModule.swift in Sources */,
 				C5BE01E42AF697100064FC88 /* UIColor.swift in Sources */,
-				C5BE01DB2AF692060064FC88 /* AuthRouter.swift in Sources */,
 				C5BE01E62AF697FA0064FC88 /* String.swift in Sources */,
 				C5BE02012AF774CB0064FC88 /* NewPairingModule.swift in Sources */,
 				C5BE02002AF774CB0064FC88 /* NewPairingRouter.swift in Sources */,
@@ -2341,12 +2315,10 @@
 				C5BE01D12AF661D70064FC88 /* NewPairingView.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
 				C5BE02022AF774CB0064FC88 /* NewPairingInteractor.swift in Sources */,
-				C5BE01D92AF691FE0064FC88 /* AuthPresenter.swift in Sources */,
 				C5BE02112AF777AD0064FC88 /* MainViewController.swift in Sources */,
 				C5BE021D2AF79B9A0064FC88 /* SessionAccountInteractor.swift in Sources */,
 				A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				C5BE01FB2AF6CB270064FC88 /* SignRouter.swift in Sources */,
-				C5BE01D72AF691CD0064FC88 /* AuthModule.swift in Sources */,
 				C5BE01F72AF6CB250064FC88 /* SignModule.swift in Sources */,
 				C5BE01FA2AF6CB270064FC88 /* SignPresenter.swift in Sources */,
 				C5BE02132AF777AD0064FC88 /* MainInteractor.swift in Sources */,

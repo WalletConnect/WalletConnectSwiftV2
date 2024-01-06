@@ -21,7 +21,7 @@ final class MainViewController: UITabBarController {
     }
 
     private func setupTabs() {
-        let viewControllers = presenter.viewControllers
+        let viewController = presenter.viewController
 
         for (index, viewController) in viewControllers.enumerated() {
             let model = presenter.tabs[index]

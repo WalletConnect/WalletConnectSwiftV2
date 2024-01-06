@@ -12,8 +12,4 @@ final class MainRouter {
     func signViewController() -> UIViewController {
         return SignModule.create(app: app)
     }
-
-    func authViewController() -> UIViewController {
-        return AuthModule.create(app: app)
-    }
 }

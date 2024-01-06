@@ -142,3 +142,33 @@ extension SignPresenter {
 
 // MARK: - SceneViewModel
 extension SignPresenter: SceneViewModel {}
+
+
+// MARK: - Auth request stub
+extension AuthRequestParams {
+    static func stub(
+        domain: String = "service.invalid",
+        chainId: String = "eip155:1",
+        nonce: String = "32891756",
+        aud: String = "https://service.invalid/login",
+        nbf: String? = nil,
+        exp: String? = nil,
+        statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
+        requestId: String? = nil,
+        resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
+    ) -> AuthRequestParams {
+        return AuthRequestParams(
+            domain: domain,
+            chains: [chainId],
+            nonce: nonce,
+            aud: aud,
+            nbf: nbf,
+            exp: exp,
+            statement: statement,
+            requestId: requestId,
+            resources: resources,
+            methods: ["eth_sign", "personal_sign", "eth_signTypedData"]
+        )
+    }
+}
+

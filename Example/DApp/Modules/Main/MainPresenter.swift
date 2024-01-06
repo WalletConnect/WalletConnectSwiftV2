@@ -6,15 +6,8 @@ final class MainPresenter {
     private let router: MainRouter
     private var disposeBag = Set<AnyCancellable>()
 
-    var tabs: [TabPage] {
-        return TabPage.allCases
-    }
-
-    var viewControllers: [UIViewController] {
-        return [
-            router.signViewController(),
-            router.authViewController()
-        ]
+    var viewController: UIViewController {
+        return router.signViewController()
     }
 
     init(router: MainRouter, interactor: MainInteractor) {
