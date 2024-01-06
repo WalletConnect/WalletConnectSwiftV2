@@ -110,7 +110,7 @@ extension WalletPresenter {
         Task.detached(priority: .high) { @MainActor [unowned self] in
             do {
                 self.showPairingLoading = true
-                self.removePairingIndicator()
+                self.setUpPairingIndicatorRemoval(topic: uri.topic)
                 try await self.interactor.pair(uri: uri)
             } catch {
                 self.showPairingLoading = false
@@ -127,10 +127,11 @@ extension WalletPresenter {
         pair(uri: uri)
     }
     
-    private func removePairingIndicator() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+    private func setUpPairingIndicatorRemoval(topic: String) {
+        Pair.instance.pairingExpirationPublisher.sink { pairing in
+            guard pairing.topic == topic else {return}
             self.showPairingLoading = false
-        }
+        }.store(in: &disposeBag)
     }
 }
 

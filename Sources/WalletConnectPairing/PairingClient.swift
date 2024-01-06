@@ -10,6 +10,9 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     }
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    public let pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
+        return expirationService.pairingExpirationPublisher
+    }
 
     private let pairingStorage: WCPairingStorage
     private let walletPairService: WalletPairService
