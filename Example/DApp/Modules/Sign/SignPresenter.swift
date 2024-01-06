@@ -53,19 +53,25 @@ final class SignPresenter: ObservableObject {
     }
     
     @MainActor
-    func connectWalletWithSign() {
+    func connectWalletWithSessionPropose() {
         Task {
-            let uri = try await Pair.instance.create()
-            walletConnectUri = uri
-            try await Sign.instance.connect(
+            walletConnectUri = try await Sign.instance.connect(
                 requiredNamespaces: Proposal.requiredNamespaces,
-                optionalNamespaces: Proposal.optionalNamespaces,
-                topic: uri.topic
+                optionalNamespaces: Proposal.optionalNamespaces
             )
-            router.presentNewPairing(walletConnectUri: uri)
+            router.presentNewPairing(walletConnectUri: walletConnectUri!)
         }
     }
-    
+
+    @MainActor
+    func connectWalletWithSessionAuthenticate() {
+        Task {
+            let uri = try await Sign.instance.authenticate(.stub())
+            walletConnectUri = uri
+            router.presentNewPairing(walletConnectUri: walletConnectUri!)
+        }
+    }
+
     func disconnect() {
         if let session {
             Task { @MainActor in

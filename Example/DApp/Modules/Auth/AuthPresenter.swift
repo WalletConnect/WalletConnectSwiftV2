@@ -87,7 +87,7 @@ extension AuthPresenter {
 extension AuthPresenter: SceneViewModel {}
 
 // MARK: - Auth request stub
-private extension AuthRequestParams {
+extension AuthRequestParams {
     static func stub(
         domain: String = "service.invalid",
         chainId: String = "eip155:1",

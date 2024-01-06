@@ -22,7 +22,7 @@ final class SignRouter {
         SessionAccountModule.create(app: app, sessionAccount: sessionAccount, session: session)
             .present(from: viewController)
     }
-    
+
     func dismissNewPairing() {
         newPairingViewController?.dismiss()
     }
