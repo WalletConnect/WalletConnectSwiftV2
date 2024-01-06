@@ -22,7 +22,7 @@ final class ExpirationService {
             self?.networkInteractor.unsubscribe(topic: pairing.topic)
 
             DispatchQueue.main.async {
-                pairingExpirationPublisherSubject.send(Pairing(pairing))
+                self?.pairingExpirationPublisherSubject.send(Pairing(pairing))
             }
         }
     }

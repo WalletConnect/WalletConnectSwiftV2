@@ -10,7 +10,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     }
 
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
-    public let pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
+    public var pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
         return expirationService.pairingExpirationPublisher
     }
 

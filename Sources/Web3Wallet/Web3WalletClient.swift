@@ -67,7 +67,7 @@ public class Web3WalletClient {
         pairingClient.pairingDeletePublisher
     }
 
-    public let pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
+    public var pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
         return pairingClient.pairingExpirationPublisher
     }
 

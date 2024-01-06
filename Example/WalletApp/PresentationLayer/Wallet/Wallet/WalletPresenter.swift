@@ -40,7 +40,7 @@ final class WalletPresenter: ObservableObject {
     
     func onAppear() {
         showPairingLoading = app.requestSent
-        removePairingIndicator()
+        showPairingLoading = false
 
         let pendingRequests = interactor.getPendingRequests()
         if let request = pendingRequests.first(where: { $0.context != nil }) {
@@ -128,7 +128,7 @@ extension WalletPresenter {
     }
     
     private func setUpPairingIndicatorRemoval(topic: String) {
-        Pair.instance.pairingExpirationPublisher.sink { pairing in
+        Web3Wallet.instance.pairingExpirationPublisher.sink { pairing in
             guard pairing.topic == topic else {return}
             self.showPairingLoading = false
         }.store(in: &disposeBag)
