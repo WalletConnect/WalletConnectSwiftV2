@@ -302,12 +302,6 @@
 		C5BE02022AF774CB0064FC88 /* NewPairingInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01F62AF6CA2B0064FC88 /* NewPairingInteractor.swift */; };
 		C5BE02032AF774CB0064FC88 /* NewPairingPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE01F42AF6CA2B0064FC88 /* NewPairingPresenter.swift */; };
 		C5BE02042AF7764F0064FC88 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE26C293F56D6004840D1 /* UIViewController.swift */; };
-		C5BE020E2AF777AD0064FC88 /* MainRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE02082AF777AD0064FC88 /* MainRouter.swift */; };
-		C5BE020F2AF777AD0064FC88 /* TabPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE020D2AF777AD0064FC88 /* TabPage.swift */; };
-		C5BE02102AF777AD0064FC88 /* MainModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE02072AF777AD0064FC88 /* MainModule.swift */; };
-		C5BE02112AF777AD0064FC88 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE020A2AF777AD0064FC88 /* MainViewController.swift */; };
-		C5BE02122AF777AD0064FC88 /* MainPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE020B2AF777AD0064FC88 /* MainPresenter.swift */; };
-		C5BE02132AF777AD0064FC88 /* MainInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE02092AF777AD0064FC88 /* MainInteractor.swift */; };
 		C5BE02142AF77A940064FC88 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C5F32A352954FE3C00A6476E /* Colors.xcassets */; };
 		C5BE021B2AF79B9A0064FC88 /* SessionAccountPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE02172AF79B950064FC88 /* SessionAccountPresenter.swift */; };
 		C5BE021C2AF79B9A0064FC88 /* SessionAccountRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BE02162AF79B950064FC88 /* SessionAccountRouter.swift */; };
@@ -650,12 +644,6 @@
 		C5BE01F42AF6CA2B0064FC88 /* NewPairingPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPairingPresenter.swift; sourceTree = "<group>"; };
 		C5BE01F52AF6CA2B0064FC88 /* NewPairingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPairingModule.swift; sourceTree = "<group>"; };
 		C5BE01F62AF6CA2B0064FC88 /* NewPairingInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPairingInteractor.swift; sourceTree = "<group>"; };
-		C5BE02072AF777AD0064FC88 /* MainModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainModule.swift; sourceTree = "<group>"; };
-		C5BE02082AF777AD0064FC88 /* MainRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainRouter.swift; sourceTree = "<group>"; };
-		C5BE02092AF777AD0064FC88 /* MainInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainInteractor.swift; sourceTree = "<group>"; };
-		C5BE020A2AF777AD0064FC88 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
-		C5BE020B2AF777AD0064FC88 /* MainPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPresenter.swift; sourceTree = "<group>"; };
-		C5BE020D2AF777AD0064FC88 /* TabPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPage.swift; sourceTree = "<group>"; };
 		C5BE02162AF79B950064FC88 /* SessionAccountRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAccountRouter.swift; sourceTree = "<group>"; };
 		C5BE02172AF79B950064FC88 /* SessionAccountPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAccountPresenter.swift; sourceTree = "<group>"; };
 		C5BE02182AF79B950064FC88 /* SessionAccountInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAccountInteractor.swift; sourceTree = "<group>"; };
@@ -1812,27 +1800,6 @@
 			path = NewPairing;
 			sourceTree = "<group>";
 		};
-		C5BE02062AF777AD0064FC88 /* Main */ = {
-			isa = PBXGroup;
-			children = (
-				C5BE02072AF777AD0064FC88 /* MainModule.swift */,
-				C5BE020B2AF777AD0064FC88 /* MainPresenter.swift */,
-				C5BE02092AF777AD0064FC88 /* MainInteractor.swift */,
-				C5BE02082AF777AD0064FC88 /* MainRouter.swift */,
-				C5BE020A2AF777AD0064FC88 /* MainViewController.swift */,
-				C5BE020C2AF777AD0064FC88 /* Model */,
-			);
-			path = Main;
-			sourceTree = "<group>";
-		};
-		C5BE020C2AF777AD0064FC88 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				C5BE020D2AF777AD0064FC88 /* TabPage.swift */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
 		C5BE02152AF79B860064FC88 /* SessionAccount */ = {
 			isa = PBXGroup;
 			children = (
@@ -1848,7 +1815,6 @@
 		C5BE02202AF7DDE70064FC88 /* Modules */ = {
 			isa = PBXGroup;
 			children = (
-				C5BE02062AF777AD0064FC88 /* Main */,
 				C5B4C4C52AF12C2900B4274A /* Sign */,
 			);
 			path = Modules;
@@ -2288,23 +2254,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5BE021C2AF79B9A0064FC88 /* SessionAccountRouter.swift in Sources */,
-				C5BE02102AF777AD0064FC88 /* MainModule.swift in Sources */,
 				C5B4C4C42AF11C8B00B4274A /* SignView.swift in Sources */,
 				C5BE02042AF7764F0064FC88 /* UIViewController.swift in Sources */,
 				C5BE021E2AF79B9A0064FC88 /* SessionAccountView.swift in Sources */,
 				C5BE02032AF774CB0064FC88 /* NewPairingPresenter.swift in Sources */,
 				84CE641F27981DED00142511 /* AppDelegate.swift in Sources */,
 				C5BE01E32AF696540064FC88 /* SceneViewController.swift in Sources */,
-				C5BE020F2AF777AD0064FC88 /* TabPage.swift in Sources */,
 				A5A8E47D293A1CFE00FEB97D /* DefaultSocketFactory.swift in Sources */,
 				C5BE01E52AF697470064FC88 /* Color.swift in Sources */,
 				A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */,
 				A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */,
-				C5BE02122AF777AD0064FC88 /* MainPresenter.swift in Sources */,
 				C5BE01E22AF693080064FC88 /* Application.swift in Sources */,
 				C5BE021B2AF79B9A0064FC88 /* SessionAccountPresenter.swift in Sources */,
 				A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */,
-				C5BE020E2AF777AD0064FC88 /* MainRouter.swift in Sources */,
 				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				C5BE021F2AF79B9A0064FC88 /* SessionAccountModule.swift in Sources */,
 				C5BE01E42AF697100064FC88 /* UIColor.swift in Sources */,
@@ -2315,13 +2277,11 @@
 				C5BE01D12AF661D70064FC88 /* NewPairingView.swift in Sources */,
 				84CE642127981DED00142511 /* SceneDelegate.swift in Sources */,
 				C5BE02022AF774CB0064FC88 /* NewPairingInteractor.swift in Sources */,
-				C5BE02112AF777AD0064FC88 /* MainViewController.swift in Sources */,
 				C5BE021D2AF79B9A0064FC88 /* SessionAccountInteractor.swift in Sources */,
 				A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				C5BE01FB2AF6CB270064FC88 /* SignRouter.swift in Sources */,
 				C5BE01F72AF6CB250064FC88 /* SignModule.swift in Sources */,
 				C5BE01FA2AF6CB270064FC88 /* SignPresenter.swift in Sources */,
-				C5BE02132AF777AD0064FC88 /* MainInteractor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
