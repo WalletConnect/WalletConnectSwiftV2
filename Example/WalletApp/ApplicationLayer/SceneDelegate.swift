@@ -1,7 +1,7 @@
 import Auth
 import SafariServices
 import UIKit
-import WalletConnectPairing
+import Web3Wallet
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificationCenterDelegate {
     var window: UIWindow?
@@ -44,7 +44,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
 
         if let uri {
             Task {
-                try await Pair.instance.pair(uri: uri)
+                try await Web3Wallet.instance.pair(uri: uri)
             }
         }
     }
