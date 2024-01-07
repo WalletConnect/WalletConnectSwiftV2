@@ -61,7 +61,8 @@ public struct SignClientFactory {
             logger: logger,
             pairingStore: pairingStore,
             sessionStore: sessionStore,
-            verifyClient: verifyClient
+            verifyClient: verifyClient,
+            rpcHistory: rpcHistory
         )
         let cleanupService = SignCleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionTopicToProposal: sessionTopicToProposal, networkInteractor: networkingClient)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)

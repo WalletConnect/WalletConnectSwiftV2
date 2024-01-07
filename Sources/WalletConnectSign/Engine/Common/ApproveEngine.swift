@@ -27,6 +27,7 @@ final class ApproveEngine {
     private let metadata: AppMetadata
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
+    private let rpcHistory: RPCHistory
 
     private var publishers = Set<AnyCancellable>()
 
@@ -41,7 +42,8 @@ final class ApproveEngine {
         logger: ConsoleLogging,
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
-        verifyClient: VerifyClientProtocol
+        verifyClient: VerifyClientProtocol,
+        rpcHistory: RPCHistory
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -54,6 +56,7 @@ final class ApproveEngine {
         self.pairingStore = pairingStore
         self.sessionStore = sessionStore
         self.verifyClient = verifyClient
+        self.rpcHistory = rpcHistory
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
@@ -125,10 +128,18 @@ final class ApproveEngine {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.proposalPayloadsNotFound
         }
+
+        if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
+           let pairing = pairingStore.getPairing(forTopic: pairingTopic),
+           !pairing.active {
+            pairingStore.delete(topic: pairingTopic)
+        }
+
         proposalPayloadsStore.delete(forKey: proposerPubKey)
         verifyContextStore.delete(forKey: proposerPubKey)
+
         try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SessionProposeProtocolMethod(), reason: reason)
-        // TODO: Delete pairing if inactive 
+
     }
 
     func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil, pairingTopic: String) async throws {
