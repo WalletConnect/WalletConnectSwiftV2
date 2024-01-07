@@ -40,7 +40,7 @@ final class WalletPresenter: ObservableObject {
     
     func onAppear() {
         showPairingLoading = app.requestSent
-        showPairingLoading = false
+        setUpPairingIndicatorRemoval()
 
         let pendingRequests = interactor.getPendingRequests()
         if let request = pendingRequests.first(where: { $0.context != nil }) {
@@ -109,11 +109,8 @@ extension WalletPresenter {
     private func pair(uri: WalletConnectURI) {
         Task.detached(priority: .high) { @MainActor [unowned self] in
             do {
-                self.showPairingLoading = true
-                self.setUpPairingIndicatorRemoval(topic: uri.topic)
                 try await self.interactor.pair(uri: uri)
             } catch {
-                self.showPairingLoading = false
                 self.errorMessage = error.localizedDescription
                 self.showError.toggle()
             }
@@ -127,14 +124,9 @@ extension WalletPresenter {
         pair(uri: uri)
     }
 
-    private func setUpPairingIndicatorRemoval(topic: String) {
-        Web3Wallet.instance.pairingExpirationPublisher.sink { pairing in
-            guard pairing.topic == topic else {return}
-            self.showPairingLoading = false
-        }.store(in: &disposeBag)
-
-        Web3Wallet.instance.sessionProposalPublisher.sink { _ in
-            self.showPairingLoading = false
+    private func setUpPairingIndicatorRemoval() {
+        Web3Wallet.instance.pairingStatePublisher.sink { [weak self] isPairing in
+            self?.showPairingLoading = isPairing
         }.store(in: &disposeBag)
     }
 }
