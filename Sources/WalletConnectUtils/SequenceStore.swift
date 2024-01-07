@@ -12,10 +12,13 @@ public final class SequenceStore<T> where T: SequenceObject {
 
     private let store: CodableStore<T>
     private let dateInitializer: () -> Date
+    private var expiryMonitorTimer: Timer?
+
 
     public init(store: CodableStore<T>, dateInitializer: @escaping () -> Date = Date.init) {
         self.store = store
         self.dateInitializer = dateInitializer
+        startExpiryMonitor()
     }
 
     public func hasSequence(forTopic topic: String) -> Bool {
@@ -45,6 +48,19 @@ public final class SequenceStore<T> where T: SequenceObject {
     public func deleteAll() {
         store.deleteAll()
         onSequenceUpdate?()
+    }
+
+    // MARK: Expiry Monitor
+
+    private func startExpiryMonitor() {
+        expiryMonitorTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+            self?.checkAllSequencesForExpiry()
+        }
+    }
+
+    private func checkAllSequencesForExpiry() {
+        let allSequences = getAll()
+        allSequences.forEach { _ = verifyExpiry(on: $0) }
     }
 }
 
