@@ -206,6 +206,7 @@ private extension NotificationService {
         Mixpanel.mainInstance().track(
             event: "💬 APNS: " + event,
             properties: [
+                "message_id": message?.id,
                 "title": message?.title,
                 "body": message?.body,
                 "icon": message?.icon,
