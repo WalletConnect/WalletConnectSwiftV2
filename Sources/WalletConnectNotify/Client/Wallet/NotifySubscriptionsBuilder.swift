@@ -40,7 +40,8 @@ class NotifySubscriptionsBuilder {
             $0[$1.id] = ScopeValue(
                 id: $1.id,
                 name: $1.name,
-                description: $1.description,
+                description: $1.description, 
+                imageUrls: $1.imageUrls,
                 enabled: selectedScope.contains($1.id)
             )
         }
