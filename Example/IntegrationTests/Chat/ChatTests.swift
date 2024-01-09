@@ -71,18 +71,10 @@ final class ChatTests: XCTestCase {
             keychain: keychain
         )
 
-        let historyClient = HistoryClientFactory.create(
-            historyUrl: "https://history.walletconnect.com",
-            relayUrl: "wss://relay.walletconnect.com",
-            keyValueStorage: keyValueStorage,
-            keychain: keychain,
-            logger: logger
-        )
-
         let clientId = try! networkingInteractor.getClientId()
         logger.debug("My client id is: \(clientId)")
 
-        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient, historyClient: historyClient)
+        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient)
     }
 
     func testInvite() async throws {
