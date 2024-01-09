@@ -63,7 +63,8 @@ final class SessionRequestPresenter: ObservableObject {
             router.dismiss()
         } catch {
             await ActivityIndicatorManager.shared.stop()
-
+            errorMessage = error.localizedDescription
+            showError.toggle()
         }
     }
     

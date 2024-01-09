@@ -40,18 +40,21 @@ final class SessionProposalPresenter: ObservableObject {
             showConnected ? showConnectedSheet.toggle() : router.dismiss()
             await ActivityIndicatorManager.shared.stop()
         } catch {
+            await ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
-            await ActivityIndicatorManager.shared.stop()
         }
     }
 
     @MainActor
     func onReject() async throws {
         do {
+            await ActivityIndicatorManager.shared.start()
             try await interactor.reject(proposal: sessionProposal)
+            await ActivityIndicatorManager.shared.stop()
             router.dismiss()
         } catch {
+            await ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }

@@ -18,7 +18,7 @@ struct SessionRequestView: View {
                         Button(action: {
                             presenter.dismiss()
                         }) {
-                            Image(systemName: "xmark") 
+                            Image(systemName: "xmark")
                                 .foregroundColor(.white)
                                 .padding()
                         }
