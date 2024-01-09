@@ -56,8 +56,15 @@ final class SessionRequestPresenter: ObservableObject {
 
     @MainActor
     func onReject() async throws {
-        try await interactor.respondError(sessionRequest: sessionRequest)
-        router.dismiss()
+        do {
+            await ActivityIndicatorManager.shared.start()
+            try await interactor.respondError(sessionRequest: sessionRequest)
+            await ActivityIndicatorManager.shared.stop()
+            router.dismiss()
+        } catch {
+            await ActivityIndicatorManager.shared.stop()
+
+        }
     }
     
     func onSignedSheetDismiss() {
