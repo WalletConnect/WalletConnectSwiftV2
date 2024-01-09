@@ -311,6 +311,12 @@ private extension ApproveEngine {
     // MARK: SessionProposeRequest
 
     func handleSessionProposeRequest(payload: RequestSubscriptionPayload<SessionType.ProposeParams>) {
+
+        if var pairing = pairingStore.getPairing(forTopic: payload.topic) {
+            pairing.activate()
+            pairingStore.setPairing(pairing)
+        }
+        
         logger.debug("Received Session Proposal")
         let proposal = payload.request
         do { try Namespace.validate(proposal.requiredNamespaces) } catch {
