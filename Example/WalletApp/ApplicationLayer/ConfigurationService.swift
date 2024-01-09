@@ -50,6 +50,14 @@ final class ConfigurationService {
             }
         }.store(in: &publishers)
 
+        Web3Wallet.instance.logsPublisher.sink { log in
+            switch log {
+            case .error(let logMessage):
+                AlertPresenter.present(message: logMessage.message, type: .error)
+            default: return
+            }
+        }.store(in: &publishers)
+
         Task {
             do {
                 let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")
