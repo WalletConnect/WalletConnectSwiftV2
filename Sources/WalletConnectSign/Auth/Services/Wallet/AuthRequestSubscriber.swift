@@ -10,6 +10,7 @@ class AuthRequestSubscriber {
     private let pairingRegisterer: PairingRegisterer
     private let verifyClient: VerifyClientProtocol
     private let verifyContextStore: CodableStore<VerifyContext>
+    private let pairingStore: WCPairingStorage
 
     var onRequest: (((request: AuthenticationRequest, context: VerifyContext?)) -> Void)?
     
@@ -20,7 +21,8 @@ class AuthRequestSubscriber {
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
         verifyClient: VerifyClientProtocol,
-        verifyContextStore: CodableStore<VerifyContext>
+        verifyContextStore: CodableStore<VerifyContext>,
+        pairingStore: WCPairingStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -29,12 +31,18 @@ class AuthRequestSubscriber {
         self.pairingRegisterer = pairingRegisterer
         self.verifyClient = verifyClient
         self.verifyContextStore = verifyContextStore
+        self.pairingStore = pairingStore
         subscribeForRequest()
     }
     
     private func subscribeForRequest() {
         pairingRegisterer.register(method: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
+
+                if var pairing = pairingStore.getPairing(forTopic: payload.topic) {
+                    pairing.activate()
+                    pairingStore.setPairing(pairing)
+                }
                 logger.debug("AuthRequestSubscriber: Received request")
 
                 pairingRegisterer.setReceived(pairingTopic: payload.topic)
