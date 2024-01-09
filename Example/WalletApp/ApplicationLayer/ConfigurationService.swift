@@ -44,7 +44,7 @@ final class ConfigurationService {
         Web3Wallet.instance.socketConnectionStatusPublisher.sink { status in
             switch status {
             case .connected:
-                AlertPresenter.present(message: "Your web socket has connected", type: .info)
+                AlertPresenter.present(message: "Your web socket has connected", type: .success)
             case .disconnected:
                 AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
             }

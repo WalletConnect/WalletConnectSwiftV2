@@ -28,7 +28,7 @@ struct AlertPresenter {
             view.configureContent(title: "", body: message)
             var config = SwiftMessages.Config()
             config.presentationStyle = .top
-            config.duration = .seconds(seconds: 1)
+            config.duration = .seconds(seconds: 1.5)
             SwiftMessages.show(config: config, view: view)
         }
     }
