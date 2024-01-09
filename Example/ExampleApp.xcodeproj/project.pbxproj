@@ -40,6 +40,7 @@
 		849D7A93292E2169006A2BD4 /* NotifyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849D7A92292E2169006A2BD4 /* NotifyTests.swift */; };
 		84A6E3C32A386BBC008A0571 /* Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A6E3C22A386BBC008A0571 /* Publisher.swift */; };
 		84AA01DB28CF0CD7005D48D8 /* XCTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AA01DA28CF0CD7005D48D8 /* XCTest.swift */; };
+		84AEC24F2B4D1EE400E27A5B /* ActivityIndicatorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AEC24E2B4D1EE400E27A5B /* ActivityIndicatorManager.swift */; };
 		84B8154E2991099000FAD54E /* BuildConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B8154D2991099000FAD54E /* BuildConfiguration.swift */; };
 		84B8155B2992A18D00FAD54E /* NotifyMessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B8155A2992A18D00FAD54E /* NotifyMessageViewModel.swift */; };
 		84CE641F27981DED00142511 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE641E27981DED00142511 /* AppDelegate.swift */; };
@@ -433,6 +434,7 @@
 		849D7A92292E2169006A2BD4 /* NotifyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyTests.swift; sourceTree = "<group>"; };
 		84A6E3C22A386BBC008A0571 /* Publisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Publisher.swift; sourceTree = "<group>"; };
 		84AA01DA28CF0CD7005D48D8 /* XCTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTest.swift; sourceTree = "<group>"; };
+		84AEC24E2B4D1EE400E27A5B /* ActivityIndicatorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorManager.swift; sourceTree = "<group>"; };
 		84B8154D2991099000FAD54E /* BuildConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildConfiguration.swift; sourceTree = "<group>"; };
 		84B8155A2992A18D00FAD54E /* NotifyMessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotifyMessageViewModel.swift; sourceTree = "<group>"; };
 		84CE641C27981DED00142511 /* DApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1666,6 +1668,7 @@
 				C56EE2A1293F6B9E004840D1 /* Helpers */,
 				C56EE262293F56D6004840D1 /* Extensions */,
 				C56EE263293F56D6004840D1 /* VIPER */,
+				84AEC24E2B4D1EE400E27A5B /* ActivityIndicatorManager.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -2512,6 +2515,7 @@
 				A51811A02A52E83100A52B15 /* SettingsPresenter.swift in Sources */,
 				847BD1DA2989492500076C90 /* MainRouter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
+				84AEC24F2B4D1EE400E27A5B /* ActivityIndicatorManager.swift in Sources */,
 				C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */,
 				C55D34B12965FB750004314A /* SessionProposalInteractor.swift in Sources */,
 				C56EE247293F566D004840D1 /* ScanModule.swift in Sources */,
