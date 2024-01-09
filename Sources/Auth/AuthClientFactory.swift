@@ -50,7 +50,7 @@ public struct AuthClientFactory {
         let signatureVerifier = messageVerifierFactory.create(projectId: projectId)
         let appRespondSubscriber = AppRespondSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: history, signatureVerifier: signatureVerifier, pairingRegisterer: pairingRegisterer, messageFormatter: messageFormatter)
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history)
-        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer, verifyClient: verifyClient, verifyContextStore: verifyContextStore, pairingStore: <#WCPairingStorage#>)
+        let walletRequestSubscriber = WalletRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer, verifyClient: verifyClient, verifyContextStore: verifyContextStore)
         let walletRespondService = WalletRespondService(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: history, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingRegisterer)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: history, verifyContextStore: verifyContextStore)
 
