@@ -2,8 +2,11 @@ import UIKit
 import WalletConnectNetworking
 import WalletConnectNotify
 import Web3Wallet
+import Combine
 
 final class ConfigurationService {
+
+    private var publishers = Set<AnyCancellable>()
 
     func configure(importAccount: ImportAccount) {
         Networking.configure(
@@ -37,6 +40,15 @@ final class ConfigurationService {
             try! groupKeychain.add(clientId, forKey: "clientId")
         }
         LoggingService.instance.startLogging()
+
+        Web3Wallet.instance.socketConnectionStatusPublisher.sink { status in
+            switch status {
+            case .connected:
+                AlertPresenter.present(message: "Your web socket has connected", type: .info)
+            case .disconnected:
+                AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
+            }
+        }.store(in: &publishers)
 
         Task {
             do {
