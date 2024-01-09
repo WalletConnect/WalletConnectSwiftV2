@@ -43,9 +43,12 @@ final class SessionRequestPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
-            let showConnected = try await interactor.approve(sessionRequest: sessionRequest, importAccount: importAccount)
+            await ActivityIndicatorManager.shared.start()
+            let showConnected = try await interactor.respondSessionRequest(sessionRequest: sessionRequest, importAccount: importAccount)
             showConnected ? showSignedSheet.toggle() : router.dismiss()
+            await ActivityIndicatorManager.shared.stop()
         } catch {
+            await ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }
@@ -53,7 +56,7 @@ final class SessionRequestPresenter: ObservableObject {
 
     @MainActor
     func onReject() async throws {
-        try await interactor.reject(sessionRequest: sessionRequest)
+        try await interactor.respondError(sessionRequest: sessionRequest)
         router.dismiss()
     }
     

@@ -6,10 +6,10 @@ class ActivityIndicatorManager {
 
     private init() {}
 
-    func start() {
-        DispatchQueue.main.async {
-            self.stop()
+    func start() async {
+        await stop() 
 
+        DispatchQueue.main.async {
             guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                   let window = windowScene.windows.first(where: { $0.isKeyWindow }) else { return }
 
@@ -22,12 +22,14 @@ class ActivityIndicatorManager {
         }
     }
 
-
-    func stop() {
-        DispatchQueue.main.async {
-            self.activityIndicator?.stopAnimating()
-            self.activityIndicator?.removeFromSuperview()
-            self.activityIndicator = nil
+    func stop() async {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async {
+                self.activityIndicator?.stopAnimating()
+                self.activityIndicator?.removeFromSuperview()
+                self.activityIndicator = nil
+                continuation.resume()
+            }
         }
     }
 }
