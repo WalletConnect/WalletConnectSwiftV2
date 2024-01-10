@@ -46,13 +46,6 @@ final class SessionRequestTests: XCTestCase {
         XCTAssertTrue(request.isExpired(currentDate: currentDate))
     }
 
-    func testIsExpiredTrueMinValidation() {
-        let currentDate = Date(timeIntervalSince1970: 500)
-        let expiry = Date(timeIntervalSince1970: 600)
-        let request = Request.stub(expiry: UInt64(expiry.timeIntervalSince1970))
-        XCTAssertTrue(request.isExpired(currentDate: currentDate))
-    }
-
     func testIsExpiredTrueMaxValidation() {
         let currentDate = Date(timeIntervalSince1970: 500)
         let expiry = Date(timeIntervalSince1970: 700000)

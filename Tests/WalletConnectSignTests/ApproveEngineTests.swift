@@ -1,12 +1,12 @@
 import XCTest
 import Combine
 import JSONRPC
-import WalletConnectUtils
 import WalletConnectPairing
 import WalletConnectNetworking
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS
+@testable import WalletConnectUtils
 
 final class ApproveEngineTests: XCTestCase {
 
@@ -33,6 +33,12 @@ final class ApproveEngineTests: XCTestCase {
         proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: "")
         verifyContextStore = CodableStore<VerifyContext>(defaults: RuntimeKeyValueStorage(), identifier: "")
         sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        let history = RPCHistory(
+            keyValueStore: .init(
+                defaults: RuntimeKeyValueStorage(),
+                identifier: ""
+            )
+        )
         engine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: proposalPayloadsStore,
@@ -44,7 +50,8 @@ final class ApproveEngineTests: XCTestCase {
             logger: ConsoleLoggerMock(),
             pairingStore: pairingStorageMock,
             sessionStore: sessionStorageMock,
-            verifyClient: VerifyClientMock()
+            verifyClient: VerifyClientMock(),
+            rpcHistory: history
         )
     }
 

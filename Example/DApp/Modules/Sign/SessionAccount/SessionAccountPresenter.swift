@@ -41,7 +41,8 @@ final class SessionAccountPresenter: ObservableObject {
         do {
             let requestParams = try getRequest(for: method)
             
-            let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!)
+            let expiry = UInt64(Date().timeIntervalSince1970 + 300)
+            let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, expiry: expiry)
             Task {
                 do {
                     try await Sign.instance.request(params: request)
