@@ -31,12 +31,9 @@ final class MainPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] response in
                 Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
-                presentResponse(response: response)
+                router.presentResponse(response: response)
             }
             .store(in: &disposeBag)
     }
 
-    private func presentResponse(response: Response) {
-
-    }
 }

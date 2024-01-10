@@ -31,18 +31,18 @@ struct SessionAccountView: View {
                 Color(red: 25/255, green: 26/255, blue: 26/255),
                 for: .navigationBar
             )
-            .sheet(isPresented: $presenter.showResponse) {
-                ZStack {
-                    Color(red: 25/255, green: 26/255, blue: 26/255)
-                        .ignoresSafeArea()
-                    
-                    ScrollView {
-                        responseView(response: presenter.response!)
-                            .padding(12)
-                    }
-                }
-                .presentationDetents([.medium])
-            }
+//            .sheet(isPresented: $presenter.showResponse) {
+//                ZStack {
+//                    Color(red: 25/255, green: 26/255, blue: 26/255)
+//                        .ignoresSafeArea()
+//                    
+//                    ScrollView {
+//                        responseView(response: presenter.response!)
+//                            .padding(12)
+//                    }
+//                }
+//                .presentationDetents([.medium])
+//            }
             .alert(presenter.errorMessage, isPresented: $presenter.showError) {
                 Button("OK", role: .cancel) {}
             }

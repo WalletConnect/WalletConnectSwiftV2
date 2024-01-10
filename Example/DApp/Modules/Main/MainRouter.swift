@@ -1,4 +1,5 @@
 import UIKit
+import WalletConnectSign
 
 final class MainRouter {
     weak var viewController: UIViewController!
@@ -15,5 +16,10 @@ final class MainRouter {
 
     func authViewController() -> UIViewController {
         return AuthModule.create(app: app)
+    }
+
+    func presentResponse(response: Response) {
+        SessionResponseModule.create(app: app, sessionResponse: response)
+            .present(from: viewController)
     }
 }

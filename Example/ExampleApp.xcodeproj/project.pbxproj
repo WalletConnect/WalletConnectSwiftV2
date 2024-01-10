@@ -32,6 +32,10 @@
 		847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E3298A806800076C90 /* NotificationsView.swift */; };
 		847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */; };
 		847F08012A25DBFF00B2A5A4 /* XPlatformW3WTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */; };
+		8486EDC52B4F1D04008E53C3 /* SessionResponseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDC42B4F1D04008E53C3 /* SessionResponseModule.swift */; };
+		8486EDC92B4F1D73008E53C3 /* SessionResponsePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDC82B4F1D73008E53C3 /* SessionResponsePresenter.swift */; };
+		8486EDCB2B4F1D7B008E53C3 /* SessionResponseRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDCA2B4F1D7B008E53C3 /* SessionResponseRouter.swift */; };
+		8486EDCF2B4F1DA6008E53C3 /* SessionResponseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDCE2B4F1DA6008E53C3 /* SessionResponseView.swift */; };
 		8487A9442A836C2A0003D5AF /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8487A9432A836C2A0003D5AF /* Sentry */; };
 		8487A9462A836C3F0003D5AF /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8487A9452A836C3F0003D5AF /* Sentry */; };
 		8487A9482A83AD680003D5AF /* LoggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8487A9472A83AD680003D5AF /* LoggingService.swift */; };
@@ -430,6 +434,10 @@
 		847BD1E3298A806800076C90 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsViewModel.swift; sourceTree = "<group>"; };
 		847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPlatformW3WTests.swift; sourceTree = "<group>"; };
+		8486EDC42B4F1D04008E53C3 /* SessionResponseModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponseModule.swift; sourceTree = "<group>"; };
+		8486EDC82B4F1D73008E53C3 /* SessionResponsePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponsePresenter.swift; sourceTree = "<group>"; };
+		8486EDCA2B4F1D7B008E53C3 /* SessionResponseRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponseRouter.swift; sourceTree = "<group>"; };
+		8486EDCE2B4F1DA6008E53C3 /* SessionResponseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponseView.swift; sourceTree = "<group>"; };
 		8487A92E2A7BD2F30003D5AF /* XPlatformProtocolTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = XPlatformProtocolTests.xctestplan; path = ../XPlatformProtocolTests.xctestplan; sourceTree = "<group>"; };
 		8487A9472A83AD680003D5AF /* LoggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingService.swift; sourceTree = "<group>"; };
 		849A4F18298281E300E61ACE /* WalletAppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletAppRelease.entitlements; sourceTree = "<group>"; };
@@ -937,6 +945,17 @@
 				847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */,
 			);
 			path = Web3Wallet;
+			sourceTree = "<group>";
+		};
+		8486EDC72B4F1D22008E53C3 /* SessionResponse */ = {
+			isa = PBXGroup;
+			children = (
+				8486EDC42B4F1D04008E53C3 /* SessionResponseModule.swift */,
+				8486EDC82B4F1D73008E53C3 /* SessionResponsePresenter.swift */,
+				8486EDCA2B4F1D7B008E53C3 /* SessionResponseRouter.swift */,
+				8486EDCE2B4F1DA6008E53C3 /* SessionResponseView.swift */,
+			);
+			path = SessionResponse;
 			sourceTree = "<group>";
 		};
 		849D7A91292E2115006A2BD4 /* Push */ = {
@@ -1890,6 +1909,7 @@
 				C5BE02062AF777AD0064FC88 /* Main */,
 				C5B4C4C52AF12C2900B4274A /* Sign */,
 				C5B4C4CD2AF12F0B00B4274A /* Auth */,
+				8486EDC72B4F1D22008E53C3 /* SessionResponse */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -2349,12 +2369,14 @@
 				A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */,
 				A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */,
 				C5BE02122AF777AD0064FC88 /* MainPresenter.swift in Sources */,
+				8486EDC52B4F1D04008E53C3 /* SessionResponseModule.swift in Sources */,
 				C5BE01E22AF693080064FC88 /* Application.swift in Sources */,
 				C5BE021B2AF79B9A0064FC88 /* SessionAccountPresenter.swift in Sources */,
 				A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */,
 				C5BE020E2AF777AD0064FC88 /* MainRouter.swift in Sources */,
 				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				C5BE021F2AF79B9A0064FC88 /* SessionAccountModule.swift in Sources */,
+				8486EDC92B4F1D73008E53C3 /* SessionResponsePresenter.swift in Sources */,
 				C5BE01E42AF697100064FC88 /* UIColor.swift in Sources */,
 				C5BE01DB2AF692060064FC88 /* AuthRouter.swift in Sources */,
 				C5BE01E62AF697FA0064FC88 /* String.swift in Sources */,
@@ -2368,9 +2390,11 @@
 				C5BE02112AF777AD0064FC88 /* MainViewController.swift in Sources */,
 				C5BE021D2AF79B9A0064FC88 /* SessionAccountInteractor.swift in Sources */,
 				A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
+				8486EDCB2B4F1D7B008E53C3 /* SessionResponseRouter.swift in Sources */,
 				C5BE01FB2AF6CB270064FC88 /* SignRouter.swift in Sources */,
 				C5BE01D72AF691CD0064FC88 /* AuthModule.swift in Sources */,
 				C5BE01F72AF6CB250064FC88 /* SignModule.swift in Sources */,
+				8486EDCF2B4F1DA6008E53C3 /* SessionResponseView.swift in Sources */,
 				C5BE01FA2AF6CB270064FC88 /* SignPresenter.swift in Sources */,
 				C5BE02132AF777AD0064FC88 /* MainInteractor.swift in Sources */,
 			);
