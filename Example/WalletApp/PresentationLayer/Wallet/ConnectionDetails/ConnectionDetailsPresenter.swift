@@ -25,11 +25,14 @@ final class ConnectionDetailsPresenter: ObservableObject {
     func onDelete() {
         Task {
             do {
+                await ActivityIndicatorManager.shared.start()
                 try await interactor.disconnectSession(session: session)
+                await ActivityIndicatorManager.shared.stop()
                 DispatchQueue.main.async {
                     self.router.dismiss()
                 }
             } catch {
+                await ActivityIndicatorManager.shared.stop()
                 print(error)
             }
         }
