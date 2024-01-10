@@ -1,4 +1,5 @@
 import UIKit
+import WalletConnectSign
 import Combine
 
 final class MainPresenter {
@@ -24,9 +25,18 @@ final class MainPresenter {
         self.router = router
         self.interactor = interactor
     }
-}
 
-// MARK: - Private functions
-extension MainPresenter {
-    private func setupInitialState() {}
+    private func setupInitialState() {
+        Sign.instance.sessionResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] response in
+                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+                presentResponse(response: response)
+            }
+            .store(in: &disposeBag)
+    }
+
+    private func presentResponse(response: Response) {
+
+    }
 }

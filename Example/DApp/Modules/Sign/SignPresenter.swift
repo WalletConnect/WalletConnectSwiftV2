@@ -70,9 +70,12 @@ final class SignPresenter: ObservableObject {
         if let session {
             Task { @MainActor in
                 do {
+                    await ActivityIndicatorManager.shared.start()
                     try await Sign.instance.disconnect(topic: session.topic)
+                    await ActivityIndicatorManager.shared.stop()
                     accountsDetails.removeAll()
                 } catch {
+                    await ActivityIndicatorManager.shared.stop()
                     showError.toggle()
                     errorMessage = error.localizedDescription
                 }

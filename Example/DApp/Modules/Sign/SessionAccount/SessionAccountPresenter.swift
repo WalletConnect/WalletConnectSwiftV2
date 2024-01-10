@@ -8,7 +8,6 @@ final class SessionAccountPresenter: ObservableObject {
         case notImplemented
     }
     
-    @Published var showResponse = false
     @Published var showError = false
     @Published var errorMessage = String.empty
     @Published var showRequestSent = false
@@ -28,7 +27,6 @@ final class SessionAccountPresenter: ObservableObject {
         sessionAccount: AccountDetails,
         session: Session
     ) {
-        defer { setupInitialState() }
         self.interactor = interactor
         self.router = router
         self.sessionAccount = sessionAccount
@@ -45,6 +43,7 @@ final class SessionAccountPresenter: ObservableObject {
             let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, expiry: expiry)
             Task {
                 do {
+                    await ActivityIndicatorManager.shared.start()
                     try await Sign.instance.request(params: request)
                     DispatchQueue.main.async { [weak self] in
                         self?.openWallet()
@@ -67,15 +66,6 @@ final class SessionAccountPresenter: ObservableObject {
 
 // MARK: - Private functions
 extension SessionAccountPresenter {
-    private func setupInitialState() {
-        Sign.instance.sessionResponsePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] response in
-                presentResponse(response: response)
-            }
-            .store(in: &subscriptions)
-    }
-    
     private func getRequest(for method: String) throws -> AnyCodable {
         let account = session.namespaces.first!.value.accounts.first!.absoluteString
         if method == "eth_sendTransaction" {
@@ -87,11 +77,6 @@ extension SessionAccountPresenter {
             return AnyCodable([account, Stub.eth_signTypedData])
         }
         throw Errors.notImplemented
-    }
-    
-    private func presentResponse(response: Response) {
-        self.response = response
-        showResponse.toggle()
     }
     
     private func openWallet() {

@@ -15,6 +15,7 @@ class ActivityIndicatorManager {
 
             let activityIndicator = UIActivityIndicatorView(style: .large)
             activityIndicator.center = window.center
+            activityIndicator.color = .white
             activityIndicator.startAnimating()
             window.addSubview(activityIndicator)
 
