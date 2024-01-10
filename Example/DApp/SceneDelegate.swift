@@ -4,9 +4,11 @@ import Web3Modal
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
+import Combine
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    private var publishers = Set<AnyCancellable>()
 
     private let app = Application()
 
@@ -30,7 +32,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             metadata: metadata
         )
-        
+
+
+        Sign.instance.socketConnectionStatusPublisher.sink { status in
+            switch status {
+            case .connected:
+                AlertPresenter.present(message: "Your web socket has connected", type: .success)
+            case .disconnected:
+                AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
+            }
+        }.store(in: &publishers)
+
         setupWindow(scene: scene)
     }
 
