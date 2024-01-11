@@ -19,4 +19,32 @@ class SessionProposalTests: XCTestCase {
         let justBeforeExpiryDate = Date(timeIntervalSince1970: TimeInterval(proposal.expiry! - 1))
         XCTAssertFalse(proposal.isExpired(currentDate: justBeforeExpiryDate), "Proposal should not be expired just before the expiry time.")
     }
+
+    // for backward compatibility
+    func testDecodingWithoutExpiry() throws {
+        let json = """
+        {
+            "relays": [],
+            "proposer": {
+                "publicKey": "testKey",
+                "metadata": {
+                    "name": "Wallet Connect",
+                    "description": "A protocol to connect blockchain wallets to dapps.",
+                    "url": "https://walletconnect.com/",
+                    "icons": []
+                }
+            },
+            "requiredNamespaces": {},
+            "optionalNamespaces": {},
+            "sessionProperties": {}
+        }
+        """.data(using: .utf8)!
+
+        let decoder = JSONDecoder()
+        let proposal = try decoder.decode(SessionProposal.self, from: json)
+
+        // Assertions
+        XCTAssertNotNil(proposal, "Proposal should be successfully decoded even without an expiry field.")
+        XCTAssertNil(proposal.expiry, "Expiry should be nil if not provided in JSON.")
+    }
 }
