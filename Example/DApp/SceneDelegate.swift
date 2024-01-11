@@ -33,6 +33,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             metadata: metadata
         )
 
+        Sign.instance.logsPublisher.sink { log in
+            switch log {
+            case .error(let logMessage):
+                AlertPresenter.present(message: logMessage.message, type: .error)
+            default: return
+            }
+        }.store(in: &publishers)
 
         Sign.instance.socketConnectionStatusPublisher.sink { status in
             switch status {
