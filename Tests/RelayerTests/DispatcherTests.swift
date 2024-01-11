@@ -64,10 +64,7 @@ final class DispatcherTests: XCTestCase {
         let logger = ConsoleLoggerMock()
         let keychainStorageMock = DispatcherKeychainStorageMock()
         let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychainStorageMock, logger: logger)
-        let socketAuthenticator = ClientIdAuthenticator(
-            clientIdStorage: clientIdStorage,
-            url: "wss://relay.walletconnect.com"
-        )
+        let socketAuthenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage)
         let relayUrlFactory = RelayUrlFactory(
             relayHost: "relay.walletconnect.com",
             projectId: "1012db890cf3cfb0c1cdc929add657ba",
