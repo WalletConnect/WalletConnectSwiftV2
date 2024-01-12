@@ -156,7 +156,11 @@ public class NotifyClient {
             host: subscription.metadata.url
         )
 
-        // TBD
+        let records = messages.map { message in
+            return NotifyMessageRecord(topic: subscription.topic, message: message, publishedAt: message.sentAt)
+        }
+
+        try notifyStorage.setMessages(records)
     }
 }
 
