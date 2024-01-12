@@ -29,7 +29,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
-    
+
     private let networkMonitor: NetworkMonitoring
 
     public init(
@@ -137,6 +137,35 @@ public class NetworkingInteractor: NetworkInteracting {
                 return nil
             }
             .eraseToAnyPublisher()
+    }
+
+    public func awaitResponse<Request: Codable, Response: Codable>(
+        request: RPCRequest,
+        topic: String,
+        requestOfType: Request,
+        requestMethod: ProtocolMethod,
+        responseOfType: Response,
+        responseMethod: ProtocolMethod,
+        envelopeType: Envelope.EnvelopeType
+    ) async throws -> Response {
+
+        try await self.request(request, topic: topic, protocolMethod: requestMethod, envelopeType: envelopeType)
+
+        return try await withCheckedThrowingContinuation { [unowned self] continuation in
+            var response, error: AnyCancellable?
+
+            response = responseSubscription(on: responseMethod)
+                .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
+                    response?.cancel()
+                    continuation.resume(with: .success(payload.response))
+                }
+
+            error = responseErrorSubscription(on: responseMethod)
+                .sink { (payload: ResponseSubscriptionErrorPayload<Request>) in
+                    error?.cancel()
+                    continuation.resume(throwing: payload.error)
+                }
+        }
     }
 
     public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
