@@ -3,17 +3,23 @@ import Combine
 
 class ProposalExpiryWatcher {
 
-    private let sessionProposalExpirationPublisherSubject: PassthroughSubject<SessionProposal, Never> = .init()
+    private let sessionProposalExpirationPublisherSubject: PassthroughSubject<Session.Proposal, Never> = .init()
+    private let historyService: HistoryService
 
-    var sessionProposalExpirationPublisher: AnyPublisher<SessionProposal, Never> {
+    var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
         return sessionProposalExpirationPublisherSubject.eraseToAnyPublisher()
     }
 
     private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private var checkTimer: Timer?
 
-    internal init(proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>) {
+    internal init(
+        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
+        historyService: HistoryService
+    ) {
         self.proposalPayloadsStore = proposalPayloadsStore
+        self.historyService = historyService
+        setUpExpiryCheckTimer()
     }
 
     func setUpExpiryCheckTimer() {
@@ -23,9 +29,13 @@ class ProposalExpiryWatcher {
     }
 
     func checkForProposalsExpiry() {
-        proposalPayloadsStore.getAll().forEach { payload in
-            sessionProposalExpirationPublisherSubject.send(payload.request)
-            proposalPayloadsStore.delete(forKey: payload.request.proposer.publicKey)
+        historyService.getPendingProposals().forEach { proposal in
+
+            let proposal = proposal.proposal
+
+            sessionProposalExpirationPublisherSubject.send(proposal)
+
+            proposalPayloadsStore.delete(forKey: proposal.id)
         }
     }
 }

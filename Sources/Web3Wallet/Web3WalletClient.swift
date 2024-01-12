@@ -81,6 +81,11 @@ public class Web3WalletClient {
             .eraseToAnyPublisher()
     }
 
+    /// Publisher that sends session proposal expiration
+    var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
+        return signClient.sessionProposalExpirationPublisher
+    }
+
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
