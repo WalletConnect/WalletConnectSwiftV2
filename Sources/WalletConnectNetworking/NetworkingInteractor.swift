@@ -142,25 +142,24 @@ public class NetworkingInteractor: NetworkInteracting {
     public func awaitResponse<Request: Codable, Response: Codable>(
         request: RPCRequest,
         topic: String,
+        method: ProtocolMethod,
         requestOfType: Request,
-        requestMethod: ProtocolMethod,
         responseOfType: Response,
-        responseMethod: ProtocolMethod,
         envelopeType: Envelope.EnvelopeType
     ) async throws -> Response {
 
-        try await self.request(request, topic: topic, protocolMethod: requestMethod, envelopeType: envelopeType)
+        try await self.request(request, topic: topic, protocolMethod: method, envelopeType: envelopeType)
 
         return try await withCheckedThrowingContinuation { [unowned self] continuation in
             var response, error: AnyCancellable?
 
-            response = responseSubscription(on: responseMethod)
+            response = responseSubscription(on: method)
                 .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
                     response?.cancel()
                     continuation.resume(with: .success(payload.response))
                 }
 
-            error = responseErrorSubscription(on: responseMethod)
+            error = responseErrorSubscription(on: method)
                 .sink { (payload: ResponseSubscriptionErrorPayload<Request>) in
                     error?.cancel()
                     continuation.resume(throwing: payload.error)
