@@ -5,7 +5,6 @@ final class ApproveEngine {
     enum Errors: Error {
         case proposalNotFound
         case relayNotFound
-        case proposalPayloadsNotFound
         case pairingNotFound
         case sessionNotFound
         case agreementMissingOrInvalid
@@ -135,7 +134,7 @@ final class ApproveEngine {
 
     func reject(proposerPubKey: String, reason: SignReasonCode) async throws {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
-            throw Errors.proposalPayloadsNotFound
+            throw Errors.proposalNotFound
         }
 
         if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
@@ -434,8 +433,20 @@ private extension ApproveEngine {
 extension ApproveEngine.Errors: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .networkNotConnected:  return "Action failed. You seem to be offline"
-        default:                    return ""
+        case .proposalNotFound:
+            return "Proposal not found."
+        case .relayNotFound:
+            return "Relay not found."
+        case .pairingNotFound:
+            return "Pairing not found."
+        case .sessionNotFound:
+            return "Session not found."
+        case .agreementMissingOrInvalid:
+            return "Agreement missing or invalid."
+        case .networkNotConnected:
+            return "Network not connected."
+        case .proposalExpired:
+            return "Proposal expired."
         }
     }
 }
