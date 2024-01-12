@@ -63,6 +63,10 @@ final class SessionProposalPresenter: ObservableObject {
     func onConnectedSheetDismiss() {
         router.dismiss()
     }
+
+    func dismiss() {
+        router.dismiss()
+    }
 }
 
 // MARK: - Private functions
