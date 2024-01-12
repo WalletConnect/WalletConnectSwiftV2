@@ -5,18 +5,14 @@ struct NotifyConfig: Codable {
         let id: String
         let name: String
         let description: String
-    }
-    struct ImageUrl: Codable {
-        let sm: String?
-        let md: String?
-        let lg: String?
+        let imageUrls: NotifyImageUrls?
     }
     let id: String
     let name: String
     let homepage: String?
     let description: String
     let dapp_url: String
-    let image_url: ImageUrl?
+    let image_url: NotifyImageUrls?
     let notificationTypes: [NotificationType]
 
     var appDomain: String {
