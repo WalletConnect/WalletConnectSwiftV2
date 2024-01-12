@@ -41,8 +41,8 @@ class PairingStateProvider {
     }
 
     private func setupPairingStateCheckTimer() {
-        checkTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.checkPairingState()
+        checkTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [unowned self] _ in
+            checkPairingState()
         }
     }
 
