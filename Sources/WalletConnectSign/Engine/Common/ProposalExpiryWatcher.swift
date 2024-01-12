@@ -30,12 +30,12 @@ class ProposalExpiryWatcher {
 
     func checkForProposalsExpiry() {
         let proposals = proposalPayloadsStore.getAll()
-        proposals.forEach { proposal in
-            let pairingTopic = proposal.topic
-            guard proposal.request.isExpired() else { return }
-            sessionProposalExpirationPublisherSubject.send(proposal.request.publicRepresentation(pairingTopic: pairingTopic))
-            proposalPayloadsStore.delete(forKey: proposal.request.proposer.publicKey)
-            rpcHistory.delete(id: proposal.id)
+        proposals.forEach { proposalPayload in
+            let pairingTopic = proposalPayload.topic
+            guard proposalPayload.request.isExpired() else { return }
+            sessionProposalExpirationPublisherSubject.send(proposalPayload.request.publicRepresentation(pairingTopic: pairingTopic))
+            proposalPayloadsStore.delete(forKey: proposalPayload.request.proposer.publicKey)
+            rpcHistory.delete(id: proposalPayload.id)
         }
     }
 }

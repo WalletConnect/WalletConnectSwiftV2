@@ -104,6 +104,10 @@ public final class SignClient: SignClientProtocol {
         return proposalExpiryWatcher.sessionProposalExpirationPublisher
     }
 
+    public var pendingProposalsPublisher: AnyPublisher<[(proposal: Session.Proposal, context: VerifyContext?)], Never> {
+        return pendingProposalsProvider.pendingProposalsPublisher
+    }
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -125,6 +129,7 @@ public final class SignClient: SignClientProtocol {
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
     private let proposalExpiryWatcher: ProposalExpiryWatcher
+    private let pendingProposalsProvider: PendingProposalsProvider
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
@@ -159,7 +164,8 @@ public final class SignClient: SignClientProtocol {
          historyService: HistoryService,
          cleanupService: SignCleanupService,
          pairingClient: PairingClient,
-         proposalExpiryWatcher: ProposalExpiryWatcher
+         proposalExpiryWatcher: ProposalExpiryWatcher,
+         pendingProposalsProvider: PendingProposalsProvider
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -178,6 +184,7 @@ public final class SignClient: SignClientProtocol {
         self.disconnectService = disconnectService
         self.pairingClient = pairingClient
         self.proposalExpiryWatcher = proposalExpiryWatcher
+        self.pendingProposalsProvider = pendingProposalsProvider
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -309,16 +316,6 @@ public final class SignClient: SignClientProtocol {
             return historyService.getPendingRequests(topic: topic)
         } else {
             return historyService.getPendingRequests()
-        }
-    }
-    
-    /// Query pending proposals
-    /// - Returns: Pending proposals received from peer with `wc_sessionPropose` protocol method
-    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
-        if let topic = topic {
-            return historyService.getPendingProposals(topic: topic)
-        } else {
-            return historyService.getPendingProposals()
         }
     }
 
