@@ -13,12 +13,10 @@ public final class HistoryClient {
     }
 
     public func fetchHistory(account: Account, topic: String, appAuthenticationKey: String, host: String) async throws -> [NotifyMessage] {
-        let identityKey = try identityClient.getInviteKey(for: account)
         let dappAuthKey = try DIDKey(did: appAuthenticationKey)
         let app = DIDWeb(host: host)
 
         let requestPayload = NotifyGetNotificationsRequestPayload(
-            identityKey: DIDKey(rawData: identityKey.rawRepresentation),
             keyserver: keyserver.absoluteString,
             dappAuthKey: dappAuthKey,
             app: app,

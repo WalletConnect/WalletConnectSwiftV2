@@ -12,6 +12,7 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
         let app: String   // - did:web of app domain that this request is associated with - Example: `did:web:app.example.com`
         let lmt: UInt64   // - the max number of notifications to return. Maximum value is 50.
         let aft: String?  // - the notification ID to start returning messages after. Null to start with the most recent notification
+        let urf: Bool
 
         static var action: String? {
             return "notify_get_notifications"
@@ -30,15 +31,13 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
         }
     }
 
-    let identityKey: DIDKey
     let keyserver: String
     let dappAuthKey: DIDKey
     let app: DIDWeb
     let limit: UInt64
     let after: String?
 
-    init(identityKey: DIDKey, keyserver: String, dappAuthKey: DIDKey, app: DIDWeb, limit: UInt64, after: String? = nil) {
-        self.identityKey = identityKey
+    init(keyserver: String, dappAuthKey: DIDKey, app: DIDWeb, limit: UInt64, after: String? = nil) {
         self.keyserver = keyserver
         self.dappAuthKey = dappAuthKey
         self.app = app
@@ -55,12 +54,13 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
             iat: defaultIat(),
             exp: expiry(days: 1),
             act: Claims.action,
-            iss: identityKey.did(variant: .ED25519),
+            iss: iss,
             ksu: keyserver,
             aud: dappAuthKey.did(variant: .ED25519),
             app: app.did,
             lmt: limit,
-            aft: after
+            aft: after,
+            urf: false
         )
     }
 }
