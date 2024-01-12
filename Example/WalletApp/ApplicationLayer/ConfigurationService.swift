@@ -63,6 +63,10 @@ final class ConfigurationService {
             AlertPresenter.present(message: "Pairing has expired", type: .warning)
         }.store(in: &publishers)
 
+        Web3Wallet.instance.sessionProposalExpirationPublisher.sink { proposal in
+            AlertPresenter.present(message: "Session Proposal has expired", type: .warning)
+        }.store(in: &publishers)
+
         Task {
             do {
                 let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")

@@ -9,3 +9,11 @@ public struct RelayProtocolOptions: Codable, Equatable {
         self.data = data
     }
 }
+
+#if DEBUG
+public extension RelayProtocolOptions {
+    static func stub() -> RelayProtocolOptions {
+        RelayProtocolOptions(protocol: "", data: nil)
+    }
+}
+#endif

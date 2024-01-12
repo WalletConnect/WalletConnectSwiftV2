@@ -1,8 +1,8 @@
 import XCTest
 import Combine
 import JSONRPC
-import WalletConnectPairing
 import WalletConnectNetworking
+@testable import WalletConnectPairing
 @testable import WalletConnectSign
 @testable import TestingUtils
 @testable import WalletConnectKMS

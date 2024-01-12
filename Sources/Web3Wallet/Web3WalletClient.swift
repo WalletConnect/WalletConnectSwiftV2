@@ -82,7 +82,7 @@ public class Web3WalletClient {
     }
 
     /// Publisher that sends session proposal expiration
-    var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
+    public var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
         return signClient.sessionProposalExpirationPublisher
     }
 

@@ -6,18 +6,6 @@ import WalletConnectUtils
 import TestingUtils
 @testable import WalletConnectPairing
 
-extension Pairing {
-    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), topic: String = String.generateTopic()) -> Pairing {
-        Pairing(WCPairing.stub(expiryDate: expiryDate, topic: topic))
-    }
-}
-
-extension WCPairing {
-    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true, topic: String = String.generateTopic()) -> WCPairing {
-        WCPairing(topic: topic, relay: RelayProtocolOptions.stub(), peerMetadata: AppMetadata.stub(), isActive: isActive, expiryDate: expiryDate)
-    }
-}
-
 extension ProposalNamespace {
     static func stubDictionary() -> [String: ProposalNamespace] {
         return [

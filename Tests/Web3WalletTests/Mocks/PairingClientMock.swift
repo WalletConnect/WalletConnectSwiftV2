@@ -40,6 +40,6 @@ final class PairingClientMock: PairingClientProtocol {
     }
     
     func getPairings() -> [Pairing] {
-        return [Pairing(topic: "", peer: nil, expiryDate: Date())]
+        return [Pairing(WCPairing.stub())]
     }
 }

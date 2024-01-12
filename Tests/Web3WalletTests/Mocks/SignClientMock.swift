@@ -4,6 +4,7 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
+
     private var logsSubject = PassthroughSubject<WalletConnectUtils.Log, Never>()
 
     var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {
@@ -74,7 +75,11 @@ final class SignClientMock: SignClientProtocol {
         )
             .eraseToAnyPublisher()
     }
-    
+
+    var sessionProposalExpirationPublisher: AnyPublisher<WalletConnectSign.Session.Proposal, Never> {
+        fatalError()
+    }
+
     var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> {
         let sessionProposal = Session.Proposal(
             id: "",

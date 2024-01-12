@@ -29,7 +29,8 @@ class ProposalExpiryWatcher {
     }
 
     func checkForProposalsExpiry() {
-        historyService.getPendingProposals().forEach { proposal in
+        let proposals = historyService.getPendingProposals()
+        proposals.forEach { proposal in
 
             let proposal = proposal.proposal
 
