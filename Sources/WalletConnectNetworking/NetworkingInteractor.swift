@@ -143,8 +143,8 @@ public class NetworkingInteractor: NetworkInteracting {
         request: RPCRequest,
         topic: String,
         method: ProtocolMethod,
-        requestOfType: Request,
-        responseOfType: Response,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
         envelopeType: Envelope.EnvelopeType
     ) async throws -> Response {
 

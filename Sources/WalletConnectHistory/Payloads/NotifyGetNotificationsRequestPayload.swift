@@ -37,6 +37,15 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
     let limit: UInt64
     let after: String?
 
+    init(identityKey: DIDKey, keyserver: String, dappAuthKey: DIDKey, app: DIDWeb, limit: UInt64, after: String? = nil) {
+        self.identityKey = identityKey
+        self.keyserver = keyserver
+        self.dappAuthKey = dappAuthKey
+        self.app = app
+        self.limit = limit
+        self.after = after
+    }
+
     init(claims: Claims) throws {
         fatalError()
     }
