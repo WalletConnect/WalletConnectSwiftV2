@@ -3,13 +3,14 @@ import Combine
 
 final class ApproveEngine {
     enum Errors: Error {
-        case wrongRequestParams
+        case proposalNotFound
         case relayNotFound
         case proposalPayloadsNotFound
         case pairingNotFound
         case sessionNotFound
         case agreementMissingOrInvalid
         case networkNotConnected
+        case proposalExpired
     }
 
     var onSessionProposal: ((Session.Proposal, VerifyContext?) -> Void)?
@@ -65,16 +66,24 @@ final class ApproveEngine {
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
         logger.debug("Approving session proposal")
-        guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
-            throw Errors.wrongRequestParams
-        }
         
+        guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
+            throw Errors.proposalNotFound
+        }
+
+        let proposal = payload.request
+
+        guard !proposal.isExpired() else {
+            logger.debug("Proposal has expired, topic: \(payload.topic)")
+            proposalPayloadsStore.delete(forKey: proposerPubKey)
+            throw Errors.proposalExpired
+        }
+
         let networkConnectionStatus = await resolveNetworkConnectionStatus()
         guard networkConnectionStatus == .connected else {
             throw Errors.networkNotConnected
         }
 
-        let proposal = payload.request
         let pairingTopic = payload.topic
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)

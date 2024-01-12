@@ -58,7 +58,8 @@ final class ConfigurationService {
             }
         }.store(in: &publishers)
 
-        Web3Wallet.instance.pairingExpirationPublisher.sink { _ in
+        Web3Wallet.instance.pairingExpirationPublisher.sink { pairing in
+            guard !pairing.active else { return }
             AlertPresenter.present(message: "Pairing has expired", type: .warning)
         }.store(in: &publishers)
 
