@@ -45,10 +45,9 @@ public protocol NetworkInteracting {
     func awaitResponse<Request: Codable, Response: Codable>(
         request: RPCRequest,
         topic: String,
+        method: ProtocolMethod,
         requestOfType: Request,
-        requestMethod: ProtocolMethod,
         responseOfType: Response,
-        responseMethod: ProtocolMethod,
         envelopeType: Envelope.EnvelopeType
     ) async throws -> Response
 

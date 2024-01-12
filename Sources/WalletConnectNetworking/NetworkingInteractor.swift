@@ -156,11 +156,13 @@ public class NetworkingInteractor: NetworkInteracting {
             response = responseSubscription(on: method)
                 .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
                     response?.cancel()
+                    error?.cancel()
                     continuation.resume(with: .success(payload.response))
                 }
 
             error = responseErrorSubscription(on: method)
                 .sink { (payload: ResponseSubscriptionErrorPayload<Request>) in
+                    response?.cancel()
                     error?.cancel()
                     continuation.resume(throwing: payload.error)
                 }

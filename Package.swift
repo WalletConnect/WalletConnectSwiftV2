@@ -94,7 +94,7 @@ let package = Package(
             dependencies: ["WalletConnectNetworking"]),
         .target(
             name: "WalletConnectHistory",
-            dependencies: []),
+            dependencies: ["WalletConnectIdentity"]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
