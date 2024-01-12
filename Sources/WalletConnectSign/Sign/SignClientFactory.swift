@@ -70,7 +70,7 @@ public struct SignClientFactory {
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingClient, logger: logger)
         let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appProposerService = AppProposeService(metadata: metadata, networkingInteractor: networkingClient, kms: kms, logger: logger)
-        let proposalExpiryWatcher = ProposalExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, historyService: historyService)
+        let proposalExpiryWatcher = ProposalExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, rpcHistory: rpcHistory)
 
         let client = SignClient(
             logger: logger,

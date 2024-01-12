@@ -4,7 +4,7 @@ import Combine
 class ProposalExpiryWatcher {
 
     private let sessionProposalExpirationPublisherSubject: PassthroughSubject<Session.Proposal, Never> = .init()
-    private let historyService: HistoryService
+    private let rpcHistory: RPCHistory
 
     var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
         return sessionProposalExpirationPublisherSubject.eraseToAnyPublisher()
@@ -15,10 +15,10 @@ class ProposalExpiryWatcher {
 
     internal init(
         proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
-        historyService: HistoryService
+        rpcHistory: RPCHistory
     ) {
         self.proposalPayloadsStore = proposalPayloadsStore
-        self.historyService = historyService
+        self.rpcHistory = rpcHistory
         setUpExpiryCheckTimer()
     }
 
@@ -29,14 +29,13 @@ class ProposalExpiryWatcher {
     }
 
     func checkForProposalsExpiry() {
-        let proposals = historyService.getPendingProposals()
+        let proposals = proposalPayloadsStore.getAll()
         proposals.forEach { proposal in
-
-            let proposal = proposal.proposal
-
-            sessionProposalExpirationPublisherSubject.send(proposal)
-
-            proposalPayloadsStore.delete(forKey: proposal.id)
+            let pairingTopic = proposal.topic
+            guard proposal.request.isExpired() else { return }
+            sessionProposalExpirationPublisherSubject.send(proposal.request.publicRepresentation(pairingTopic: pairingTopic))
+            proposalPayloadsStore.delete(forKey: proposal.request.proposer.publicKey)
+            rpcHistory.delete(id: proposal.id)
         }
     }
 }

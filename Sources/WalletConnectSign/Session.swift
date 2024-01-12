@@ -28,7 +28,11 @@ extension Session {
 
         // TODO: Refactor internal objects to manage only needed data
         internal let proposal: SessionProposal
-        
+
+        func isExpired() -> Bool {
+            return proposal.isExpired()
+        }
+
         init(
             id: String,
             pairingTopic: String,
