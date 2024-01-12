@@ -136,10 +136,6 @@ final class SignClientMock: SignClientProtocol {
         return [WalletConnectSign.Session(topic: "", pairingTopic: "", peer: metadata, requiredNamespaces: [:], namespaces: [:], sessionProperties: nil, expiryDate: Date())]
     }
     
-    func getPendingProposals(topic: String?) -> [(proposal: WalletConnectSign.Session.Proposal, context: VerifyContext?)] {
-        return []
-    }
-    
     func getPendingRequests(topic: String?) -> [(request: WalletConnectSign.Request, context: WalletConnectSign.VerifyContext?)] {
         return [(request, nil)]
     }
