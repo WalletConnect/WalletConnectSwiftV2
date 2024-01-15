@@ -11,7 +11,7 @@ final class SessionProposalRouter {
     
     func dismiss() {
         DispatchQueue.main.async { [weak self] in
-            self?.viewController.dismiss()
+            self?.viewController?.dismiss()
         }
     }
 }
