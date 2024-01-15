@@ -17,6 +17,7 @@ public final class HistoryClient {
         let app = DIDWeb(host: host)
 
         let requestPayload = NotifyGetNotificationsRequestPayload(
+            account: account,
             keyserver: keyserver.absoluteString,
             dappAuthKey: dappAuthKey,
             app: app,

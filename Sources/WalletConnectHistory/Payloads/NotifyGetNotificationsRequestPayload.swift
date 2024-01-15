@@ -5,6 +5,7 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
     struct Claims: JWTClaims {
         let iat: UInt64
         let exp: UInt64
+        let sub: String
         let act: String?  // - `notify_get_notifications`
         let iss: String   // - did:key of client identity key
         let ksu: String   // - key server for identity key verification
@@ -31,13 +32,15 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
         }
     }
 
+    let account: Account
     let keyserver: String
     let dappAuthKey: DIDKey
     let app: DIDWeb
     let limit: UInt64
     let after: String?
 
-    init(keyserver: String, dappAuthKey: DIDKey, app: DIDWeb, limit: UInt64, after: String? = nil) {
+    init(account: Account, keyserver: String, dappAuthKey: DIDKey, app: DIDWeb, limit: UInt64, after: String? = nil) {
+        self.account = account
         self.keyserver = keyserver
         self.dappAuthKey = dappAuthKey
         self.app = app
@@ -52,7 +55,8 @@ struct NotifyGetNotificationsRequestPayload: JWTClaimsCodable {
     func encode(iss: String) throws -> Claims {
         return Claims(
             iat: defaultIat(),
-            exp: expiry(days: 1),
+            exp: expiry(days: 1), 
+            sub: account.did,
             act: Claims.action,
             iss: iss,
             ksu: keyserver,
