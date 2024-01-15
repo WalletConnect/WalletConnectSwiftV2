@@ -108,6 +108,11 @@ public final class SignClient: SignClientProtocol {
         return pendingProposalsProvider.pendingProposalsPublisher
     }
 
+    public var requestExpirationPublisher: AnyPublisher<Request, Never> {
+        return requestsExpiryWatcher.requestExpirationPublisher
+    }
+
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -130,6 +135,7 @@ public final class SignClient: SignClientProtocol {
     private let cleanupService: SignCleanupService
     private let proposalExpiryWatcher: ProposalExpiryWatcher
     private let pendingProposalsProvider: PendingProposalsProvider
+    private let requestsExpiryWatcher: RequestsExpiryWatcher
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
@@ -165,7 +171,8 @@ public final class SignClient: SignClientProtocol {
          cleanupService: SignCleanupService,
          pairingClient: PairingClient,
          proposalExpiryWatcher: ProposalExpiryWatcher,
-         pendingProposalsProvider: PendingProposalsProvider
+         pendingProposalsProvider: PendingProposalsProvider,
+         requestsExpiryWatcher: RequestsExpiryWatcher
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -185,6 +192,7 @@ public final class SignClient: SignClientProtocol {
         self.pairingClient = pairingClient
         self.proposalExpiryWatcher = proposalExpiryWatcher
         self.pendingProposalsProvider = pendingProposalsProvider
+        self.requestsExpiryWatcher = requestsExpiryWatcher
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()

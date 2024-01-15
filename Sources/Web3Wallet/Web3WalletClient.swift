@@ -90,6 +90,10 @@ public class Web3WalletClient {
         return signClient.pendingProposalsPublisher
     }
 
+    public var requestExpirationPublisher: AnyPublisher<Request, Never> {
+        return signClient.requestExpirationPublisher
+    }
+
     // MARK: - Private Properties
     private let authClient: AuthClientProtocol
     private let signClient: SignClientProtocol
