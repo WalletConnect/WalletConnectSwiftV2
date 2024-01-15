@@ -10,7 +10,7 @@ public struct NotifyMessage: Codable, Equatable {
     public let sent_at: UInt64
 
     public var sentAt: Date {
-        return Date(timeIntervalSince1970: TimeInterval(sent_at))
+        return Date(milliseconds: sent_at)
     }
 
     public init(id: String, title: String, body: String, icon: String, url: String, type: String, sentAt: Date) {
@@ -20,6 +20,6 @@ public struct NotifyMessage: Codable, Equatable {
         self.icon = icon
         self.url = url
         self.type = type
-        self.sent_at = UInt64(sentAt.timeIntervalSince1970)
+        self.sent_at = UInt64(sentAt.millisecondsSince1970)
     }
 }
