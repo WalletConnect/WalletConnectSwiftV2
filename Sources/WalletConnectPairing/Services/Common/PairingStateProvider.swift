@@ -1,4 +1,3 @@
-
 import Combine
 import Foundation
 
@@ -6,6 +5,7 @@ class PairingStateProvider {
     private let pairingStorage: WCPairingStorage
     private var pairingStatePublisherSubject = PassthroughSubject<Bool, Never>()
     private var checkTimer: Timer?
+    private var lastPairingState: Bool?
 
     public var pairingStatePublisher: AnyPublisher<Bool, Never> {
         pairingStatePublisherSubject.eraseToAnyPublisher()
@@ -23,7 +23,11 @@ class PairingStateProvider {
     }
 
     private func checkPairingState() {
-        let pairingStateActive = !pairingStorage.getAll().allSatisfy { $0.active || $0.requestReceived}
-        pairingStatePublisherSubject.send(pairingStateActive)
+        let pairingStateActive = !pairingStorage.getAll().allSatisfy { $0.active || $0.requestReceived }
+
+        if lastPairingState != pairingStateActive {
+            pairingStatePublisherSubject.send(pairingStateActive)
+            lastPairingState = pairingStateActive
+        }
     }
 }
