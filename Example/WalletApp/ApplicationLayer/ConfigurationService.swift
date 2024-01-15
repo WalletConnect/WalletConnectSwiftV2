@@ -69,8 +69,12 @@ final class ConfigurationService {
             AlertPresenter.present(message: "Pairing has expired", type: .warning)
         }.store(in: &publishers)
 
-        Web3Wallet.instance.sessionProposalExpirationPublisher.sink { proposal in
+        Web3Wallet.instance.sessionProposalExpirationPublisher.sink { _ in
             AlertPresenter.present(message: "Session Proposal has expired", type: .warning)
+        }.store(in: &publishers)
+
+        Web3Wallet.instance.requestExpirationPublisher.sink { _ in
+            AlertPresenter.present(message: "Session Request has expired", type: .warning)
         }.store(in: &publishers)
 
         Task {
