@@ -109,6 +109,14 @@ extension SignPresenter {
                 self.accountsDetails.removeAll()
             }
             .store(in: &subscriptions)
+
+        Sign.instance.sessionResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { response in
+                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+            }
+            .store(in: &subscriptions)
+
     }
     
     private func getSession() {

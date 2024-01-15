@@ -58,6 +58,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
 
         let viewController = SignModule.create(app: app)
+            .wrapToNavigationController()
 
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()

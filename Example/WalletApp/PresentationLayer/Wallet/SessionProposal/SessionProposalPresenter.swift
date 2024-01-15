@@ -72,7 +72,9 @@ final class SessionProposalPresenter: ObservableObject {
 // MARK: - Private functions
 private extension SessionProposalPresenter {
     func setupInitialState() {
-        Web3Wallet.instance.sessionProposalExpirationPublisher.sink { [weak self] proposal in
+        Web3Wallet.instance.sessionProposalExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] proposal in
             guard let self = self else { return }
             if proposal.id == self.sessionProposal.id {
                 dismiss()

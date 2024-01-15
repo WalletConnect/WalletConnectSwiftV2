@@ -41,7 +41,9 @@ final class ConfigurationService {
         }
         LoggingService.instance.startLogging()
 
-        Web3Wallet.instance.socketConnectionStatusPublisher.sink { status in
+        Web3Wallet.instance.socketConnectionStatusPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { status in
             switch status {
             case .connected:
                 AlertPresenter.present(message: "Your web socket has connected", type: .success)
@@ -50,7 +52,9 @@ final class ConfigurationService {
             }
         }.store(in: &publishers)
 
-        Web3Wallet.instance.logsPublisher.sink { log in
+        Web3Wallet.instance.logsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { log in
             switch log {
             case .error(let logMessage):
                 AlertPresenter.present(message: logMessage.message, type: .error)
@@ -58,7 +62,9 @@ final class ConfigurationService {
             }
         }.store(in: &publishers)
 
-        Web3Wallet.instance.pairingExpirationPublisher.sink { pairing in
+        Web3Wallet.instance.pairingExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { pairing in
             guard !pairing.active else { return }
             AlertPresenter.present(message: "Pairing has expired", type: .warning)
         }.store(in: &publishers)

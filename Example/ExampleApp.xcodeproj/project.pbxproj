@@ -32,10 +32,6 @@
 		847BD1E8298A806800076C90 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1E3298A806800076C90 /* NotificationsView.swift */; };
 		847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */; };
 		847F08012A25DBFF00B2A5A4 /* XPlatformW3WTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */; };
-		8486EDC52B4F1D04008E53C3 /* SessionResponseModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDC42B4F1D04008E53C3 /* SessionResponseModule.swift */; };
-		8486EDC92B4F1D73008E53C3 /* SessionResponsePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDC82B4F1D73008E53C3 /* SessionResponsePresenter.swift */; };
-		8486EDCB2B4F1D7B008E53C3 /* SessionResponseRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDCA2B4F1D7B008E53C3 /* SessionResponseRouter.swift */; };
-		8486EDCF2B4F1DA6008E53C3 /* SessionResponseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDCE2B4F1DA6008E53C3 /* SessionResponseView.swift */; };
 		8486EDD12B4F2DC1008E53C3 /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8486EDD02B4F2DC1008E53C3 /* AlertPresenter.swift */; };
 		8486EDD32B4F2EA6008E53C3 /* SwiftMessages in Frameworks */ = {isa = PBXBuildFile; productRef = 8486EDD22B4F2EA6008E53C3 /* SwiftMessages */; };
 		8487A9442A836C2A0003D5AF /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8487A9432A836C2A0003D5AF /* Sentry */; };
@@ -425,10 +421,6 @@
 		847BD1E3298A806800076C90 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		847BD1EA298A87AB00076C90 /* SubscriptionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsViewModel.swift; sourceTree = "<group>"; };
 		847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPlatformW3WTests.swift; sourceTree = "<group>"; };
-		8486EDC42B4F1D04008E53C3 /* SessionResponseModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponseModule.swift; sourceTree = "<group>"; };
-		8486EDC82B4F1D73008E53C3 /* SessionResponsePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponsePresenter.swift; sourceTree = "<group>"; };
-		8486EDCA2B4F1D7B008E53C3 /* SessionResponseRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponseRouter.swift; sourceTree = "<group>"; };
-		8486EDCE2B4F1DA6008E53C3 /* SessionResponseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionResponseView.swift; sourceTree = "<group>"; };
 		8486EDD02B4F2DC1008E53C3 /* AlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenter.swift; sourceTree = "<group>"; };
 		8487A92E2A7BD2F30003D5AF /* XPlatformProtocolTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = XPlatformProtocolTests.xctestplan; path = ../XPlatformProtocolTests.xctestplan; sourceTree = "<group>"; };
 		8487A9472A83AD680003D5AF /* LoggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingService.swift; sourceTree = "<group>"; };
@@ -927,17 +919,6 @@
 				847F08002A25DBFF00B2A5A4 /* XPlatformW3WTests.swift */,
 			);
 			path = Web3Wallet;
-			sourceTree = "<group>";
-		};
-		8486EDC72B4F1D22008E53C3 /* SessionResponse */ = {
-			isa = PBXGroup;
-			children = (
-				8486EDC42B4F1D04008E53C3 /* SessionResponseModule.swift */,
-				8486EDC82B4F1D73008E53C3 /* SessionResponsePresenter.swift */,
-				8486EDCA2B4F1D7B008E53C3 /* SessionResponseRouter.swift */,
-				8486EDCE2B4F1DA6008E53C3 /* SessionResponseView.swift */,
-			);
-			path = SessionResponse;
 			sourceTree = "<group>";
 		};
 		849D7A91292E2115006A2BD4 /* Push */ = {
@@ -1857,7 +1838,6 @@
 			isa = PBXGroup;
 			children = (
 				C5B4C4C52AF12C2900B4274A /* Sign */,
-				8486EDC72B4F1D22008E53C3 /* SessionResponse */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -2313,13 +2293,11 @@
 				C5BE01E52AF697470064FC88 /* Color.swift in Sources */,
 				A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */,
 				A51AC0D928E436A3001BACF9 /* InputConfig.swift in Sources */,
-				8486EDC52B4F1D04008E53C3 /* SessionResponseModule.swift in Sources */,
 				C5BE01E22AF693080064FC88 /* Application.swift in Sources */,
 				C5BE021B2AF79B9A0064FC88 /* SessionAccountPresenter.swift in Sources */,
 				A5A8E47E293A1CFE00FEB97D /* DefaultSignerFactory.swift in Sources */,
 				A5A0843D29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
 				C5BE021F2AF79B9A0064FC88 /* SessionAccountModule.swift in Sources */,
-				8486EDC92B4F1D73008E53C3 /* SessionResponsePresenter.swift in Sources */,
 				C5BE01E42AF697100064FC88 /* UIColor.swift in Sources */,
 				C5BE01E62AF697FA0064FC88 /* String.swift in Sources */,
 				C5BE02012AF774CB0064FC88 /* NewPairingModule.swift in Sources */,
@@ -2331,10 +2309,8 @@
 				C5BE02022AF774CB0064FC88 /* NewPairingInteractor.swift in Sources */,
 				C5BE021D2AF79B9A0064FC88 /* SessionAccountInteractor.swift in Sources */,
 				A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
-				8486EDCB2B4F1D7B008E53C3 /* SessionResponseRouter.swift in Sources */,
 				C5BE01FB2AF6CB270064FC88 /* SignRouter.swift in Sources */,
 				C5BE01F72AF6CB250064FC88 /* SignModule.swift in Sources */,
-				8486EDCF2B4F1DA6008E53C3 /* SessionResponseView.swift in Sources */,
 				C5BE01FA2AF6CB270064FC88 /* SignPresenter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
