@@ -47,7 +47,7 @@ class PairingStateProvider {
     }
 
     private func checkPairingState() {
-        let pairingStateActive = !pairingStorage.getAll().allSatisfy { $0.active }
+        let pairingStateActive = !pairingStorage.getAll().allSatisfy { $0.active || $0.requestReceived}
         pairingStatePublisherSubject.send(pairingStateActive)
     }
 }
