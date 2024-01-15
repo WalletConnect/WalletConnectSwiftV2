@@ -45,8 +45,7 @@ public struct RelayClientFactory {
         let clientIdStorage = ClientIdStorage(defaults: keyValueStorage, keychain: keychainStorage, logger: logger)
 
         let socketAuthenticator = ClientIdAuthenticator(
-            clientIdStorage: clientIdStorage,
-            url: "wss://\(relayHost)"
+            clientIdStorage: clientIdStorage
         )
         let relayUrlFactory = RelayUrlFactory(
             relayHost: relayHost,
