@@ -57,7 +57,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
 
-        let viewController = MainModule.create(app: app)
+        let viewController = SignModule.create(app: app)
 
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()
