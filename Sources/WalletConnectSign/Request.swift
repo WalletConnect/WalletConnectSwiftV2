@@ -17,6 +17,13 @@ public struct Request: Codable, Equatable {
     static let minTtl: TimeInterval = 300    // 5 minutes
     static let maxTtl: TimeInterval = 604800 // 7 days
 
+    
+    /// - Parameters:
+    ///   - topic: topic of a session
+    ///   - method: request method
+    ///   - params: request params
+    ///   - chainId: chain id
+    ///   - ttl: ttl of a request, will be used to calculate expiry, 5 minutes by default
     public init(topic: String, method: String, params: AnyCodable, chainId: Blockchain, ttl: TimeInterval = 300) throws {
         guard ttl >= Request.minTtl && ttl <= Request.maxTtl else {
             throw Errors.invalidTtl

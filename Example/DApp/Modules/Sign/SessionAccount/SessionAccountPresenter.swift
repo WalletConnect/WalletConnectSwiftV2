@@ -41,8 +41,8 @@ final class SessionAccountPresenter: ObservableObject {
         do {
             let requestParams = try getRequest(for: method)
             
-            let expiry = UInt64(Date().timeIntervalSince1970 + 300)
-            let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, expiry: expiry)
+            let ttl: TimeInterval = 300
+            let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, ttl: ttl)
             Task {
                 do {
                     await ActivityIndicatorManager.shared.start()
