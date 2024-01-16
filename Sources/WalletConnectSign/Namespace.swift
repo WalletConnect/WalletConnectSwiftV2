@@ -1,9 +1,26 @@
-public enum AutoNamespacesError: Error {
+import Foundation
+
+public enum AutoNamespacesError: Error, LocalizedError {
     case requiredChainsNotSatisfied
     case requiredAccountsNotSatisfied
     case requiredMethodsNotSatisfied
     case requiredEventsNotSatisfied
     case emtySessionNamespacesForbidden
+
+    public var errorDescription: String? {
+        switch self {
+        case .requiredChainsNotSatisfied:
+            return "The required chains are not satisfied."
+        case .requiredAccountsNotSatisfied:
+            return "The required accounts are not satisfied."
+        case .requiredMethodsNotSatisfied:
+            return "The required methods are not satisfied."
+        case .requiredEventsNotSatisfied:
+            return "The required events are not satisfied."
+        case .emtySessionNamespacesForbidden:
+            return "Empty session namespaces are not allowed."
+        }
+    }
 }
 
 public struct ProposalNamespace: Equatable, Codable {
