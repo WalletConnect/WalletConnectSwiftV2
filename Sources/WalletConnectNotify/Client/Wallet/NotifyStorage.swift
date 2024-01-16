@@ -71,7 +71,7 @@ final class NotifyStorage: NotifyStoring {
     }
 
     func replaceAllSubscriptions(_ subscriptions: [NotifySubscription]) throws {
-        try database.save(subscriptions: subscriptions)
+        try database.replace(subscriptions: subscriptions)
     }
 
     func deleteSubscription(topic: String) throws {

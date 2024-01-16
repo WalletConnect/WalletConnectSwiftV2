@@ -29,8 +29,16 @@ final class NotifyDatabase {
     }
 
     func save(subscriptions: [NotifySubscription]) throws {
-        let sql = try SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions)
+        guard let sql = SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions) else { return }
         try execute(sql: sql)
+        try onSubscriptionsUpdate?()
+    }
+
+    func replace(subscriptions: [NotifySubscription]) throws {
+        try execute(sql: SqliteQuery.delete(table: Table.subscriptions))
+        if let sql = SqliteQuery.replace(table: Table.subscriptions, rows: subscriptions) {
+            try execute(sql: sql)
+        }
         try onSubscriptionsUpdate?()
     }
 
@@ -95,7 +103,7 @@ final class NotifyDatabase {
     }
 
     func save(messages: [NotifyMessageRecord]) throws {
-        let sql = try SqliteQuery.replace(table: Table.messages, rows: messages)
+        guard let sql = SqliteQuery.replace(table: Table.messages, rows: messages) else { return }
         try execute(sql: sql)
         try onMessagesUpdate?()
     }
@@ -110,14 +118,15 @@ private extension NotifyDatabase {
             
             try sqlite.execute(sql: """
                 CREATE TABLE IF NOT EXISTS \(Table.subscriptions) (
-                    topic TEXT PRIMARY KEY,
+                    topic TEXT NOT NULL,
                     account TEXT NOT NULL,
                     relay TEXT NOT NULL,
                     metadata TEXT NOT NULL,
                     scope TEXT NOT NULL,
                     expiry TEXT NOT NULL,
                     symKey TEXT NOT NULL,
-                    appAuthenticationKey TEXT NOT NULL
+                    appAuthenticationKey TEXT NOT NULL,
+                    id TEXT PRIMARY KEY
                 );
             """)
 

@@ -28,8 +28,8 @@ private extension HistoryNetworkService {
     }
 
     func getJwt(historyUrl: String) throws -> String {
-        let authenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage, url: historyUrl)
-        return try authenticator.createAuthToken()
+        let authenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage)
+        return try authenticator.createAuthToken(url: historyUrl)
     }
 
     func host(from url: String) throws -> String {

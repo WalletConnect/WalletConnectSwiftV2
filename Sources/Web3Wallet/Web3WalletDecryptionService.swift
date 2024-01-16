@@ -1,5 +1,4 @@
 import Foundation
-import WalletConnectSign
 
 public final class Web3WalletDecryptionService {
     enum Errors: Error {
