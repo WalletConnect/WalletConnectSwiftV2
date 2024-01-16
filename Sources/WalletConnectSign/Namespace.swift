@@ -148,9 +148,6 @@ enum SessionProperties {
 
 public enum AutoNamespaces {
     /// For a wallet to build session proposal structure by provided supported chains, methods, events & accounts.
-    /// - Parameters:
-    ///   - proposalId: Session Proposal id
-    ///   - namespaces: namespaces for given session, needs to contain at least required namespaces proposed by dApp.
     public static func build(
         sessionProposal: Session.Proposal,
         chains: [Blockchain],
