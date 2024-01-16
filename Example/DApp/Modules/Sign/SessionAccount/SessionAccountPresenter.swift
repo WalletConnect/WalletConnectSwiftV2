@@ -42,7 +42,7 @@ final class SessionAccountPresenter: ObservableObject {
             let requestParams = try getRequest(for: method)
             
             let ttl: TimeInterval = 300
-            let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, ttl: ttl)
+            let request = try Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, ttl: ttl)
             Task {
                 do {
                     await ActivityIndicatorManager.shared.start()

@@ -107,12 +107,21 @@ extension SignPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] _ in
                 self.accountsDetails.removeAll()
+                router.popToRoot()
+                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
 
         Sign.instance.sessionResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { response in
+                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+            }
+            .store(in: &subscriptions)
+
+        Sign.instance.requestExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
                 Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)

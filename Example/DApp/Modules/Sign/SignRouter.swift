@@ -26,4 +26,8 @@ final class SignRouter {
     func dismiss() {
         viewController.dismiss(animated: true)
     }
+
+    func popToRoot() {
+        viewController.popToRoot()
+    }
 }
