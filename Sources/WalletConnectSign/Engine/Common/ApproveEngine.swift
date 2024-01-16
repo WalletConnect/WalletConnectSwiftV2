@@ -10,6 +10,7 @@ final class ApproveEngine {
         case agreementMissingOrInvalid
         case networkNotConnected
         case proposalExpired
+        case emtySessionNamespacesForbidden
     }
 
     var onSessionProposal: ((Session.Proposal, VerifyContext?) -> Void)?
@@ -65,7 +66,9 @@ final class ApproveEngine {
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws {
         logger.debug("Approving session proposal")
-        
+
+        guard !sessionNamespaces.isEmpty else { throw Errors.emtySessionNamespacesForbidden }
+
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.proposalNotFound
         }
@@ -441,6 +444,8 @@ extension ApproveEngine.Errors: LocalizedError {
             return "Network not connected."
         case .proposalExpired:
             return "Proposal expired."
+        case .emtySessionNamespacesForbidden:
+            return "Session Namespaces Cannot Be Empty"
         }
     }
 }

@@ -3,6 +3,7 @@ public enum AutoNamespacesError: Error {
     case requiredAccountsNotSatisfied
     case requiredMethodsNotSatisfied
     case requiredEventsNotSatisfied
+    case emtySessionNamespacesForbidden
 }
 
 public struct ProposalNamespace: Equatable, Codable {
@@ -322,7 +323,8 @@ public enum AutoNamespaces {
                 }
             }
         }
-        
+        guard !sessionNamespaces.isEmpty else { throw AutoNamespacesError.emtySessionNamespacesForbidden }
+
         return sessionNamespaces
     }
 }
