@@ -123,6 +123,7 @@ extension SignPresenter {
             .receive(on: DispatchQueue.main)
             .sink { _ in
                 Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+                AlertPresenter.present(message: "Session Request has expired", type: .warning)
             }
             .store(in: &subscriptions)
 
