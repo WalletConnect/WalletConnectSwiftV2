@@ -11,6 +11,5 @@ final class NewPairingRouter {
     
     func dismiss() {
         viewController.dismiss(animated: true)
-        UIApplication.shared.open(URL(string: "showcase://")!)
     }
 }
