@@ -67,4 +67,16 @@ final class WalletConnectURITests: XCTestCase {
         let uri = WalletConnectURI(string: inputURIString)
         XCTAssertNil(uri)
     }
+
+    func testInitHandlesURLEncodedString() {
+        let input = stubURI()
+        let encodedURIString = input.string
+            .addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? ""
+        let uri = WalletConnectURI(string: encodedURIString)
+
+        // Assert that the initializer can handle encoded URI and it matches the expected URI
+        XCTAssertEqual(input.uri, uri)
+        XCTAssertEqual(input.string, uri?.absoluteString)
+    }
+
 }

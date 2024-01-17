@@ -23,7 +23,8 @@ public struct WalletConnectURI: Equatable {
     }
 
     public init?(string: String) {
-        guard let components = Self.parseURIComponents(from: string) else {
+        let decodedString = string.removingPercentEncoding ?? string
+        guard let components = Self.parseURIComponents(from: decodedString) else {
             return nil
         }
         let query: [String: String]? = components.queryItems?.reduce(into: [:]) { $0[$1.name] = $1.value }
@@ -45,11 +46,8 @@ public struct WalletConnectURI: Equatable {
     }
     
     public init?(deeplinkUri: URL) {
-        if let deeplinkUri = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") {
-            self.init(string: deeplinkUri)
-        } else {
-            return nil
-        }
+        let uriString = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") ?? ""
+        self.init(string: uriString)
     }
 
     private var relayQuery: String {
@@ -61,10 +59,11 @@ public struct WalletConnectURI: Equatable {
     }
 
     private static func parseURIComponents(from string: String) -> URLComponents? {
-        guard string.hasPrefix("wc:") else {
+        let decodedString = string.removingPercentEncoding ?? string
+        guard decodedString.hasPrefix("wc:") else {
             return nil
         }
-        let urlString = !string.hasPrefix("wc://") ? string.replacingOccurrences(of: "wc:", with: "wc://") : string
+        let urlString = !decodedString.hasPrefix("wc://") ? decodedString.replacingOccurrences(of: "wc:", with: "wc://") : decodedString
         return URLComponents(string: urlString)
     }
 }
