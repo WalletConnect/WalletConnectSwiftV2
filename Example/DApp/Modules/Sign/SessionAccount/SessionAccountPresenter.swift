@@ -12,7 +12,9 @@ final class SessionAccountPresenter: ObservableObject {
     @Published var showError = false
     @Published var errorMessage = String.empty
     @Published var showRequestSent = false
-    
+    @Published var requesting = false
+
+
     private let interactor: SessionAccountInteractor
     private let router: SessionAccountRouter
     private let session: Session
@@ -47,10 +49,14 @@ final class SessionAccountPresenter: ObservableObject {
                 do {
                     await ActivityIndicatorManager.shared.start()
                     try await Sign.instance.request(params: request)
+                    await ActivityIndicatorManager.shared.stop()
+                    requesting = true
                     DispatchQueue.main.async { [weak self] in
                         self?.openWallet()
                     }
                 } catch {
+                    await ActivityIndicatorManager.shared.stop()
+                    requesting = false
                     showError.toggle()
                     errorMessage = error.localizedDescription
                 }
@@ -72,6 +78,7 @@ extension SessionAccountPresenter {
         Sign.instance.sessionResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] response in
+                requesting = false
                 presentResponse(response: response)
             }
             .store(in: &subscriptions)
