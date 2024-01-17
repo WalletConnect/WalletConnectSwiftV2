@@ -4,7 +4,6 @@ import Combine
 @testable import WalletConnectSign
 
 final class SignClientMock: SignClientProtocol {
-
     private var logsSubject = PassthroughSubject<WalletConnectUtils.Log, Never>()
 
     var logsPublisher: AnyPublisher<WalletConnectUtils.Log, Never> {
@@ -23,7 +22,7 @@ final class SignClientMock: SignClientProtocol {
     var requestCalled = false
     
     private let metadata = AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))
-    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: "", chainId: Blockchain("eip155:1")!, expiry: nil)
+    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: AnyCodable(""), chainId: Blockchain("eip155:1")!, expiry: nil)
     private let response = WalletConnectSign.Response(id: RPCID(1234567890123456789), topic: "", chainId: "", result: .response(AnyCodable(any: "")))
     
     var sessionProposalPublisher: AnyPublisher<(proposal: WalletConnectSign.Session.Proposal, context: VerifyContext?), Never> {
@@ -64,7 +63,17 @@ final class SignClientMock: SignClientProtocol {
         return Result.Publisher(("topic", ReasonMock()))
             .eraseToAnyPublisher()
     }
-    
+
+    var pendingProposalsPublisher: AnyPublisher<[(proposal: WalletConnectSign.Session.Proposal, context: WalletConnectSign.VerifyContext?)], Never> {
+        return Result.Publisher([])
+            .eraseToAnyPublisher()
+    }
+
+    var requestExpirationPublisher: AnyPublisher<WalletConnectSign.Request, Never> {
+        Result.Publisher(request)
+            .eraseToAnyPublisher()
+    }
+
     var sessionEventPublisher: AnyPublisher<(event: WalletConnectSign.Session.Event, sessionTopic: String, chainId: WalletConnectUtils.Blockchain?), Never> {
         return Result.Publisher(
             (
