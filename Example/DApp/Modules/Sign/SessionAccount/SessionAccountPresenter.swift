@@ -41,7 +41,7 @@ final class SessionAccountPresenter: ObservableObject {
         do {
             let requestParams = try getRequest(for: method)
             
-            let ttl: TimeInterval = 300
+            let ttl: TimeInterval = 600
             let request = try Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, ttl: ttl)
             Task {
                 do {

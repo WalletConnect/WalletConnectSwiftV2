@@ -2,7 +2,7 @@ import Foundation
 
 struct SessionRequestProtocolMethod: ProtocolMethod {
 
-    static let defaultTtl: Int = 300
+    static let defaultTtl: Int = 600
 
     let method: String = "wc_sessionRequest"
 
