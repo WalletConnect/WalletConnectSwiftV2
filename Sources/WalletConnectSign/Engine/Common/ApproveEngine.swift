@@ -88,9 +88,6 @@ final class ApproveEngine {
 
         let pairingTopic = payload.topic
 
-        proposalPayloadsStore.delete(forKey: proposerPubKey)
-        verifyContextStore.delete(forKey: proposerPubKey)
-
         try Namespace.validate(sessionNamespaces)
         try Namespace.validateApproved(sessionNamespaces, against: proposal.requiredNamespaces)
 
@@ -128,6 +125,9 @@ final class ApproveEngine {
         _ = try await [proposeResponse, settleRequest]
 
         logger.debug("Session proposal response and settle request have been sent")
+
+        proposalPayloadsStore.delete(forKey: proposerPubKey)
+        verifyContextStore.delete(forKey: proposerPubKey)
 
         pairingRegisterer.activate(
             pairingTopic: payload.topic,
