@@ -43,17 +43,22 @@ public final class RPCHistory {
 
     @discardableResult
     public func resolve(_ response: RPCResponse) throws -> Record {
+        let record = try validate(response)
+        storage.delete(forKey: "\(record.id)")
+        return record
+    }
+
+    @discardableResult
+    public func validate(_ response: RPCResponse) throws -> Record {
         guard let id = response.id else {
             throw HistoryError.unidentifiedResponse
         }
-        guard var record = get(recordId: id) else {
+        guard let record = get(recordId: id) else {
             throw HistoryError.requestMatchingResponseNotFound
         }
         guard record.response == nil else {
             throw HistoryError.responseDuplicateNotAllowed
         }
-        record.response = response
-        storage.set(record, forKey: "\(record.id)")
         return record
     }
 
