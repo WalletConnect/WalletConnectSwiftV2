@@ -100,6 +100,7 @@ final class SignClientTests: XCTestCase {
 
         class Store { var rejectedProposal: Session.Proposal? }
         let store = Store()
+        let semaphore = DispatchSemaphore(value: 0)
 
         let uri = try! await dappPairingClient.create()
         try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
@@ -110,10 +111,12 @@ final class SignClientTests: XCTestCase {
                 do {
                     try await wallet.reject(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
                     store.rejectedProposal = proposal
+                    semaphore.signal()
                 } catch { XCTFail("\(error)") }
             }
         }.store(in: &publishers)
         dapp.sessionRejectionPublisher.sink { proposal, _ in
+            semaphore.wait()
             XCTAssertEqual(store.rejectedProposal, proposal)
             sessionRejectExpectation.fulfill() // TODO: Assert reason code
         }.store(in: &publishers)
