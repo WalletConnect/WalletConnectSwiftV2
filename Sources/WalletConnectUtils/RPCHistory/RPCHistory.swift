@@ -32,8 +32,7 @@ public final class RPCHistory {
     }
 
     public func get(recordId: RPCID) -> Record? {
-        // FOR TESTING!!!
-        try! storage.get(key: recordId.string)
+        try? storage.get(key: recordId.string)
     }
 
     public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin) throws {
