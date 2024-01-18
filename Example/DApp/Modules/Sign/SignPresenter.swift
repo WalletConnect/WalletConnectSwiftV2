@@ -57,12 +57,18 @@ final class SignPresenter: ObservableObject {
         Task {
             let uri = try await Pair.instance.create()
             walletConnectUri = uri
-            try await Sign.instance.connect(
-                requiredNamespaces: Proposal.requiredNamespaces,
-                optionalNamespaces: Proposal.optionalNamespaces,
-                topic: uri.topic
-            )
-            router.presentNewPairing(walletConnectUri: uri)
+            do {
+                await ActivityIndicatorManager.shared.start()
+                try await Sign.instance.connect(
+                    requiredNamespaces: Proposal.requiredNamespaces,
+                    optionalNamespaces: Proposal.optionalNamespaces,
+                    topic: uri.topic
+                )
+                await ActivityIndicatorManager.shared.stop()
+                router.presentNewPairing(walletConnectUri: uri)
+            } catch {
+                await ActivityIndicatorManager.shared.stop()
+            }
         }
     }
     
