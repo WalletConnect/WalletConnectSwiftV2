@@ -11,7 +11,7 @@ public struct Request: Codable, Equatable {
     public let method: String
     public let params: AnyCodable
     public let chainId: Blockchain
-    public var expiry: UInt64?
+    public var expiryTimestamp: UInt64?
 
     // TTL bounds
     static let minTtl: TimeInterval = 600    // 10 minutes
@@ -33,7 +33,7 @@ public struct Request: Codable, Equatable {
         self.init(id: RPCID(JsonRpcID.generate()), topic: topic, method: method, params: params, chainId: chainId, expiry: calculatedExpiry)
     }
 
-    init<C>(id: RPCID, topic: String, method: String, params: C, chainId: Blockchain, ttl: TimeInterval) throws where C: Codable {
+    init<C>(id: RPCID, topic: String, method: String, params: C, chainId: Blockchain, ttl: TimeInterval = 600) throws where C: Codable {
         guard ttl >= Request.minTtl && ttl <= Request.maxTtl else {
             throw Errors.invalidTtl
         }
@@ -48,17 +48,17 @@ public struct Request: Codable, Equatable {
         self.method = method
         self.params = params
         self.chainId = chainId
-        self.expiry = expiry
+        self.expiryTimestamp = expiry
     }
 
     func isExpired(currentDate: Date = Date()) -> Bool {
-        guard let expiry = expiry else { return false }
+        guard let expiry = expiryTimestamp else { return false }
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
         return expiryDate < currentDate
     }
 
     func calculateTtl(currentDate: Date = Date()) throws -> Int {
-        guard let expiry = expiry else { return Int(Self.minTtl) }
+        guard let expiry = expiryTimestamp else { return Int(Self.minTtl) }
         
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
         let diff = expiryDate.timeIntervalSince(currentDate)

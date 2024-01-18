@@ -7,9 +7,9 @@ struct SessionProposal: Codable, Equatable {
     let requiredNamespaces: [String: ProposalNamespace]
     let optionalNamespaces: [String: ProposalNamespace]?
     let sessionProperties: [String: String]?
-    let expiry: UInt64?
+    let expiryTimestamp: UInt64?
 
-    static let proposalExpiry: TimeInterval = 300 // 5 minutes
+    static let proposalTtl: TimeInterval = 300 // 5 minutes
 
     internal init(relays: [RelayProtocolOptions],
                   proposer: Participant,
@@ -21,7 +21,7 @@ struct SessionProposal: Codable, Equatable {
         self.requiredNamespaces = requiredNamespaces
         self.optionalNamespaces = optionalNamespaces
         self.sessionProperties = sessionProperties
-        self.expiry = UInt64(Date().timeIntervalSince1970 + Self.proposalExpiry)
+        self.expiryTimestamp = UInt64(Date().timeIntervalSince1970 + Self.proposalTtl)
     }
 
     func publicRepresentation(pairingTopic: String) -> Session.Proposal {
@@ -37,7 +37,7 @@ struct SessionProposal: Codable, Equatable {
     }
 
     func isExpired(currentDate: Date = Date()) -> Bool {
-        guard let expiry = expiry else { return false }
+        guard let expiry = expiryTimestamp else { return false }
 
         let expiryDate = Date(timeIntervalSince1970: TimeInterval(expiry))
 

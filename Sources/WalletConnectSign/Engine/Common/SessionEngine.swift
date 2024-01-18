@@ -63,7 +63,7 @@ final class SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             throw WalletConnectError.invalidPermissions
         }
-        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
+        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiryTimestamp)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let ttl = try request.calculateTtl()
         let protocolMethod = SessionRequestProtocolMethod(ttl: ttl)

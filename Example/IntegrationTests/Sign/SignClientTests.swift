@@ -197,7 +197,7 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
+                let request = try! Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.request(params: request)
             }
         }.store(in: &publishers)
@@ -244,7 +244,7 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
+                let request = try! Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.request(params: request)
             }
         }.store(in: &publishers)

@@ -10,13 +10,13 @@ class SessionProposalTests: XCTestCase {
 
     func testProposalExpired() {
         let proposal = SessionProposal.stub()
-        let expiredDate = Date(timeIntervalSince1970: TimeInterval(proposal.expiry! + 1))
+        let expiredDate = Date(timeIntervalSince1970: TimeInterval(proposal.expiryTimestamp! + 1))
         XCTAssertTrue(proposal.isExpired(currentDate: expiredDate), "Proposal should be expired after the expiry time.")
     }
 
     func testProposalNotExpiredJustBeforeExpiry() {
         let proposal = SessionProposal.stub()
-        let justBeforeExpiryDate = Date(timeIntervalSince1970: TimeInterval(proposal.expiry! - 1))
+        let justBeforeExpiryDate = Date(timeIntervalSince1970: TimeInterval(proposal.expiryTimestamp! - 1))
         XCTAssertFalse(proposal.isExpired(currentDate: justBeforeExpiryDate), "Proposal should not be expired just before the expiry time.")
     }
 
@@ -45,6 +45,6 @@ class SessionProposalTests: XCTestCase {
 
         // Assertions
         XCTAssertNotNil(proposal, "Proposal should be successfully decoded even without an expiry field.")
-        XCTAssertNil(proposal.expiry, "Expiry should be nil if not provided in JSON.")
+        XCTAssertNil(proposal.expiryTimestamp, "Expiry should be nil if not provided in JSON.")
     }
 }
