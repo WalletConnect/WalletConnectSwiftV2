@@ -13,10 +13,15 @@ final class WalletPresenter: ObservableObject {
     private let importAccount: ImportAccount
     
     private let app: Application
-    
+    private var isPairingTimer: Timer?
+
     @Published var sessions = [Session]()
     
-    @Published var showPairingLoading = false
+    @Published var showPairingLoading = false {
+        didSet {
+            handlePairingLoadingChanged()
+        }
+    }
     @Published var showError = false
     @Published var errorMessage = "Error"
     @Published var showConnectedSheet = false
@@ -94,6 +99,16 @@ final class WalletPresenter: ObservableObject {
                 await ActivityIndicatorManager.shared.stop()
                 sessions = sessions
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
+            }
+        }
+    }
+
+    private func handlePairingLoadingChanged() {
+        isPairingTimer?.invalidate()
+
+        if showPairingLoading {
+            isPairingTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+                AlertPresenter.present(message: "Pairing takes longer then expected, check your internet connection or try again", type: .warning)
             }
         }
     }
