@@ -35,10 +35,8 @@ final class RPCHistoryTests: XCTestCase {
         try sut.set(requestB, forTopic: String.randomTopic(), emmitedBy: .local)
         try sut.resolve(responseA)
         try sut.resolve(responseB)
-        let recordA = sut.get(recordId: requestA.id!)
-        let recordB = sut.get(recordId: requestB.id!)
-        XCTAssertEqual(recordA?.response, responseA)
-        XCTAssertEqual(recordB?.response, responseB)
+        XCTAssertNil(sut.get(recordId: requestA.id!))
+        XCTAssertNil(sut.get(recordId: requestB.id!))
     }
 
     func testDelete() throws {
@@ -95,7 +93,7 @@ final class RPCHistoryTests: XCTestCase {
     }
 
     func testResolveDuplicateResponse() throws {
-        let expectedError = RPCHistory.HistoryError.responseDuplicateNotAllowed
+        let expectedError = RPCHistory.HistoryError.requestMatchingResponseNotFound
 
         let request = RPCRequest.stub()
         let responseA = RPCResponse(matchingRequest: request, result: true)
@@ -106,5 +104,28 @@ final class RPCHistoryTests: XCTestCase {
         XCTAssertThrowsError(try sut.resolve(responseB)) { error in
             XCTAssertEqual(expectedError, error as? RPCHistory.HistoryError)
         }
+    }
+
+    func testRemoveOutdated() throws {
+        let request1 = RPCRequest.stub()
+        let request2 = RPCRequest.stub()
+
+        let time1 = TestTimeProvider(currentDate: .distantPast)
+        let time2 = TestTimeProvider(currentDate: Date())
+
+        try sut.set(request1, forTopic: .randomTopic(), emmitedBy: .local, time: time1)
+        try sut.set(request2, forTopic: .randomTopic(), emmitedBy: .local, time: time2)
+
+        XCTAssertEqual(sut.get(recordId: request1.id!)?.request, request1)
+        XCTAssertEqual(sut.get(recordId: request2.id!)?.request, request2)
+
+        sut.removeOutdated()
+
+        XCTAssertEqual(sut.get(recordId: request1.id!)?.request, nil)
+        XCTAssertEqual(sut.get(recordId: request2.id!)?.request, request2)
+    }
+
+    struct TestTimeProvider: TimeProvider {
+        var currentDate: Date
     }
 }

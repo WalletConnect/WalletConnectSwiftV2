@@ -1,3 +1,5 @@
+import Foundation
+
 public final class RPCHistory {
 
     public struct Record: Codable {
@@ -9,7 +11,8 @@ public final class RPCHistory {
         public let topic: String
         let origin: Origin
         public let request: RPCRequest
-        public var response: RPCResponse?
+        public let response: RPCResponse?
+        public var timestamp: Date?
     }
 
     enum HistoryError: Error {
@@ -24,20 +27,22 @@ public final class RPCHistory {
 
     init(keyValueStore: CodableStore<Record>) {
         self.storage = keyValueStore
+
+        removeOutdated()
     }
 
     public func get(recordId: RPCID) -> Record? {
         try? storage.get(key: recordId.string)
     }
 
-    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin) throws {
+    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin, time: TimeProvider = DefaultTimeProvider()) throws {
         guard let id = request.id else {
             throw HistoryError.unidentifiedRequest
         }
         guard get(recordId: id) == nil else {
             throw HistoryError.requestDuplicateNotAllowed
         }
-        let record = Record(id: id, topic: topic, origin: origin, request: request)
+        let record = Record(id: id, topic: topic, origin: origin, request: request, response: nil, timestamp: time.currentDate)
         storage.set(record, forKey: "\(record.id)")
     }
 
@@ -98,5 +103,25 @@ public final class RPCHistory {
 
     public func getPending() -> [Record] {
         storage.getAll().filter { $0.response == nil }
+    }
+}
+
+extension RPCHistory {
+
+    func removeOutdated() {
+        let records = storage.getAll()
+
+        let thirtyDays: TimeInterval = 30*86400
+
+        for var record in records {
+            if let timestamp = record.timestamp {
+                if timestamp.distance(to: Date()) > thirtyDays {
+                    storage.delete(forKey: record.id.string)
+                }
+            } else {
+                record.timestamp = Date()
+                storage.set(record, forKey: "\(record.id)")
+            }
+        }
     }
 }
