@@ -171,9 +171,10 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public func respond(topic: String, response: RPCResponse, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
-        try rpcHistory.resolve(response)
+        try rpcHistory.validate(response)
         let message = try serializer.serialize(topic: topic, encodable: response, envelopeType: envelopeType)
         try await relayClient.publish(topic: topic, payload: message, tag: protocolMethod.responseConfig.tag, prompt: protocolMethod.responseConfig.prompt, ttl: protocolMethod.responseConfig.ttl)
+        try rpcHistory.resolve(response)
     }
 
     public func respondSuccess(topic: String, requestId: RPCID, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
@@ -216,8 +217,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     private func handleResponse(topic: String, response: RPCResponse, publishedAt: Date, derivedTopic: String?) {
         do {
-            try rpcHistory.resolve(response)
-            let record = rpcHistory.get(recordId: response.id!)!
+            let record = try rpcHistory.resolve(response)
             responsePublisherSubject.send((topic, record.request, response, publishedAt, derivedTopic))
         } catch {
             logger.debug("Handle json rpc response error: \(error)")
