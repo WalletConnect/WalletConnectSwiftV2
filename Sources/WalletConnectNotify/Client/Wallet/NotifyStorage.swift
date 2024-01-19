@@ -122,6 +122,10 @@ final class NotifyStorage: NotifyStoring {
     func setMessage(_ message: NotifyMessageRecord) throws {
         try database.save(message: message)
     }
+
+    func setMessages(_ messages: [NotifyMessageRecord]) throws {
+        try database.save(messages: messages)
+    }
 }
 
 private extension NotifyStorage {

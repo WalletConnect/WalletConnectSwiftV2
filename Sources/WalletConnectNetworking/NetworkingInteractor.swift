@@ -29,7 +29,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
-    
+
     private let networkMonitor: NetworkMonitoring
 
     public init(
@@ -137,6 +137,45 @@ public class NetworkingInteractor: NetworkInteracting {
                 return nil
             }
             .eraseToAnyPublisher()
+    }
+
+    public func awaitResponse<Request: Codable, Response: Codable>(
+        request: RPCRequest,
+        topic: String,
+        method: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        envelopeType: Envelope.EnvelopeType
+    ) async throws -> Response {
+        return try await withCheckedThrowingContinuation { [unowned self] continuation in
+            var response, error: AnyCancellable?
+
+            let cancel: () -> Void = {
+                response?.cancel()
+                error?.cancel()
+            }
+
+            response = responseSubscription(on: method)
+                .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
+                    cancel()
+                    continuation.resume(with: .success(payload.response))
+                }
+
+            error = responseErrorSubscription(on: method)
+                .sink { (payload: ResponseSubscriptionErrorPayload<Request>) in
+                    cancel()
+                    continuation.resume(throwing: payload.error)
+                }
+
+            Task(priority: .high) {
+                do {
+                    try await self.request(request, topic: topic, protocolMethod: method, envelopeType: envelopeType)
+                } catch {
+                    cancel()
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {

@@ -77,6 +77,8 @@ extension SubscriptionPresenter: SceneViewModel {
 private extension SubscriptionPresenter {
 
     func setupInitialState() {
+        interactor.fetchHistory()
+
         pushMessages = interactor.getPushMessages()
 
         interactor.messagesPublisher
