@@ -25,7 +25,7 @@ public class NotifyClient {
     private let keyserverURL: URL
     private let pushClient: PushClient
     private let identityClient: IdentityClient
-    private let historyClient: HistoryClient
+    private let historyService: HistoryService
     private let notifyStorage: NotifyStorage
     private let notifyAccountProvider: NotifyAccountProvider
     private let notifyMessageSubscriber: NotifyMessageSubscriber
@@ -43,7 +43,7 @@ public class NotifyClient {
          keyserverURL: URL,
          kms: KeyManagementServiceProtocol,
          identityClient: IdentityClient,
-         historyClient: HistoryClient,
+         historyService: HistoryService,
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
@@ -64,7 +64,7 @@ public class NotifyClient {
         self.keyserverURL = keyserverURL
         self.pushClient = pushClient
         self.identityClient = identityClient
-        self.historyClient = historyClient
+        self.historyService = historyService
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
         self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
@@ -149,7 +149,7 @@ public class NotifyClient {
     }
 
     public func fetchHistory(subscription: NotifySubscription) async throws {
-        let messages = try await historyClient.fetchHistory(
+        let messages = try await historyService.fetchHistory(
             account: subscription.account,
             topic: subscription.topic,
             appAuthenticationKey: subscription.appAuthenticationKey,

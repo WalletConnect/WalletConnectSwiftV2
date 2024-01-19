@@ -1,6 +1,6 @@
 import Foundation
 
-public final class HistoryClient {
+public final class HistoryService {
 
     private let keyserver: URL
     private let networkingClient: NetworkInteracting

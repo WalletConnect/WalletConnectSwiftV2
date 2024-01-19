@@ -68,14 +68,14 @@ public struct NotifyClientFactory {
         let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, groupKeychainStorage: groupKeychainStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
         let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, kms: kms, identityClient: identityClient, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
         let subscriptionWatcher = SubscriptionWatcher(notifyWatchSubscriptionsRequester: notifyWatchSubscriptionsRequester, logger: logger)
-        let historyClient = HistoryClientFactory.create(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient)
+        let historyService = HistoryService(keyserver: keyserverURL, networkingClient: networkInteractor, identityClient: identityClient)
 
         return NotifyClient(
             logger: logger,
             keyserverURL: keyserverURL,
             kms: kms,
             identityClient: identityClient, 
-            historyClient: historyClient,
+            historyService: historyService,
             pushClient: pushClient,
             notifyMessageSubscriber: notifyMessageSubscriber,
             notifyStorage: notifyStorage,
