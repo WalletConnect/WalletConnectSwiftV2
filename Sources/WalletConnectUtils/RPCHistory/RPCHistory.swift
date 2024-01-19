@@ -106,7 +106,7 @@ public final class RPCHistory {
     }
 }
 
-private extension RPCHistory {
+extension RPCHistory {
 
     func removeOutdated() {
         let records = storage.getAll()

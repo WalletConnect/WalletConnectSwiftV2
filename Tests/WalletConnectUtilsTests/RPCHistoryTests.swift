@@ -35,10 +35,8 @@ final class RPCHistoryTests: XCTestCase {
         try sut.set(requestB, forTopic: String.randomTopic(), emmitedBy: .local)
         try sut.resolve(responseA)
         try sut.resolve(responseB)
-        let recordA = sut.get(recordId: requestA.id!)
-        let recordB = sut.get(recordId: requestB.id!)
-        XCTAssertEqual(recordA?.response, responseA)
-        XCTAssertEqual(recordB?.response, responseB)
+        XCTAssertNil(sut.get(recordId: requestA.id!))
+        XCTAssertNil(sut.get(recordId: requestB.id!))
     }
 
     func testDelete() throws {
@@ -95,7 +93,7 @@ final class RPCHistoryTests: XCTestCase {
     }
 
     func testResolveDuplicateResponse() throws {
-        let expectedError = RPCHistory.HistoryError.responseDuplicateNotAllowed
+        let expectedError = RPCHistory.HistoryError.requestMatchingResponseNotFound
 
         let request = RPCRequest.stub()
         let responseA = RPCResponse(matchingRequest: request, result: true)
