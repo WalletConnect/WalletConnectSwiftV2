@@ -61,7 +61,6 @@
 		A50D53C32ABA055700A4FD8B /* NotifyPreferencesRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BE2ABA055700A4FD8B /* NotifyPreferencesRouter.swift */; };
 		A50D53C42ABA055700A4FD8B /* NotifyPreferencesInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53BF2ABA055700A4FD8B /* NotifyPreferencesInteractor.swift */; };
 		A50D53C52ABA055700A4FD8B /* NotifyPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50D53C02ABA055700A4FD8B /* NotifyPreferencesView.swift */; };
-		A50DF19D2A25084A0036EA6C /* WalletConnectHistory in Frameworks */ = {isa = PBXBuildFile; productRef = A50DF19C2A25084A0036EA6C /* WalletConnectHistory */; };
 		A50F3946288005B200064555 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50F3945288005B200064555 /* Types.swift */; };
 		A51606F82A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
 		A51606F92A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51606F72A2F47BD00CACB92 /* DefaultBIP44Provider.swift */; };
@@ -767,7 +766,6 @@
 				A5E03DFF2864662500888481 /* WalletConnect in Frameworks */,
 				A561C80529DFCD4500DF540D /* WalletConnectSync in Frameworks */,
 				A5E03DF52864651200888481 /* Starscream in Frameworks */,
-				A50DF19D2A25084A0036EA6C /* WalletConnectHistory in Frameworks */,
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
 				84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */,
 				C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */,
@@ -2107,7 +2105,6 @@
 				C5DD5BE0294E09E3008FD3A4 /* Web3Wallet */,
 				A561C80429DFCD4500DF540D /* WalletConnectSync */,
 				A573C53A29EC365800E3CBFD /* HDWalletKit */,
-				A50DF19C2A25084A0036EA6C /* WalletConnectHistory */,
 				A5B6C0F22A6EAB1700927332 /* WalletConnectNotify */,
 			);
 			productName = IntegrationTests;
@@ -3443,10 +3440,6 @@
 		84DDB4EC28ABB663003D66ED /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectAuth;
-		};
-		A50DF19C2A25084A0036EA6C /* WalletConnectHistory */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = WalletConnectHistory;
 		};
 		A54195A42934E83F0035AD19 /* Web3 */ = {
 			isa = XCSwiftPackageProductDependency;
