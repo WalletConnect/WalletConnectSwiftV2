@@ -148,7 +148,9 @@ extension WalletPresenter {
     }
 
     private func setUpPairingIndicatorRemoval() {
-        Web3Wallet.instance.pairingStatePublisher.sink { [weak self] isPairing in
+        Web3Wallet.instance.pairingStatePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isPairing in
             self?.showPairingLoading = isPairing
         }.store(in: &disposeBag)
     }
@@ -173,3 +175,4 @@ extension WalletPresenter.Errors: LocalizedError {
         }
     }
 }
+
