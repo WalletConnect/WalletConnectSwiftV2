@@ -35,14 +35,14 @@ public final class RPCHistory {
         try? storage.get(key: recordId.string)
     }
 
-    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin) throws {
+    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin, time: TimeProvider = DefaultTimeProvider()) throws {
         guard let id = request.id else {
             throw HistoryError.unidentifiedRequest
         }
         guard get(recordId: id) == nil else {
             throw HistoryError.requestDuplicateNotAllowed
         }
-        let record = Record(id: id, topic: topic, origin: origin, request: request, response: nil, timestamp: Date())
+        let record = Record(id: id, topic: topic, origin: origin, request: request, response: nil, timestamp: time.currentDate)
         storage.set(record, forKey: "\(record.id)")
     }
 
