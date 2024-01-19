@@ -4,7 +4,6 @@ import XCTest
 import WalletConnectUtils
 @testable import WalletConnectKMS
 @testable import WalletConnectSync
-@testable import WalletConnectHistory
 import WalletConnectRelay
 import Combine
 import Web3
