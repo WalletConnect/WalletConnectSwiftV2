@@ -147,25 +147,34 @@ public class NetworkingInteractor: NetworkInteracting {
         responseOfType: Response.Type,
         envelopeType: Envelope.EnvelopeType
     ) async throws -> Response {
-
-        try await self.request(request, topic: topic, protocolMethod: method, envelopeType: envelopeType)
-
         return try await withCheckedThrowingContinuation { [unowned self] continuation in
             var response, error: AnyCancellable?
 
+            let cancel: () -> Void = {
+                response?.cancel()
+                error?.cancel()
+            }
+
             response = responseSubscription(on: method)
                 .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
-                    response?.cancel()
-                    error?.cancel()
+                    cancel()
                     continuation.resume(with: .success(payload.response))
                 }
 
             error = responseErrorSubscription(on: method)
                 .sink { (payload: ResponseSubscriptionErrorPayload<Request>) in
-                    response?.cancel()
-                    error?.cancel()
+                    cancel()
                     continuation.resume(throwing: payload.error)
                 }
+
+            Task(priority: .high) {
+                do {
+                    try await self.request(request, topic: topic, protocolMethod: method, envelopeType: envelopeType)
+                } catch {
+                    cancel()
+                    continuation.resume(throwing: error)
+                }
+            }
         }
     }
 
