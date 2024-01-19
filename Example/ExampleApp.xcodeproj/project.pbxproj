@@ -176,6 +176,7 @@
 		A5B6C0F32A6EAB1700927332 /* WalletConnectNotify in Frameworks */ = {isa = PBXBuildFile; productRef = A5B6C0F22A6EAB1700927332 /* WalletConnectNotify */; };
 		A5B6C0F52A6EAB2800927332 /* WalletConnectNotify in Frameworks */ = {isa = PBXBuildFile; productRef = A5B6C0F42A6EAB2800927332 /* WalletConnectNotify */; };
 		A5B6C0F72A6EAB3200927332 /* WalletConnectNotify in Frameworks */ = {isa = PBXBuildFile; productRef = A5B6C0F62A6EAB3200927332 /* WalletConnectNotify */; };
+		A5B814FA2B5AAA2F00AECCFD /* WalletConnectIdentity in Frameworks */ = {isa = PBXBuildFile; productRef = A5B814F92B5AAA2F00AECCFD /* WalletConnectIdentity */; };
 		A5BB7FA328B6A50400707FC6 /* WalletConnectAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */; };
 		A5BB7FAD28B6AA7D00707FC6 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BB7FAC28B6AA7D00707FC6 /* QRCodeGenerator.swift */; };
 		A5C2020B287D9DEE007E3188 /* WelcomeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C20206287D9DEE007E3188 /* WelcomeModule.swift */; };
@@ -765,6 +766,7 @@
 			files = (
 				A5E03DFF2864662500888481 /* WalletConnect in Frameworks */,
 				A561C80529DFCD4500DF540D /* WalletConnectSync in Frameworks */,
+				A5B814FA2B5AAA2F00AECCFD /* WalletConnectIdentity in Frameworks */,
 				A5E03DF52864651200888481 /* Starscream in Frameworks */,
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
 				84DDB4ED28ABB663003D66ED /* WalletConnectAuth in Frameworks */,
@@ -2106,6 +2108,7 @@
 				A561C80429DFCD4500DF540D /* WalletConnectSync */,
 				A573C53A29EC365800E3CBFD /* HDWalletKit */,
 				A5B6C0F22A6EAB1700927332 /* WalletConnectNotify */,
+				A5B814F92B5AAA2F00AECCFD /* WalletConnectIdentity */,
 			);
 			productName = IntegrationTests;
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
@@ -3522,6 +3525,10 @@
 		A5B6C0F62A6EAB3200927332 /* WalletConnectNotify */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectNotify;
+		};
+		A5B814F92B5AAA2F00AECCFD /* WalletConnectIdentity */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectIdentity;
 		};
 		A5BB7FA228B6A50400707FC6 /* WalletConnectAuth */ = {
 			isa = XCSwiftPackageProductDependency;

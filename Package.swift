@@ -46,7 +46,9 @@ let package = Package(
         .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
-
+        .library(
+            name: "WalletConnectIdentity",
+            targets: ["WalletConnectIdentity"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),

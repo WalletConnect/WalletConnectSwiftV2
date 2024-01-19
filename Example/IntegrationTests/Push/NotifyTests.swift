@@ -252,7 +252,6 @@ final class NotifyTests: XCTestCase {
             try await walletNotifyClientA.deleteSubscription(topic: notifyMessageRecord.topic)
         }
     }
-
 }
 
 
