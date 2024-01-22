@@ -53,6 +53,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
                 try await Web3Wallet.instance.pair(uri: uri)
             }
         } catch {
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
             print("Error initializing WalletConnectURI: \(error.localizedDescription)")
         }
     }

@@ -12,7 +12,7 @@ public struct WalletConnectURI: Equatable {
     public let expiryTimestamp: UInt64
 
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)&expiryTimestamp=\(fiveMinutesFromNow)"
+        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)&expiryTimestamp=\(expiryTimestamp)"
     }
 
     public var deeplinkUri: String {
@@ -102,9 +102,9 @@ extension WalletConnectURI.Errors: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .expired:
-            return NSLocalizedString("The URI has expired.", comment: "Expired URI Error")
+            return NSLocalizedString("The WalletConnect Pairing URI has expired.", comment: "Expired URI Error")
         case .invalidFormat:
-            return NSLocalizedString("The format of the URI is invalid.", comment: "Invalid Format URI Error")
+            return NSLocalizedString("The format of the WalletConnect Pairing URI is invalid.", comment: "Invalid Format URI Error")
         }
     }
 }
