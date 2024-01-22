@@ -108,13 +108,13 @@ final class ApproveEngine {
         let result = SessionType.ProposeResponse(relay: relay, responderPublicKey: selfPublicKey.hexRepresentation)
         let response = RPCResponse(id: payload.id, result: result)
 
-        async let proposeResponse: () = networkingInteractor.respond(
+        async let proposeResponseTask: () = networkingInteractor.respond(
             topic: payload.topic,
             response: response,
             protocolMethod: SessionProposeProtocolMethod()
         )
 
-        async let settleRequest: () = settle(
+        async let settleRequestTask: WCSession = settle(
             topic: sessionTopic,
             proposal: proposal,
             namespaces: sessionNamespaces,
@@ -122,8 +122,11 @@ final class ApproveEngine {
             pairingTopic: pairingTopic
         )
 
-        _ = try await [proposeResponse, settleRequest]
+        _ = try await proposeResponseTask
+        let session: WCSession = try await settleRequestTask
 
+        sessionStore.setSession(session)
+        onSessionSettle?(session.publicRepresentation())
         logger.debug("Session proposal response and settle request have been sent")
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
@@ -140,6 +143,8 @@ final class ApproveEngine {
             throw Errors.proposalNotFound
         }
 
+        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SessionProposeProtocolMethod(), reason: reason)
+
         if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
            let pairing = pairingStore.getPairing(forTopic: pairingTopic),
            !pairing.active {
@@ -149,11 +154,9 @@ final class ApproveEngine {
         proposalPayloadsStore.delete(forKey: proposerPubKey)
         verifyContextStore.delete(forKey: proposerPubKey)
 
-        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SessionProposeProtocolMethod(), reason: reason)
-
     }
 
-    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil, pairingTopic: String) async throws {
+    func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil, pairingTopic: String) async throws -> WCSession {
         guard let agreementKeys = kms.getAgreementSecret(for: topic) else {
             throw Errors.agreementMissingOrInvalid
         }
@@ -191,7 +194,6 @@ final class ApproveEngine {
 
         logger.debug("Sending session settle request")
 
-        sessionStore.setSession(session)
 
         let protocolMethod = SessionSettleProtocolMethod()
         let request = RPCRequest(method: protocolMethod.method, params: settleParams)
@@ -200,7 +202,7 @@ final class ApproveEngine {
         async let settleRequest: () = networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
 
         _ = try await [settleRequest, subscription]
-        onSessionSettle?(session.publicRepresentation())
+        return session
     }
 }
 
