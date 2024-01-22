@@ -134,6 +134,36 @@ public class NetworkingInteractorMock: NetworkInteracting {
             }.store(in: &publishers)
     }
 
+    public func awaitResponse<Request: Codable, Response: Codable>(
+        request: RPCRequest,
+        topic: String,
+        method: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        envelopeType: Envelope.EnvelopeType
+    ) async throws -> Response {
+
+        try await self.request(request, topic: topic, protocolMethod: method, envelopeType: envelopeType)
+
+        return try await withCheckedThrowingContinuation { [unowned self] continuation in
+            var response, error: AnyCancellable?
+
+            response = responseSubscription(on: method)
+                .sink { (payload: ResponseSubscriptionPayload<Request, Response>) in
+                    response?.cancel()
+                    error?.cancel()
+                    continuation.resume(with: .success(payload.response))
+                }
+
+            error = responseErrorSubscription(on: method)
+                .sink { (payload: ResponseSubscriptionErrorPayload<Request>) in
+                    response?.cancel()
+                    error?.cancel()
+                    continuation.resume(throwing: payload.error)
+                }
+        }
+    }
+
     public func subscribe(topic: String) async throws {
         defer { onSubscribeCalled?() }
         subscriptions.append(topic)

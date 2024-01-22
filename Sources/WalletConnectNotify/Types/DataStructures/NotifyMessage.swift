@@ -7,13 +7,19 @@ public struct NotifyMessage: Codable, Equatable {
     public let icon: String
     public let url: String
     public let type: String
+    public let sent_at: UInt64
 
-    public init(id: String, title: String, body: String, icon: String, url: String, type: String) {
+    public var sentAt: Date {
+        return Date(milliseconds: sent_at)
+    }
+
+    public init(id: String, title: String, body: String, icon: String, url: String, type: String, sentAt: Date) {
         self.id = id
         self.title = title
         self.body = body
         self.icon = icon
         self.url = url
         self.type = type
+        self.sent_at = UInt64(sentAt.millisecondsSince1970)
     }
 }

@@ -18,16 +18,19 @@ public struct NotifyMessageRecord: Codable, Equatable, SqliteRow {
     public init(decoder: SqliteRowDecoder) throws {
         self.topic = try decoder.decodeString(at: 1)
 
+        let sentAt = try decoder.decodeDate(at: 7)
+
         self.message = NotifyMessage(
             id: try decoder.decodeString(at: 0),
             title: try decoder.decodeString(at: 2),
             body: try decoder.decodeString(at: 3),
             icon: try decoder.decodeString(at: 4),
             url: try decoder.decodeString(at: 5),
-            type: try decoder.decodeString(at: 6)
+            type: try decoder.decodeString(at: 6), 
+            sentAt: sentAt
         )
 
-        self.publishedAt = try decoder.decodeDate(at: 7)
+        self.publishedAt = sentAt
     }
 
     public func encode() -> SqliteRowEncoder {
