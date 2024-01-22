@@ -80,6 +80,14 @@ private extension SessionProposalPresenter {
                 dismiss()
             }
         }.store(in: &disposeBag)
+
+        Web3Wallet.instance.pairingExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink {[weak self]  pairing in
+                if self?.sessionProposal.pairingTopic == pairing.topic {
+                    self?.dismiss()
+                }
+        }.store(in: &disposeBag)
     }
 }
 
