@@ -225,12 +225,6 @@ public class Web3WalletClient {
         signClient.getPendingRequests(topic: topic)
     }
 
-    /// - Parameter id: id of a wc_sessionRequest jsonrpc request
-    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
-        signClient.getSessionRequestRecord(id: id)
-    }
-    
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {

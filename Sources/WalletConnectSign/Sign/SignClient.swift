@@ -327,12 +327,6 @@ public final class SignClient: SignClientProtocol {
         }
     }
 
-    /// - Parameter id: id of a wc_sessionRequest jsonrpc request
-    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
-        return historyService.getSessionRequest(id: id)
-    }
-
     /// Delete all stored data such as: pairings, sessions, keys
     ///
     /// - Note: Will unsubscribe from all topics
