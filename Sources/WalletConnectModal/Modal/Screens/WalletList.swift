@@ -33,11 +33,11 @@ struct WalletList: View {
             // iOS 14 doesn't have extra separators below the list by default.
         } else {
             // To remove only extra separators below the list:
-            UITableView.appearance().tableFooterView = UIView()
+            UITableView.appearance(whenContainedInInstancesOf: [WalletConnectModalSheetController.self]).tableFooterView = UIView()
         }
 
         // To remove all separators including the actual ones:
-        UITableView.appearance().separatorStyle = .none
+        UITableView.appearance(whenContainedInInstancesOf: [WalletConnectModalSheetController.self]).separatorStyle = .none
     }
     
     var body: some View {

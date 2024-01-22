@@ -54,12 +54,10 @@ final class SignPresenter: ObservableObject {
     }
     
     func connectWalletWithWCM() {
-        Task {
-            WalletConnectModal.set(sessionParams: .init(
-                requiredNamespaces: Proposal.requiredNamespaces,
-                optionalNamespaces: Proposal.optionalNamespaces
-            ))
-        }
+        WalletConnectModal.set(sessionParams: .init(
+            requiredNamespaces: Proposal.requiredNamespaces,
+            optionalNamespaces: Proposal.optionalNamespaces
+        ))
         WalletConnectModal.present(from: nil)
     }
     

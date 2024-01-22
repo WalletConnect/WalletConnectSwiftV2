@@ -35,15 +35,8 @@ final class WalletDetailViewModel: ObservableObject {
     
     func handle(_ event: Event) {
         switch event {
-        case .onAppear:
+        case .onAppear, .didTapUniversalLink, .didTapTryAgain:
             deeplinkToWallet()
-            
-        case .didTapUniversalLink:
-            deeplinkToWallet()
-            
-        case .didTapTryAgain:
-           deeplinkToWallet()
-
         case .didTapAppStore:
             deeplinkHandler.openAppstore(wallet: wallet)
         }
