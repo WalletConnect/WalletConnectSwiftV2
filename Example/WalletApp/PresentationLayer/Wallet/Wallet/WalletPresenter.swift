@@ -60,7 +60,7 @@ final class WalletPresenter: ObservableObject {
     func onPasteUri() {
         router.presentPaste { [weak self] uriString in
             do {
-                let uri = try WalletConnectURI(string: uriString)
+                let uri = try WalletConnectURI(uriString: uriString)
                 print("URI: \(uri)")
                 self?.pair(uri: uri)
             } catch {
@@ -76,7 +76,7 @@ final class WalletPresenter: ObservableObject {
     func onScanUri() {
         router.presentScan { [weak self] uriString in
             do {
-                let uri = try WalletConnectURI(string: uriString)
+                let uri = try WalletConnectURI(uriString: uriString)
                 print("URI: \(uri)")
                 self?.pair(uri: uri)
                 self?.router.dismiss()

@@ -30,9 +30,18 @@ public struct WalletConnectURI: Equatable {
         self.expiryTimestamp = fiveMinutesFromNow
     }
 
+    @available(*, deprecated, message: "Use the throwing initializer instead")
+    public init?(string: String) {
+        do {
+            try self.init(uriString: string)
+        } catch {
+            print("Initialization failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
 
-    public init(string: String) throws {
-        let decodedString = string.removingPercentEncoding ?? string
+    public init(uriString: String) throws {
+        let decodedString = uriString.removingPercentEncoding ?? uriString
         guard let components = Self.parseURIComponents(from: decodedString) else {
             throw Errors.invalidFormat
         }
@@ -68,7 +77,7 @@ public struct WalletConnectURI: Equatable {
 
     public init(deeplinkUri: URL) throws {
         let uriString = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") ?? ""
-        try self.init(string: uriString)
+        try self.init(uriString: uriString)
     }
 
     private var relayQuery: String {
@@ -113,7 +122,7 @@ import UIKit
 extension WalletConnectURI {
     public init(connectionOptions: UIScene.ConnectionOptions) throws {
         if let uri = connectionOptions.urlContexts.first?.url.query?.replacingOccurrences(of: "uri=", with: "") {
-            try self.init(string: uri)
+            try self.init(uriString: uri)
         } else {
             throw Errors.invalidFormat
         }
@@ -121,7 +130,7 @@ extension WalletConnectURI {
     
     public init(urlContext: UIOpenURLContext) throws {
         if let uri = urlContext.url.query?.replacingOccurrences(of: "uri=", with: "") {
-            try self.init(string: uri)
+            try self.init(uriString: uri)
         } else {
             throw Errors.invalidFormat
         }

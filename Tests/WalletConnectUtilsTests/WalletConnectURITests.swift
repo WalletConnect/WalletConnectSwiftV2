@@ -20,14 +20,14 @@ final class WalletConnectURITests: XCTestCase {
     func testInitURIToString() throws {
         let input = stubURI()
         let uriString = input.uri.absoluteString
-        let outputURI = try WalletConnectURI(string: uriString)
+        let outputURI = try WalletConnectURI(uriString: uriString)
         XCTAssertEqual(input.uri, outputURI)
         XCTAssertEqual(input.string, outputURI.absoluteString)
     }
 
     func testInitStringToURI() throws {
         let inputURIString = stubURI().string
-        let uri = try WalletConnectURI(string: inputURIString)
+        let uri = try WalletConnectURI(uriString: inputURIString)
         let outputURIString = uri.absoluteString
         XCTAssertEqual(inputURIString, outputURIString)
     }
@@ -35,7 +35,7 @@ final class WalletConnectURITests: XCTestCase {
     func testInitStringToURIAlternate() throws {
         let expectedString = stubURI().string
         let inputURIString = expectedString.replacingOccurrences(of: "wc:", with: "wc://")
-        let uri = try WalletConnectURI(string: inputURIString)
+        let uri = try WalletConnectURI(uriString: inputURIString)
         let outputURIString = uri.absoluteString
         XCTAssertEqual(expectedString, outputURIString)
     }
@@ -44,31 +44,31 @@ final class WalletConnectURITests: XCTestCase {
 
     func testInitFailsBadScheme() {
         let inputURIString = stubURI().string.replacingOccurrences(of: "wc:", with: "")
-        XCTAssertThrowsError(try WalletConnectURI(string: inputURIString))
+        XCTAssertThrowsError(try WalletConnectURI(uriString: inputURIString))
     }
 
     func testInitFailsMalformedURL() {
         let inputURIString = "wc://<"
-        XCTAssertThrowsError(try WalletConnectURI(string: inputURIString))
+        XCTAssertThrowsError(try WalletConnectURI(uriString: inputURIString))
     }
 
     func testInitFailsNoSymKeyParam() {
         let input = stubURI()
         let inputURIString = input.string.replacingOccurrences(of: "symKey=\(input.uri.symKey)", with: "")
-        XCTAssertThrowsError(try WalletConnectURI(string: inputURIString))
+        XCTAssertThrowsError(try WalletConnectURI(uriString: inputURIString))
     }
 
     func testInitFailsNoRelayParam() {
         let input = stubURI()
         let inputURIString = input.string.replacingOccurrences(of: "&relay-protocol=\(input.uri.relay.protocol)", with: "")
-        XCTAssertThrowsError(try WalletConnectURI(string: inputURIString))
+        XCTAssertThrowsError(try WalletConnectURI(uriString: inputURIString))
     }
 
     func testInitHandlesURLEncodedString() throws {
         let input = stubURI()
         let encodedURIString = input.string
             .addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? ""
-        let uri = try WalletConnectURI(string: encodedURIString)
+        let uri = try WalletConnectURI(uriString: encodedURIString)
 
         // Assert that the initializer can handle encoded URI and it matches the expected URI
         XCTAssertEqual(input.uri, uri)
@@ -88,7 +88,7 @@ final class WalletConnectURITests: XCTestCase {
         // Create a URI string with an expired timestamp
         let expiredTimestamp = UInt64(Date().timeIntervalSince1970) - 300 // 5 minutes in the past
         let expiredURIString = "wc:\(input.uri.topic)@\(input.uri.version)?symKey=\(input.uri.symKey)&relay-protocol=\(input.uri.relay.protocol)&expiryTimestamp=\(expiredTimestamp)"
-        XCTAssertThrowsError(try WalletConnectURI(string: expiredURIString))
+        XCTAssertThrowsError(try WalletConnectURI(uriString: expiredURIString))
     }
 
     // Test compatibility with old clients that don't include expiryTimestamp in their uri
@@ -96,7 +96,7 @@ final class WalletConnectURITests: XCTestCase {
         let input = stubURI().string
         // Remove expiryTimestamp from the URI string
         let uriStringWithoutExpiry = input.replacingOccurrences(of: "&expiryTimestamp=\(stubURI().uri.expiryTimestamp)", with: "")
-        let uri = try WalletConnectURI(string: uriStringWithoutExpiry)
+        let uri = try WalletConnectURI(uriString: uriStringWithoutExpiry)
 
         // Check if the expiryTimestamp is set to 5 minutes in the future
         let expectedExpiryTimestamp = UInt64(Date().timeIntervalSince1970) + 5 * 60
