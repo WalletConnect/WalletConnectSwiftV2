@@ -13,6 +13,7 @@ final class SessionAccountPresenter: ObservableObject {
     @Published var errorMessage = String.empty
     @Published var showRequestSent = false
     @Published var requesting = false
+    @Published var lastRequest: Request?
 
 
     private let interactor: SessionAccountInteractor
@@ -49,6 +50,7 @@ final class SessionAccountPresenter: ObservableObject {
                 do {
                     await ActivityIndicatorManager.shared.start()
                     try await Sign.instance.request(params: request)
+                    lastRequest = request
                     await ActivityIndicatorManager.shared.stop()
                     requesting = true
                     DispatchQueue.main.async { [weak self] in

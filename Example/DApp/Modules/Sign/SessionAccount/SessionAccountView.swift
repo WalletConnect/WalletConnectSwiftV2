@@ -231,8 +231,7 @@ struct SessionAccountView: View {
                     
                     Spacer()
                     
-                    let record = Sign.instance.getSessionRequestRecord(id: response.id)!
-                    Text(record.request.method)
+                    Text(presenter.lastRequest!.method)
                         .font(
                             Font.system(size: 14, weight: .medium)
                         )
