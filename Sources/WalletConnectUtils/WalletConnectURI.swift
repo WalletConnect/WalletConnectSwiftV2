@@ -1,13 +1,18 @@
 import Foundation
 
 public struct WalletConnectURI: Equatable {
+    public enum Errors: Error {
+          case expired
+          case invalidFormat
+      }
     public let topic: String
     public let version: String
     public let symKey: String
     public let relay: RelayProtocolOptions
+    public let expiryTimestamp: UInt64
 
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)"
+        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)&expiryTimestamp=\(fiveMinutesFromNow)"
     }
 
     public var deeplinkUri: String {
@@ -20,12 +25,16 @@ public struct WalletConnectURI: Equatable {
         self.topic = topic
         self.symKey = symKey
         self.relay = relay
+
+        // Only after all properties are initialized, you can use self or its methods
+        self.expiryTimestamp = fiveMinutesFromNow
     }
 
-    public init?(string: String) {
+
+    public init(string: String) throws {
         let decodedString = string.removingPercentEncoding ?? string
         guard let components = Self.parseURIComponents(from: decodedString) else {
-            return nil
+            throw Errors.invalidFormat
         }
         let query: [String: String]? = components.queryItems?.reduce(into: [:]) { $0[$1.name] = $1.value }
 
@@ -35,19 +44,31 @@ public struct WalletConnectURI: Equatable {
             let symKey = query?["symKey"],
             let relayProtocol = query?["relay-protocol"]
         else {
-            return nil
+            throw Errors.invalidFormat
         }
+
         let relayData = query?["relay-data"]
+
+        // Check if expiryTimestamp is provided and valid
+        if let expiryTimestampString = query?["expiryTimestamp"],
+           let expiryTimestamp = UInt64(expiryTimestampString),
+           expiryTimestamp <= UInt64(Date().timeIntervalSince1970) {
+            throw Errors.expired
+        }
 
         self.version = version
         self.topic = topic
         self.symKey = symKey
         self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
+        // Set expiryTimestamp to 5 minutes in the future if not included in the uri
+        self.expiryTimestamp = UInt64(query?["expiryTimestamp"] ?? "") ?? fiveMinutesFromNow
+
     }
-    
-    public init?(deeplinkUri: URL) {
+
+
+    public init(deeplinkUri: URL) throws {
         let uriString = deeplinkUri.query?.replacingOccurrences(of: "uri=", with: "") ?? ""
-        self.init(string: uriString)
+        try self.init(string: uriString)
     }
 
     private var relayQuery: String {
@@ -68,24 +89,41 @@ public struct WalletConnectURI: Equatable {
     }
 }
 
+extension WalletConnectURI.Errors: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .expired:
+            return NSLocalizedString("The URI has expired.", comment: "Expired URI Error")
+        case .invalidFormat:
+            return NSLocalizedString("The format of the URI is invalid.", comment: "Invalid Format URI Error")
+        }
+    }
+}
+
+
+fileprivate var fiveMinutesFromNow: UInt64 {
+    return UInt64(Date().timeIntervalSince1970) + 5 * 60
+}
+
+
 #if canImport(UIKit)
 
 import UIKit
 
 extension WalletConnectURI {
-    public init?(connectionOptions: UIScene.ConnectionOptions) {
+    public init(connectionOptions: UIScene.ConnectionOptions) throws {
         if let uri = connectionOptions.urlContexts.first?.url.query?.replacingOccurrences(of: "uri=", with: "") {
-            self.init(string: uri)
+            try self.init(string: uri)
         } else {
-            return nil
+            throw Errors.invalidFormat
         }
     }
     
-    public init?(urlContext: UIOpenURLContext) {
+    public init(urlContext: UIOpenURLContext) throws {
         if let uri = urlContext.url.query?.replacingOccurrences(of: "uri=", with: "") {
-            self.init(string: uri)
+            try self.init(string: uri)
         } else {
-            return nil
+            throw Errors.invalidFormat
         }
     }
 }

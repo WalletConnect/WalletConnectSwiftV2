@@ -58,15 +58,15 @@ final class WalletPresenter: ObservableObject {
     }
 
     func onPasteUri() {
-        router.presentPaste { [weak self] uri in
-            guard let uri = WalletConnectURI(string: uri) else {
-                self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
+        router.presentPaste { [weak self] uriString in
+            do {
+                let uri = try WalletConnectURI(string: uriString)
+                print("URI: \(uri)")
+                self?.pair(uri: uri)
+            } catch {
+                self?.errorMessage = error.localizedDescription
                 self?.showError.toggle()
-                return
             }
-            print("URI: \(uri)")
-            self?.pair(uri: uri)
-
         } onError: { [weak self] error in
             print(error.localizedDescription)
             self?.router.dismiss()
@@ -74,20 +74,22 @@ final class WalletPresenter: ObservableObject {
     }
 
     func onScanUri() {
-        router.presentScan { [weak self] uri in
-            guard let uri = WalletConnectURI(string: uri) else {
-                self?.errorMessage = Errors.invalidUri(uri: uri).localizedDescription
+        router.presentScan { [weak self] uriString in
+            do {
+                let uri = try WalletConnectURI(string: uriString)
+                print("URI: \(uri)")
+                self?.pair(uri: uri)
+                self?.router.dismiss()
+            } catch {
+                self?.errorMessage = error.localizedDescription
                 self?.showError.toggle()
-                return
             }
-            print("URI: \(uri)")
-            self?.pair(uri: uri)
-            self?.router.dismiss()
-        } onError: { error in
+        } onError: { [weak self] error in
             print(error.localizedDescription)
-            self.router.dismiss()
+            self?.router.dismiss()
         }
     }
+
     
     func removeSession(at indexSet: IndexSet) async {
         if let index = indexSet.first {
