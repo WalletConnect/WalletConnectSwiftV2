@@ -50,7 +50,7 @@ private extension HistoryService {
             method: request.request.method,
             params: request.request.params,
             chainId: request.chainId,
-            expiry: request.request.expiry
+            expiryTimestamp: request.request.expiryTimestamp
         )
 
         return (mappedRequest, record.id)

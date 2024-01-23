@@ -63,7 +63,7 @@ final class SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             throw WalletConnectError.invalidPermissions
         }
-        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiryTimestamp)
+        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiryTimestamp: request.expiryTimestamp)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let ttl = try request.calculateTtl()
         let protocolMethod = SessionRequestProtocolMethod(ttl: ttl)
@@ -229,7 +229,7 @@ private extension SessionEngine {
             method: payload.request.request.method,
             params: payload.request.request.params,
             chainId: payload.request.chainId,
-            expiry: payload.request.request.expiry
+            expiryTimestamp: payload.request.request.expiryTimestamp
         )
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)

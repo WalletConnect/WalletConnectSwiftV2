@@ -30,7 +30,7 @@ public struct Request: Codable, Equatable {
         }
 
         let calculatedExpiry = UInt64(Date().timeIntervalSince1970) + UInt64(ttl)
-        self.init(id: RPCID(JsonRpcID.generate()), topic: topic, method: method, params: params, chainId: chainId, expiry: calculatedExpiry)
+        self.init(id: RPCID(JsonRpcID.generate()), topic: topic, method: method, params: params, chainId: chainId, expiryTimestamp: calculatedExpiry)
     }
 
     init<C>(id: RPCID, topic: String, method: String, params: C, chainId: Blockchain, ttl: TimeInterval = 300) throws where C: Codable {
@@ -39,16 +39,16 @@ public struct Request: Codable, Equatable {
         }
 
         let calculatedExpiry = UInt64(Date().timeIntervalSince1970) + UInt64(ttl)
-        self.init(id: id, topic: topic, method: method, params: AnyCodable(params), chainId: chainId, expiry: calculatedExpiry)
+        self.init(id: id, topic: topic, method: method, params: AnyCodable(params), chainId: chainId, expiryTimestamp: calculatedExpiry)
     }
 
-    internal init(id: RPCID, topic: String, method: String, params: AnyCodable, chainId: Blockchain, expiry: UInt64?) {
+    internal init(id: RPCID, topic: String, method: String, params: AnyCodable, chainId: Blockchain, expiryTimestamp: UInt64?) {
         self.id = id
         self.topic = topic
         self.method = method
         self.params = params
         self.chainId = chainId
-        self.expiryTimestamp = expiry
+        self.expiryTimestamp = expiryTimestamp
     }
 
     func isExpired(currentDate: Date = Date()) -> Bool {
