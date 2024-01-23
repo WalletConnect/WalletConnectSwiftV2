@@ -1,35 +1,42 @@
 import UIKit
-
 class ActivityIndicatorManager {
     static let shared = ActivityIndicatorManager()
     private var activityIndicator: UIActivityIndicatorView?
+    private let serialQueue = DispatchQueue(label: "com.yourapp.activityIndicatorManager")
 
     private init() {}
 
-    func start() async {
-        await stop() 
+    func start() {
+        serialQueue.async {
+            self.stopInternal {
+                DispatchQueue.main.async {
+                    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                          let window = windowScene.windows.first(where: { $0.isKeyWindow }) else { return }
 
-        DispatchQueue.main.async {
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let window = windowScene.windows.first(where: { $0.isKeyWindow }) else { return }
+                    let activityIndicator = UIActivityIndicatorView(style: .large)
+                    activityIndicator.center = window.center
+                    activityIndicator.color = .white
+                    activityIndicator.startAnimating()
+                    window.addSubview(activityIndicator)
 
-            let activityIndicator = UIActivityIndicatorView(style: .large)
-            activityIndicator.center = window.center
-            activityIndicator.startAnimating()
-            window.addSubview(activityIndicator)
-
-            self.activityIndicator = activityIndicator
+                    self.activityIndicator = activityIndicator
+                }
+            }
         }
     }
 
-    func stop() async {
-        await withCheckedContinuation { continuation in
-            DispatchQueue.main.async {
-                self.activityIndicator?.stopAnimating()
-                self.activityIndicator?.removeFromSuperview()
-                self.activityIndicator = nil
-                continuation.resume()
-            }
+    func stop() {
+        serialQueue.async {
+            self.stopInternal(completion: nil)
+        }
+    }
+
+    private func stopInternal(completion: (() -> Void)?) {
+        DispatchQueue.main.async {
+            self.activityIndicator?.stopAnimating()
+            self.activityIndicator?.removeFromSuperview()
+            self.activityIndicator = nil
+            completion?()
         }
     }
 }

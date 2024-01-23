@@ -94,11 +94,11 @@ final class WalletPresenter: ObservableObject {
     func removeSession(at indexSet: IndexSet) async {
         if let index = indexSet.first {
             do {
-                await ActivityIndicatorManager.shared.start()
+                ActivityIndicatorManager.shared.start()
                 try await interactor.disconnectSession(session: sessions[index])
-                await ActivityIndicatorManager.shared.stop()
+                ActivityIndicatorManager.shared.stop()
             } catch {
-                await ActivityIndicatorManager.shared.stop()
+                ActivityIndicatorManager.shared.stop()
                 sessions = sessions
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
             }

@@ -35,12 +35,12 @@ final class SessionProposalPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
-            await ActivityIndicatorManager.shared.start()
+            ActivityIndicatorManager.shared.start()
             let showConnected = try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
             showConnected ? showConnectedSheet.toggle() : router.dismiss()
-            await ActivityIndicatorManager.shared.stop()
+            ActivityIndicatorManager.shared.stop()
         } catch {
-            await ActivityIndicatorManager.shared.stop()
+            ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }
@@ -49,12 +49,12 @@ final class SessionProposalPresenter: ObservableObject {
     @MainActor
     func onReject() async throws {
         do {
-            await ActivityIndicatorManager.shared.start()
+            ActivityIndicatorManager.shared.start()
             try await interactor.reject(proposal: sessionProposal)
-            await ActivityIndicatorManager.shared.stop()
+            ActivityIndicatorManager.shared.stop()
             router.dismiss()
         } catch {
-            await ActivityIndicatorManager.shared.stop()
+            ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }
