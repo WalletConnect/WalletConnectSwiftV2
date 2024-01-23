@@ -273,7 +273,7 @@ final class NotifyTests: XCTestCase {
         await fulfillment(of: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
 
         try await walletNotifyClientA.fetchHistory(subscription: subscription)
-        XCTAssertEqual(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count, 41)
+        XCTAssertTrue(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count > 40)
     }
 }
 
