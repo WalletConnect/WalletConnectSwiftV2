@@ -44,10 +44,11 @@ final class RelayClientEndToEndTests: XCTestCase {
         )
         let socket = WebSocket(url: urlFactory.create(fallback: false))
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
+        let networkMonitor = NetworkMonitor()
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
-            networkMonitor: NetworkMonitor(),
+            networkMonitor: networkMonitor,
             socketConnectionType: .manual,
             logger: logger
         )
@@ -58,7 +59,8 @@ final class RelayClientEndToEndTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
-            socketConnectionType: .manual,
+            socketConnectionType: .manual, 
+            networkMonitor: networkMonitor,
             logger: logger
         )
         let clientId = try! relayClient.getClientId()
