@@ -58,16 +58,16 @@ final class SignPresenter: ObservableObject {
             let uri = try await Pair.instance.create()
             walletConnectUri = uri
             do {
-                await ActivityIndicatorManager.shared.start()
+                ActivityIndicatorManager.shared.start()
                 try await Sign.instance.connect(
                     requiredNamespaces: Proposal.requiredNamespaces,
                     optionalNamespaces: Proposal.optionalNamespaces,
                     topic: uri.topic
                 )
-                await ActivityIndicatorManager.shared.stop()
+                ActivityIndicatorManager.shared.stop()
                 router.presentNewPairing(walletConnectUri: uri)
             } catch {
-                await ActivityIndicatorManager.shared.stop()
+                ActivityIndicatorManager.shared.stop()
             }
         }
     }
@@ -76,12 +76,12 @@ final class SignPresenter: ObservableObject {
         if let session {
             Task { @MainActor in
                 do {
-                    await ActivityIndicatorManager.shared.start()
+                    ActivityIndicatorManager.shared.start()
                     try await Sign.instance.disconnect(topic: session.topic)
-                    await ActivityIndicatorManager.shared.stop()
+                    ActivityIndicatorManager.shared.stop()
                     accountsDetails.removeAll()
                 } catch {
-                    await ActivityIndicatorManager.shared.stop()
+                    ActivityIndicatorManager.shared.stop()
                     showError.toggle()
                     errorMessage = error.localizedDescription
                 }
@@ -114,21 +114,21 @@ extension SignPresenter {
             .sink { [unowned self] _ in
                 self.accountsDetails.removeAll()
                 router.popToRoot()
-                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
 
         Sign.instance.sessionResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { response in
-                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
 
         Sign.instance.requestExpirationPublisher
             .receive(on: DispatchQueue.main)
             .sink { _ in
-                Task(priority: .high) { await ActivityIndicatorManager.shared.stop() }
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
                 AlertPresenter.present(message: "Session Request has expired", type: .warning)
             }
             .store(in: &subscriptions)

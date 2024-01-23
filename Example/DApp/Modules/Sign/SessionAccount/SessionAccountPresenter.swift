@@ -48,16 +48,16 @@ final class SessionAccountPresenter: ObservableObject {
             let request = try Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, ttl: ttl)
             Task {
                 do {
-                    await ActivityIndicatorManager.shared.start()
+                    ActivityIndicatorManager.shared.start()
                     try await Sign.instance.request(params: request)
                     lastRequest = request
-                    await ActivityIndicatorManager.shared.stop()
+                    ActivityIndicatorManager.shared.stop()
                     requesting = true
                     DispatchQueue.main.async { [weak self] in
                         self?.openWallet()
                     }
                 } catch {
-                    await ActivityIndicatorManager.shared.stop()
+                    ActivityIndicatorManager.shared.stop()
                     requesting = false
                     showError.toggle()
                     errorMessage = error.localizedDescription
