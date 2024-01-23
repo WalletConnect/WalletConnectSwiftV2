@@ -30,8 +30,6 @@ public class NetworkingInteractor: NetworkInteracting {
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
-    private let networkMonitor: NetworkMonitoring
-
     public init(
         relayClient: RelayClient,
         serializer: Serializing,
@@ -43,8 +41,7 @@ public class NetworkingInteractor: NetworkInteracting {
         self.rpcHistory = rpcHistory
         self.logger = logger
         self.socketConnectionStatusPublisher = relayClient.socketConnectionStatusPublisher
-        self.networkMonitor = NetworkMonitor()
-        self.networkConnectionStatusPublisher = networkMonitor.networkConnectionStatusPublisher
+        self.networkConnectionStatusPublisher = relayClient.networkConnectionStatusPublisher
         setupRelaySubscribtion()
     }
 

@@ -27,6 +27,10 @@ public final class RelayClient {
         dispatcher.socketConnectionStatusPublisher
     }
 
+    public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
+        dispatcher.networkConnectionStatusPublisher
+    }
+
     private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String, publishedAt: Date), Never>()
 
     private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
