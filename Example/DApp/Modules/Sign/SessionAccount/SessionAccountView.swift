@@ -230,13 +230,14 @@ struct SessionAccountView: View {
                     .padding(12)
                     
                     Spacer()
-                    
-                    Text(presenter.lastRequest!.method)
-                        .font(
-                            Font.system(size: 14, weight: .medium)
-                        )
-                        .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
-                        .padding(12)
+                    if let lastRequest = presenter.lastRequest {
+                        Text(lastRequest.method)
+                            .font(
+                                Font.system(size: 14, weight: .medium)
+                            )
+                            .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
+                            .padding(12)
+                    }
                 }
                 
                 ZStack {
