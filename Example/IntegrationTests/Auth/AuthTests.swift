@@ -40,6 +40,7 @@ final class AuthTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: logger)
 
         let networkingClient = NetworkingClientFactory.create(
