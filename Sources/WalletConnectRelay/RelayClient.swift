@@ -169,9 +169,9 @@ public final class RelayClient {
         }
     }
 
-    public func unsubscribe(topic: String, completion: @escaping ((Error?) -> Void)) {
+    public func unsubscribe(topic: String, completion: ((Error?) -> Void)?) {
         guard let subscriptionId = subscriptions[topic] else {
-            completion(Errors.subscriptionIdNotFound)
+            completion?(Errors.subscriptionIdNotFound)
             return
         }
         logger.debug("Unsubscribing from topic: \(topic)")
@@ -183,12 +183,12 @@ public final class RelayClient {
         dispatcher.protectedSend(message) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Failed to unsubscribe from topic")
-                completion(error)
+                completion?(error)
             } else {
                 self?.concurrentQueue.async(flags: .barrier) {
                     self?.subscriptions[topic] = nil
                 }
-                completion(nil)
+                completion?(nil)
             }
         }
     }
