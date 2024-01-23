@@ -29,4 +29,6 @@ public protocol SignClientProtocol {
     func cleanup() async throws
     
     func getPendingRequests(topic: String?) -> [(request: Request, context: VerifyContext?)]
+    func getPendingProposals(topic: String?) -> [(proposal: Session.Proposal, context: VerifyContext?)]
 }
+

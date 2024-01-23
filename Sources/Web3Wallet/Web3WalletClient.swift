@@ -225,6 +225,10 @@ public class Web3WalletClient {
         signClient.getPendingRequests(topic: topic)
     }
 
+    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
+        signClient.getPendingProposals(topic: topic)
+    }
+
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {

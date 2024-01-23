@@ -327,6 +327,10 @@ public final class SignClient: SignClientProtocol {
         }
     }
 
+    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
+        pendingProposalsProvider.getPendingProposals()
+    }
+
     /// Delete all stored data such as: pairings, sessions, keys
     ///
     /// - Note: Will unsubscribe from all topics

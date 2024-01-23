@@ -13,7 +13,7 @@ final class SessionAccountPresenter: ObservableObject {
     @Published var errorMessage = String.empty
     @Published var showRequestSent = false
     @Published var requesting = false
-    @Published var lastRequest: Request?
+    var lastRequest: Request?
 
 
     private let interactor: SessionAccountInteractor
