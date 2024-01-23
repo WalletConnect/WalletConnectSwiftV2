@@ -47,6 +47,7 @@ final class RelayClientEndToEndTests: XCTestCase {
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
+            networkMonitor: NetworkMonitor(),
             socketConnectionType: .manual,
             logger: logger
         )
