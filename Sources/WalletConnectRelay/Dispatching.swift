@@ -77,7 +77,7 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
-        guard !socket.isConnected, !networkMonitor.isConnected else {
+        guard !socket.isConnected || !networkMonitor.isConnected else {
             return send(string, completion: completion)
         }
 
