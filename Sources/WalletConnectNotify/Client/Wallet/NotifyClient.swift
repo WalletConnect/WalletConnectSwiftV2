@@ -17,7 +17,7 @@ public class NotifyClient {
         return logger.logsPublisher
     }
 
-    private let deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester
+    private let notifyDeleteSubscriptionRequester: NotifyDeleteSubscriptionRequester
     private let notifySubscribeRequester: NotifySubscribeRequester
 
     public let logger: ConsoleLogging
@@ -31,6 +31,7 @@ public class NotifyClient {
     private let notifyMessageSubscriber: NotifyMessageSubscriber
     private let resubscribeService: NotifyResubscribeService
     private let notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber
+    private let notifyDeleteSubscriptionSubscriber: NotifyDeleteSubscriptionSubscriber
     private let notifyUpdateRequester: NotifyUpdateRequester
     private let notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber
     private let subscriptionsAutoUpdater: SubscriptionsAutoUpdater
@@ -48,10 +49,11 @@ public class NotifyClient {
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
-         deleteNotifySubscriptionRequester: DeleteNotifySubscriptionRequester,
+         notifyDeleteSubscriptionRequester: NotifyDeleteSubscriptionRequester,
          resubscribeService: NotifyResubscribeService,
          notifySubscribeRequester: NotifySubscribeRequester,
          notifySubscribeResponseSubscriber: NotifySubscribeResponseSubscriber,
+         notifyDeleteSubscriptionSubscriber: NotifyDeleteSubscriptionSubscriber,
          notifyUpdateRequester: NotifyUpdateRequester,
          notifyUpdateResponseSubscriber: NotifyUpdateResponseSubscriber,
          notifyAccountProvider: NotifyAccountProvider,
@@ -69,10 +71,11 @@ public class NotifyClient {
         self.historyService = historyService
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
-        self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
+        self.notifyDeleteSubscriptionRequester = notifyDeleteSubscriptionRequester
         self.resubscribeService = resubscribeService
         self.notifySubscribeRequester = notifySubscribeRequester
         self.notifySubscribeResponseSubscriber = notifySubscribeResponseSubscriber
+        self.notifyDeleteSubscriptionSubscriber = notifyDeleteSubscriptionSubscriber
         self.notifyUpdateRequester = notifyUpdateRequester
         self.notifyUpdateResponseSubscriber = notifyUpdateResponseSubscriber
         self.notifyAccountProvider = notifyAccountProvider
@@ -128,7 +131,7 @@ public class NotifyClient {
     }
 
     public func deleteSubscription(topic: String) async throws {
-        try await deleteNotifySubscriptionRequester.delete(topic: topic)
+        try await notifyDeleteSubscriptionRequester.delete(topic: topic)
     }
 
     public func deleteNotifyMessage(id: String) {

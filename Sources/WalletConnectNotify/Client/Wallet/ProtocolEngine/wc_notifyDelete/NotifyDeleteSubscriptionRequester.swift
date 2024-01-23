@@ -1,13 +1,12 @@
 import Foundation
 
-class DeleteNotifySubscriptionRequester {
+class NotifyDeleteSubscriptionRequester {
     enum Errors: Error {
         case notifySubscriptionNotFound
     }
     private let keyserver: URL
     private let networkingInteractor: NetworkInteracting
     private let identityClient: IdentityClient
-    private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let notifyStorage: NotifyStorage
 
@@ -15,14 +14,12 @@ class DeleteNotifySubscriptionRequester {
         keyserver: URL,
         networkingInteractor: NetworkInteracting,
         identityClient: IdentityClient,
-        kms: KeyManagementServiceProtocol,
         logger: ConsoleLogging,
         notifyStorage: NotifyStorage
     ) {
         self.keyserver = keyserver
         self.networkingInteractor = networkingInteractor
         self.identityClient = identityClient
-        self.kms = kms
         self.logger = logger
         self.notifyStorage = notifyStorage
     }
@@ -49,15 +46,11 @@ class DeleteNotifySubscriptionRequester {
         try notifyStorage.deleteSubscription(topic: topic)
         try notifyStorage.deleteMessages(topic: topic)
 
-        networkingInteractor.unsubscribe(topic: topic)
-
-        logger.debug("Subscription removed, topic: \(topic)")
-
-        kms.deleteSymmetricKey(for: topic)
+        logger.debug("Subscription delete request sent, topic: \(topic)")
     } 
 }
 
-private extension DeleteNotifySubscriptionRequester {
+private extension NotifyDeleteSubscriptionRequester {
 
     func createJWTWrapper(dappPubKey: DIDKey, reason: String, app: DIDWeb, account: Account) throws -> NotifyDeletePayload.Wrapper {
         let jwtPayload = NotifyDeletePayload(account: account, keyserver: keyserver, dappPubKey: dappPubKey, app: app)
