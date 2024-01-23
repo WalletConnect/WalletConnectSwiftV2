@@ -82,7 +82,7 @@ final class ModalViewModelTests: XCTestCase {
         await sut.fetchWallets()
         await sut.createURI()
         
-        XCTAssertEqual(sut.uri, "wc:foo@2?symKey=bar&relay-protocol=irn")
+        XCTAssertEqual(sut.uri, "wc:foo@2?symKey=bar&relay-protocol=irn&expiryTimestamp=1706001526")
         XCTAssertEqual(sut.wallets.count, 2)
         XCTAssertEqual(sut.wallets.map(\.id), ["1", "2"])
         XCTAssertEqual(sut.wallets.map(\.name), ["Sample App", "Awesome App"])
@@ -94,7 +94,7 @@ final class ModalViewModelTests: XCTestCase {
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
-            URL(string: "https://example.com/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn")!
+            URL(string: "https://example.com/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
         )
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called using universal link")
@@ -104,7 +104,7 @@ final class ModalViewModelTests: XCTestCase {
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
-            URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn")!
+            URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
         )
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called using native link")
@@ -114,7 +114,7 @@ final class ModalViewModelTests: XCTestCase {
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
-            URL(string: "https://awesome.com/awesome/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn")!
+            URL(string: "https://awesome.com/awesome/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
         )
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called using native link")
@@ -124,7 +124,7 @@ final class ModalViewModelTests: XCTestCase {
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
-            URL(string: "https://awesome.com/awesome/desktop/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn")!
+            URL(string: "https://awesome.com/awesome/desktop/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
         )
     }
 }

@@ -136,5 +136,17 @@ extension WalletConnectURI {
         }
     }
 }
+#endif
 
+#if DEBUG
+extension WalletConnectURI {
+    init(topic: String, symKey: String, relay: RelayProtocolOptions, expiryTimestamp: UInt64) {
+        self.version = "2"
+        self.topic = topic
+        self.symKey = symKey
+        self.relay = relay
+        self.expiryTimestamp = expiryTimestamp
+    }
+
+}
 #endif
