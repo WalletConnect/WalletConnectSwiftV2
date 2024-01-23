@@ -80,6 +80,7 @@ final class ApproveEngineTests: XCTestCase {
         XCTAssertTrue(networkingInteractor.didCallSubscribe)
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
+        XCTAssertTrue(sessionStorageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
         XCTAssertTrue(pairingRegisterer.isActivateCalled)
     }
 
@@ -105,8 +106,7 @@ final class ApproveEngineTests: XCTestCase {
         let topicB = String.generateTopic()
         cryptoMock.setAgreementSecret(agreementKeys, topic: topicB)
         let proposal = SessionProposal.stub(proposerPubKey: AgreementPrivateKey().publicKey.hexRepresentation)
-        try await engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary(), pairingTopic: "")
-        XCTAssertTrue(sessionStorageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
+        _ = try await engine.settle(topic: topicB, proposal: proposal, namespaces: SessionNamespace.stubDictionary(), pairingTopic: "")
         XCTAssert(networkingInteractor.didSubscribe(to: topicB), "Responder must subscribe for topic B")
         XCTAssertTrue(networkingInteractor.didCallRequest, "Responder must send session settle payload on topic B")
     }
