@@ -90,7 +90,9 @@ final class Dispatcher: NSObject, Dispatching {
                 switch result {
                 case .failure(let error):
                     cancellable?.cancel()
-                    self.handleFallbackIfNeeded(error: error)
+                    if !socket.isConnected {
+                        handleFallbackIfNeeded(error: error)
+                    }
                     completion(error)
                 case .finished: break
                 }
