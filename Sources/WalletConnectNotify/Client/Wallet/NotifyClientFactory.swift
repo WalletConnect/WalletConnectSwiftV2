@@ -2,7 +2,7 @@ import Foundation
 
 public struct NotifyClientFactory {
 
-    public static func create(projectId: String, groupIdentifier: String, networkInteractor: NetworkInteracting, pairingRegisterer: PairingRegisterer, pushClient: PushClient, crypto: CryptoProvider, notifyHost: String, explorerHost: String) -> NotifyClient {
+    public static func create(projectId: String, groupIdentifier: String, networkInteractor: NetworkInteracting, pushClient: PushClient, crypto: CryptoProvider, notifyHost: String, explorerHost: String) -> NotifyClient {
         let logger = ConsoleLogger(prefix: "🔔",loggingLevel: .debug)
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
@@ -18,7 +18,6 @@ public struct NotifyClientFactory {
             keychainStorage: keychainStorage,
             groupKeychainStorage: groupKeychainService,
             networkInteractor: networkInteractor,
-            pairingRegisterer: pairingRegisterer,
             pushClient: pushClient,
             crypto: crypto,
             notifyHost: notifyHost,
@@ -34,7 +33,6 @@ public struct NotifyClientFactory {
         keychainStorage: KeychainStorageProtocol,
         groupKeychainStorage: KeychainStorageProtocol,
         networkInteractor: NetworkInteracting,
-        pairingRegisterer: PairingRegisterer,
         pushClient: PushClient,
         crypto: CryptoProvider,
         notifyHost: String,

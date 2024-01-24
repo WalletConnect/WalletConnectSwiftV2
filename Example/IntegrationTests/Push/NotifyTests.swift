@@ -8,7 +8,6 @@ import Combine
 import WalletConnectNetworking
 import WalletConnectPush
 @testable import WalletConnectNotify
-@testable import WalletConnectPairing
 import WalletConnectIdentity
 import WalletConnectSigner
 
@@ -30,12 +29,11 @@ final class NotifyTests: XCTestCase {
 
     private var publishers = Set<AnyCancellable>()
 
-    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
+    func makeClientDependencies(prefix: String) -> (NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
         let relayLogger = ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(prefix: prefix + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(prefix: prefix + " [Networking]", loggingLevel: .debug)
         let kmsLogger = ConsoleLogger(prefix: prefix + " [KMS]", loggingLevel: .debug)
 
@@ -55,19 +53,13 @@ final class NotifyTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             kmsLogger: kmsLogger)
 
-        let pairingClient = PairingClientFactory.create(
-            logger: pairingLogger,
-            keyValueStorage: keyValueStorage,
-            keychainStorage: keychain,
-            networkingClient: networkingClient)
-
         let clientId = try! networkingClient.getClientId()
         networkingLogger.debug("My client id is: \(clientId)")
-        return (pairingClient, networkingClient, keychain, keyValueStorage)
+        return (networkingClient, keychain, keyValueStorage)
     }
 
     func makeWalletClient(prefix: String = "🦋 Wallet: ") -> NotifyClient {
-        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
         let pushClient = PushClientFactory.create(projectId: "",
                                                   pushHost: "echo.walletconnect.com",
@@ -84,7 +76,6 @@ final class NotifyTests: XCTestCase {
                                                 keychainStorage: keychain,
                                                 groupKeychainStorage: KeychainStorageMock(),
                                                 networkInteractor: networkingInteractor,
-                                                pairingRegisterer: pairingClient,
                                                 pushClient: pushClient,
                                                 crypto: DefaultCryptoProvider(),
                                                 notifyHost: InputConfig.notifyHost, 
