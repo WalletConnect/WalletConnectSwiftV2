@@ -65,7 +65,7 @@ private extension Request {
             method: "method",
             params: AnyCodable("params"),
             chainId: Blockchain("eip155:1")!,
-            expiry: expiry
+            expiryTimestamp: expiry
         )
     }
 }
