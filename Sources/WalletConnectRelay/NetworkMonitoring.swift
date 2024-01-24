@@ -8,6 +8,7 @@ public enum NetworkConnectionStatus {
 }
 
 public protocol NetworkMonitoring: AnyObject {
+    var isConnected: Bool { get }
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> { get }
 }
 
@@ -16,7 +17,11 @@ public final class NetworkMonitor: NetworkMonitoring {
     private let workerQueue = DispatchQueue(label: "com.walletconnect.sdk.network.monitor")
     
     private let networkConnectionStatusPublisherSubject = CurrentValueSubject<NetworkConnectionStatus, Never>(.connected)
-    
+
+    public var isConnected: Bool {
+        return networkConnectionStatusPublisherSubject.value == .connected
+    }
+
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
         networkConnectionStatusPublisherSubject
             .share()

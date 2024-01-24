@@ -56,6 +56,7 @@ final class ChatTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: logger)
 
         let networkingInteractor = NetworkingClientFactory.create(

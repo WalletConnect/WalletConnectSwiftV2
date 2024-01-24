@@ -45,6 +45,7 @@ final class NotifyTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: relayLogger)
 
         let networkingClient = NetworkingClientFactory.create(

@@ -4,10 +4,14 @@ import Combine
 @testable import WalletConnectRelay
 
 class DispatcherMock: Dispatching {
+
     private var publishers = Set<AnyCancellable>()
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         return socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+    var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
+        return Just(.connected).eraseToAnyPublisher()
     }
 
     var sent = false
