@@ -62,6 +62,7 @@ final class DispatcherTests: XCTestCase {
         networkMonitor = NetworkMonitoringMock()
         let defaults = RuntimeKeyValueStorage()
         let logger = ConsoleLoggerMock()
+        let networkMonitor = NetworkMonitoringMock()
         let keychainStorageMock = DispatcherKeychainStorageMock()
         let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychainStorageMock, logger: logger)
         let socketAuthenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage)
@@ -72,7 +73,8 @@ final class DispatcherTests: XCTestCase {
         )
         sut = Dispatcher(
             socketFactory: webSocketFactory,
-            relayUrlFactory: relayUrlFactory,
+            relayUrlFactory: relayUrlFactory, 
+            networkMonitor: networkMonitor,
             socketConnectionType: .manual,
             logger: ConsoleLoggerMock()
         )
