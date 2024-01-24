@@ -22,7 +22,7 @@ final class SignClientMock: SignClientProtocol {
     var requestCalled = false
     
     private let metadata = AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))
-    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: AnyCodable(""), chainId: Blockchain("eip155:1")!, expiry: nil)
+    private let request = WalletConnectSign.Request(id: .left(""), topic: "", method: "", params: AnyCodable(""), chainId: Blockchain("eip155:1")!, expiryTimestamp: nil)
     private let response = WalletConnectSign.Response(id: RPCID(1234567890123456789), topic: "", chainId: "", result: .response(AnyCodable(any: "")))
     
     var sessionProposalPublisher: AnyPublisher<(proposal: WalletConnectSign.Session.Proposal, context: VerifyContext?), Never> {
@@ -152,11 +152,7 @@ final class SignClientMock: SignClientProtocol {
     func getPendingRequests(topic: String?) -> [(request: WalletConnectSign.Request, context: WalletConnectSign.VerifyContext?)] {
         return [(request, nil)]
     }
-    
-    func getSessionRequestRecord(id: JSONRPC.RPCID) -> (request: WalletConnectSign.Request, context: WalletConnectSign.VerifyContext?)? {
-        return (request, nil)
-    }
-    
+
     func cleanup() async throws {
         cleanupCalled = true
     }
