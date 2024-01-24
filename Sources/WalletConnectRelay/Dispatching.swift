@@ -68,7 +68,7 @@ final class Dispatcher: NSObject, Dispatching {
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
         guard socket.isConnected else {
-            completion(NetworkError.webSocketNotConnected)
+            completion(NetworkError.connectionFailed)
             return
         }
         socket.write(string: string) {
@@ -85,7 +85,7 @@ final class Dispatcher: NSObject, Dispatching {
         cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
             .filter { $0.0 == .connected && $0.1 == .connected }
             .setFailureType(to: NetworkError.self)
-            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .webSocketNotConnected })
+            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
             .sink(receiveCompletion: { [unowned self] result in
                 switch result {
                 case .failure(let error):
@@ -145,7 +145,7 @@ extension Dispatcher {
     }
     
     private func handleFallbackIfNeeded(error: NetworkError) {
-        if error == .webSocketNotConnected && socket.request.url?.host == NetworkConstants.defaultUrl {
+        if error == .connectionFailed && socket.request.url?.host == NetworkConstants.defaultUrl {
             logger.debug("[WebSocket] - Fallback to \(NetworkConstants.fallbackUrl)")
             fallback = true
             socket.request.url = relayUrlFactory.create(fallback: fallback)
