@@ -148,12 +148,14 @@ public class NotifyClient {
         return notifyStorage.messagesPublisher(topic: topic)
     }
 
-    public func fetchHistory(subscription: NotifySubscription) async throws {
+    public func fetchHistory(subscription: NotifySubscription, after: String?, limit: Int) async throws -> Bool {
         let messages = try await historyService.fetchHistory(
             account: subscription.account,
             topic: subscription.topic,
             appAuthenticationKey: subscription.appAuthenticationKey,
-            host: subscription.metadata.url
+            host: subscription.metadata.url, 
+            after: after, 
+            limit: limit
         )
 
         let records = messages.map { message in
@@ -161,6 +163,8 @@ public class NotifyClient {
         }
 
         try notifyStorage.setMessages(records)
+
+        return messages.count == limit
     }
 }
 

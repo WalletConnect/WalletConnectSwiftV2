@@ -31,9 +31,7 @@ final class SubscriptionInteractor {
         }
     }
 
-    func fetchHistory() {
-        Task(priority: .high) {
-            try await Notify.instance.fetchHistory(subscription: subscription)
-        }
+    func fetchHistory(after: String?, limit: Int) async throws -> Bool {
+        return try await Notify.instance.fetchHistory(subscription: subscription, after: after, limit: limit)
     }
 }
