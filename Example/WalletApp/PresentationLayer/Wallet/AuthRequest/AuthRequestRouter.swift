@@ -11,6 +11,5 @@ final class AuthRequestRouter {
     
     func dismiss() {
         viewController.dismiss()
-        UIApplication.shared.open(URL(string: "showcase://")!)
     }
 }

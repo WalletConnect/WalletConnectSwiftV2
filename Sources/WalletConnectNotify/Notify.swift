@@ -10,7 +10,6 @@ public class Notify {
             projectId: Networking.projectId,
             groupIdentifier: Networking.groupIdentifier,
             networkInteractor: Networking.interactor,
-            pairingRegisterer: Pair.registerer,
             pushClient: Push.instance,
             crypto: config.crypto,
             notifyHost: config.notifyHost,

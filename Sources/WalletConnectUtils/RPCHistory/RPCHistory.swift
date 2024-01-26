@@ -15,13 +15,28 @@ public final class RPCHistory {
         public var timestamp: Date?
     }
 
-    enum HistoryError: Error {
+    enum HistoryError: Error, LocalizedError {
         case unidentifiedRequest
         case unidentifiedResponse
         case requestDuplicateNotAllowed
         case responseDuplicateNotAllowed
         case requestMatchingResponseNotFound
+        var errorDescription: String? {
+            switch self {
+            case .unidentifiedRequest:
+                return "Unidentified request."
+            case .unidentifiedResponse:
+                return "Unidentified response."
+            case .requestDuplicateNotAllowed:
+                return "Request duplicates are not allowed."
+            case .responseDuplicateNotAllowed:
+                return "Response duplicates are not allowed."
+            case .requestMatchingResponseNotFound:
+                return "Matching requesr for the response not found."
+            }
+        }
     }
+
 
     private let storage: CodableStore<Record>
 

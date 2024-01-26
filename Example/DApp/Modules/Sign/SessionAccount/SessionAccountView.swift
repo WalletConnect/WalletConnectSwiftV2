@@ -8,9 +8,11 @@ struct SessionAccountView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                
                 Color(red: 25/255, green: 26/255, blue: 26/255)
                     .ignoresSafeArea()
-                
+
+
                 ScrollView {
                     VStack(spacing: 12) {
                         networkView(title: String(presenter.sessionAccount.chain.split(separator: ":").first ?? ""))
@@ -20,6 +22,14 @@ struct SessionAccountView: View {
                         Spacer()
                     }
                     .padding(12)
+                }
+
+                if presenter.requesting {
+                    loadingView
+                        .frame(width: 200, height: 200)
+                        .background(Color.gray.opacity(0.95))
+                        .cornerRadius(20)
+                        .shadow(radius: 10)
                 }
             }
             .navigationTitle(presenter.sessionAccount.chain)
@@ -179,7 +189,18 @@ struct SessionAccountView: View {
             }
         }
     }
-    
+
+    private var loadingView: some View {
+        VStack {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                .scaleEffect(1.5)
+            Text("Request sent, waiting for response")
+                .foregroundColor(.white)
+                .padding(.top, 20)
+        }
+    }
+
     private func responseView(response: Response) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16)
@@ -209,14 +230,14 @@ struct SessionAccountView: View {
                     .padding(12)
                     
                     Spacer()
-                    
-                    let record = Sign.instance.getSessionRequestRecord(id: response.id)!
-                    Text(record.request.method)
-                        .font(
-                            Font.system(size: 14, weight: .medium)
-                        )
-                        .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
-                        .padding(12)
+                    if let lastRequest = presenter.lastRequest {
+                        Text(lastRequest.method)
+                            .font(
+                                Font.system(size: 14, weight: .medium)
+                            )
+                            .foregroundColor(Color(red: 0.58, green: 0.62, blue: 0.62))
+                            .padding(12)
+                    }
                 }
                 
                 ZStack {

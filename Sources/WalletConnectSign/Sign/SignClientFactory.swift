@@ -41,7 +41,7 @@ public struct SignClientFactory {
         let sessionStore = SessionStorage(storage: SequenceStore<WCSession>(store: .init(defaults: keyValueStorage, identifier: SignStorageIdentifiers.sessions.rawValue)))
         let proposalPayloadsStore = CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.proposals.rawValue)
         let verifyContextStore = CodableStore<VerifyContext>(defaults: keyValueStorage, identifier: VerifyStorageIdentifiers.context.rawValue)
-        let historyService = HistoryService(history: rpcHistory, proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
+        let historyService = HistoryService(history: rpcHistory, verifyContextStore: verifyContextStore)
         let verifyClient = VerifyClientFactory.create()
         let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyContextStore: verifyContextStore, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -61,7 +61,8 @@ public struct SignClientFactory {
             logger: logger,
             pairingStore: pairingStore,
             sessionStore: sessionStore,
-            verifyClient: verifyClient
+            verifyClient: verifyClient,
+            rpcHistory: rpcHistory
         )
         let cleanupService = SignCleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionTopicToProposal: sessionTopicToProposal, networkInteractor: networkingClient)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -69,6 +70,9 @@ public struct SignClientFactory {
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingClient, logger: logger)
         let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appProposerService = AppProposeService(metadata: metadata, networkingInteractor: networkingClient, kms: kms, logger: logger)
+        let proposalExpiryWatcher = ProposalExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, rpcHistory: rpcHistory)
+        let pendingProposalsProvider = PendingProposalsProvider(proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
+        let requestsExpiryWatcher = RequestsExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, rpcHistory: rpcHistory, historyService: historyService)
 
         let client = SignClient(
             logger: logger,
@@ -86,7 +90,10 @@ public struct SignClientFactory {
             disconnectService: disconnectService,
             historyService: historyService,
             cleanupService: cleanupService,
-            pairingClient: pairingClient
+            pairingClient: pairingClient,
+            proposalExpiryWatcher: proposalExpiryWatcher,
+            pendingProposalsProvider: pendingProposalsProvider,
+            requestsExpiryWatcher: requestsExpiryWatcher
         )
         return client
     }

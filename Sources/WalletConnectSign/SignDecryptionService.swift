@@ -37,7 +37,7 @@ public class SignDecryptionService {
                 method: request.request.method,
                 params: request.request.params,
                 chainId: request.chainId,
-                expiry: request.request.expiry
+                expiryTimestamp: request.request.expiryTimestamp
             )
 
             return request

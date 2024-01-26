@@ -35,7 +35,7 @@ struct WalletView: View {
                                     }
                                     .onDelete { indexSet in
                                         Task(priority: .high) {
-                                            await presenter.removeSession(at: indexSet)
+                                            try await presenter.removeSession(at: indexSet)
                                         }
                                     }
                                 }

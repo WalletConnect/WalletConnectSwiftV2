@@ -5,7 +5,7 @@ import JSONRPC
 @testable import TestingUtils
 @testable import WalletConnectKMS
 @testable import WalletConnectPairing
-import WalletConnectUtils
+@testable import WalletConnectUtils
 
 func deriveTopic(publicKey: String, privateKey: AgreementPrivateKey) -> String {
     try! KeyManagementService.generateAgreementKey(from: privateKey, peerPublicKey: publicKey).derivedTopic()
@@ -59,6 +59,12 @@ final class AppProposalServiceTests: XCTestCase {
             kms: cryptoMock,
             logger: logger
         )
+        let history = RPCHistory(
+            keyValueStore: .init(
+                defaults: RuntimeKeyValueStorage(),
+                identifier: ""
+            )
+        )
         approveEngine = ApproveEngine(
             networkingInteractor: networkingInteractor,
             proposalPayloadsStore: .init(defaults: RuntimeKeyValueStorage(), identifier: ""),
@@ -70,7 +76,8 @@ final class AppProposalServiceTests: XCTestCase {
             logger: logger,
             pairingStore: storageMock,
             sessionStore: WCSessionStorageMock(),
-            verifyClient: VerifyClientMock()
+            verifyClient: VerifyClientMock(),
+            rpcHistory: history
         )
     }
 

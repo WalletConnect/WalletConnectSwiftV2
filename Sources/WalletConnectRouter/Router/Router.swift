@@ -1,5 +1,5 @@
+#if os(iOS)
 import UIKit
-
 public struct WalletConnectRouter {
     public static func goBack(uri: String) {
         if #available(iOS 17, *) {
@@ -13,3 +13,4 @@ public struct WalletConnectRouter {
         }
     }
 }
+#endif

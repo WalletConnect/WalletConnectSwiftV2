@@ -999,4 +999,28 @@ final class AutoNamespacesValidationTests: XCTestCase {
         ]
         XCTAssertEqual(sessionNamespaces, expectedNamespaces)
     }
+
+    func testBuildThrowsWhenSessionNamespacesAreEmpty() {
+        let sessionProposal = Session.Proposal(
+            id: "",
+            pairingTopic: "",
+            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
+            requiredNamespaces: [:],
+            optionalNamespaces: [:],
+            sessionProperties: nil,
+            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
+        )
+
+        XCTAssertThrowsError(try AutoNamespaces.build(
+            sessionProposal: sessionProposal,
+            chains: [],
+            methods: [],
+            events: [],
+            accounts: []
+        ), "Expected to throw AutoNamespacesError.emtySessionNamespacesForbidden, but it did not") { error in
+            guard case AutoNamespacesError.emtySessionNamespacesForbidden = error else {
+                return XCTFail("Unexpected error type: \(error)")
+            }
+        }
+    }
 }

@@ -12,6 +12,9 @@ public protocol SignClientProtocol {
     var sessionRejectionPublisher: AnyPublisher<(Session.Proposal, Reason), Never> { get }
     var sessionEventPublisher: AnyPublisher<(event: Session.Event, sessionTopic: String, chainId: Blockchain?), Never> { get }
     var logsPublisher: AnyPublisher<Log, Never> {get}
+    var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> { get }
+    var pendingProposalsPublisher: AnyPublisher<[(proposal: Session.Proposal, context: VerifyContext?)], Never> { get }
+    var requestExpirationPublisher: AnyPublisher<Request, Never> { get }
 
     func connect(requiredNamespaces: [String: ProposalNamespace], optionalNamespaces: [String: ProposalNamespace]?, sessionProperties: [String: String]?, topic: String) async throws
     func request(params: Request) async throws
@@ -27,5 +30,5 @@ public protocol SignClientProtocol {
     
     func getPendingRequests(topic: String?) -> [(request: Request, context: VerifyContext?)]
     func getPendingProposals(topic: String?) -> [(proposal: Session.Proposal, context: VerifyContext?)]
-    func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)?
 }
+

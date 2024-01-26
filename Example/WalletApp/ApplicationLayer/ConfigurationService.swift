@@ -2,8 +2,11 @@ import UIKit
 import WalletConnectNetworking
 import WalletConnectNotify
 import Web3Wallet
+import Combine
 
 final class ConfigurationService {
+
+    private var publishers = Set<AnyCancellable>()
 
     func configure(importAccount: ImportAccount) {
         Networking.configure(
@@ -37,6 +40,42 @@ final class ConfigurationService {
             try! groupKeychain.add(clientId, forKey: "clientId")
         }
         LoggingService.instance.startLogging()
+
+        Web3Wallet.instance.socketConnectionStatusPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+            switch status {
+            case .connected:
+                AlertPresenter.present(message: "Your web socket has connected", type: .success)
+            case .disconnected:
+                AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
+            }
+        }.store(in: &publishers)
+
+        Web3Wallet.instance.logsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { log in
+            switch log {
+            case .error(let logMessage):
+                AlertPresenter.present(message: logMessage.message, type: .error)
+            default: return
+            }
+        }.store(in: &publishers)
+
+        Web3Wallet.instance.pairingExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { pairing in
+            guard !pairing.active else { return }
+            AlertPresenter.present(message: "Pairing has expired", type: .warning)
+        }.store(in: &publishers)
+
+        Web3Wallet.instance.sessionProposalExpirationPublisher.sink { _ in
+            AlertPresenter.present(message: "Session Proposal has expired", type: .warning)
+        }.store(in: &publishers)
+
+        Web3Wallet.instance.requestExpirationPublisher.sink { _ in
+            AlertPresenter.present(message: "Session Request has expired", type: .warning)
+        }.store(in: &publishers)
 
         Task {
             do {
