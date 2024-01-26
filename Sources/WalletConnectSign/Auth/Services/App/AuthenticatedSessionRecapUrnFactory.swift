@@ -1,6 +1,6 @@
 import Foundation
 
-class AuthenticatedSessionRecapFactory {
+class AuthenticatedSessionRecapUrnFactory {
     static func createNamespaceRecap(methods: [String]) throws -> String {
         let actions = methods.map{"request/\($0)"}
         let recap = RecapFactory.createRecap(resource: "eip155", actions: actions)

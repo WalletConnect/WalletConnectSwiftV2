@@ -34,7 +34,7 @@ actor SessionAuthRequestService {
         }
         if let methods = params.methods,
            !methods.isEmpty {
-            let namespaceRecap = try createNamespaceRecap(methods: methods)
+            let namespaceRecap = try createRecapUrn(methods: methods)
             params.addResource(resource: namespaceRecap)
         }
         let requester = Participant(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
@@ -47,7 +47,7 @@ actor SessionAuthRequestService {
         try await networkingInteractor.subscribe(topic: responseTopic)
     }
 
-    private func createNamespaceRecap(methods: [String]) throws -> String {
-        try AuthenticatedSessionRecapFactory.createNamespaceRecap(methods: methods)
+    private func createRecapUrn(methods: [String]) throws -> String {
+        try AuthenticatedSessionRecapUrnFactory.createNamespaceRecap(methods: methods)
     }
 }
