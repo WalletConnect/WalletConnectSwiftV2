@@ -28,7 +28,7 @@ actor SessionAuthRequestService {
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
         let protocolMethod = SessionAuthenticatedProtocolMethod()
         guard let chainNamespace = Blockchain(params.chains.first!)?.namespace,
-            chainNamespace == "eip155"
+              chainNamespace == "eip155"
         else {
             throw Errors.invalidChain
         }
@@ -49,18 +49,5 @@ actor SessionAuthRequestService {
 
     private func createNamespaceRecap(methods: [String]) throws -> String {
         try AuthenticatedSessionRecapFactory.createNamespaceRecap(methods: methods)
-    }
-}
-
-class AuthenticatedSessionRecapFactory {
-    static func createNamespaceRecap(methods: [String]) throws -> String {
-        let actions = methods.map{"request/\($0)"}
-        let recap = RecapFactory.createRecap(resource: "eip155", actions: actions)
-        let jsonEncoder = JSONEncoder()
-        jsonEncoder.outputFormatting = .withoutEscapingSlashes
-        let jsonData = try jsonEncoder.encode(recap)
-        let base64Encoded = jsonData.base64EncodedString()
-        let urn = "urn:recap:\(base64Encoded)"
-        return urn
     }
 }
