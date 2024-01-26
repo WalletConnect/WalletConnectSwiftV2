@@ -27,12 +27,14 @@ actor SessionAuthRequestService {
         let pubKey = try kms.createX25519KeyPair()
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
         let protocolMethod = SessionAuthenticatedProtocolMethod()
-        guard let chainNamespace = Blockchain(params.chains.first!)?.namespace else {
+        guard let chainNamespace = Blockchain(params.chains.first!)?.namespace,
+            chainNamespace == "eip155"
+        else {
             throw Errors.invalidChain
         }
         if let methods = params.methods,
            !methods.isEmpty {
-            let namespaceRecap = try createNamespaceRecap(chainNamespace: chainNamespace, methods: methods)
+            let namespaceRecap = try createNamespaceRecap(methods: methods)
             params.addResource(resource: namespaceRecap)
         }
         let requester = Participant(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
@@ -45,9 +47,15 @@ actor SessionAuthRequestService {
         try await networkingInteractor.subscribe(topic: responseTopic)
     }
 
-    private func createNamespaceRecap(chainNamespace: String, methods: [String]) throws -> String {
+    private func createNamespaceRecap(methods: [String]) throws -> String {
+        try AuthenticatedSessionRecapFactory.createNamespaceRecap(methods: methods)
+    }
+}
+
+class AuthenticatedSessionRecapFactory {
+    static func createNamespaceRecap(methods: [String]) throws -> String {
         let actions = methods.map{"request/\($0)"}
-        let recap = RecapFactory.createRecap(resource: chainNamespace, actions: actions)
+        let recap = RecapFactory.createRecap(resource: "eip155", actions: actions)
         let jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .withoutEscapingSlashes
         let jsonData = try jsonEncoder.encode(recap)
