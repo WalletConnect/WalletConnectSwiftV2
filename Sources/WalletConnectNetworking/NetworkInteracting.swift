@@ -42,6 +42,15 @@ public protocol NetworkInteracting {
         subscription: @escaping (ResponseSubscriptionPayload<Request, Response>) async throws -> Void
     )
 
+    func awaitResponse<Request: Codable, Response: Codable>(
+        request: RPCRequest,
+        topic: String,
+        method: ProtocolMethod,
+        requestOfType: Request.Type,
+        responseOfType: Response.Type,
+        envelopeType: Envelope.EnvelopeType
+    ) async throws -> Response
+
     func getClientId() throws -> String
 }
 

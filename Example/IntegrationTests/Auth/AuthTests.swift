@@ -1,3 +1,4 @@
+//
 //import Foundation
 //import XCTest
 //@testable import WalletConnectUtils
@@ -40,6 +41,7 @@
 //            keyValueStorage: keyValueStorage,
 //            keychainStorage: keychain,
 //            socketFactory: DefaultSocketFactory(),
+//            networkMonitor: NetworkMonitor(),
 //            logger: logger)
 //
 //        let networkingClient = NetworkingClientFactory.create(
@@ -92,7 +94,7 @@
 //        walletAuthClient.authRequestPublisher.sink { [unowned self] request in
 //            Task(priority: .high) {
 //                let signerFactory = DefaultSignerFactory()
-//                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+//                let signer = MessageSignerFactory(signerFactory: signerFactory).create(projectId: InputConfig.projectId)
 //                let payload = try! request.0.payload.cacaoPayload(address: walletAccount.address)
 //                let signature = try! signer.sign(payload: payload, privateKey: prvKey, type: .eip191)
 //                try! await walletAuthClient.respond(requestId: request.0.id, signature: signature, from: walletAccount)
@@ -207,3 +209,4 @@
 //        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
 //    }
 //}
+//>>>>>>> bd8835437254fb808be3ac89fdcff43fa13c3b87

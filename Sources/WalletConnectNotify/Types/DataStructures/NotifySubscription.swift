@@ -67,12 +67,14 @@ public struct ScopeValue: Codable, Equatable {
     public let id: String
     public let name: String
     public let description: String
+    public let imageUrls: NotifyImageUrls?
     public let enabled: Bool
 
-    public init(id: String, name: String, description: String, enabled: Bool) {
+    public init(id: String, name: String, description: String, imageUrls: NotifyImageUrls?, enabled: Bool) {
         self.id = id
         self.name = name
         self.description = description
+        self.imageUrls = imageUrls
         self.enabled = enabled
     }
 }

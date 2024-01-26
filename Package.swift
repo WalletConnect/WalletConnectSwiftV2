@@ -41,12 +41,11 @@ let package = Package(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
         .library(
-            name: "WalletConnectHistory",
-            targets: ["WalletConnectHistory"]),
-        .library(
             name: "WalletConnectModal",
             targets: ["WalletConnectModal"]),
-
+        .library(
+            name: "WalletConnectIdentity",
+            targets: ["WalletConnectIdentity"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
@@ -59,7 +58,7 @@ let package = Package(
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
-            dependencies: ["WalletConnectIdentity", "WalletConnectSync", "WalletConnectHistory"],
+            dependencies: ["WalletConnectIdentity", "WalletConnectSync"],
             path: "Sources/Chat"),
         .target(
             name: "Web3Wallet",
@@ -67,7 +66,7 @@ let package = Package(
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectNotify",
-            dependencies: ["WalletConnectPairing", "WalletConnectPush", "WalletConnectIdentity", "WalletConnectSigner", "Database"],
+            dependencies: ["WalletConnectIdentity", "WalletConnectPairing", "WalletConnectPush", "WalletConnectSigner", "Database"],
             path: "Sources/WalletConnectNotify"),
         .target(
             name: "WalletConnectPush",
@@ -85,9 +84,6 @@ let package = Package(
         .target(
             name: "WalletConnectPairing",
             dependencies: ["WalletConnectNetworking"]),
-        .target(
-            name: "WalletConnectHistory",
-            dependencies: ["HTTPClient", "WalletConnectRelay"]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),

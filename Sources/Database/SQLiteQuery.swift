@@ -2,7 +2,7 @@ import Foundation
 
 public struct SqliteQuery {
 
-    public static func replace(table: String, rows: [SqliteRow]) throws -> String {
+    public static func replace(table: String, rows: [SqliteRow]) -> String? {
         var values: [String] = []
 
         for row in rows {
@@ -12,7 +12,7 @@ public struct SqliteQuery {
         }
 
         guard let first = rows.first else {
-            throw Errors.rowsNotFound
+            return nil
         }
 
         let formattedArguments = first.encode().values
@@ -35,6 +35,10 @@ public struct SqliteQuery {
 
     public static func select(table: String, where argument: String, equals value: String) -> String {
         return "SELECT * FROM \(table) WHERE \(argument) = '\(value)';"
+    }
+
+    public static func delete(table: String) -> String {
+        return "DELETE FROM \(table);"
     }
 
     public static func delete(table: String, where argument: String, equals value: String) -> String {

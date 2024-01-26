@@ -98,20 +98,24 @@ struct SubscriptionView: View {
             .padding(.top, 56.0)
             .padding(.bottom, 8.0)
 
-            Text(presenter.subscriptionViewModel.name)
-                .font(.large700)
-                .foregroundColor(.Foreground100)
-                .padding(.bottom, 8.0)
+            Group {
+                Text(presenter.subscriptionViewModel.name)
+                    .font(.large700)
+                    .foregroundColor(.Foreground100)
+                    .padding(.bottom, 8.0)
 
-            Text(presenter.subscriptionViewModel.domain)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.Foreground200)
-                .padding(.bottom, 16.0)
+                Text(presenter.subscriptionViewModel.domain)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.Foreground200)
+                    .padding(.bottom, 16.0)
 
-            Text(presenter.subscriptionViewModel.description)
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.Foreground100)
-                .padding(.bottom, 16.0)
+                Text(presenter.subscriptionViewModel.description)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.Foreground100)
+                    .padding(.bottom, 16.0)
+            }
+            .padding(.horizontal, 20)
+            .multilineTextAlignment(.center)
 
             Menu {
                 Button(role: .destructive, action: {

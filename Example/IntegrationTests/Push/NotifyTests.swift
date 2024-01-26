@@ -45,6 +45,7 @@ final class NotifyTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: relayLogger)
 
         let networkingClient = NetworkingClientFactory.create(
@@ -165,7 +166,6 @@ final class NotifyTests: XCTestCase {
         }
     }
 
-    /*
     func testWalletCreatesAndUpdatesSubscription() async throws {
         let created = expectation(description: "Subscription created")
 
@@ -193,17 +193,15 @@ final class NotifyTests: XCTestCase {
 
         await fulfillment(of: [created], timeout: InputConfig.defaultTimeout)
 
-        let updateScope = Set([subscription.scope.keys.first!])
-        try await walletNotifyClientA.update(topic: subscription.topic, scope: updateScope)
+        try await walletNotifyClientA.update(topic: subscription.topic, scope: [])
 
         await fulfillment(of: [updated], timeout: InputConfig.defaultTimeout)
 
-        let updatedScope = Set(subscription.scope.filter { $0.value.enabled == true }.keys)
-        XCTAssertEqual(updatedScope, updateScope)
+        let updatedScope = subscription.scope.filter { $0.value.enabled == true }
+        XCTAssertTrue(updatedScope.isEmpty)
 
         try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
     }
-    */
 
     func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates notify subscription")
@@ -256,6 +254,28 @@ final class NotifyTests: XCTestCase {
         }
     }
 
+    func testFetchHistory() async throws {
+        let subscribeExpectation = expectation(description: "fetch notify subscription")
+        let account = Account("eip155:1:0x622b17376F76d72C43527a917f59273247A917b4")!
+
+        var subscription: NotifySubscription!
+        walletNotifyClientA.subscriptionsPublisher
+            .sink { subscriptions in
+                subscription = subscriptions.first
+                subscribeExpectation.fulfill()
+            }.store(in: &publishers)
+
+        try await walletNotifyClientA.register(account: account, domain: gmDappDomain) { message in
+            let privateKey = Data(hex: "c3ff8a0ae33ac5d58e515055c5870fa2f220d070997bd6fd77a5f2c148528ff0")
+            let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+            return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        }
+
+        await fulfillment(of: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
+
+        try await walletNotifyClientA.fetchHistory(subscription: subscription)
+        XCTAssertTrue(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count > 40)
+    }
 }
 
 

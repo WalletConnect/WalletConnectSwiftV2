@@ -25,6 +25,7 @@ public class NotifyClient {
     private let keyserverURL: URL
     private let pushClient: PushClient
     private let identityClient: IdentityClient
+    private let historyService: HistoryService
     private let notifyStorage: NotifyStorage
     private let notifyAccountProvider: NotifyAccountProvider
     private let notifyMessageSubscriber: NotifyMessageSubscriber
@@ -42,6 +43,7 @@ public class NotifyClient {
          keyserverURL: URL,
          kms: KeyManagementServiceProtocol,
          identityClient: IdentityClient,
+         historyService: HistoryService,
          pushClient: PushClient,
          notifyMessageSubscriber: NotifyMessageSubscriber,
          notifyStorage: NotifyStorage,
@@ -62,6 +64,7 @@ public class NotifyClient {
         self.keyserverURL = keyserverURL
         self.pushClient = pushClient
         self.identityClient = identityClient
+        self.historyService = historyService
         self.notifyMessageSubscriber = notifyMessageSubscriber
         self.notifyStorage = notifyStorage
         self.deleteNotifySubscriptionRequester = deleteNotifySubscriptionRequester
@@ -143,6 +146,21 @@ public class NotifyClient {
 
     public func messagesPublisher(topic: String) -> AnyPublisher<[NotifyMessageRecord], Never> {
         return notifyStorage.messagesPublisher(topic: topic)
+    }
+
+    public func fetchHistory(subscription: NotifySubscription) async throws {
+        let messages = try await historyService.fetchHistory(
+            account: subscription.account,
+            topic: subscription.topic,
+            appAuthenticationKey: subscription.appAuthenticationKey,
+            host: subscription.metadata.url
+        )
+
+        let records = messages.map { message in
+            return NotifyMessageRecord(topic: subscription.topic, message: message, publishedAt: message.sentAt)
+        }
+
+        try notifyStorage.setMessages(records)
     }
 }
 

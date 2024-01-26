@@ -32,6 +32,7 @@ final class XPlatformW3WTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: relayLogger
         )
 

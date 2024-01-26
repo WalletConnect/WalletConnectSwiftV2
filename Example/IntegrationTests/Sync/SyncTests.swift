@@ -63,6 +63,7 @@ final class SyncTests: XCTestCase {
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: logger)
         let networkingInteractor = NetworkingClientFactory.create(
             relayClient: relayClient,

@@ -29,6 +29,7 @@ final class SignClientTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: logger
         )
 
@@ -106,6 +107,7 @@ final class SignClientTests: XCTestCase {
 
         class Store { var rejectedProposal: Session.Proposal? }
         let store = Store()
+        let semaphore = DispatchSemaphore(value: 0)
 
         let uri = try! await dappPairingClient.create()
         try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
@@ -116,10 +118,12 @@ final class SignClientTests: XCTestCase {
                 do {
                     try await wallet.rejectSession(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
                     store.rejectedProposal = proposal
+                    semaphore.signal()
                 } catch { XCTFail("\(error)") }
             }
         }.store(in: &publishers)
         dapp.sessionRejectionPublisher.sink { proposal, _ in
+            semaphore.wait()
             XCTAssertEqual(store.rejectedProposal, proposal)
             sessionRejectExpectation.fulfill() // TODO: Assert reason code
         }.store(in: &publishers)
@@ -875,7 +879,6 @@ final class SignClientTests: XCTestCase {
     func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
         let responseExpectation = expectation(description: "error response delivered")
         let uri = try! await dapp.authenticate(AuthRequestParams.stub())
-        try! await dapp.authenticate(AuthRequestParams.stub(), topic: uri.topic)
 
         try? await walletPairingClient.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
@@ -900,8 +903,6 @@ final class SignClientTests: XCTestCase {
     func testSessionAuthenticateUserRespondError() async {
         let responseExpectation = expectation(description: "error response delivered")
         let uri = try! await dapp.authenticate(AuthRequestParams.stub())
-
-        try! await dapp.authenticate(AuthRequestParams.stub(), topic: uri.topic)
 
         try? await walletPairingClient.pair(uri: uri)
         wallet.authRequestPublisher.sink { [unowned self] request in

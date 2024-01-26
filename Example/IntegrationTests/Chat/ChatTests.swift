@@ -1,10 +1,10 @@
+//
 //import Foundation
 //import XCTest
 //@testable import WalletConnectChat
 //import WalletConnectUtils
 //@testable import WalletConnectKMS
 //@testable import WalletConnectSync
-//@testable import WalletConnectHistory
 //import WalletConnectRelay
 //import Combine
 //import Web3
@@ -57,6 +57,7 @@
 //            keyValueStorage: keyValueStorage,
 //            keychainStorage: keychain,
 //            socketFactory: DefaultSocketFactory(),
+//            networkMonitor: NetworkMonitor(),
 //            logger: logger)
 //
 //        let networkingInteractor = NetworkingClientFactory.create(
@@ -71,18 +72,10 @@
 //            keychain: keychain
 //        )
 //
-//        let historyClient = HistoryClientFactory.create(
-//            historyUrl: "https://history.walletconnect.com",
-//            relayUrl: "wss://relay.walletconnect.com",
-//            keyValueStorage: keyValueStorage,
-//            keychain: keychain,
-//            logger: logger
-//        )
-//
 //        let clientId = try! networkingInteractor.getClientId()
 //        logger.debug("My client id is: \(clientId)")
 //
-//        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient, historyClient: historyClient)
+//        return ChatClientFactory.create(keyserverURL: keyserverURL, relayClient: relayClient, networkingInteractor: networkingInteractor, keychain:  keychain, logger: logger, storage: keyValueStorage, syncClient: syncClient)
 //    }
 //
 //    func testInvite() async throws {
@@ -173,3 +166,4 @@
 //        return .signed(try! signer.sign(message: message, privateKey: privateKey, type: .eip191))
 //    }
 //}
+//>>>>>>> bd8835437254fb808be3ac89fdcff43fa13c3b87

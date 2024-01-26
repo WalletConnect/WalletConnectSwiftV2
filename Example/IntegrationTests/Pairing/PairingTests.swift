@@ -29,6 +29,7 @@ final class PairingTests: XCTestCase {
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: logger)
 
         let networkingClient = NetworkingClientFactory.create(
