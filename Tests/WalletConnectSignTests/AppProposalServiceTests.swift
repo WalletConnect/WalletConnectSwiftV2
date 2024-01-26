@@ -99,7 +99,7 @@ final class AppProposalServiceTests: XCTestCase {
 
     func testHandleSessionProposeResponse() async {
         let exp = expectation(description: "testHandleSessionProposeResponse")
-        let uri = try! await appPairService.create()
+        let uri = try! await appPairService.create(supportedMethods: nil)
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
@@ -128,7 +128,7 @@ final class AppProposalServiceTests: XCTestCase {
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
         _ = storageMock.getPairing(forTopic: topicA)!
 
-        wait(for: [exp], timeout: 5)
+        await fulfillment(of: [exp], timeout: 5)
 
         let sessionTopic = networkingInteractor.subscriptions.last!
 
@@ -137,7 +137,7 @@ final class AppProposalServiceTests: XCTestCase {
     }
 
     func testSessionProposeError() async {
-        let uri = try! await appPairService.create()
+        let uri = try! await appPairService.create(supportedMethods: nil)
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
@@ -161,7 +161,7 @@ final class AppProposalServiceTests: XCTestCase {
     }
 
     func testSessionProposeErrorOnActivePairing() async {
-        let uri = try! await appPairService.create()
+        let uri = try! await appPairService.create(supportedMethods: nil)
         let pairing = storageMock.getPairing(forTopic: uri.topic)!
         let topicA = pairing.topic
         let relayOptions = RelayProtocolOptions(protocol: "", data: nil)

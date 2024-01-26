@@ -237,12 +237,6 @@ public class Web3WalletClient {
         signClient.getPendingProposals(topic: topic)
     }
 
-    /// - Parameter id: id of a wc_sessionRequest jsonrpc request
-    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
-        signClient.getSessionRequestRecord(id: id)
-    }
-
     public func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) throws -> AuthObject {
         try signClient.makeAuthObject(authRequest: authRequest, signature: signature, account: account)
     }
