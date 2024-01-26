@@ -12,7 +12,14 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         pairingDeleteRequestSubscriber.deletePublisherSubject.eraseToAnyPublisher()
     }
 
+    public var pairingStatePublisher: AnyPublisher<Bool, Never> {
+        return pairingStateProvider.pairingStatePublisher
+    }
+
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
+    public var pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
+        return expirationService.pairingExpirationPublisher
+    }
 
     private let pairingStorage: WCPairingStorage
     private let walletPairService: WalletPairService
@@ -28,6 +35,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let resubscribeService: PairingResubscribeService
     private let expirationService: ExpirationService
     private let pairingDeleteRequestSubscriber: PairingDeleteRequestSubscriber
+    private let pairingStateProvider: PairingStateProvider
 
     private let cleanupService: PairingCleanupService
 
@@ -50,7 +58,8 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         cleanupService: PairingCleanupService,
         pingService: PairingPingService,
         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
-        pairingsProvider: PairingsProvider
+        pairingsProvider: PairingsProvider,
+        pairingStateProvider: PairingStateProvider
     ) {
         self.pairingStorage = pairingStorage
         self.appPairService = appPairService
@@ -67,6 +76,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         self.pingService = pingService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
+        self.pairingStateProvider = pairingStateProvider
         setUpPublishers()
         setUpExpiration()
     }

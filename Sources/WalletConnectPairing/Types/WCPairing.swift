@@ -28,30 +28,12 @@ public struct WCPairing: SequenceObject {
         30 * .day
     }
 
-    public init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, requestReceived: Bool = false, expiryDate: Date) {
-        self.topic = topic
-        self.relay = relay
-        self.peerMetadata = peerMetadata
-        self.active = isActive
-        self.requestReceived = requestReceived
-        self.expiryDate = expiryDate
-    }
-
-    public init(topic: String) {
-        self.topic = topic
-        self.relay = RelayProtocolOptions(protocol: "irn", data: nil)
-        self.active = false
-        self.requestReceived = false
-        self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
-    }
-
     public init(uri: WalletConnectURI) {
         self.topic = uri.topic
         self.relay = uri.relay
         self.active = false
         self.requestReceived = false
-        self.expiryDate = Self.dateInitializer().advanced(by: Self.timeToLiveInactive)
-        self.methods = uri.methods
+        self.expiryDate = Date(timeIntervalSince1970: TimeInterval(uri.expiryTimestamp))
     }
 
     public mutating func activate() {
@@ -77,3 +59,32 @@ public struct WCPairing: SequenceObject {
         expiryDate = newExpiryDate
     }
 }
+
+#if DEBUG
+extension WCPairing {
+    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true, topic: String = String.generateTopic()) -> WCPairing {
+        WCPairing(topic: topic, relay: RelayProtocolOptions.stub(), peerMetadata: AppMetadata.stub(), isActive: isActive, expiryDate: expiryDate)
+    }
+
+    init(topic: String, relay: RelayProtocolOptions, peerMetadata: AppMetadata, isActive: Bool = false, requestReceived: Bool = false, expiryDate: Date) {
+        self.topic = topic
+        self.relay = relay
+        self.peerMetadata = peerMetadata
+        self.active = isActive
+        self.requestReceived = requestReceived
+        self.expiryDate = expiryDate
+    }
+}
+
+extension WalletConnectURI {
+    public static func stub() -> WalletConnectURI {
+        WalletConnectURI(
+            topic: String.generateTopic(),
+            symKey: SymmetricKey().hexRepresentation,
+            relay: RelayProtocolOptions(protocol: "", data: nil),
+            methods: ["wc_sessionPropose"]
+        )
+    }
+}
+
+#endif

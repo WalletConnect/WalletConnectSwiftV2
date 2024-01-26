@@ -22,8 +22,8 @@ final class AppPairActivationServiceTests: XCTestCase {
     }
 
     func testActivate() {
-        let topic = "topic"
-        let pairing = WCPairing(topic: topic)
+        let pairing = WCPairing(uri: WalletConnectURI.stub())
+        let topic = pairing.topic
         let date = pairing.expiryDate
 
         storageMock.setPairing(pairing)

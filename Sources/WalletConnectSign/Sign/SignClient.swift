@@ -117,6 +117,20 @@ public final class SignClient: SignClientProtocol {
         return logger.logsPublisher
     }
 
+    /// Publisher that sends session proposal expiration
+    public var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
+        return proposalExpiryWatcher.sessionProposalExpirationPublisher
+    }
+
+    public var pendingProposalsPublisher: AnyPublisher<[(proposal: Session.Proposal, context: VerifyContext?)], Never> {
+        return pendingProposalsProvider.pendingProposalsPublisher
+    }
+
+    public var requestExpirationPublisher: AnyPublisher<Request, Never> {
+        return requestsExpiryWatcher.requestExpirationPublisher
+    }
+
+
     /// An object that loggs SDK's errors and info messages
     public let logger: ConsoleLogging
 
@@ -137,13 +151,16 @@ public final class SignClient: SignClientProtocol {
     private let appProposeService: AppProposeService
     private let historyService: HistoryService
     private let cleanupService: SignCleanupService
-    
+    private let pendingRequestsProvider: PendingRequestsProvider
+    private let proposalExpiryWatcher: ProposalExpiryWatcher
+    private let pendingProposalsProvider: PendingProposalsProvider
+    private let requestsExpiryWatcher: RequestsExpiryWatcher
+
     //Auth
     private let appRequestService: SessionAuthRequestService
     private let authResposeSubscriber: AuthResponseSubscriber
     private let authRequestSubscriber: AuthRequestSubscriber
     private let authResponder: AuthResponder
-    private let pendingRequestsProvider: PendingRequestsProvider
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
     private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
@@ -184,7 +201,10 @@ public final class SignClient: SignClientProtocol {
          appRespondSubscriber: AuthResponseSubscriber,
          authRequestSubscriber: AuthRequestSubscriber,
          authResponder: AuthResponder,
-         pendingRequestsProvider: PendingRequestsProvider
+         pendingRequestsProvider: PendingRequestsProvider,
+         proposalExpiryWatcher: ProposalExpiryWatcher,
+         pendingProposalsProvider: PendingProposalsProvider,
+         requestsExpiryWatcher: RequestsExpiryWatcher
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -207,6 +227,9 @@ public final class SignClient: SignClientProtocol {
         self.authResponder = authResponder
         self.authResposeSubscriber = appRespondSubscriber
         self.pendingRequestsProvider = pendingRequestsProvider
+        self.proposalExpiryWatcher = proposalExpiryWatcher
+        self.pendingProposalsProvider = pendingProposalsProvider
+        self.requestsExpiryWatcher = requestsExpiryWatcher
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -436,21 +459,9 @@ public final class SignClient: SignClientProtocol {
             return historyService.getPendingRequests()
         }
     }
-    
-    /// Query pending proposals
-    /// - Returns: Pending proposals received from peer with `wc_sessionPropose` protocol method
-    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
-        if let topic = topic {
-            return historyService.getPendingProposals(topic: topic)
-        } else {
-            return historyService.getPendingProposals()
-        }
-    }
 
-    /// - Parameter id: id of a wc_sessionRequest jsonrpc request
-    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
-        return historyService.getSessionRequest(id: id)
+    public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
+        pendingProposalsProvider.getPendingProposals()
     }
 
     /// Delete all stored data such as: pairings, sessions, keys

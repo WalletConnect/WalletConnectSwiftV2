@@ -1,3 +1,4 @@
+//
 //import XCTest
 //import Combine
 //
@@ -154,12 +155,12 @@
 //    }
 //    
 //    func testRejectSessionCalled() async {
-//        try! await web3WalletClient.rejectSession(proposalId: "", reason: .userRejected)
+//        try! await web3WalletClient.reject(proposalId: "", reason: .userRejected)
 //        XCTAssertTrue(signClient.rejectCalled)
 //    }
 //    
 //    func testRejectAuthRequestCalled() async {
-//        try! await web3WalletClient.rejectSession(requestId: .left(""))
+//        try! await web3WalletClient.reject(requestId: .left(""))
 //        XCTAssertTrue(authClient.rejectCalled)
 //    }
 //    
@@ -225,7 +226,7 @@
 //            iat: "2021-09-30T16:25:24Z"
 //        )
 //        
-//        let formattedMessage = try! web3WalletClient.formatAuthMessage(
+//        let formattedMessage = try! web3WalletClient.formatMessage(
 //            payload: authPayload,
 //            address: ""
 //        )
@@ -247,11 +248,6 @@
 //    func testSignPendingRequestsCalledAndNotEmpty() async {
 //        let pendingRequests = web3WalletClient.getPendingRequests(topic: "")
 //        XCTAssertEqual(1, pendingRequests.count)
-//    }
-//    
-//    func testSessionRequestRecordCalledAndNotNil() async {
-//        let sessionRequestRecord = web3WalletClient.getSessionRequestRecord(id: .left(""))
-//        XCTAssertNotNil(sessionRequestRecord)
 //    }
 //    
 //    func testAuthPendingRequestsCalledAndNotEmpty() async {

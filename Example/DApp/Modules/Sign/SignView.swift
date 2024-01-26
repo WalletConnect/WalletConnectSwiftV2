@@ -72,6 +72,7 @@ struct SignView: View {
                         .padding(12)
                     }
                 }
+                .padding(.bottom, presenter.accountsDetails.isEmpty ? 0 : 76) 
                 .onAppear {
                     presenter.onAppear()
                 }

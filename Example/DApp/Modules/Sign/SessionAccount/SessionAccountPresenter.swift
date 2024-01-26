@@ -12,7 +12,10 @@ final class SessionAccountPresenter: ObservableObject {
     @Published var showError = false
     @Published var errorMessage = String.empty
     @Published var showRequestSent = false
-    
+    @Published var requesting = false
+    var lastRequest: Request?
+
+
     private let interactor: SessionAccountInteractor
     private let router: SessionAccountRouter
     private let session: Session
@@ -41,14 +44,21 @@ final class SessionAccountPresenter: ObservableObject {
         do {
             let requestParams = try getRequest(for: method)
             
-            let request = Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!)
+            let ttl: TimeInterval = 300
+            let request = try Request(topic: session.topic, method: method, params: requestParams, chainId: Blockchain(sessionAccount.chain)!, ttl: ttl)
             Task {
                 do {
+                    ActivityIndicatorManager.shared.start()
                     try await Sign.instance.request(params: request)
+                    lastRequest = request
+                    ActivityIndicatorManager.shared.stop()
+                    requesting = true
                     DispatchQueue.main.async { [weak self] in
                         self?.openWallet()
                     }
                 } catch {
+                    ActivityIndicatorManager.shared.stop()
+                    requesting = false
                     showError.toggle()
                     errorMessage = error.localizedDescription
                 }
@@ -70,6 +80,7 @@ extension SessionAccountPresenter {
         Sign.instance.sessionResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] response in
+                requesting = false
                 presentResponse(response: response)
             }
             .store(in: &subscriptions)

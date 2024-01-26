@@ -41,4 +41,8 @@ final class MainRouter {
         AuthRequestModule.create(app: app, request: request, importAccount: importAccount, context: context)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
+
+    func dismiss() {
+        viewController.dismiss()
+    }
 }

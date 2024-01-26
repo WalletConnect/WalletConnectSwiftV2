@@ -4,19 +4,7 @@ import JSONRPC
 import WalletConnectKMS
 import WalletConnectUtils
 import TestingUtils
-import WalletConnectPairing
-
-extension Pairing {
-    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), topic: String = String.generateTopic()) -> Pairing {
-        Pairing(topic: topic, peer: nil, expiryDate: expiryDate)
-    }
-}
-
-extension WCPairing {
-    static func stub(expiryDate: Date = Date(timeIntervalSinceNow: 10000), isActive: Bool = true, topic: String = String.generateTopic()) -> WCPairing {
-        WCPairing(topic: topic, relay: RelayProtocolOptions.stub(), peerMetadata: AppMetadata.stub(), isActive: isActive, expiryDate: expiryDate)
-    }
-}
+@testable import WalletConnectPairing
 
 extension ProposalNamespace {
     static func stubDictionary() -> [String: ProposalNamespace] {
@@ -68,7 +56,7 @@ extension RPCRequest {
 
     static func stubRequest(method: String, chainId: Blockchain, expiry: UInt64? = nil) -> RPCRequest {
         let params = SessionType.RequestParams(
-            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable()), expiry: expiry),
+            request: SessionType.RequestParams.Request(method: method, params: AnyCodable(EmptyCodable()), expiryTimestamp: expiry),
             chainId: chainId)
         return RPCRequest(method: SessionRequestProtocolMethod().method, params: params)
     }

@@ -55,11 +55,17 @@ final class SignPresenter: ObservableObject {
     @MainActor
     func connectWalletWithSessionPropose() {
         Task {
-            walletConnectUri = try await Sign.instance.connect(
-                requiredNamespaces: Proposal.requiredNamespaces,
-                optionalNamespaces: Proposal.optionalNamespaces
-            )
-            router.presentNewPairing(walletConnectUri: walletConnectUri!)
+            do {
+                ActivityIndicatorManager.shared.start()
+                walletConnectUri = try await Sign.instance.connect(
+                    requiredNamespaces: Proposal.requiredNamespaces,
+                    optionalNamespaces: Proposal.optionalNamespaces
+                )
+                ActivityIndicatorManager.shared.stop()
+                router.presentNewPairing(walletConnectUri: walletConnectUri!)
+            } catch {
+                ActivityIndicatorManager.shared.stop()
+            }
         }
     }
 
@@ -76,9 +82,12 @@ final class SignPresenter: ObservableObject {
         if let session {
             Task { @MainActor in
                 do {
+                    ActivityIndicatorManager.shared.start()
                     try await Sign.instance.disconnect(topic: session.topic)
+                    ActivityIndicatorManager.shared.stop()
                     accountsDetails.removeAll()
                 } catch {
+                    ActivityIndicatorManager.shared.stop()
                     showError.toggle()
                     errorMessage = error.localizedDescription
                 }
@@ -110,6 +119,15 @@ extension SignPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] _ in
                 self.accountsDetails.removeAll()
+                router.popToRoot()
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
+            }
+            .store(in: &subscriptions)
+
+        Sign.instance.sessionResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { response in
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
 
@@ -118,6 +136,13 @@ extension SignPresenter {
             .sink { [unowned self] _ in
                 self.router.dismiss()
                 self.getSession()
+            }
+            .store(in: &subscriptions)
+        Sign.instance.requestExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
+                AlertPresenter.present(message: "Session Request has expired", type: .warning)
             }
             .store(in: &subscriptions)
     }

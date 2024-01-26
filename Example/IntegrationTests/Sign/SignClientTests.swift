@@ -207,7 +207,7 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
+                let request = try! Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.request(params: request)
             }
         }.store(in: &publishers)
@@ -254,7 +254,7 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
+                let request = try! Request(id: RPCID(0), topic: settledSession.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.request(params: request)
             }
         }.store(in: &publishers)
@@ -695,7 +695,7 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dappPairingClient.create()
         try await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
         try await walletPairingClient.pair(uri: uri)
-        await fulfillment(of: [settlementFailedExpectation], timeout: 1)
+        await fulfillment(of: [settlementFailedExpectation], timeout: InputConfig.defaultTimeout)
     }
     
     func testCaip25SatisfyPartiallyRequiredNamespacesMethodsFails() async throws {
@@ -951,7 +951,7 @@ final class SignClientTests: XCTestCase {
             guard case .success(let session) = result else { XCTFail(); return }
 
             Task(priority: .high) {
-                let request = Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain, expiry: nil)
+                let request = try Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.request(params: request)
             }
         }

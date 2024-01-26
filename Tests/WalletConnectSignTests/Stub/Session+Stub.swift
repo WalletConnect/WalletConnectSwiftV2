@@ -31,7 +31,7 @@ extension WCSession {
                 events: [],
                 accounts: Account.stubSet(),
                 acknowledged: acknowledged,
-                expiry: Int64(expiryDate.timeIntervalSince1970))
+                expiryTimestamp: Int64(expiryDate.timeIntervalSince1970))
         }
 }
 

@@ -4,6 +4,17 @@ import Combine
 @testable import WalletConnectPairing
 
 final class PairingClientMock: PairingClientProtocol {
+    var pairingStatePublisher: AnyPublisher<Bool, Never> {
+        pairingStatePublisherSubject.eraseToAnyPublisher()
+    }
+    var pairingStatePublisherSubject = PassthroughSubject<Bool, Never>()
+
+    var pairingExpirationPublisher: AnyPublisher<WalletConnectPairing.Pairing, Never> {
+        return pairingExpirationPublisherSubject.eraseToAnyPublisher()
+    }
+    var pairingExpirationPublisherSubject = PassthroughSubject<WalletConnectPairing.Pairing, Never>()
+
+
     var pairingDeletePublisher: AnyPublisher<(code: Int, message: String), Never> {
         pairingDeletePublisherSubject.eraseToAnyPublisher()
     }
@@ -29,7 +40,7 @@ final class PairingClientMock: PairingClientProtocol {
     }
     
     func getPairings() -> [Pairing] {
-        return [Pairing(topic: "", peer: nil, expiryDate: Date())]
+        return [Pairing(WCPairing.stub())]
     }
 
     func register(supportedMethods: [String]) async {
