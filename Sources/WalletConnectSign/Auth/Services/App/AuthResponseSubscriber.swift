@@ -46,12 +46,7 @@ class AuthResponseSubscriber {
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
-                guard let record = rpcHistory.get(recordId: payload.id) else {
-                    logger.error("record not found")
-                    return
-                }
-                let pairingTopic = record.topic
-
+                let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
 
                 let requestId = payload.id
@@ -66,7 +61,6 @@ class AuthResponseSubscriber {
                         onResponse?(requestId, .failure(error as! AuthError))
                         return
                     }
-                    let pairingTopic = pairingTopic
                     let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, authRequestPayload: authRequestPayload)
 
                     onResponse?(requestId, .success(session))
