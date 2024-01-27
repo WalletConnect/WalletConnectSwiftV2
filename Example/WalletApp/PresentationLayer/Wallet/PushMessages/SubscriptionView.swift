@@ -34,6 +34,11 @@ struct SubscriptionView: View {
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                 }
+
+                if presenter.isMoreDataAvailable {
+                    lastRowView()
+                        .listRowSeparator(.hidden)
+                }
             }
             .listStyle(PlainListStyle())
         }
@@ -160,6 +165,26 @@ struct SubscriptionView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 410)
+    }
+
+    func lastRowView() -> some View {
+        VStack {
+            switch presenter.loadingState {
+            case .loading:
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.bottom, 24)
+            case .idle:
+                EmptyView()
+            }
+        }
+        .frame(height: 50)
+        .onAppear {
+            presenter.loadMoreMessages()
+        }
     }
 }
 

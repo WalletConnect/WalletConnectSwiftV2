@@ -12,7 +12,7 @@ public final class HistoryService {
         self.identityClient = identityClient
     }
 
-    public func fetchHistory(account: Account, topic: String, appAuthenticationKey: String, host: String) async throws -> [NotifyMessage] {
+    public func fetchHistory(account: Account, topic: String, appAuthenticationKey: String, host: String, after: String?, limit: Int) async throws -> [NotifyMessage] {
         let dappAuthKey = try DIDKey(did: appAuthenticationKey)
         let app = DIDWeb(host: host)
 
@@ -21,8 +21,8 @@ public final class HistoryService {
             keyserver: keyserver.absoluteString,
             dappAuthKey: dappAuthKey,
             app: app,
-            limit: 50,
-            after: nil
+            limit: UInt64(limit),
+            after: after
         )
 
         let wrapper = try identityClient.signAndCreateWrapper(payload: requestPayload, account: account)
