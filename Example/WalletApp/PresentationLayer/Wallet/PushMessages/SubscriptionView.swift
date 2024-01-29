@@ -77,7 +77,7 @@ struct SubscriptionView: View {
                             .font(.system(size: 11))
                     }
 
-                    Text(pushMessage.subtitle)
+                    Text(.init(pushMessage.subtitle))
                         .foregroundColor(.Foreground175)
                         .font(.system(size: 13))
 
