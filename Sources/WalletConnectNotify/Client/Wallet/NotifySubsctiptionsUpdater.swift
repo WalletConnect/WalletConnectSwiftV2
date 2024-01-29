@@ -42,9 +42,13 @@ final class NotifySubsctiptionsUpdater {
                 try kms.setSymmetricKey(symKey, for: subscription.topic)
             }
 
-            let topics = newSubscriptions.map { $0.topic }
+            let topicsToSubscribe = newSubscriptions.map { $0.topic }
 
-            try await networkingInteractor.batchSubscribe(topics: topics)
+            let oldTopics = Set(oldSubscriptions.map { $0.topic })
+            let topicsToUnsubscribe = Array(oldTopics.subtracting(topicsToSubscribe))
+
+            try await networkingInteractor.batchUnsubscribe(topics: topicsToUnsubscribe)
+            try await networkingInteractor.batchSubscribe(topics: topicsToSubscribe)
 
             try Task.checkCancellation()
 
