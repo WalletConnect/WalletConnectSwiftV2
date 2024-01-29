@@ -33,6 +33,7 @@ public struct WCPairing: SequenceObject {
         self.relay = uri.relay
         self.active = false
         self.requestReceived = false
+        self.methods = uri.methods
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(uri.expiryTimestamp))
     }
 

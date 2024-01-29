@@ -169,11 +169,11 @@ extension SignPresenter {
 extension SignPresenter: SceneViewModel {}
 
 
-// MARK: - Auth request stub
+// MARK: - Authenticate request stub
 extension AuthRequestParams {
     static func stub(
         domain: String = "service.invalid",
-        chainId: String = "eip155:1",
+        chains: [String] = ["eip155:1", "eip155:137"],
         nonce: String = "32891756",
         aud: String = "https://service.invalid/login",
         nbf: String? = nil,
@@ -184,7 +184,7 @@ extension AuthRequestParams {
     ) -> AuthRequestParams {
         return AuthRequestParams(
             domain: domain,
-            chains: [chainId],
+            chains: chains,
             nonce: nonce,
             aud: aud,
             nbf: nbf,
