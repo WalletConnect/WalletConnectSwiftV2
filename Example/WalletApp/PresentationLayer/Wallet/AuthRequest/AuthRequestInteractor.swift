@@ -13,11 +13,13 @@ final class AuthRequestInteractor {
 
     
     func approve(request: AuthenticationRequest, importAccount: ImportAccount) async throws -> Bool {
-        let account = importAccount.account
         var auths = [AuthObject]()
 
 
         try request.payload.chains.forEach { chain in
+
+            let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
+
 
             let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: account)
 

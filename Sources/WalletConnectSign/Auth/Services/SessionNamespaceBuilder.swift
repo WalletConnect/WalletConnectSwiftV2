@@ -15,9 +15,10 @@ class SessionNamespaceBuilder {
 
     func buildSessionNamespaces(cacaos: [Cacao]) throws -> [String: SessionNamespace] {
 
+        //ensure all cacaos have the same resources
         guard let cacao = cacaos.first,
               let resources = cacao.p.resources,
-              let namespacesUrn = resources.last,
+              let namespacesUrn = resources.first(where: {$0.hasPrefix("urn:recap")}),
               let decodedRecap = decodeUrnToJson(urn: namespacesUrn),
               let chainsNamespace = try? DIDPKH(did: cacao.p.iss).account.blockchain.namespace else {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
