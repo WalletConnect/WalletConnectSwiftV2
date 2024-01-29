@@ -3,9 +3,9 @@ import Foundation
 
 class SessionNamespaceBuilder {
     enum Errors: Error {
-        case recordForIdNotFound
-        case malformedAuthRequestParams
+        case emptyCacaosArrayForbidden
         case cannotCreateSessionNamespaceFromTheRecap
+        case malformedRecap
     }
     private let logger: ConsoleLogging
 
@@ -14,20 +14,31 @@ class SessionNamespaceBuilder {
     }
 
     func buildSessionNamespaces(cacaos: [Cacao]) throws -> [String: SessionNamespace] {
+        guard !cacaos.isEmpty else {
+            throw Errors.emptyCacaosArrayForbidden
+        }
 
-        //ensure all cacaos have the same resources
-        guard let cacao = cacaos.first,
-              let resources = cacao.p.resources,
-              let namespacesUrn = resources.first(where: {$0.hasPrefix("urn:recap")}),
-              let decodedRecap = decodeUrnToJson(urn: namespacesUrn),
-              let chainsNamespace = try? DIDPKH(did: cacao.p.iss).account.blockchain.namespace else {
+        // Get the first "urn:recap" resource from the first cacao
+        guard let recapUrn = cacaos.first?.p.resources?.first(where: { $0.hasPrefix("urn:recap") }) else {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
         }
 
-        let accounts = cacaos.compactMap{ try? DIDPKH(did: $0.p.iss).account }
+        // Check if all cacaos have exactly the same first "urn:recap" resource
+        for cacao in cacaos {
+            guard let resources = cacao.p.resources,
+                  resources.contains(recapUrn) else {
+                throw Errors.malformedRecap
+            }
+        }
+
+        guard let decodedRecap = decodeUrnToJson(urn: recapUrn),
+              let chainsNamespace = try? DIDPKH(did: cacaos.first!.p.iss).account.blockchain.namespace else {
+            throw Errors.cannotCreateSessionNamespaceFromTheRecap
+        }
+
+        let accounts = cacaos.compactMap { try? DIDPKH(did: $0.p.iss).account }
 
         let accountsSet = Set(accounts)
-
         let methods = getMethods(from: decodedRecap)
 
         let sessionNamespace = SessionNamespace(accounts: accountsSet, methods: methods, events: [])
