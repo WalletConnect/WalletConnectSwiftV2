@@ -32,7 +32,7 @@ extension View {
     
     @ViewBuilder
     func onTapGestureBackported(count: Int = 1, perform action: @escaping () -> Void) -> some View {
-        self
+        self.onTapGesture(count: count, perform: action)
     }
         
     #elseif os(tvOS)

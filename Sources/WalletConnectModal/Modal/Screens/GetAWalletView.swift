@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct GetAWalletView: View {
-    let wallets: [Listing]
-    let onWalletTap: (Listing) -> Void
+    let wallets: [Wallet]
+    let onWalletTap: (Wallet) -> Void
     let navigateToExternalLink: (URL) -> Void
     
     var body: some View {
@@ -71,7 +71,7 @@ struct GetAWalletView: View {
 struct GetAWalletView_Previews: PreviewProvider {
     static var previews: some View {
         GetAWalletView(
-            wallets: Listing.stubList,
+            wallets: Wallet.stubList,
             onWalletTap: { _ in },
             navigateToExternalLink: { _ in }
         )

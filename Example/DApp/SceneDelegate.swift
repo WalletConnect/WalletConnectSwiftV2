@@ -1,6 +1,7 @@
 import UIKit
 
 import Web3Modal
+import WalletConnectModal
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
@@ -42,6 +43,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 )
             ]
         )
+        
+        WalletConnectModal.configure(
+            projectId: InputConfig.projectId,
+            metadata: metadata
+        )
+        
 
         Sign.instance.logsPublisher.sink { log in
             switch log {

@@ -2,6 +2,7 @@ import UIKit
 import Combine
 
 import Web3Modal
+import WalletConnectModal
 import WalletConnectSign
 
 final class SignPresenter: ObservableObject {
@@ -50,6 +51,14 @@ final class SignPresenter: ObservableObject {
             ))
         }
         Web3Modal.present(from: nil)
+    }
+    
+    func connectWalletWithWCM() {
+        WalletConnectModal.set(sessionParams: .init(
+            requiredNamespaces: Proposal.requiredNamespaces,
+            optionalNamespaces: Proposal.optionalNamespaces
+        ))
+        WalletConnectModal.present(from: nil)
     }
     
     @MainActor
