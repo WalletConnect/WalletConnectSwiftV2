@@ -16,6 +16,8 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
         let aud: String
         /// Blockchain account that notify subscription has been proposed for -`did:pkh`
         let sub: String
+        /// array of Notify Server Subscriptions
+        let sbs: [NotifyServerSubscription]
         /// Dapp's domain url
         let app: String
 
@@ -39,22 +41,16 @@ struct NotifyUpdateResponsePayload: JWTClaimsCodable {
     let account: Account
     let selfPubKey: DIDKey
     let app: DIDWeb
+    let subscriptions: [NotifyServerSubscription]
 
     init(claims: Claims) throws {
         self.account = try Account(DIDPKHString: claims.sub)
         self.selfPubKey = try DIDKey(did: claims.aud)
         self.app = try DIDWeb(did: claims.app)
+        self.subscriptions = claims.sbs
     }
 
     func encode(iss: String) throws -> Claims {
-        return Claims(
-            iat: defaultIat(),
-            exp: expiry(days: 1),
-            act: Claims.action,
-            iss: iss,
-            aud: selfPubKey.did(variant: .ED25519),
-            sub: account.did,
-            app: app.did
-        )
+        fatalError()
     }
 }

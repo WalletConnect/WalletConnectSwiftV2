@@ -18,6 +18,8 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
         let sub: String
         /// Dapp's domain url
         let app: String
+        /// array of Notify Subscriptions
+        let sbs: [NotifyServerSubscription]
 
         static var action: String? {
             return "notify_subscription_response"
@@ -39,22 +41,16 @@ struct NotifySubscriptionResponsePayload: JWTClaimsCodable {
     let account: Account
     let selfPubKey: DIDKey
     let app: String
+    let subscriptions: [NotifyServerSubscription]
 
     init(claims: Claims) throws {
         self.account = try Account(DIDPKHString: claims.sub)
         self.selfPubKey = try DIDKey(did: claims.aud)
         self.app = claims.app
+        self.subscriptions = claims.sbs
     }
 
     func encode(iss: String) throws -> Claims {
-        return Claims(
-            iat: defaultIat(),
-            exp: expiry(days: 1),
-            act: Claims.action,
-            iss: iss,
-            aud: selfPubKey.did(variant: .ED25519),
-            sub: account.did,
-            app: app
-        )
+        fatalError("Client is not supposed to encode this JWT payload")
     }
 }
