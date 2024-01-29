@@ -7,7 +7,7 @@ public struct SqliteQuery {
 
         for row in rows {
             values.append(row.encode().values
-                .map { "'\($0.value)'" }
+                .map { "'\($0.value.screen())'" }
                 .joined(separator: ", "))
         }
 
@@ -34,7 +34,7 @@ public struct SqliteQuery {
     }
 
     public static func select(table: String, where argument: String, equals value: String) -> String {
-        return "SELECT * FROM \(table) WHERE \(argument) = '\(value)';"
+        return "SELECT * FROM \(table) WHERE \(argument) = '\(value.screen())';"
     }
 
     public static func delete(table: String) -> String {
@@ -42,7 +42,7 @@ public struct SqliteQuery {
     }
 
     public static func delete(table: String, where argument: String, equals value: String) -> String {
-        return "DELETE FROM \(table) WHERE \(argument) = '\(value)';"
+        return "DELETE FROM \(table) WHERE \(argument) = '\(value.screen())';"
     }
 }
 
@@ -50,5 +50,12 @@ extension SqliteQuery {
 
     enum Errors: Error {
         case rowsNotFound
+    }
+}
+
+private extension String {
+
+    func screen() -> String {
+        return replacingOccurrences(of: "'", with: "''")
     }
 }

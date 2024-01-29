@@ -64,7 +64,8 @@ final class SubscriptionPresenter: ObservableObject {
         case .idle:
             Task(priority: .high) { @MainActor in
                 loadingState = .loading
-                isMoreDataAvailable = try await interactor.fetchHistory(after: messages.last?.id, limit: 50)
+                let isLoaded = try? await interactor.fetchHistory(after: messages.last?.id, limit: 50)
+                isMoreDataAvailable = isLoaded ?? false
                 loadingState = .idle
             }
         }
