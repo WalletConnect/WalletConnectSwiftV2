@@ -78,18 +78,17 @@ final class ModalViewModelTests: XCTestCase {
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
-            URL(string: "https://example.com/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
+            URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
         )
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called using universal link")
         
-        sut.navigateToDeepLink(wallet: sut.wallets[1], preferUniversal: false, preferBrowser: false)
+        sut.navigateToDeepLink(wallet: sut.wallets[1], preferBrowser: false)
         XCTWaiter.wait(for: [expectation], timeout: 3)
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
             URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
-            URL(string: "awesomeapp://deeplinkwc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn")!
         )
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called using webapp link")
@@ -104,12 +103,12 @@ final class ModalViewModelTests: XCTestCase {
         
         expectation = XCTestExpectation(description: "Wait for openUrl to be called using native link")
         
-        sut.navigateToDeepLink(wallet: sut.wallets[1], preferUniversal: false, preferBrowser: true)
+        sut.navigateToDeepLink(wallet: sut.wallets[1], preferBrowser: true)
         XCTWaiter.wait(for: [expectation], timeout: 3)
         
         XCTAssertEqual(
             openURLFuncTest.currentValue,
-            URL(string: "https://awesome.com/awesome/desktop/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
+            URL(string: "https://awesome.com/awesome/universal/wc?uri=wc%3Afoo%402%3FsymKey%3Dbar%26relay-protocol%3Dirn%26expiryTimestamp%3D1706001526")!
         )
     }
 }
