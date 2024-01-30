@@ -53,7 +53,7 @@ extension MainPresenter {
                 router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
             }.store(in: &disposeBag)
         
-        interactor.requestPublisher
+        interactor.authenticateRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] result in
                 router.present(request: result.request, importAccount: importAccount, context: result.context)
