@@ -49,12 +49,12 @@ struct SubscriptionView: View {
     private func notificationView(pushMessage: NotifyMessageViewModel) -> some View {
         VStack(alignment: .center) {
             HStack(spacing: 12) {
-                CacheAsyncImage(url: URL(string: pushMessage.imageUrl) ?? presenter.subscriptionViewModel.imageUrl) { phase in
+                CacheAsyncImage(url: presenter.messageIconUrl(message: pushMessage)) { phase in
                     if let image = phase.image {
                         image
                             .resizable()
                             .frame(width: 48, height: 48)
-                            .background(Color.black)
+                            .background(Color.black.opacity(0.05))
                             .cornerRadius(10, corners: .allCorners)
                     } else {
                         Color.black
