@@ -1,6 +1,7 @@
 import UIKit
 
 import Web3Modal
+import WalletConnectModal
 import WalletConnectRelay
 import WalletConnectNetworking
 import Combine
@@ -29,8 +30,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         Web3Modal.configure(
             projectId: InputConfig.projectId,
+            metadata: metadata,
+            customWallets: [
+                .init(
+                    id: "swift-sample",
+                    name: "Swift Sample Wallet",
+                    homepage: "https://walletconnect.com/",
+                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
+                    order: 1,
+                    mobileLink: "walletapp://"
+                )
+            ]
+        )
+        
+        WalletConnectModal.configure(
+            projectId: InputConfig.projectId,
             metadata: metadata
         )
+        
 
         Sign.instance.logsPublisher.sink { log in
             switch log {

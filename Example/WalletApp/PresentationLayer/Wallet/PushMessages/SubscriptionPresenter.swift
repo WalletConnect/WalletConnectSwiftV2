@@ -4,12 +4,20 @@ import WalletConnectNotify
 
 final class SubscriptionPresenter: ObservableObject {
 
+    enum LoadingState {
+        case loading
+        case idle
+    }
+
     private var subscription: NotifySubscription
     private let interactor: SubscriptionInteractor
     private let router: SubscriptionRouter
     private var disposeBag = Set<AnyCancellable>()
 
     @Published private var pushMessages: [NotifyMessageRecord] = []
+
+    @Published var loadingState: LoadingState = .idle
+    @Published var isMoreDataAvailable: Bool = true
 
     var subscriptionViewModel: SubscriptionsViewModel {
         return SubscriptionsViewModel(subscription: subscription)
@@ -49,6 +57,20 @@ final class SubscriptionPresenter: ObservableObject {
         router.dismiss()
     }
 
+    func loadMoreMessages() {
+        switch loadingState {
+        case .loading:
+            break
+        case .idle:
+            Task(priority: .high) { @MainActor in
+                loadingState = .loading
+                let isLoaded = try? await interactor.fetchHistory(after: messages.last?.id, limit: 50)
+                isMoreDataAvailable = isLoaded ?? false
+                loadingState = .idle
+            }
+        }
+    }
+
     @objc func preferencesDidPress() {
         router.presentPreferences(subscription: subscription)
     }
@@ -77,8 +99,6 @@ extension SubscriptionPresenter: SceneViewModel {
 private extension SubscriptionPresenter {
 
     func setupInitialState() {
-        interactor.fetchHistory()
-
         pushMessages = interactor.getPushMessages()
 
         interactor.messagesPublisher

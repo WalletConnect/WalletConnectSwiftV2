@@ -10,7 +10,7 @@ struct WalletImage: View {
     
     @Environment(\.projectId) var projectId
     
-    var wallet: Listing?
+    var wallet: Wallet?
     var size: Size = .medium
     
     var body: some View {
@@ -24,7 +24,7 @@ struct WalletImage: View {
         }
     }
     
-    private func imageURL(for wallet: Listing?) -> URL? {
+    private func imageURL(for wallet: Wallet?) -> URL? {
         
         guard let wallet else { return nil }
             

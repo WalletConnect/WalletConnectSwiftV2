@@ -337,6 +337,7 @@
 		CF25F2892A432476009C7E49 /* WalletConnectModal in Frameworks */ = {isa = PBXBuildFile; productRef = CF25F2882A432476009C7E49 /* WalletConnectModal */; };
 		CF6704DF29E59DDC003326A4 /* XCUIElementQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6704DE29E59DDC003326A4 /* XCUIElementQuery.swift */; };
 		CF6704E129E5A014003326A4 /* XCTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6704E029E5A014003326A4 /* XCTestCase.swift */; };
+		CFDB50722B2869AA00A0CBC2 /* WalletConnectModal in Frameworks */ = {isa = PBXBuildFile; productRef = CFDB50712B2869AA00A0CBC2 /* WalletConnectModal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -707,6 +708,7 @@
 				8486EDD32B4F2EA6008E53C3 /* SwiftMessages in Frameworks */,
 				84943C7B2A9BA206007EBAC2 /* Mixpanel in Frameworks */,
 				A573C53929EC365000E3CBFD /* HDWalletKit in Frameworks */,
+				CFDB50722B2869AA00A0CBC2 /* WalletConnectModal in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1953,6 +1955,7 @@
 				84943C7A2A9BA206007EBAC2 /* Mixpanel */,
 				C5BE01DE2AF692D80064FC88 /* WalletConnectRouter */,
 				C579FEB52AFA86CD008855EB /* Web3Modal */,
+				CFDB50712B2869AA00A0CBC2 /* WalletConnectModal */,
 				8486EDD22B4F2EA6008E53C3 /* SwiftMessages */,
 			);
 			productName = DApp;
@@ -3338,7 +3341,7 @@
 			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.9;
+				minimumVersion = 1.0.15;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -3538,6 +3541,10 @@
 			productName = Web3Wallet;
 		};
 		CF25F2882A432476009C7E49 /* WalletConnectModal */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = WalletConnectModal;
+		};
+		CFDB50712B2869AA00A0CBC2 /* WalletConnectModal */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectModal;
 		};

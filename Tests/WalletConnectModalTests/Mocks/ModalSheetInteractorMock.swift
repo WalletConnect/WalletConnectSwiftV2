@@ -7,14 +7,14 @@ import WalletConnectSign
 
 final class ModalSheetInteractorMock: ModalSheetInteractor {
     
-    var listings: [Listing]
+    var wallets: [Wallet]
     
-    init(listings: [Listing] = Listing.stubList) {
-        self.listings = listings
+    init(wallets: [Wallet] = Wallet.stubList) {
+        self.wallets = wallets
     }
 
-    func getListings() async throws -> [Listing] {
-        listings
+    func getWallets(page: Int, entries: Int) async throws -> (Int, [Wallet]) {
+        (1, wallets)
     }
     
     func createPairingAndConnect() async throws -> WalletConnectURI? {
