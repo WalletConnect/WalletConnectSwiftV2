@@ -115,19 +115,19 @@ class NotificationService: UNNotificationServiceExtension {
 private extension NotificationService {
 
     func handle(content: UNNotificationContent, pushMessage: NotifyMessage, subscription: NotifySubscription, topic: String) -> UNNotificationContent {
-        
-        let icon = subscription.scope[pushMessage.type]?.imageUrls?.sm ?? pushMessage.icon
 
         var senderAvatar: INImage?
 
-        do {
-            let iconUrl = try icon.asURL()
-            let senderThumbnailImageData = try Data(contentsOf: iconUrl)
-            let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
-            let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
-            senderAvatar = INImage(imageData: senderThumbnailImageFileData)
-        } catch {
-            log("Fetch icon error: \(error)", account: subscription.account, topic: topic, message: pushMessage)
+        if let icon = subscription.messageIcons(ofType: pushMessage.type).md {
+            do {
+                let iconUrl = try icon.asURL()
+                let senderThumbnailImageData = try Data(contentsOf: iconUrl)
+                let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
+                let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
+                senderAvatar = INImage(imageData: senderThumbnailImageFileData)
+            } catch {
+                log("Fetch icon error: \(error)", account: subscription.account, topic: topic, message: pushMessage)
+            }
         }
 
         var personNameComponents = PersonNameComponents()
