@@ -19,7 +19,7 @@ public protocol SignClientProtocol {
 
     func connect(requiredNamespaces: [String: ProposalNamespace], optionalNamespaces: [String: ProposalNamespace]?, sessionProperties: [String: String]?, topic: String) async throws
     func request(params: Request) async throws
-    func approve(proposalId: String, namespaces: [String: SessionNamespace], sessionProperties: [String: String]?) async throws
+    func approve(proposalId: String, namespaces: [String: SessionNamespace], sessionProperties: [String: String]?) async throws -> Session
     func rejectSession(proposalId: String, reason: RejectionReason) async throws
     func rejectSession(requestId: RPCID) async throws
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws

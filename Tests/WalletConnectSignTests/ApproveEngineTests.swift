@@ -73,7 +73,7 @@ final class ApproveEngineTests: XCTestCase {
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
         pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
         
-        try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
+        _ = try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
 
         let topicB = networkingInteractor.subscriptions.last!
 
@@ -195,7 +195,7 @@ final class ApproveEngineTests: XCTestCase {
         
         XCTAssertTrue(verifyContextStore.getAll().count == 1)
         
-        try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
+        _ = try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
         
         XCTAssertTrue(verifyContextStore.getAll().isEmpty)
     }

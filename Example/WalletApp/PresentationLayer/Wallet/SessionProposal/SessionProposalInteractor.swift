@@ -28,7 +28,7 @@ final class SessionProposalInteractor {
             events: Array(supportedEvents),
             accounts: supportedAccounts
         )
-        try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
+        _ = try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
 
         if let uri = proposal.proposer.redirect?.native {
             WalletConnectRouter.goBack(uri: uri)

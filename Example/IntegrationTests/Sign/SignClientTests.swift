@@ -82,7 +82,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -137,7 +137,7 @@ final class SignClientTests: XCTestCase {
 
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
-                do { try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
             }
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
@@ -200,7 +200,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch {
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch {
                     XCTFail("\(error)")
                 }
             }
@@ -291,7 +291,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -488,7 +488,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -557,7 +557,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -616,7 +616,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -682,7 +682,7 @@ final class SignClientTests: XCTestCase {
             wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
                     do {
-                        try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                        _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                     } catch {
                         settlementFailedExpectation.fulfill()
                     }
@@ -748,7 +748,7 @@ final class SignClientTests: XCTestCase {
             wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
                     do {
-                        try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                        _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                     } catch {
                         settlementFailedExpectation.fulfill()
                     }
@@ -782,7 +782,7 @@ final class SignClientTests: XCTestCase {
 
                 let auth = try wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
 
-                try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
             }
         }
         .store(in: &publishers)
@@ -822,7 +822,7 @@ final class SignClientTests: XCTestCase {
                     cacaos.append(cacao)
 
                 }
-                try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: cacaos)
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: cacaos)
             }
         }
         .store(in: &publishers)
@@ -887,7 +887,7 @@ final class SignClientTests: XCTestCase {
 
                 let auth = try wallet.makeAuthObject(authRequest: request, signature: invalidSignature, account: walletAccount)
 
-                try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
             }
         }
         .store(in: &publishers)
@@ -943,7 +943,7 @@ final class SignClientTests: XCTestCase {
 
                 let auth = try wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
 
-                try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
             }
         }
         .store(in: &publishers)
