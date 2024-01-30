@@ -16,10 +16,6 @@ actor AuthResponder {
     private let metadata: AppMetadata
     private let sessionStore: WCSessionStorage
     private let sessionNamespaceBuilder: SessionNamespaceBuilder
-    private let sessionSettledPublisherSubject = PassthroughSubject<Session, Never>()
-    var sessionSettledPublisher: AnyPublisher<Session, Never> {
-        return sessionSettledPublisherSubject.eraseToAnyPublisher()
-    }
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -45,7 +41,7 @@ actor AuthResponder {
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
     }
 
-    func respond(requestId: RPCID, auths: [Cacao]) async throws {
+    func respond(requestId: RPCID, auths: [Cacao]) async throws -> Session {
         let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
         let (responseTopic, responseKeys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
@@ -81,7 +77,8 @@ actor AuthResponder {
         )
 
         verifyContextStore.delete(forKey: requestId.string)
-        sessionSettledPublisherSubject.send(session)
+        
+        return session
     }
 
     func respondError(requestId: RPCID) async throws {

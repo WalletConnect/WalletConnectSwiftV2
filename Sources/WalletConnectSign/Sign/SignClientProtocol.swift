@@ -24,7 +24,7 @@ public protocol SignClientProtocol {
     func rejectSession(requestId: RPCID) async throws
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws
     func extend(topic: String) async throws
-    func approveSessionAuthenticate(requestId: RPCID, auths: [AuthObject]) async throws 
+    func approveSessionAuthenticate(requestId: RPCID, auths: [AuthObject]) async throws -> Session
     func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) throws -> AuthObject
     func respond(topic: String, requestId: RPCID, response: RPCResult) async throws
     func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws

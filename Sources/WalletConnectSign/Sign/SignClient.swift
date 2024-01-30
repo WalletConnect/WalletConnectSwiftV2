@@ -285,7 +285,7 @@ public final class SignClient: SignClientProtocol {
 
     /// For a dApp to propose an authenticated session to a wallet.
     /// Function will propose a session on existing pairing.
-    public func authenticate(
+    public func sessionAuthenticate(
         _ params: AuthRequestParams,
         topic: String
     ) async throws {
@@ -329,7 +329,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws {
+    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> Session {
         try await authResponder.respond(requestId: requestId, auths: auths)
     }
 

@@ -37,7 +37,7 @@ final class AuthRequestInteractor {
         }
 
 
-        try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
+        _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
 
         /* Redirect */
         if let uri = request.requester.redirect?.native {
