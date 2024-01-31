@@ -7,8 +7,7 @@ public struct NotifyClientFactory {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
-        let databasePath = databasePath(appGroup: groupIdentifier, database: "notify_v\(version).db")
-        let sqlite = DiskSqlite(path: databasePath)
+        let sqlite = NotifySqliteFactory.create(appGroup: groupIdentifier)
 
         return NotifyClientFactory.create(
             projectId: projectId,
@@ -96,20 +95,5 @@ public struct NotifyClientFactory {
             notifySubscriptionsUpdater: notifySubscriptionsUpdater,
             subscriptionWatcher: subscriptionWatcher
         )
-    }
-
-    static func databasePath(appGroup: String, database: String) -> String {
-        guard let path = FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
-            .appendingPathComponent(database) else {
-
-            fatalError("Database path not exists")
-        }
-
-        return path.absoluteString
-    }
-
-    static var version: String {
-        return "1"
     }
 }
