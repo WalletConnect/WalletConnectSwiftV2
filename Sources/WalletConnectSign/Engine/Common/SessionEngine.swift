@@ -51,7 +51,8 @@ final class SessionEngine {
         setupResponseSubscriptions()
         setupUpdateSubscriptions()
         setupExpirationSubscriptions()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [unowned self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else {return}
             sessionRequestsProvider.emitRequestIfPending()
         }
     }
@@ -105,7 +106,8 @@ final class SessionEngine {
             protocolMethod: protocolMethod
         )
         verifyContextStore.delete(forKey: requestId.string)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [unowned self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else {return}
             sessionRequestsProvider.emitRequestIfPending()
         }
     }

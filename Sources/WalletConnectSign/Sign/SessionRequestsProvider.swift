@@ -19,8 +19,8 @@ class SessionRequestsProvider {
 
     private func setupEmitRequestHandling() {
         emitRequestSubject
-            .sink { [unowned self] _ in
-
+            .sink { [weak self] _ in
+                guard let self = self else { return }
                 let now = Date()
                 if let lastEmitDate = self.lastEmitDate, now.timeIntervalSince(lastEmitDate) < 1 {
                     // If the last emit was less than 1 second ago, ignore this request.
