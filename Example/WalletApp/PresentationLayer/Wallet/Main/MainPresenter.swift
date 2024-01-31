@@ -50,14 +50,14 @@ extension MainPresenter {
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] (request, context) in
-                if let vc = UIApplication.currentWindow.rootViewController?.topController,
-                   vc.restorationIdentifier == SessionRequestModule.restorationIdentifier {
+                guard let vc = UIApplication.currentWindow.rootViewController?.topController,
+                      vc.restorationIdentifier != SessionRequestModule.restorationIdentifier else {
                     return
-                } else {
-                    router.dismiss()
-                    router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
                 }
+                router.dismiss()
+                router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
             }.store(in: &disposeBag)
+
         
         interactor.requestPublisher
             .receive(on: DispatchQueue.main)
