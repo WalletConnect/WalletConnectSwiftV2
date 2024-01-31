@@ -24,7 +24,7 @@ public final class SignClient: SignClientProtocol {
     ///
     /// In most cases event will be emited on wallet
     public var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> {
-        sessionRequestPublisherSubject.eraseToAnyPublisher()
+        sessionEngine.sessionRequestPublisher
     }
 
     /// Publisher that sends web socket connection status
@@ -138,7 +138,6 @@ public final class SignClient: SignClientProtocol {
     private let requestsExpiryWatcher: RequestsExpiryWatcher
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
-    private let sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
     private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
     private let sessionSettlePublisherSubject = PassthroughSubject<Session, Never>()
     private let sessionDeletePublisherSubject = PassthroughSubject<(String, Reason), Never>()
@@ -358,9 +357,6 @@ public final class SignClient: SignClientProtocol {
         }
         approveEngine.onSessionSettle = { [unowned self] settledSession in
             sessionSettlePublisherSubject.send(settledSession)
-        }
-        sessionEngine.onSessionRequest = { [unowned self] (sessionRequest, context) in
-            sessionRequestPublisherSubject.send((sessionRequest, context))
         }
         sessionEngine.onSessionDelete = { [unowned self] topic, reason in
             sessionDeletePublisherSubject.send((topic, reason))

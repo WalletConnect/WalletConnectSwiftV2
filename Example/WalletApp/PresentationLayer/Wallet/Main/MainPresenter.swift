@@ -48,11 +48,15 @@ extension MainPresenter {
         
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] request, context in
-                router.dismiss()
-                router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
+            .sink { [unowned self] (request, context) in
+                if let rootview = router.viewController.presentedViewController as? SessionViewController {
+                    return
+                } else {
+                    router.dismiss()
+                    router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
+                }
             }.store(in: &disposeBag)
-        
+
         interactor.requestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] result in
