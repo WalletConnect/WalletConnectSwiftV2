@@ -73,14 +73,15 @@ class AuthResponseSubscriber {
         try await cacaos.asyncForEach { [unowned self] cacao in
             guard
                 let account = try? DIDPKH(did: cacao.p.iss).account,
-                let message = try? messageFormatter.formatMessage(from: cacao.p)
+                let message = try? messageFormatter.formatMessage(from: cacao.p, includeRecapInTheStatement: true)
             else {
                 throw AuthError.malformedResponseParams
             }
 
             guard
                 let recovered = try? messageFormatter.formatMessage(
-                    from: authRequestPayload.cacaoPayload(account: account)
+                    from: authRequestPayload.cacaoPayload(account: account),
+                    includeRecapInTheStatement: true
                 ),
                 recovered == message
             else {
