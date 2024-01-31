@@ -15,6 +15,10 @@ public struct NotifySubscription: Codable, Equatable, SqliteRow {
         return "\(account.absoluteString)-\(metadata.url)"
     }
 
+    public func messageIcons(ofType type: String) -> NotifyImageUrls {
+        return scope[type]?.imageUrls ?? NotifyImageUrls(icons: metadata.icons) ?? NotifyImageUrls()
+    }
+
     public init(decoder: SqliteRowDecoder) throws {
         self.topic = try decoder.decodeString(at: 0)
         self.account = try Account(decoder.decodeString(at: 1))!

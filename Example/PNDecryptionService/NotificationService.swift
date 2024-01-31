@@ -75,11 +75,11 @@ class NotificationService: UNNotificationServiceExtension {
     private func handleNotifyNotification(content: UNNotificationContent, topic: String, ciphertext: String) -> UNMutableNotificationContent {
         do {
             let service = NotifyDecryptionService(groupIdentifier: "group.com.walletconnect.sdk")
-            let (pushMessage, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
+            let (pushMessage, subscription, account) = try service.decryptMessage(topic: topic, ciphertext: ciphertext)
 
             log("message decrypted", account: account, topic: topic, message: pushMessage)
 
-            let updatedContent = handle(content: content, pushMessage: pushMessage, topic: topic)
+            let updatedContent = handle(content: content, pushMessage: pushMessage, subscription: subscription, topic: topic)
 
             let mutableContent = updatedContent.mutableCopy() as! UNMutableNotificationContent
             mutableContent.title = pushMessage.title
@@ -114,62 +114,66 @@ class NotificationService: UNNotificationServiceExtension {
 
 private extension NotificationService {
 
-    func handle(content: UNNotificationContent, pushMessage: NotifyMessage, topic: String) -> UNNotificationContent {
-        do {
-            let iconUrl = try pushMessage.icon.asURL()
+    func handle(content: UNNotificationContent, pushMessage: NotifyMessage, subscription: NotifySubscription, topic: String) -> UNNotificationContent {
 
-            let senderThumbnailImageData = try Data(contentsOf: iconUrl)
-            let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
-            let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
-            let senderAvatar = INImage(imageData: senderThumbnailImageFileData)
+        var senderAvatar: INImage?
 
-            var personNameComponents = PersonNameComponents()
-            personNameComponents.nickname = pushMessage.title
-
-            let senderPerson = INPerson(
-                personHandle: INPersonHandle(value: topic, type: .unknown),
-                nameComponents: personNameComponents,
-                displayName: pushMessage.title,
-                image: senderAvatar,
-                contactIdentifier: nil,
-                customIdentifier: topic,
-                isMe: false,
-                suggestionType: .none
-            )
-
-            let selfPerson = INPerson(
-                personHandle: INPersonHandle(value: "0", type: .unknown),
-                nameComponents: nil,
-                displayName: nil,
-                image: nil,
-                contactIdentifier: nil,
-                customIdentifier: nil,
-                isMe: true,
-                suggestionType: .none
-            )
-
-            let incomingMessagingIntent = INSendMessageIntent(
-                recipients: [selfPerson],
-                outgoingMessageType: .outgoingMessageText,
-                content: pushMessage.body,
-                speakableGroupName: nil,
-                conversationIdentifier: pushMessage.type,
-                serviceName: nil,
-                sender: senderPerson,
-                attachments: []
-            )
-
-            incomingMessagingIntent.setImage(senderAvatar, forParameterNamed: \.sender)
-
-            let interaction = INInteraction(intent: incomingMessagingIntent, response: nil)
-            interaction.direction = .incoming
-            interaction.donate(completion: nil)
-
-            return try content.updating(from: incomingMessagingIntent)
-        } 
-        catch {
-            return content
+        if let icon = subscription.messageIcons(ofType: pushMessage.type).md {
+            do {
+                let iconUrl = try icon.asURL()
+                let senderThumbnailImageData = try Data(contentsOf: iconUrl)
+                let senderThumbnailImageFileUrl = try downloadAttachment(data: senderThumbnailImageData, fileName: iconUrl.lastPathComponent)
+                let senderThumbnailImageFileData = try Data(contentsOf: senderThumbnailImageFileUrl)
+                senderAvatar = INImage(imageData: senderThumbnailImageFileData)
+            } catch {
+                log("Fetch icon error: \(error)", account: subscription.account, topic: topic, message: pushMessage)
+            }
         }
+
+        var personNameComponents = PersonNameComponents()
+        personNameComponents.nickname = pushMessage.title
+
+        let senderPerson = INPerson(
+            personHandle: INPersonHandle(value: topic, type: .unknown),
+            nameComponents: personNameComponents,
+            displayName: pushMessage.title,
+            image: senderAvatar,
+            contactIdentifier: nil,
+            customIdentifier: topic,
+            isMe: false,
+            suggestionType: .none
+        )
+
+        let selfPerson = INPerson(
+            personHandle: INPersonHandle(value: "0", type: .unknown),
+            nameComponents: nil,
+            displayName: nil,
+            image: nil,
+            contactIdentifier: nil,
+            customIdentifier: nil,
+            isMe: true,
+            suggestionType: .none
+        )
+
+        let incomingMessagingIntent = INSendMessageIntent(
+            recipients: [selfPerson],
+            outgoingMessageType: .outgoingMessageText,
+            content: pushMessage.body,
+            speakableGroupName: nil,
+            conversationIdentifier: pushMessage.type,
+            serviceName: nil,
+            sender: senderPerson,
+            attachments: []
+        )
+
+        incomingMessagingIntent.setImage(senderAvatar, forParameterNamed: \.sender)
+
+        let interaction = INInteraction(intent: incomingMessagingIntent, response: nil)
+        interaction.direction = .incoming
+        interaction.donate(completion: nil)
+
+        let updated = try? content.updating(from: incomingMessagingIntent)
+        return updated ?? content
     }
 
     func downloadAttachment(data: Data, fileName: String) throws -> URL {

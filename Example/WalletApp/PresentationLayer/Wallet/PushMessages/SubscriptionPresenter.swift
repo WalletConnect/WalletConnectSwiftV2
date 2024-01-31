@@ -52,6 +52,11 @@ final class SubscriptionPresenter: ObservableObject {
         }
     }
 
+    func messageIconUrl(message: NotifyMessageViewModel) -> URL? {
+        let icons = subscription.messageIcons(ofType: message.type)
+        return try? icons.md?.asURL()
+    }
+
     func unsubscribe() {
         interactor.deleteSubscription(subscription)
         router.dismiss()
