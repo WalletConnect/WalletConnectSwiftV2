@@ -10,9 +10,12 @@ class RecapStatementBuilderTests: XCTestCase {
             ]
         ]
 
+        let encoded = try! JSONEncoder().encode(decodedRecap).base64EncodedString()
+        let urn = try! RecapUrn(urn: "urn:recap:\(encoded)")
+
         let expectedStatement = "I further authorize the stated URI to perform the following actions: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'."
 
-        let recapStatement = RecapStatementBuilder.buildRecapStatement(from: decodedRecap)
+        let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
 
         XCTAssertEqual(recapStatement, expectedStatement)
     }
@@ -24,11 +27,17 @@ class RecapStatementBuilderTests: XCTestCase {
                 "request/eth_sendTransaction": []
             ]
         ]
+        let encoded = try! JSONEncoder().encode(decodedRecap).base64EncodedString()
+        let urn = try! RecapUrn(urn: "urn:recap:\(encoded)")
 
         let expectedStatement = "I further authorize the stated URI to perform the following actions: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'."
 
-        let recapStatement = RecapStatementBuilder.buildRecapStatement(from: decodedRecap)
+        let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
 
         XCTAssertEqual(recapStatement, expectedStatement)
+    }
+
+    func testMultipleRecaps() {
+
     }
 }
