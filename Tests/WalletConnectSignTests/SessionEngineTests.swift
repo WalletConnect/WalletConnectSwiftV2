@@ -29,7 +29,17 @@ final class SessionEngineTests: XCTestCase {
             verifyClient: VerifyClientMock(),
             kms: KeyManagementServiceMock(),
             sessionStore: sessionStorage,
-            logger: ConsoleLoggerMock()
+            logger: ConsoleLoggerMock(),
+            sessionRequestsProvider: SessionRequestsProvider(
+                historyService: HistoryService(
+                    history: RPCHistory(
+                        keyValueStore: .init(
+                            defaults: RuntimeKeyValueStorage(),
+                            identifier: ""
+                        )
+                    ),
+                    verifyContextStore: verifyContextStore
+                ))
         )
     }
 

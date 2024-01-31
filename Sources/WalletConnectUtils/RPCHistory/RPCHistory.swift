@@ -32,7 +32,7 @@ public final class RPCHistory {
             case .responseDuplicateNotAllowed:
                 return "Response duplicates are not allowed."
             case .requestMatchingResponseNotFound:
-                return "Matching requesr for the response not found."
+                return "Matching request for the response not found."
             }
         }
     }
@@ -118,6 +118,10 @@ public final class RPCHistory {
 
     public func getPending() -> [Record] {
         storage.getAll().filter { $0.response == nil }
+    }
+
+    public func deleteAll() {
+        storage.deleteAll()
     }
 }
 
