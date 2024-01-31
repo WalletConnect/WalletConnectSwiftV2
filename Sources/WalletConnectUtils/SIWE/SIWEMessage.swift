@@ -46,7 +46,7 @@ public struct SIWEMessage: Equatable {
 
     private func getStatementLine(includeRecapInTheStatement: Bool) -> String {
         if includeRecapInTheStatement,
-           let resource = resources?.last,
+           let recaps = resources?.compactMap { RecapUrn(urn: $0) }
               let decodedRecap = decodeUrnToJson(urn: resource),
            let attValue = decodedRecap["att"] {
             if let statement = statement {
@@ -81,9 +81,9 @@ public struct SIWEMessage: Equatable {
         }
     }
 
-    private func buildRecapStatement(from decodedRecap: [String: [String: [String]]]) -> String {
-        RecapStatementBuilder.buildRecapStatement(from: decodedRecap)
-    }
+//    private func buildRecapStatement(from decodedRecap: [String: [String: [String]]]) -> String {
+//        RecapStatementBuilder.buildRecapStatement(from: decodedRecap)
+//    }
 
 }
 

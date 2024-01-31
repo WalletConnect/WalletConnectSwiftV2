@@ -1,15 +1,23 @@
-
 import Foundation
 
 struct RecapUrn {
     enum Errors: Error {
         case invalidUrn
     }
+    let urn: String
+
     init(urn: String) throws {
         guard urn.hasPrefix("urn:recap") else { throw Errors.invalidUrn }
         self.urn = urn
     }
-    let urn: String
+
+    // Extracts the Base64-encoded JSON portion of the URN
+    func decodedPayload() -> Data? {
+        let components = urn.components(separatedBy: ":")
+        guard components.count > 2 else { return nil }
+        let base64Part = components.dropFirst(2).joined(separator: ":")
+        return Data(base64Encoded: base64Part)
+    }
 }
 
 struct RecapStatementBuilder {
@@ -17,11 +25,10 @@ struct RecapStatementBuilder {
         var statementParts: [String] = []
 
         recapUrns.forEach { urn in
-            let decodedRecap = decodeUrnToJson(urn: urn)
+            guard let jsonData = urn.decodedPayload() else { return }
+            guard let decodedRecap: [String: [String: [String: [String]]]] = decodeUrnToJson(jsonData: jsonData) else { return }
+
             guard let attValue = decodedRecap["att"] else { return }
-
-
-            // sort resources keys for consistancy in the statement
             let sortedResourceKeys = attValue.keys.sorted()
 
             for resourceKey in sortedResourceKeys {
@@ -33,7 +40,6 @@ struct RecapStatementBuilder {
                     requestActions.append("'\(action)'")
                 }
 
-                // sorting is required as dictionary doesn't guarantee the order of elements
                 requestActions.sort()
 
                 if !requestActions.isEmpty {
@@ -41,9 +47,7 @@ struct RecapStatementBuilder {
                     statementParts.append("'request': \(actionsString) for '\(resourceKey)'")
                 }
             }
-
         }
-
 
         if !statementParts.isEmpty {
             let formattedStatement = statementParts.joined(separator: "; ")
@@ -53,16 +57,12 @@ struct RecapStatementBuilder {
         }
     }
 
-
-    private static func decodeUrnToJson(urn: RecapUrn) -> [String: [String: [String: [String]]]] {
-        // Decode the Base64 encoded JSON
-        guard let jsonData = Data(base64Encoded: urn.urn) else { return nil }
-
-        // Deserialize the JSON data into the desired dictionary
+    private static func decodeUrnToJson<T: Decodable>(jsonData: Data) -> T? {
         do {
-            let decodedDictionary = try JSONDecoder().decode([String: [String: [String: [String]]]].self, from: jsonData)
-            return decodedDictionary
+            let decodedObject = try JSONDecoder().decode(T.self, from: jsonData)
+            return decodedObject
         } catch {
+            print("Error decoding JSON: \(error)")
             return nil
         }
     }
