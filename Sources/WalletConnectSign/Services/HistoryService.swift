@@ -15,32 +15,45 @@ final class HistoryService {
 
     public func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         guard let record = history.get(recordId: id) else { return nil }
-        guard let (request, recordId) = mapRequestRecord(record) else {
+        guard let (request, recordId, _) = mapRequestRecord(record) else {
             return nil
         }
         return (request, try? verifyContextStore.get(key: recordId.string))
     }
 
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
-        let requests = history.getPending()
-            .compactMap { mapRequestRecord($0) }
-            .filter { !$0.0.isExpired() } // Note the change here to access the Request part of the tuple
-        return requests.map { (request: $0.0, context: try? verifyContextStore.get(key: $0.1.string)) }
+        getPendingRequestsSortedByTimestamp()
     }
 
+    func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)] {
+        let requests = history.getPending()
+            .compactMap { mapRequestRecord($0) }
+            .filter { !$0.0.isExpired() }
+            .sorted {
+                switch ($0.2, $1.2) {
+                case let (date1?, date2?): return date1 < date2 // Both dates are present
+                case (nil, _): return false // First date is nil, so it should go last
+                case (_, nil): return true  // Second date is nil, so the first one should come first
+                }
+            }
+            .map { (request: $0.0, context: try? verifyContextStore.get(key: $0.1.string)) }
+
+        return requests
+    }
 
     func getPendingRequestsWithRecordId() -> [(request: Request, recordId: RPCID)] {
-        history.getPending()
+        return history.getPending()
             .compactMap { mapRequestRecord($0) }
+            .map { (request: $0.0, recordId: $0.1) } 
     }
 
     func getPendingRequests(topic: String) -> [(request: Request, context: VerifyContext?)] {
-        return getPendingRequests().filter { $0.request.topic == topic }
+        return getPendingRequestsSortedByTimestamp().filter { $0.request.topic == topic }
     }
 }
 
 private extension HistoryService {
-    func mapRequestRecord(_ record: RPCHistory.Record) -> (Request, RPCID)? {
+    func mapRequestRecord(_ record: RPCHistory.Record) -> (Request, RPCID, Date?)? {
         guard let request = try? record.request.params?.get(SessionType.RequestParams.self)
         else { return nil }
 
@@ -53,6 +66,6 @@ private extension HistoryService {
             expiryTimestamp: request.request.expiryTimestamp
         )
 
-        return (mappedRequest, record.id)
+        return (mappedRequest, record.id, record.timestamp)
     }
 }

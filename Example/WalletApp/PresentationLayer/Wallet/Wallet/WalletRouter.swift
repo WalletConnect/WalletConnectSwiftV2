@@ -13,7 +13,7 @@ final class WalletRouter {
     
     func present(sessionRequest: Request, importAccount: ImportAccount, sessionContext: VerifyContext?) {
         SessionRequestModule.create(app: app, sessionRequest: sessionRequest, importAccount: importAccount, sessionContext: sessionContext)
-            .presentFullScreen(from: viewController, transparentBackground: true)
+            .presentFullScreen(from: UIApplication.currentWindow.rootViewController!, transparentBackground: true)
     }
     
     func present(sessionProposal: Session.Proposal, importAccount: ImportAccount, sessionContext: VerifyContext?) {
