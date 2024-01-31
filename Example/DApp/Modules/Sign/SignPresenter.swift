@@ -2,6 +2,7 @@ import UIKit
 import Combine
 
 import Web3Modal
+import WalletConnectModal
 import WalletConnectSign
 
 final class SignPresenter: ObservableObject {
@@ -52,17 +53,31 @@ final class SignPresenter: ObservableObject {
         Web3Modal.present(from: nil)
     }
     
+    func connectWalletWithWCM() {
+        WalletConnectModal.set(sessionParams: .init(
+            requiredNamespaces: Proposal.requiredNamespaces,
+            optionalNamespaces: Proposal.optionalNamespaces
+        ))
+        WalletConnectModal.present(from: nil)
+    }
+    
     @MainActor
     func connectWalletWithSign() {
         Task {
             let uri = try await Pair.instance.create()
             walletConnectUri = uri
-            try await Sign.instance.connect(
-                requiredNamespaces: Proposal.requiredNamespaces,
-                optionalNamespaces: Proposal.optionalNamespaces,
-                topic: uri.topic
-            )
-            router.presentNewPairing(walletConnectUri: uri)
+            do {
+                ActivityIndicatorManager.shared.start()
+                try await Sign.instance.connect(
+                    requiredNamespaces: Proposal.requiredNamespaces,
+                    optionalNamespaces: Proposal.optionalNamespaces,
+                    topic: uri.topic
+                )
+                ActivityIndicatorManager.shared.stop()
+                router.presentNewPairing(walletConnectUri: uri)
+            } catch {
+                ActivityIndicatorManager.shared.stop()
+            }
         }
     }
     
@@ -70,9 +85,12 @@ final class SignPresenter: ObservableObject {
         if let session {
             Task { @MainActor in
                 do {
+                    ActivityIndicatorManager.shared.start()
                     try await Sign.instance.disconnect(topic: session.topic)
+                    ActivityIndicatorManager.shared.stop()
                     accountsDetails.removeAll()
                 } catch {
+                    ActivityIndicatorManager.shared.stop()
                     showError.toggle()
                     errorMessage = error.localizedDescription
                 }
@@ -104,8 +122,26 @@ extension SignPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] _ in
                 self.accountsDetails.removeAll()
+                router.popToRoot()
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
+
+        Sign.instance.sessionResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { response in
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
+            }
+            .store(in: &subscriptions)
+
+        Sign.instance.requestExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
+                AlertPresenter.present(message: "Session Request has expired", type: .warning)
+            }
+            .store(in: &subscriptions)
+
     }
     
     private func getSession() {

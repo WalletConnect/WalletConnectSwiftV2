@@ -67,10 +67,31 @@ public class Web3WalletClient {
         pairingClient.pairingDeletePublisher
     }
 
+    public var pairingStatePublisher: AnyPublisher<Bool, Never> {
+        pairingClient.pairingStatePublisher
+    }
+
+    public var pairingExpirationPublisher: AnyPublisher<Pairing, Never> {
+        return pairingClient.pairingExpirationPublisher
+    }
+
     public var logsPublisher: AnyPublisher<Log, Never> {
         return signClient.logsPublisher
             .merge(with: pairingClient.logsPublisher)
             .eraseToAnyPublisher()
+    }
+
+    /// Publisher that sends session proposal expiration
+    public var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> {
+        return signClient.sessionProposalExpirationPublisher
+    }
+
+    public var pendingProposalsPublisher: AnyPublisher<[(proposal: Session.Proposal, context: VerifyContext?)], Never> {
+        return signClient.pendingProposalsPublisher
+    }
+
+    public var requestExpirationPublisher: AnyPublisher<Request, Never> {
+        return signClient.requestExpirationPublisher
     }
 
     // MARK: - Private Properties
@@ -203,19 +224,11 @@ public class Web3WalletClient {
     public func getPendingRequests(topic: String? = nil) -> [(request: Request, context: VerifyContext?)] {
         signClient.getPendingRequests(topic: topic)
     }
-    
-    /// Query pending proposals
-    /// - Returns: Pending proposals received from peer with `wc_sessionPropose` protocol method
+
     public func getPendingProposals(topic: String? = nil) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
         signClient.getPendingProposals(topic: topic)
     }
-    
-    /// - Parameter id: id of a wc_sessionRequest jsonrpc request
-    /// - Returns: json rpc record object for given id or nil if record for give id does not exits
-    public func getSessionRequestRecord(id: RPCID) -> (request: Request, context: VerifyContext?)? {
-        signClient.getSessionRequestRecord(id: id)
-    }
-    
+
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
     public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {

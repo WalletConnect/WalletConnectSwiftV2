@@ -30,4 +30,8 @@ final class SubscriptionInteractor {
             try await Notify.instance.deleteSubscription(topic: subscription.topic)
         }
     }
+
+    func fetchHistory(after: String?, limit: Int) async throws -> Bool {
+        return try await Notify.instance.fetchHistory(subscription: subscription, after: after, limit: limit)
+    }
 }

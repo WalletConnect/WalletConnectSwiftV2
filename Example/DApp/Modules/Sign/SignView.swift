@@ -18,29 +18,42 @@ struct SignView: View {
                             
                             Spacer()
                             
-                            Button {
-                                presenter.connectWalletWithW3M()
-                            } label: {
-                                Text("Connect with Web3Modal")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(Color(red: 95/255, green: 159/255, blue: 248/255))
-                                    .cornerRadius(16)
-                            }
-                            .padding(.top, 20)
-                            
-                            Button {
-                                presenter.connectWalletWithSign()
-                            } label: {
-                                Text("Connect with Sign API")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(Color(red: 95/255, green: 159/255, blue: 248/255))
-                                    .cornerRadius(16)
+                            VStack(spacing: 10) {
+                                Button {
+                                    presenter.connectWalletWithW3M()
+                                } label: {
+                                    Text("Connect with Web3Modal")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 10)
+                                        .background(Color(red: 95/255, green: 159/255, blue: 248/255))
+                                        .cornerRadius(16)
+                                }
+                                
+                                Button {
+                                    presenter.connectWalletWithSign()
+                                } label: {
+                                    Text("Connect with Sign API")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 10)
+                                        .background(Color(red: 95/255, green: 159/255, blue: 248/255))
+                                        .cornerRadius(16)
+                                }
+                                
+                                Button {
+                                    presenter.connectWalletWithWCM()
+                                } label: {
+                                    Text("Connect with WalletConnectModal")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 10)
+                                        .background(Color(red: 95/255, green: 159/255, blue: 248/255))
+                                        .cornerRadius(16)
+                                }
                             }
                             .padding(.top, 10)
                         }
@@ -59,6 +72,7 @@ struct SignView: View {
                         .padding(12)
                     }
                 }
+                .padding(.bottom, presenter.accountsDetails.isEmpty ? 0 : 76) 
                 .onAppear {
                     presenter.onAppear()
                 }

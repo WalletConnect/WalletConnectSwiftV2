@@ -8,7 +8,6 @@ import Combine
 import WalletConnectNetworking
 import WalletConnectPush
 @testable import WalletConnectNotify
-@testable import WalletConnectPairing
 import WalletConnectIdentity
 import WalletConnectSigner
 
@@ -30,12 +29,11 @@ final class NotifyTests: XCTestCase {
 
     private var publishers = Set<AnyCancellable>()
 
-    func makeClientDependencies(prefix: String) -> (PairingClient, NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
+    func makeClientDependencies(prefix: String) -> (NetworkInteracting, KeychainStorageProtocol, KeyValueStorage) {
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
 
         let relayLogger = ConsoleLogger(prefix: prefix + " [Relay]", loggingLevel: .debug)
-        let pairingLogger = ConsoleLogger(prefix: prefix + " [Pairing]", loggingLevel: .debug)
         let networkingLogger = ConsoleLogger(prefix: prefix + " [Networking]", loggingLevel: .debug)
         let kmsLogger = ConsoleLogger(prefix: prefix + " [KMS]", loggingLevel: .debug)
 
@@ -45,6 +43,7 @@ final class NotifyTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: relayLogger)
 
         let networkingClient = NetworkingClientFactory.create(
@@ -54,19 +53,13 @@ final class NotifyTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             kmsLogger: kmsLogger)
 
-        let pairingClient = PairingClientFactory.create(
-            logger: pairingLogger,
-            keyValueStorage: keyValueStorage,
-            keychainStorage: keychain,
-            networkingClient: networkingClient)
-
         let clientId = try! networkingClient.getClientId()
         networkingLogger.debug("My client id is: \(clientId)")
-        return (pairingClient, networkingClient, keychain, keyValueStorage)
+        return (networkingClient, keychain, keyValueStorage)
     }
 
     func makeWalletClient(prefix: String = "🦋 Wallet: ") -> NotifyClient {
-        let (pairingClient, networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
+        let (networkingInteractor, keychain, keyValueStorage) = makeClientDependencies(prefix: prefix)
         let notifyLogger = ConsoleLogger(prefix: prefix + " [Notify]", loggingLevel: .debug)
         let pushClient = PushClientFactory.create(projectId: "",
                                                   pushHost: "echo.walletconnect.com",
@@ -83,7 +76,6 @@ final class NotifyTests: XCTestCase {
                                                 keychainStorage: keychain,
                                                 groupKeychainStorage: KeychainStorageMock(),
                                                 networkInteractor: networkingInteractor,
-                                                pairingRegisterer: pairingClient,
                                                 pushClient: pushClient,
                                                 crypto: DefaultCryptoProvider(),
                                                 notifyHost: InputConfig.notifyHost, 
@@ -165,7 +157,6 @@ final class NotifyTests: XCTestCase {
         }
     }
 
-    /*
     func testWalletCreatesAndUpdatesSubscription() async throws {
         let created = expectation(description: "Subscription created")
 
@@ -202,7 +193,6 @@ final class NotifyTests: XCTestCase {
 
         try await walletNotifyClientA.deleteSubscription(topic: subscription.topic)
     }
-    */
 
     func testNotifyServerSubscribeAndNotifies() async throws {
         let subscribeExpectation = expectation(description: "creates notify subscription")
@@ -255,6 +245,29 @@ final class NotifyTests: XCTestCase {
         }
     }
 
+    func testFetchHistory() async throws {
+        let subscribeExpectation = expectation(description: "fetch notify subscription")
+        let account = Account("eip155:1:0x622b17376F76d72C43527a917f59273247A917b4")!
+
+        var subscription: NotifySubscription!
+        walletNotifyClientA.subscriptionsPublisher
+            .sink { subscriptions in
+                subscription = subscriptions.first
+                subscribeExpectation.fulfill()
+            }.store(in: &publishers)
+
+        try await walletNotifyClientA.register(account: account, domain: gmDappDomain) { message in
+            let privateKey = Data(hex: "c3ff8a0ae33ac5d58e515055c5870fa2f220d070997bd6fd77a5f2c148528ff0")
+            let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+            return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        }
+
+        await fulfillment(of: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
+
+        let hasMore = try await walletNotifyClientA.fetchHistory(subscription: subscription, after: nil, limit: 20)
+        XCTAssertTrue(hasMore)
+        XCTAssertTrue(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count == 20)
+    }
 }
 
 

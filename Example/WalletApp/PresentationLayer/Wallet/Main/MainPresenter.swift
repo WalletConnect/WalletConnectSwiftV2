@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import SwiftUI
 
 final class MainPresenter {
     private let interactor: MainInteractor
@@ -48,9 +49,15 @@ extension MainPresenter {
         
         interactor.sessionRequestPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] request, context in
+            .sink { [unowned self] (request, context) in
+                guard let vc = UIApplication.currentWindow.rootViewController?.topController,
+                      vc.restorationIdentifier != SessionRequestModule.restorationIdentifier else {
+                    return
+                }
+                router.dismiss()
                 router.present(sessionRequest: request, importAccount: importAccount, sessionContext: context)
             }.store(in: &disposeBag)
+
         
         interactor.requestPublisher
             .receive(on: DispatchQueue.main)

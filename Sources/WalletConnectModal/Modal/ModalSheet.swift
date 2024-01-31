@@ -119,14 +119,12 @@ public struct ModalSheet: View {
     @ViewBuilder
     private func welcome() -> some View {
         WalletList(
-            wallets: .init(get: {
-                viewModel.filteredWallets
-            }, set: { _ in }),
             destination: .init(get: {
                 viewModel.destination
             }, set: { _ in }),
+            viewModel: viewModel,
             navigateTo: viewModel.navigateTo(_:),
-            onListingTap: { viewModel.onListingTap($0) }
+            onWalletTap: { viewModel.onWalletTap($0) }
         )
     }
     

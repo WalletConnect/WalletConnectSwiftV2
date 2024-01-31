@@ -3,98 +3,69 @@ import Foundation
 final class HistoryService {
 
     private let history: RPCHistory
-    private let proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>
     private let verifyContextStore: CodableStore<VerifyContext>
 
     init(
         history: RPCHistory,
-        proposalPayloadsStore: CodableStore<RequestSubscriptionPayload<SessionType.ProposeParams>>,
         verifyContextStore: CodableStore<VerifyContext>
     ) {
         self.history = history
-        self.proposalPayloadsStore = proposalPayloadsStore
         self.verifyContextStore = verifyContextStore
     }
 
     public func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         guard let record = history.get(recordId: id) else { return nil }
-        guard let request = mapRequestRecord(record) else {
+        guard let (request, recordId, _) = mapRequestRecord(record) else {
             return nil
         }
-        return (request, try? verifyContextStore.get(key: request.id.string))
+        return (request, try? verifyContextStore.get(key: recordId.string))
     }
-    
+
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
+        getPendingRequestsSortedByTimestamp()
+    }
+
+    func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)] {
         let requests = history.getPending()
             .compactMap { mapRequestRecord($0) }
-            .filter { !$0.isExpired() }
-        return requests.map { ($0, try? verifyContextStore.get(key: $0.id.string)) }
+            .filter { !$0.0.isExpired() }
+            .sorted {
+                switch ($0.2, $1.2) {
+                case let (date1?, date2?): return date1 < date2 // Both dates are present
+                case (nil, _): return false // First date is nil, so it should go last
+                case (_, nil): return true  // Second date is nil, so the first one should come first
+                }
+            }
+            .map { (request: $0.0, context: try? verifyContextStore.get(key: $0.1.string)) }
+
+        return requests
+    }
+
+    func getPendingRequestsWithRecordId() -> [(request: Request, recordId: RPCID)] {
+        return history.getPending()
+            .compactMap { mapRequestRecord($0) }
+            .map { (request: $0.0, recordId: $0.1) } 
     }
 
     func getPendingRequests(topic: String) -> [(request: Request, context: VerifyContext?)] {
-        return getPendingRequests().filter { $0.request.topic == topic }
-    }
-    
-    func getPendingProposals() -> [(proposal: Session.Proposal, context: VerifyContext?)] {
-        let pendingHistory = history.getPending()
-        
-        let requestSubscriptionPayloads = pendingHistory
-            .compactMap { record -> RequestSubscriptionPayload<SessionType.ProposeParams>? in
-                guard let proposalParams = mapProposeParams(record) else {
-                    return nil
-                }
-                return RequestSubscriptionPayload(id: record.id, topic: record.topic, request: proposalParams, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil)
-            }
-        
-        requestSubscriptionPayloads.forEach {
-            let proposal = $0.request
-            proposalPayloadsStore.set($0, forKey: proposal.proposer.publicKey)
-        }
-        
-        let proposals = pendingHistory
-            .compactMap { mapProposalRecord($0) }
-        
-        return proposals.map { ($0, try? verifyContextStore.get(key: $0.proposal.proposer.publicKey)) }
-    }
-    
-    func getPendingProposals(topic: String) -> [(proposal: Session.Proposal, context: VerifyContext?)] {
-        return getPendingProposals().filter { $0.proposal.pairingTopic == topic }
+        return getPendingRequestsSortedByTimestamp().filter { $0.request.topic == topic }
     }
 }
 
 private extension HistoryService {
-    func mapRequestRecord(_ record: RPCHistory.Record) -> Request? {
+    func mapRequestRecord(_ record: RPCHistory.Record) -> (Request, RPCID, Date?)? {
         guard let request = try? record.request.params?.get(SessionType.RequestParams.self)
         else { return nil }
 
-        return Request(
+        let mappedRequest = Request(
             id: record.id,
             topic: record.topic,
             method: request.request.method,
             params: request.request.params,
             chainId: request.chainId,
-            expiry: request.request.expiry
+            expiryTimestamp: request.request.expiryTimestamp
         )
-    }
-    
-    func mapProposeParams(_ record: RPCHistory.Record) -> SessionType.ProposeParams? {
-        guard let proposal = try? record.request.params?.get(SessionType.ProposeParams.self)
-        else { return nil }
-        return proposal
-    }
-    
-    func mapProposalRecord(_ record: RPCHistory.Record) -> Session.Proposal? {
-        guard let proposal = try? record.request.params?.get(SessionType.ProposeParams.self)
-        else { return nil }
-        
-        return Session.Proposal(
-            id: proposal.proposer.publicKey,
-            pairingTopic: record.topic,
-            proposer: proposal.proposer.metadata,
-            requiredNamespaces: proposal.requiredNamespaces,
-            optionalNamespaces: proposal.optionalNamespaces ?? [:],
-            sessionProperties: proposal.sessionProperties,
-            proposal: proposal
-        )
+
+        return (mappedRequest, record.id, record.timestamp)
     }
 }

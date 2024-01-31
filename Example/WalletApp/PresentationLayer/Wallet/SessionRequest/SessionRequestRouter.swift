@@ -10,6 +10,8 @@ final class SessionRequestRouter {
     }
     
     func dismiss() {
-        viewController.dismiss()
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.dismiss()
+        }
     }
 }

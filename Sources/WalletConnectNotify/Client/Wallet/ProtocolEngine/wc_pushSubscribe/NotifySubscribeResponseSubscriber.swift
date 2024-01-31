@@ -2,31 +2,22 @@ import Foundation
 import Combine
 
 class NotifySubscribeResponseSubscriber {
-    enum Errors: Error {
-        case couldNotCreateSubscription
-    }
 
     private let networkingInteractor: NetworkInteracting
-    private let kms: KeyManagementServiceProtocol
-    private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let notifyStorage: NotifyStorage
-    private let groupKeychainStorage: KeychainStorageProtocol
-    private let notifyConfigProvider: NotifyConfigProvider
+    private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
+    private let notifySubscriptionsUpdater: NotifySubsctiptionsUpdater
 
     init(networkingInteractor: NetworkInteracting,
-         kms: KeyManagementServiceProtocol,
          logger: ConsoleLogging,
-         groupKeychainStorage: KeychainStorageProtocol,
-         notifyStorage: NotifyStorage,
-         notifyConfigProvider: NotifyConfigProvider
+         notifySubscriptionsBuilder: NotifySubscriptionsBuilder,
+         notifySubscriptionsUpdater: NotifySubsctiptionsUpdater
     ) {
         self.networkingInteractor = networkingInteractor
-        self.kms = kms
         self.logger = logger
-        self.groupKeychainStorage = groupKeychainStorage
-        self.notifyStorage = notifyStorage
-        self.notifyConfigProvider = notifyConfigProvider
+        self.notifySubscriptionsBuilder = notifySubscriptionsBuilder
+        self.notifySubscriptionsUpdater = notifySubscriptionsUpdater
+
         subscribeForSubscriptionResponse()
     }
 
@@ -39,7 +30,12 @@ class NotifySubscribeResponseSubscriber {
         ) { [unowned self] payload in
             logger.debug("Received Notify Subscribe response")
 
-            let _ = try NotifySubscriptionResponsePayload.decodeAndVerify(from: payload.response)
+            let (requestPayload, _) = try NotifySubscriptionPayload.decodeAndVerify(from: payload.request)
+            let (responsePayload, _) = try NotifySubscriptionResponsePayload.decodeAndVerify(from: payload.response)
+
+            let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
+
+            try await notifySubscriptionsUpdater.update(subscriptions: subscriptions, for: requestPayload.subscriptionAccount)
 
             logger.debug("NotifySubscribeResponseSubscriber: unsubscribing from response topic: \(payload.topic)")
 

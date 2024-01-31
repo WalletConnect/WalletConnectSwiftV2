@@ -128,6 +128,15 @@
         }
       },
       {
+        "package": "SwiftMessages",
+        "repositoryURL": "https://github.com/SwiftKickMobile/SwiftMessages",
+        "state": {
+          "branch": null,
+          "revision": "62e12e138fc3eedf88c7553dd5d98712aa119f40",
+          "version": "9.0.9"
+        }
+      },
+      {
         "package": "swiftui-async-button",
         "repositoryURL": "https://github.com/lorenzofiamingo/swiftui-async-button",
         "state": {
@@ -168,8 +177,8 @@
         "repositoryURL": "https://github.com/WalletConnect/web3modal-swift",
         "state": {
           "branch": null,
-          "revision": "3295d69d1b12df29a5040578d107f56986b1b399",
-          "version": "1.0.13"
+          "revision": "296b2b72c116807a862e4c08ecf0a78ff044f87a",
+          "version": "1.0.16"
         }
       }
     ]

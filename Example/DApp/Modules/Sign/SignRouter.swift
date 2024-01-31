@@ -20,14 +20,14 @@ final class SignRouter {
     
     func presentSessionAccount(sessionAccount: AccountDetails, session: Session) {
         SessionAccountModule.create(app: app, sessionAccount: sessionAccount, session: session)
-            .present(from: viewController)
+            .push(from: viewController)
     }
-    
-    func dismissNewPairing() {
-        newPairingViewController?.dismiss()
-    }
-    
+
     func dismiss() {
         viewController.dismiss(animated: true)
+    }
+
+    func popToRoot() {
+        viewController.popToRoot()
     }
 }

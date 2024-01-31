@@ -2,21 +2,23 @@ import Foundation
 import Combine
 
 class NotifyUpdateResponseSubscriber {
+    
     private let networkingInteractor: NetworkInteracting
-    private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
-    private let notifyStorage: NotifyStorage
-    private let nofityConfigProvider: NotifyConfigProvider
+    private let notifySubscriptionsBuilder: NotifySubscriptionsBuilder
+    private let notifySubscriptionsUpdater: NotifySubsctiptionsUpdater
 
-    init(networkingInteractor: NetworkInteracting,
-         logger: ConsoleLogging,
-         notifyConfigProvider: NotifyConfigProvider,
-         notifyStorage: NotifyStorage
+    init(
+        networkingInteractor: NetworkInteracting,
+        logger: ConsoleLogging,
+        notifySubscriptionsBuilder: NotifySubscriptionsBuilder,
+        notifySubscriptionsUpdater: NotifySubsctiptionsUpdater
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
-        self.notifyStorage = notifyStorage
-        self.nofityConfigProvider = notifyConfigProvider
+        self.notifySubscriptionsBuilder = notifySubscriptionsBuilder
+        self.notifySubscriptionsUpdater = notifySubscriptionsUpdater
+
         subscribeForUpdateResponse()
     }
 
@@ -24,10 +26,6 @@ class NotifyUpdateResponseSubscriber {
 }
 
 private extension NotifyUpdateResponseSubscriber {
-    enum Errors: Error {
-        case subscriptionDoesNotExist
-        case selectedScopeNotFound
-    }
 
     func subscribeForUpdateResponse() {
         networkingInteractor.subscribeOnResponse(
@@ -37,7 +35,11 @@ private extension NotifyUpdateResponseSubscriber {
             errorHandler: logger
         ) { [unowned self] payload in
 
-            let _ = try NotifyUpdateResponsePayload.decodeAndVerify(from: payload.response)
+            let (responsePayload, _) = try NotifyUpdateResponsePayload.decodeAndVerify(from: payload.response)
+
+            let subscriptions = try await notifySubscriptionsBuilder.buildSubscriptions(responsePayload.subscriptions)
+
+            try await notifySubscriptionsUpdater.update(subscriptions: subscriptions, for: responsePayload.account)
 
             logger.debug("Received Notify Update response")
         }

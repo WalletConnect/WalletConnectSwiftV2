@@ -1,12 +1,15 @@
 import UIKit
 
 import Web3Modal
+import WalletConnectModal
 import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
+import Combine
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    private var publishers = Set<AnyCancellable>()
 
     private let app = Application()
 
@@ -28,9 +31,42 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         Web3Modal.configure(
             projectId: InputConfig.projectId,
+            metadata: metadata,
+            customWallets: [
+                .init(
+                    id: "swift-sample",
+                    name: "Swift Sample Wallet",
+                    homepage: "https://walletconnect.com/",
+                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
+                    order: 1,
+                    mobileLink: "walletapp://"
+                )
+            ]
+        )
+        
+        WalletConnectModal.configure(
+            projectId: InputConfig.projectId,
             metadata: metadata
         )
         
+
+        Sign.instance.logsPublisher.sink { log in
+            switch log {
+            case .error(let logMessage):
+                AlertPresenter.present(message: logMessage.message, type: .error)
+            default: return
+            }
+        }.store(in: &publishers)
+
+        Sign.instance.socketConnectionStatusPublisher.sink { status in
+            switch status {
+            case .connected:
+                AlertPresenter.present(message: "Your web socket has connected", type: .success)
+            case .disconnected:
+                AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
+            }
+        }.store(in: &publishers)
+
         setupWindow(scene: scene)
     }
 
@@ -38,7 +74,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
 
-        let viewController = MainModule.create(app: app)
+        let viewController = SignModule.create(app: app)
+            .wrapToNavigationController()
 
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()

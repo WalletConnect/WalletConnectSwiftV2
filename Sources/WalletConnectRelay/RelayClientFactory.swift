@@ -20,6 +20,8 @@ public struct RelayClientFactory {
 
         let logger = ConsoleLogger(prefix: "🚄" ,loggingLevel: .off)
 
+        let networkMonitor = NetworkMonitor()
+
         return RelayClientFactory.create(
             relayHost: relayHost,
             projectId: projectId,
@@ -27,6 +29,7 @@ public struct RelayClientFactory {
             keychainStorage: keychainStorage,
             socketFactory: socketFactory,
             socketConnectionType: socketConnectionType,
+            networkMonitor: networkMonitor,
             logger: logger
         )
     }
@@ -39,6 +42,7 @@ public struct RelayClientFactory {
         keychainStorage: KeychainStorageProtocol,
         socketFactory: WebSocketFactory,
         socketConnectionType: SocketConnectionType = .automatic,
+        networkMonitor: NetworkMonitoring,
         logger: ConsoleLogging
     ) -> RelayClient {
 
@@ -52,9 +56,11 @@ public struct RelayClientFactory {
             projectId: projectId,
             socketAuthenticator: socketAuthenticator
         )
+
         let dispatcher = Dispatcher(
             socketFactory: socketFactory,
-            relayUrlFactory: relayUrlFactory,
+            relayUrlFactory: relayUrlFactory, 
+            networkMonitor: networkMonitor,
             socketConnectionType: socketConnectionType,
             logger: logger
         )

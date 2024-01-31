@@ -43,9 +43,12 @@ final class SessionRequestPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
-            let showConnected = try await interactor.approve(sessionRequest: sessionRequest, importAccount: importAccount)
+            ActivityIndicatorManager.shared.start()
+            let showConnected = try await interactor.respondSessionRequest(sessionRequest: sessionRequest, importAccount: importAccount)
             showConnected ? showSignedSheet.toggle() : router.dismiss()
+            ActivityIndicatorManager.shared.stop()
         } catch {
+            ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }
@@ -53,8 +56,16 @@ final class SessionRequestPresenter: ObservableObject {
 
     @MainActor
     func onReject() async throws {
-        try await interactor.reject(sessionRequest: sessionRequest)
-        router.dismiss()
+        do {
+            ActivityIndicatorManager.shared.start()
+            try await interactor.respondError(sessionRequest: sessionRequest)
+            ActivityIndicatorManager.shared.stop()
+            router.dismiss()
+        } catch {
+            ActivityIndicatorManager.shared.stop()
+            errorMessage = error.localizedDescription
+            showError.toggle()
+        }
     }
     
     func onSignedSheetDismiss() {
@@ -68,7 +79,16 @@ final class SessionRequestPresenter: ObservableObject {
 
 // MARK: - Private functions
 private extension SessionRequestPresenter {
-    func setupInitialState() {}
+    func setupInitialState() {
+        Web3Wallet.instance.requestExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] request in
+                guard let self = self else { return }
+                if request.id == sessionRequest.id {
+                    dismiss()
+                }
+            }.store(in: &disposeBag)
+    }
 }
 
 // MARK: - SceneViewModel

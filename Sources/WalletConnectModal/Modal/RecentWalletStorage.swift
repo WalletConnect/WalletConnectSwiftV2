@@ -7,7 +7,7 @@ final class RecentWalletsStorage {
         self.defaults = defaults
     }
 
-    var recentWallets: [Listing] {
+    var recentWallets: [Wallet] {
         get {
             loadRecentWallets()
         }
@@ -16,16 +16,16 @@ final class RecentWalletsStorage {
         }
     }
     
-    func loadRecentWallets() -> [Listing] {
+    func loadRecentWallets() -> [Wallet] {
         guard
             let data = defaults.data(forKey: "recentWallets"),
-            let wallets = try? JSONDecoder().decode([Listing].self, from: data)
+            let wallets = try? JSONDecoder().decode([Wallet].self, from: data)
         else {
             return []
         }
         
-        return wallets.filter { listing in
-            guard let lastTimeUsed = listing.lastTimeUsed else {
+        return wallets.filter { wallet in
+            guard let lastTimeUsed = wallet.lastTimeUsed else {
                 assertionFailure("Shouldn't happen we stored wallet without `lastTimeUsed`")
                 return false
             }
@@ -35,9 +35,9 @@ final class RecentWalletsStorage {
         }
     }
     
-    func saveRecentWallets(_ listings: [Listing])  {
+    func saveRecentWallets(_ wallets: [Wallet])  {
         
-        let subset = Array(listings.filter {
+        let subset = Array(wallets.filter {
             $0.lastTimeUsed != nil
         }.prefix(5))
         

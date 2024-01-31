@@ -7,11 +7,15 @@ final class SessionEngine {
     }
 
     var onSessionsUpdate: (([Session]) -> Void)?
-    var onSessionRequest: ((Request, VerifyContext?) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
     var onSessionRejected: ((String, SessionType.Reason) -> Void)?
     var onSessionDelete: ((String, SessionType.Reason) -> Void)?
     var onEventReceived: ((String, Session.Event, Blockchain?) -> Void)?
+
+    var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> {
+        return sessionRequestsProvider.sessionRequestPublisher
+    }
+
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
@@ -21,6 +25,7 @@ final class SessionEngine {
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
+    private let sessionRequestsProvider: SessionRequestsProvider
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -29,7 +34,8 @@ final class SessionEngine {
         verifyClient: VerifyClientProtocol,
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
-        logger: ConsoleLogging
+        logger: ConsoleLogging,
+        sessionRequestsProvider: SessionRequestsProvider
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService
@@ -38,12 +44,17 @@ final class SessionEngine {
         self.kms = kms
         self.sessionStore = sessionStore
         self.logger = logger
+        self.sessionRequestsProvider = sessionRequestsProvider
 
         setupConnectionSubscriptions()
         setupRequestSubscriptions()
         setupResponseSubscriptions()
         setupUpdateSubscriptions()
         setupExpirationSubscriptions()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else {return}
+            sessionRequestsProvider.emitRequestIfPending()
+        }
     }
 
     func hasSession(for topic: String) -> Bool {
@@ -63,9 +74,10 @@ final class SessionEngine {
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
             throw WalletConnectError.invalidPermissions
         }
-        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
+        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiryTimestamp: request.expiryTimestamp)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
-        let protocolMethod = SessionRequestProtocolMethod(ttl: request.calculateTtl())
+        let ttl = try request.calculateTtl()
+        let protocolMethod = SessionRequestProtocolMethod(ttl: ttl)
         let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id)
         try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
     }
@@ -94,6 +106,10 @@ final class SessionEngine {
             protocolMethod: protocolMethod
         )
         verifyContextStore.delete(forKey: requestId.string)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else {return}
+            sessionRequestsProvider.emitRequestIfPending()
+        }
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
@@ -228,7 +244,7 @@ private extension SessionEngine {
             method: payload.request.request.method,
             params: payload.request.request.params,
             chainId: payload.request.chainId,
-            expiry: payload.request.request.expiry
+            expiryTimestamp: payload.request.request.expiryTimestamp
         )
         guard let session = sessionStore.getSession(forTopic: topic) else {
             return respondError(payload: payload, reason: .noSessionForTopic, protocolMethod: protocolMethod)
@@ -248,12 +264,12 @@ private extension SessionEngine {
                 let response = try await verifyClient.verifyOrigin(assertionId: assertionId)
                 let verifyContext = verifyClient.createVerifyContext(origin: response.origin, domain: session.peerParticipant.metadata.url, isScam: response.isScam)
                 verifyContextStore.set(verifyContext, forKey: request.id.string)
-                onSessionRequest?(request, verifyContext)
+
+                sessionRequestsProvider.emitRequestIfPending()
             } catch {
                 let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: session.peerParticipant.metadata.url, isScam: nil)
                 verifyContextStore.set(verifyContext, forKey: request.id.string)
-                onSessionRequest?(request, verifyContext)
-                return
+                sessionRequestsProvider.emitRequestIfPending()
             }
         }
     }

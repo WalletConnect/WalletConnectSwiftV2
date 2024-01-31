@@ -1,24 +1,24 @@
 import Combine
 import Foundation
 import WalletConnectSign
-import WalletConnectUtils
+@testable import WalletConnectUtils
 @testable import WalletConnectModal
 @testable import WalletConnectSign
 
 final class ModalSheetInteractorMock: ModalSheetInteractor {
     
-    var listings: [Listing]
+    var wallets: [Wallet]
     
-    init(listings: [Listing] = Listing.stubList) {
-        self.listings = listings
+    init(wallets: [Wallet] = Wallet.stubList) {
+        self.wallets = wallets
     }
 
-    func getListings() async throws -> [Listing] {
-        listings
+    func getWallets(page: Int, entries: Int) async throws -> (Int, [Wallet]) {
+        (1, wallets)
     }
     
     func createPairingAndConnect() async throws -> WalletConnectURI? {
-        .init(topic: "foo", symKey: "bar", relay: .init(protocol: "irn", data: nil))
+        .init(topic: "foo", symKey: "bar", relay: .init(protocol: "irn", data: nil), expiryTimestamp: 1706001526)
     }
     
     var sessionSettlePublisher: AnyPublisher<Session, Never> {

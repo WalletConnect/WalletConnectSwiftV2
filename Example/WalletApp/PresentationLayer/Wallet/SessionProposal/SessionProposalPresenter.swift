@@ -35,9 +35,12 @@ final class SessionProposalPresenter: ObservableObject {
     @MainActor
     func onApprove() async throws {
         do {
+            ActivityIndicatorManager.shared.start()
             let showConnected = try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
             showConnected ? showConnectedSheet.toggle() : router.dismiss()
+            ActivityIndicatorManager.shared.stop()
         } catch {
+            ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }
@@ -46,9 +49,12 @@ final class SessionProposalPresenter: ObservableObject {
     @MainActor
     func onReject() async throws {
         do {
+            ActivityIndicatorManager.shared.start()
             try await interactor.reject(proposal: sessionProposal)
+            ActivityIndicatorManager.shared.stop()
             router.dismiss()
         } catch {
+            ActivityIndicatorManager.shared.stop()
             errorMessage = error.localizedDescription
             showError.toggle()
         }
@@ -57,12 +63,31 @@ final class SessionProposalPresenter: ObservableObject {
     func onConnectedSheetDismiss() {
         router.dismiss()
     }
+
+    func dismiss() {
+        router.dismiss()
+    }
 }
 
 // MARK: - Private functions
 private extension SessionProposalPresenter {
     func setupInitialState() {
+        Web3Wallet.instance.sessionProposalExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] proposal in
+            guard let self = self else { return }
+            if proposal.id == self.sessionProposal.id {
+                dismiss()
+            }
+        }.store(in: &disposeBag)
 
+        Web3Wallet.instance.pairingExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink {[weak self]  pairing in
+                if self?.sessionProposal.pairingTopic == pairing.topic {
+                    self?.dismiss()
+                }
+        }.store(in: &disposeBag)
     }
 }
 

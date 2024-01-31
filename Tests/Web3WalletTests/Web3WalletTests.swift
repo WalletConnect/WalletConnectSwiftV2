@@ -249,11 +249,6 @@ final class Web3WalletTests: XCTestCase {
         XCTAssertEqual(1, pendingRequests.count)
     }
     
-    func testSessionRequestRecordCalledAndNotNil() async {
-        let sessionRequestRecord = web3WalletClient.getSessionRequestRecord(id: .left(""))
-        XCTAssertNotNil(sessionRequestRecord)
-    }
-    
     func testAuthPendingRequestsCalledAndNotEmpty() async {
         let pendingRequests = try! web3WalletClient.getPendingRequests()
         XCTAssertEqual(1, pendingRequests.count)

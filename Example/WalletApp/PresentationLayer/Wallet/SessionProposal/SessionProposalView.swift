@@ -13,6 +13,19 @@ struct SessionProposalView: View {
             VStack {
                 Spacer()
                 
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            presenter.dismiss()
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                                .padding()
+                        }
+                    }
+                    .padding()
+                }
                 VStack(spacing: 0) {
                     Image("header")
                         .resizable()

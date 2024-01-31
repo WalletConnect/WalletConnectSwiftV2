@@ -24,7 +24,7 @@ extension Error {
 extension NetworkError {
 
     var isWebSocketError: Bool {
-        guard case .webSocketNotConnected = self else { return false }
+        guard case .connectionFailed = self else { return false }
         return true
     }
 

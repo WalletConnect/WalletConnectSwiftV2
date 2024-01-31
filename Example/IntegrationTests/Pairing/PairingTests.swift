@@ -9,7 +9,6 @@ import WalletConnectPush
 @testable import Auth
 @testable import WalletConnectPairing
 @testable import WalletConnectSync
-@testable import WalletConnectHistory
 
 final class PairingTests: XCTestCase {
 
@@ -35,6 +34,7 @@ final class PairingTests: XCTestCase {
             keyValueStorage: RuntimeKeyValueStorage(),
             keychainStorage: keychain,
             socketFactory: DefaultSocketFactory(),
+            networkMonitor: NetworkMonitor(),
             logger: logger)
 
         let networkingClient = NetworkingClientFactory.create(

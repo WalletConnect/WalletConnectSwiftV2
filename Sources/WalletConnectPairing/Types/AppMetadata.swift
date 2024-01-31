@@ -70,3 +70,17 @@ public struct AppMetadata: Codable, Equatable {
         self.redirect = redirect
     }
 }
+
+#if DEBUG
+public extension AppMetadata {
+    static func stub() -> AppMetadata {
+        AppMetadata(
+            name: "Wallet Connect",
+            description: "A protocol to connect blockchain wallets to dapps.",
+            url: "https://walletconnect.com/",
+            icons: [],
+            redirect: AppMetadata.Redirect(native: "", universal: nil)
+        )
+    }
+}
+#endif
