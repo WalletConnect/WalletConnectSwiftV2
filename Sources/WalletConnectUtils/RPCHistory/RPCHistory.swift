@@ -119,6 +119,10 @@ public final class RPCHistory {
     public func getPending() -> [Record] {
         storage.getAll().filter { $0.response == nil }
     }
+
+    public func deleteAll() {
+        storage.deleteAll()
+    }
 }
 
 extension RPCHistory {

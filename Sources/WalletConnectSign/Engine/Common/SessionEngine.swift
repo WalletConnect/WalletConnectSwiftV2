@@ -51,7 +51,7 @@ final class SessionEngine {
         setupResponseSubscriptions()
         setupUpdateSubscriptions()
         setupExpirationSubscriptions()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [unowned self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [unowned self] in
             sessionRequestsProvider.emitRequestIfPending()
         }
     }
@@ -105,7 +105,9 @@ final class SessionEngine {
             protocolMethod: protocolMethod
         )
         verifyContextStore.delete(forKey: requestId.string)
-        sessionRequestsProvider.emitRequestIfPending()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [unowned self] in
+            sessionRequestsProvider.emitRequestIfPending()
+        }
     }
 
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
