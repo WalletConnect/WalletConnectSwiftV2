@@ -82,13 +82,41 @@ class RecapStatementBuilderTests: XCTestCase {
     }
 
     func testComplexRecap() {
-        // URN with encoded JSON string
-        let urnString = "urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9leGFtcGxlLmNvbS9waWN0dXJlcy8iOnsiY3J1ZC9kZWxldGUiOlt7fV0sImNydWQvdXBkYXRlIjpbe31dLCJvdGhlci9hY3Rpb24iOlt7fV19LCJtYWlsdG86dXNlcm5hbWVAZXhhbXBsZS5jb20iOnsibXNnL3JlY2VpdmUiOlt7Im1heF9jb3VudCI6NSwidGVtcGxhdGVzIjpbIm5ld3NsZXR0ZXIiLCJtYXJrZXRpbmciXX1dLCJtc2cvc2VuZCI6W3sidG8iOiJzb21lb25lQGVtYWlsLmNvbSJ9LHsidG8iOiJqb2VAZW1haWwuY29tIn1dfX0sInByZiI6WyJiYWZ5YmVpZ2s3bHkzcG9nNnV1cHhrdTNiNmJ1YmlycjQzNGliNnRmYXltdm94NmdvdGFhYWFhYSJdfQ=="
+        // JSON string
+        let jsonString = """
+        {
+           "att":{
+              "https://example.com/pictures/":{
+                 "crud/delete": [{}],
+                 "crud/update": [{}],
+                 "other/action": [{}]
+              },
+              "mailto:username@example.com":{
+                  "msg/receive": [{
+                      "max_count": 5,
+                      "templates": ["newsletter", "marketing"]
+                  }],
+                  "msg/send": [{"to": "someone@email.com"}, {"to": "joe@email.com"}]
+              }
+           },
+           "prf":["bafybeigk7ly3pog6uupxku3b6bubirr434ib6tfaymvox6gotaaaaaaaaa"]
+        }
+        """
 
-        let urn = try! RecapUrn(urn: urnString)
+        // Convert JSON string to Data
+        guard let jsonData = jsonString.data(using: .utf8) else {
+            XCTFail("Failed to convert JSON string to Data")
+            return
+        }
+
+        // Base64 encode the JSON data
+        let base64EncodedJson = jsonData.base64EncodedString()
+
+        // Create a URN with the encoded JSON
+        let urn = try! RecapUrn(urn: "urn:recap:\(base64EncodedJson)")
 
         // Expected statement
-        let expectedStatement = "I further authorize the stated URI to perform the following actions on my behalf: (1) 'crud': 'delete', 'update' for 'https://example.com/pictures'. (2) 'other': 'action' for 'https://example.com/pictures'. (3) 'msg': 'receive', 'send' for 'mailto:username@example.com'."
+        let expectedStatement = "I further authorize the stated URI to perform the following actions on my behalf: (1) 'crud': 'delete', 'update' for 'https://example.com/pictures/'. (2) 'other': 'action' for 'https://example.com/pictures/'. (3) 'msg': 'receive', 'send' for 'mailto:username@example.com'."
 
         // Generating the recap statement from the URN
         let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
@@ -96,6 +124,7 @@ class RecapStatementBuilderTests: XCTestCase {
         // Asserting the generated statement against the expected statement
         XCTAssertEqual(recapStatement, expectedStatement)
     }
+
 
 
 }
