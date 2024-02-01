@@ -20,6 +20,11 @@ struct RecapUrn {
     }
 }
 
+struct RecapData: Decodable {
+    var att: [String: [String: [AnyCodable]]]?
+    var prf: [String]?
+}
+
 struct RecapStatementBuilder {
     static func buildRecapStatement(recapUrns: [RecapUrn]) -> String {
         var statementParts: [String] = []
@@ -27,33 +32,26 @@ struct RecapStatementBuilder {
 
         recapUrns.forEach { urn in
             guard let jsonData = urn.decodedPayload() else { return }
-            guard let decodedRecap: [String: [String: [String: [String]]]] = decodeUrnToJson(jsonData: jsonData) else { return }
+            guard let decodedRecap = try? JSONDecoder().decode(RecapData.self, from: jsonData) else {
+                print("Error decoding JSON")
+                return
+            }
 
-            guard let attValue = decodedRecap["att"] else { return }
+            guard let attValue = decodedRecap.att else { return }
             let sortedResourceKeys = attValue.keys.sorted()
 
             for resourceKey in sortedResourceKeys {
                 guard let actions = attValue[resourceKey] else { continue }
                 var actionsByType: [String: [String]] = [:]
 
-                // Grouping actions by their prefix
-                for (actionType, _) in actions {
-                    let components = actionType.split(separator: "/").map(String.init)
-                    guard components.count > 1 else { continue }
-                    let prefix = components[0]
-                    let action = components.dropFirst().joined(separator: "/")
-
-                    actionsByType[prefix, default: []].append(action)
+                for actionType in actions.keys {
+                    let action = actionType.split(separator: "/").dropFirst().joined(separator: "/")
+                    actionsByType[String(actionType.split(separator: "/").first!), default: []].append(action)
                 }
 
-                // Sorting the action types (prefixes) alphabetically
-                let sortedActionTypes = actionsByType.keys.sorted()
-
-                // Constructing statement parts from sorted actions
-                for prefix in sortedActionTypes {
-                    guard let actionList = actionsByType[prefix] else { continue }
-                    let sortedActionList = actionList.sorted().map { "'\($0)'" }.joined(separator: ", ")
-                    statementParts.append("(\(actionCounter)) '\(prefix)': \(sortedActionList) for '\(resourceKey)'")
+                actionsByType.sorted(by: { $0.key < $1.key }).forEach { prefix, actions in
+                    let formattedActions = actions.sorted().map { "'\($0)'" }.joined(separator: ", ")
+                    statementParts.append("(\(actionCounter)) '\(prefix)': \(formattedActions) for '\(resourceKey)'")
                     actionCounter += 1
                 }
             }
@@ -64,16 +62,6 @@ struct RecapStatementBuilder {
             return "I further authorize the stated URI to perform the following actions on my behalf: \(formattedStatement)."
         } else {
             return "No actions authorized."
-        }
-    }
-
-    private static func decodeUrnToJson<T: Decodable>(jsonData: Data) -> T? {
-        do {
-            let decodedObject = try JSONDecoder().decode(T.self, from: jsonData)
-            return decodedObject
-        } catch {
-            print("Error decoding JSON: \(error)")
-            return nil
         }
     }
 }
