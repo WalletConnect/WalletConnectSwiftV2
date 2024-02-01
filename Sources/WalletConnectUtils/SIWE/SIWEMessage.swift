@@ -45,19 +45,20 @@ public struct SIWEMessage: Equatable {
     }
 
     private func getStatementLine(includeRecapInTheStatement: Bool) -> String {
-        if includeRecapInTheStatement,
-           let recaps = resources?.compactMap { RecapUrn(urn: $0) }
-              let decodedRecap = decodeUrnToJson(urn: resource),
-           let attValue = decodedRecap["att"] {
-            if let statement = statement {
-                return "\n\(statement) \(buildRecapStatement(from: attValue))"
-            } else {
-                return "\n\(buildRecapStatement(from: attValue))"
-            }
-        } else {
-            guard let statement = statement else { return "" }
-            return "\n\(statement)"
-        }
+        ""
+//        if includeRecapInTheStatement,
+//           let recaps = resources?.compactMap { RecapUrn(urn: $0) }
+//              let decodedRecap = decodeUrnToJson(urn: resource),
+//           let attValue = decodedRecap["att"] {
+//            if let statement = statement {
+//                return "\n\(statement) \(buildRecapStatement(from: attValue))"
+//            } else {
+//                return "\n\(buildRecapStatement(from: attValue))"
+//            }
+//        } else {
+//            guard let statement = statement else { return "" }
+//            return "\n\(statement)"
+//        }
     }
 
     

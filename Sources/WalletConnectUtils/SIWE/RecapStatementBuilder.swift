@@ -23,6 +23,7 @@ struct RecapUrn {
 struct RecapStatementBuilder {
     static func buildRecapStatement(recapUrns: [RecapUrn]) -> String {
         var statementParts: [String] = []
+        var actionCounter: Int = 1
 
         recapUrns.forEach { urn in
             guard let jsonData = urn.decodedPayload() else { return }
@@ -33,27 +34,36 @@ struct RecapStatementBuilder {
 
             for resourceKey in sortedResourceKeys {
                 guard let actions = attValue[resourceKey] else { continue }
-                var requestActions: [String] = []
+                var actionsByType: [String: [String]] = [:]
 
-                for (actionType, _) in actions where actionType.starts(with: "request/") {
-                    let action = actionType.replacingOccurrences(of: "request/", with: "")
-                    requestActions.append("'\(action)'")
+                // Grouping actions by their prefix
+                for (actionType, _) in actions {
+                    let components = actionType.split(separator: "/").map(String.init)
+                    guard components.count > 1 else { continue }
+                    let prefix = components[0]
+                    let action = components.dropFirst().joined(separator: "/")
+
+                    actionsByType[prefix, default: []].append(action)
                 }
 
-                requestActions.sort()
+                // Sorting the action types (prefixes) alphabetically
+                let sortedActionTypes = actionsByType.keys.sorted()
 
-                if !requestActions.isEmpty {
-                    let actionsString = requestActions.joined(separator: ", ")
-                    statementParts.append("'request': \(actionsString) for '\(resourceKey)'")
+                // Constructing statement parts from sorted actions
+                for prefix in sortedActionTypes {
+                    guard let actionList = actionsByType[prefix] else { continue }
+                    let sortedActionList = actionList.sorted().map { "'\($0)'" }.joined(separator: ", ")
+                    statementParts.append("(\(actionCounter)) '\(prefix)': \(sortedActionList) for '\(resourceKey)'")
+                    actionCounter += 1
                 }
             }
         }
 
         if !statementParts.isEmpty {
-            let formattedStatement = statementParts.joined(separator: "; ")
-            return "I further authorize the stated URI to perform the following actions: (1) \(formattedStatement)."
+            let formattedStatement = statementParts.joined(separator: ". ")
+            return "I further authorize the stated URI to perform the following actions on my behalf: \(formattedStatement)."
         } else {
-            return ""
+            return "No actions authorized."
         }
     }
 
