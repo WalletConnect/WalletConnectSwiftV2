@@ -17,7 +17,7 @@ class RecapStatementBuilderTests: XCTestCase {
 
         let expectedStatement = "I further authorize the stated URI to perform the following actions on my behalf: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'."
 
-        let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
+        let recapStatement = try! RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
 
         XCTAssertEqual(recapStatement, expectedStatement)
     }
@@ -36,7 +36,7 @@ class RecapStatementBuilderTests: XCTestCase {
 
         let expectedStatement = "I further authorize the stated URI to perform the following actions on my behalf: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'."
 
-        let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
+        let recapStatement = try! RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
 
         XCTAssertEqual(recapStatement, expectedStatement)
     }
@@ -75,7 +75,7 @@ class RecapStatementBuilderTests: XCTestCase {
         let expectedStatement = "I further authorize the stated URI to perform the following actions on my behalf: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'. (2) 'crud': 'delete', 'update' for 'https://example.com/pictures/'. (3) 'other': 'action' for 'https://example.com/pictures/'."
 
         // Generating the recap statement from both URNs
-        let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn1, urn2])
+        let recapStatement = try! RecapStatementBuilder.buildRecapStatement(recapUrns: [urn1, urn2])
 
         // Asserting the generated statement against the expected statement
         XCTAssertEqual(recapStatement, expectedStatement)
@@ -115,16 +115,28 @@ class RecapStatementBuilderTests: XCTestCase {
         // Create a URN with the encoded JSON
         let urn = try! RecapUrn(urn: "urn:recap:\(base64EncodedJson)")
 
-        // Expected statement
         let expectedStatement = "I further authorize the stated URI to perform the following actions on my behalf: (1) 'crud': 'delete', 'update' for 'https://example.com/pictures/'. (2) 'other': 'action' for 'https://example.com/pictures/'. (3) 'msg': 'receive', 'send' for 'mailto:username@example.com'."
 
-        // Generating the recap statement from the URN
-        let recapStatement = RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
+        let recapStatement = try! RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])
 
         // Asserting the generated statement against the expected statement
         XCTAssertEqual(recapStatement, expectedStatement)
     }
 
 
+    func testBuilderThrowsNoActionsAuthorizedError() {
+        // Create a RecapUrn with no actions
+        let emptyRecap: [String: [String: [String: [String]]]] = [
+            "att": [:] // No actions defined
+        ]
+
+        let encoded = try! JSONEncoder().encode(emptyRecap).base64EncodedString()
+        let urn = try! RecapUrn(urn: "urn:recap:\(encoded)")
+
+        // Assert that building a statement with no actions throws an error
+        XCTAssertThrowsError(try RecapStatementBuilder.buildRecapStatement(recapUrns: [urn])) { error in
+            XCTAssertEqual(error as? RecapStatementBuilder.Errors, RecapStatementBuilder.Errors.noActionsAuthorized)
+        }
+    }
 
 }
