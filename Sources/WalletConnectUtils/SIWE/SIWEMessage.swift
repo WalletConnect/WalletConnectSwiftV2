@@ -29,12 +29,13 @@ public struct SIWEMessage: Equatable {
         self.resources = resources
     }
 
-    public func formatted(includeRecapInTheStatement: Bool = false) -> String {
+    public func formatted() throws -> String {
 
+        let statementLine = try getStatementLine()
         return """
                \(domain) wants you to sign in with your Ethereum account:
                \(address)
-               \(getStatementLine(includeRecapInTheStatement: includeRecapInTheStatement))
+               \(statementLine)
 
                URI: \(uri)
                Version: \(version)
@@ -44,21 +45,24 @@ public struct SIWEMessage: Equatable {
                """
     }
 
-    private func getStatementLine(includeRecapInTheStatement: Bool) -> String {
-        ""
-//        if includeRecapInTheStatement,
-//           let recaps = resources?.compactMap { RecapUrn(urn: $0) }
-//              let decodedRecap = decodeUrnToJson(urn: resource),
-//           let attValue = decodedRecap["att"] {
-//            if let statement = statement {
-//                return "\n\(statement) \(buildRecapStatement(from: attValue))"
-//            } else {
-//                return "\n\(buildRecapStatement(from: attValue))"
-//            }
-//        } else {
-//            guard let statement = statement else { return "" }
-//            return "\n\(statement)"
-//        }
+    private func getStatementLine() throws -> String {
+        if let recaps = resources?.compactMap({ try? RecapUrn(urn: $0) }),
+           !recaps.isEmpty {
+            do {
+                let recapStatement = try RecapStatementBuilder.buildRecapStatement(recapUrns: recaps)
+                if let statement = statement {
+                    return "\n\(statement) \(recapStatement)"
+                } else {
+                    return "\n\(recapStatement)"
+                }
+            } catch {
+                throw error
+            }
+        } else {
+            guard let statement = statement else { return "" }
+            return "\n\(statement)"
+        }
+
     }
 
     
@@ -81,11 +85,6 @@ public struct SIWEMessage: Equatable {
             return nil
         }
     }
-
-//    private func buildRecapStatement(from decodedRecap: [String: [String: [String]]]) -> String {
-//        RecapStatementBuilder.buildRecapStatement(from: decodedRecap)
-//    }
-
 }
 
 private extension SIWEMessage {

@@ -36,9 +36,11 @@ struct RecapData: Decodable {
 struct RecapStatementBuilder {
     enum Errors: Error {
         case noActionsAuthorized
+        case emptyRecapsForbidden
     }
 
     static func buildRecapStatement(recapUrns: [RecapUrn]) throws -> String {
+        guard recapUrns.count > 0 else { throw Errors.emptyRecapsForbidden }
         var statementParts: [String] = []
         var actionCounter = 1
 

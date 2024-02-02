@@ -117,7 +117,6 @@ class RecapStatementBuilderTests: XCTestCase {
         let urn1 = try RecapUrn(urn: "urn:recap:\(encodedSign)")
         let urn2 = try RecapUrn(urn: "urn:recap:\(encodedNotify)")
 
-        // Expected statement combining both recaps, reflecting the updated order
         let expectedStatement = """
         I further authorize the stated URI to perform the following actions on my behalf: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'. (2) 'crud': 'notifications', 'subscriptions' for 'https://notify.walletconnect.com/all-apps'.
         """
