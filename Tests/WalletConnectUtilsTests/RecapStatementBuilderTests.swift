@@ -81,6 +81,56 @@ class RecapStatementBuilderTests: XCTestCase {
         XCTAssertEqual(recapStatement, expectedStatement)
     }
 
+    func testRecapNotifyAndSign() throws {
+        let notifyRecapJson = """
+        {
+           "att":{
+              "https://notify.walletconnect.com/all-apps":{
+                 "crud/notifications": [{}],
+                 "crud/subscriptions": [{}]
+              }
+           }
+        }
+        """
+
+        let signRecapJson = """
+        {
+           "att":{
+              "eip155":{
+                 "request/eth_sendTransaction": [{}],
+                 "request/personal_sign": [{}]
+              }
+           }
+        }
+        """
+
+        // Correctly constructing Data from JSON strings
+        guard let notifyRecapData = notifyRecapJson.data(using: .utf8),
+              let signRecapData = signRecapJson.data(using: .utf8) else {
+            XCTFail("Failed to create Data from JSON strings")
+            return
+        }
+
+        let encodedNotify = notifyRecapData.base64EncodedString()
+        let encodedSign = signRecapData.base64EncodedString()
+
+        let urn1 = try RecapUrn(urn: "urn:recap:\(encodedSign)")
+        let urn2 = try RecapUrn(urn: "urn:recap:\(encodedNotify)")
+
+        // Expected statement combining both recaps, reflecting the updated order
+        let expectedStatement = """
+        I further authorize the stated URI to perform the following actions on my behalf: (1) 'request': 'eth_sendTransaction', 'personal_sign' for 'eip155'. (2) 'crud': 'notifications', 'subscriptions' for 'https://notify.walletconnect.com/all-apps'.
+        """
+
+        // Generating the recap statement from both URNs, with 'sign' recap first
+        let recapStatement = try RecapStatementBuilder.buildRecapStatement(recapUrns: [urn1, urn2])
+
+        // Asserting the generated statement against the expected statement
+        XCTAssertEqual(recapStatement, expectedStatement)
+
+    }
+
+
     func testComplexRecap() {
         // JSON string
         let jsonString = """
