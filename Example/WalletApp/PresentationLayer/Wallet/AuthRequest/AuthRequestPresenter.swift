@@ -11,19 +11,23 @@ final class AuthRequestPresenter: ObservableObject {
     let request: AuthenticationRequest
     let validationStatus: VerifyContext.ValidationStatus?
     
-    var messages: [String] {
+    var messages: [(String, String)] {
         return buildFormattedMessages(request: request, account: importAccount.account)
     }
 
-    func buildFormattedMessages(request: AuthenticationRequest, account: Account) -> [String] {
-        request.payload.chains.compactMap { chain in
-            guard let blockchain = Blockchain(chain), let chainAccount = Account(blockchain: blockchain, address: account.address) else {
+    func buildFormattedMessages(request: AuthenticationRequest, account: Account) -> [(String, String)] {
+        request.payload.chains.enumerated().compactMap { index, chain in
+            guard let blockchain = Blockchain(chain),
+                  let chainAccount = Account(blockchain: blockchain, address: account.address) else {
                 return nil
             }
-            return try? Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: chainAccount)
+            guard let formattedMessage = try? Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: chainAccount) else {
+                return nil
+            }
+            let messagePrefix = "Message \(index + 1):"
+            return (messagePrefix, formattedMessage)
         }
     }
-
 
     @Published var showSignedSheet = false
     
@@ -107,6 +111,10 @@ final class AuthRequestPresenter: ObservableObject {
             auths.append(auth)
         }
         return auths
+    }
+
+    func dismiss() {
+        router.dismiss()
     }
 }
 
