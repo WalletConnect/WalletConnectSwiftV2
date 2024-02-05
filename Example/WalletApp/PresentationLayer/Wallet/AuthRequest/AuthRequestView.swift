@@ -187,8 +187,8 @@ struct AuthRequestView: View {
     
     private func declineButton() -> some View {
         Button {
-            Task(priority: .userInitiated) { try await
-                presenter.onReject()
+            Task(priority: .userInitiated) { await
+                presenter.reject()
             }
         } label: {
             Text("Decline")
@@ -211,8 +211,8 @@ struct AuthRequestView: View {
     
     private func allowButton() -> some View {
         Button {
-            Task(priority: .userInitiated) { try await
-                presenter.onApprove()
+            Task(priority: .userInitiated) { await
+                presenter.approve()
             }
         } label: {
             Text(presenter.validationStatus == .scam ? "Proceed anyway" : "Allow")

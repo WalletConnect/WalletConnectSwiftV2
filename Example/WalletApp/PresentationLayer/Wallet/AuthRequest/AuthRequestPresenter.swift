@@ -2,52 +2,111 @@ import UIKit
 import Combine
 
 import Web3Wallet
+import WalletConnectRouter
 
 final class AuthRequestPresenter: ObservableObject {
-    private let interactor: AuthRequestInteractor
     private let router: AuthRequestRouter
 
     let importAccount: ImportAccount
     let request: AuthenticationRequest
     let validationStatus: VerifyContext.ValidationStatus?
     
-    var message: String {
-        return interactor.formatted(request: request, account: importAccount.account)
+    var messages: [String] {
+        return buildFormattedMessages(request: request, account: importAccount.account)
     }
-    
+
+    func buildFormattedMessages(request: AuthenticationRequest, account: Account) -> [String] {
+        request.payload.chains.compactMap { chain in
+            guard let blockchain = Blockchain(chain), let chainAccount = Account(blockchain: blockchain, address: account.address) else {
+                return nil
+            }
+            return try? Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: chainAccount)
+        }
+    }
+
+
     @Published var showSignedSheet = false
     
     private var disposeBag = Set<AnyCancellable>()
 
+    private let messageSigner: MessageSigner
+
     init(
         importAccount: ImportAccount,
-        interactor: AuthRequestInteractor,
         router: AuthRequestRouter,
         request: AuthenticationRequest,
-        context: VerifyContext?
+        context: VerifyContext?,
+        messageSigner: MessageSigner
     ) {
         defer { setupInitialState() }
-        self.interactor = interactor
         self.router = router
         self.importAccount = importAccount
         self.request = request
         self.validationStatus = context?.validation
+        self.messageSigner = messageSigner
     }
 
     @MainActor
-    func onApprove() async throws {
-        let showConnected = try await interactor.approve(request: request, importAccount: importAccount)
-        showConnected ? showSignedSheet.toggle() : router.dismiss()
+    func approve() async {
+        do {
+
+            let auths = try buildAuthObjects()
+
+            _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
+
+            /* Redirect */
+            if let uri = request.requester.redirect?.native {
+                WalletConnectRouter.goBack(uri: uri)
+                router.dismiss()
+            } else {
+                showSignedSheet.toggle()
+            }
+
+        } catch {
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
+        }
     }
 
     @MainActor
-    func onReject() async throws {
-        try await interactor.reject(request: request)
-        router.dismiss()
+    func reject() async  {
+        
+        do {
+            try await Web3Wallet.instance.rejectSession(requestId: request.id)
+
+            /* Redirect */
+            if let uri = request.requester.redirect?.native {
+                WalletConnectRouter.goBack(uri: uri)
+            }
+            router.dismiss()
+        } catch {
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
+        }
     }
     
     func onSignedSheetDismiss() {
         router.dismiss()
+    }
+
+    private func buildAuthObjects() throws -> [AuthObject] {
+        var auths = [AuthObject]()
+
+        try request.payload.chains.forEach { chain in
+
+            let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
+
+
+            let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: account)
+
+            let signature = try messageSigner.sign(
+                message: SIWEmessages,
+                privateKey: Data(hex: importAccount.privateKey),
+                type: .eip191)
+
+            let auth = try Web3Wallet.instance.makeAuthObject(authRequest: request, signature: signature, account: account)
+
+            auths.append(auth)
+        }
+        return auths
     }
 }
 

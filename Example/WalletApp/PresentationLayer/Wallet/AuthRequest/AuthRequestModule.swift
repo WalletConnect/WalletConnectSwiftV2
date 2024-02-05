@@ -6,8 +6,7 @@ final class AuthRequestModule {
     @discardableResult
     static func create(app: Application, request: AuthenticationRequest, importAccount: ImportAccount, context: VerifyContext?) -> UIViewController {
         let router = AuthRequestRouter(app: app)
-        let interactor = AuthRequestInteractor(messageSigner: app.messageSigner)
-        let presenter = AuthRequestPresenter(importAccount: importAccount, interactor: interactor, router: router, request: request, context: context)
+        let presenter = AuthRequestPresenter(importAccount: importAccount, router: router, request: request, context: context, messageSigner: app.messageSigner)
         let view = AuthRequestView().environmentObject(presenter)
         let viewController = SceneViewController(viewModel: presenter, content: view)
 

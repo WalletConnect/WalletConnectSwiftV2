@@ -226,7 +226,6 @@
 		C55D347F295DD7140004314A /* AuthRequestModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347A295DD7140004314A /* AuthRequestModule.swift */; };
 		C55D3480295DD7140004314A /* AuthRequestPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347B295DD7140004314A /* AuthRequestPresenter.swift */; };
 		C55D3481295DD7140004314A /* AuthRequestRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347C295DD7140004314A /* AuthRequestRouter.swift */; };
-		C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347D295DD7140004314A /* AuthRequestInteractor.swift */; };
 		C55D3483295DD7140004314A /* AuthRequestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D347E295DD7140004314A /* AuthRequestView.swift */; };
 		C55D3489295DD8CA0004314A /* PasteUriModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D3484295DD8CA0004314A /* PasteUriModule.swift */; };
 		C55D348A295DD8CA0004314A /* PasteUriPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55D3485295DD8CA0004314A /* PasteUriPresenter.swift */; };
@@ -584,7 +583,6 @@
 		C55D347A295DD7140004314A /* AuthRequestModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestModule.swift; sourceTree = "<group>"; };
 		C55D347B295DD7140004314A /* AuthRequestPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestPresenter.swift; sourceTree = "<group>"; };
 		C55D347C295DD7140004314A /* AuthRequestRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestRouter.swift; sourceTree = "<group>"; };
-		C55D347D295DD7140004314A /* AuthRequestInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestInteractor.swift; sourceTree = "<group>"; };
 		C55D347E295DD7140004314A /* AuthRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRequestView.swift; sourceTree = "<group>"; };
 		C55D3484295DD8CA0004314A /* PasteUriModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUriModule.swift; sourceTree = "<group>"; };
 		C55D3485295DD8CA0004314A /* PasteUriPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUriPresenter.swift; sourceTree = "<group>"; };
@@ -750,7 +748,6 @@
 			files = (
 				A5E03DFF2864662500888481 /* WalletConnect in Frameworks */,
 				A561C80529DFCD4500DF540D /* WalletConnectSync in Frameworks */,
-				A5B814FA2B5AAA2F00AECCFD /* WalletConnectIdentity in Frameworks */,
 				A5E03DF52864651200888481 /* Starscream in Frameworks */,
 				A5C8BE85292FE20B006CC85C /* Web3 in Frameworks */,
 				C5DD5BE1294E09E3008FD3A4 /* Web3Wallet in Frameworks */,
@@ -1532,7 +1529,6 @@
 				C55D347A295DD7140004314A /* AuthRequestModule.swift */,
 				C55D347B295DD7140004314A /* AuthRequestPresenter.swift */,
 				C55D347C295DD7140004314A /* AuthRequestRouter.swift */,
-				C55D347D295DD7140004314A /* AuthRequestInteractor.swift */,
 				C55D347E295DD7140004314A /* AuthRequestView.swift */,
 			);
 			path = AuthRequest;
@@ -2051,7 +2047,6 @@
 				A561C80429DFCD4500DF540D /* WalletConnectSync */,
 				A573C53A29EC365800E3CBFD /* HDWalletKit */,
 				A5B6C0F22A6EAB1700927332 /* WalletConnectNotify */,
-				A5B814F92B5AAA2F00AECCFD /* WalletConnectIdentity */,
 			);
 			productName = IntegrationTests;
 			productReference = A5E03DED286464DB00888481 /* IntegrationTests.xctest */;
@@ -2447,7 +2442,6 @@
 				847BD1DA2989492500076C90 /* MainRouter.swift in Sources */,
 				C5F32A2E2954814A00A6476E /* ConnectionDetailsRouter.swift in Sources */,
 				84AEC24F2B4D1EE400E27A5B /* ActivityIndicatorManager.swift in Sources */,
-				C55D3482295DD7140004314A /* AuthRequestInteractor.swift in Sources */,
 				C55D34B12965FB750004314A /* SessionProposalInteractor.swift in Sources */,
 				C56EE247293F566D004840D1 /* ScanModule.swift in Sources */,
 				C56EE28D293F5757004840D1 /* AppearanceConfigurator.swift in Sources */,
