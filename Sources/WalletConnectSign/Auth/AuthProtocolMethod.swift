@@ -1,7 +1,7 @@
 import Foundation
 
 struct SessionAuthenticatedProtocolMethod: ProtocolMethod {
-    let method: String = "wc_sessionAuthenticated"
+    let method: String = "wc_sessionAuthenticate"
 
     let requestConfig = RelayConfig(tag: 1116, prompt: true, ttl: 86400)
 

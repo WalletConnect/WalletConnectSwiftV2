@@ -7,7 +7,7 @@ private func stubURI(includeMethods: Bool = true) -> (uri: WalletConnectURI, str
     let protocolName = "irn"
     let timestamp = UInt64(Date().timeIntervalSince1970) + 5 * 60
     var uriString = "wc:\(topic)@2?symKey=\(symKey)&relay-protocol=\(protocolName)&expiryTimestamp=\(timestamp)"
-    let methods = ["wc_sessionPropose", "wc_sessionAuthenticated"]
+    let methods = ["wc_sessionPropose", "wc_sessionAuthenticate"]
     if includeMethods {
         let methodsString = methods.joined(separator: ",")
         uriString.append("&methods=\(methodsString)")
