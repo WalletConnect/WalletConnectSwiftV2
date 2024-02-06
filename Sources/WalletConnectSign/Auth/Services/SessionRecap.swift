@@ -32,19 +32,15 @@ struct SessionRecap {
             throw Errors.invalidRecapStructure
         }
 
-        // Ensure all actions are prefixed with 'request/'
-        guard eip155Actions.keys.allSatisfy({ $0.hasPrefix("request/") }) else {
-            throw Errors.invalidActions
-        }
-
         self.urn = urn
         self.recapData = decodedData
     }
 
     var methods: Set<String> {
         guard let eip155Actions = recapData.att?["eip155"] else { return [] }
-        return Set(eip155Actions.keys.map { String($0.dropFirst("request/".count)) })
+        return Set(eip155Actions.keys
+            .filter{$0.hasPrefix("request/")}
+            .map { String($0.dropFirst("request/".count)) })
     }
-
 }
 
