@@ -134,7 +134,7 @@ struct AuthRequestView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color.blue) // Changed background color of the header
+                    .background(Color.blue)
                     .cornerRadius(28, corners: .allCorners)
                     .padding(.leading, 15)
                     .padding(.top, 9)
@@ -142,7 +142,7 @@ struct AuthRequestView: View {
                 ScrollView {
                     VStack(spacing: 10) {
                         ForEach(Array(presenter.messages.enumerated()), id: \.offset) { _, messageTuple in
-                            VStack(alignment: .leading, spacing: 5) { // Added spacing between header and message
+                            VStack(alignment: .leading, spacing: 5) {
                                 Text("\(messageTuple.0)")
                                     .font(.system(size: 14, weight: .bold, design: .rounded))
                                     .foregroundColor(.black)
