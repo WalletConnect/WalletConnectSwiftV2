@@ -121,7 +121,14 @@ final class AuthRequestPresenter: ObservableObject {
 // MARK: - Private functions
 private extension AuthRequestPresenter {
     func setupInitialState() {
-
+        Web3Wallet.instance.requestExpirationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] requestId in
+                guard let self = self else { return }
+                if requestId == request.id {
+                    dismiss()
+                }
+            }.store(in: &disposeBag)
     }
 }
 
