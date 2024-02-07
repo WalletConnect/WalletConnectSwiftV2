@@ -126,7 +126,7 @@ public final class SignClient: SignClientProtocol {
         return pendingProposalsProvider.pendingProposalsPublisher
     }
 
-    public var requestExpirationPublisher: AnyPublisher<Request, Never> {
+    public var requestExpirationPublisher: AnyPublisher<RPCID, Never> {
         return requestsExpiryWatcher.requestExpirationPublisher
     }
 

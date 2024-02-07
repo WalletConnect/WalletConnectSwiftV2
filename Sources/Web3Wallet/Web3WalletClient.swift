@@ -90,7 +90,7 @@ public class Web3WalletClient {
         return signClient.pendingProposalsPublisher
     }
 
-    public var requestExpirationPublisher: AnyPublisher<Request, Never> {
+    public var requestExpirationPublisher: AnyPublisher<RPCID, Never> {
         return signClient.requestExpirationPublisher
     }
 

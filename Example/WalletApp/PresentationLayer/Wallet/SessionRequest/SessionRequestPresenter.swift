@@ -82,9 +82,9 @@ private extension SessionRequestPresenter {
     func setupInitialState() {
         Web3Wallet.instance.requestExpirationPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] request in
+            .sink { [weak self] requestId in
                 guard let self = self else { return }
-                if request.id == sessionRequest.id {
+                if requestId == sessionRequest.id {
                     dismiss()
                 }
             }.store(in: &disposeBag)

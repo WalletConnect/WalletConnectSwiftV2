@@ -15,7 +15,7 @@ public protocol SignClientProtocol {
     var logsPublisher: AnyPublisher<Log, Never> {get}
     var sessionProposalExpirationPublisher: AnyPublisher<Session.Proposal, Never> { get }
     var pendingProposalsPublisher: AnyPublisher<[(proposal: Session.Proposal, context: VerifyContext?)], Never> { get }
-    var requestExpirationPublisher: AnyPublisher<Request, Never> { get }
+    var requestExpirationPublisher: AnyPublisher<RPCID, Never> { get }
 
     func connect(requiredNamespaces: [String: ProposalNamespace], optionalNamespaces: [String: ProposalNamespace]?, sessionProperties: [String: String]?, topic: String) async throws
     func request(params: Request) async throws
