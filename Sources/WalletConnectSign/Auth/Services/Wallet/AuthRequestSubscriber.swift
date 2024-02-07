@@ -34,11 +34,15 @@ class AuthRequestSubscriber {
         self.pairingStore = pairingStore
         subscribeForRequest()
     }
-    
+
     private func subscribeForRequest() {
         pairingRegisterer.register(method: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
 
+                guard !payload.request.isExpired() else {
+                    return respondError(payload: payload, reason: .sessionRequestExpired)
+                }
+                
                 if var pairing = pairingStore.getPairing(forTopic: payload.topic) {
                     pairing.activate()
                     pairingStore.setPairing(pairing)
@@ -46,7 +50,7 @@ class AuthRequestSubscriber {
                 logger.debug("AuthRequestSubscriber: Received request")
 
                 pairingRegisterer.setReceived(pairingTopic: payload.topic)
-                
+
                 let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.authPayload, requester: payload.request.requester.metadata)
 
                 Task(priority: .high) {
@@ -64,5 +68,15 @@ class AuthRequestSubscriber {
                     }
                 }
             }.store(in: &publishers)
+    }
+
+    func respondError(payload: SubscriptionPayload, reason: SignReasonCode) {
+        Task(priority: .high) {
+            do {
+                try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SessionAuthenticatedProtocolMethod(), reason: reason)
+            } catch {
+                logger.error("Respond Error failed with: \(error.localizedDescription)")
+            }
+        }
     }
 }
