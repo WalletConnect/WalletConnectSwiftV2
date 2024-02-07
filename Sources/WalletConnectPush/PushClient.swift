@@ -18,6 +18,10 @@ public class PushClient: PushClientProtocol {
         try await registerService.register(deviceToken: deviceToken, alwaysRaw: enableEncrypted)
     }
 
+    public func unregister() async throws {
+        try await registerService.unregister()
+    }
+
 #if DEBUG
     public func register(deviceToken: String) async throws {
         try await registerService.register(deviceToken: deviceToken, alwaysRaw: true)
