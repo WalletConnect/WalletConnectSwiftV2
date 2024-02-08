@@ -7,8 +7,7 @@ public struct NotifyClientFactory {
         let keyserverURL = URL(string: "https://keys.walletconnect.com")!
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
         let groupKeychainService = GroupKeychainStorage(serviceIdentifier: groupIdentifier)
-        let databasePath = databasePath(appGroup: groupIdentifier, database: "notify_v\(version).db")
-        let sqlite = DiskSqlite(path: databasePath)
+        let sqlite = NotifySqliteFactory.create(appGroup: groupIdentifier)
 
         return NotifyClientFactory.create(
             projectId: projectId,
@@ -45,28 +44,32 @@ public struct NotifyClientFactory {
         let identityClient = IdentityClientFactory.create(keyserver: keyserverURL, keychain: keychainStorage, logger: logger)
         let notifyMessageSubscriber = NotifyMessageSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, notifyStorage: notifyStorage, crypto: crypto, logger: logger)
         let webDidResolver = NotifyWebDidResolver()
-        let deleteNotifySubscriptionRequester = DeleteNotifySubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, kms: kms, logger: logger, notifyStorage: notifyStorage)
+        let notifyDeleteSubscriptionRequester = NotifyDeleteSubscriptionRequester(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, notifyStorage: notifyStorage)
         let resubscribeService = NotifyResubscribeService(networkInteractor: networkInteractor, notifyStorage: notifyStorage, logger: logger)
 
         let notifyConfigProvider = NotifyConfigProvider(projectId: projectId, explorerHost: explorerHost)
 
         let notifySubscribeRequester = NotifySubscribeRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, kms: kms, webDidResolver: webDidResolver, notifyConfigProvider: notifyConfigProvider)
 
-        let notifySubscribeResponseSubscriber = NotifySubscribeResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifyConfigProvider: notifyConfigProvider)
+        let notifySubscriptionsUpdater = NotifySubsctiptionsUpdater(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, groupKeychainStorage: groupKeychainStorage)
+
+        let notifySubscriptionsBuilder = NotifySubscriptionsBuilder(notifyConfigProvider: notifyConfigProvider)
+
+        let notifySubscribeResponseSubscriber = NotifySubscribeResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, notifySubscriptionsBuilder: notifySubscriptionsBuilder, notifySubscriptionsUpdater: notifySubscriptionsUpdater)
 
         let notifyUpdateRequester = NotifyUpdateRequester(keyserverURL: keyserverURL, identityClient: identityClient, networkingInteractor: networkInteractor, notifyConfigProvider: notifyConfigProvider, logger: logger, notifyStorage: notifyStorage)
 
-        let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, notifyConfigProvider: notifyConfigProvider, notifyStorage: notifyStorage)
+        let notifyUpdateResponseSubscriber = NotifyUpdateResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, notifySubscriptionsBuilder: notifySubscriptionsBuilder, notifySubscriptionsUpdater: notifySubscriptionsUpdater)
 
         let subscriptionsAutoUpdater = SubscriptionsAutoUpdater(notifyUpdateRequester: notifyUpdateRequester, logger: logger, notifyStorage: notifyStorage)
 
         let notifyWatcherAgreementKeysProvider = NotifyWatcherAgreementKeysProvider(kms: kms)
         let notifyWatchSubscriptionsRequester = NotifyWatchSubscriptionsRequester(keyserverURL: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, webDidResolver: webDidResolver, notifyAccountProvider: notifyAccountProvider, notifyWatcherAgreementKeysProvider: notifyWatcherAgreementKeysProvider, notifyHost: notifyHost)
-        let notifySubscriptionsBuilder = NotifySubscriptionsBuilder(notifyConfigProvider: notifyConfigProvider)
-        let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifyStorage: notifyStorage, groupKeychainStorage: groupKeychainStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
-        let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, kms: kms, identityClient: identityClient, logger: logger, groupKeychainStorage: groupKeychainStorage, notifyStorage: notifyStorage, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
+        let notifyWatchSubscriptionsResponseSubscriber = NotifyWatchSubscriptionsResponseSubscriber(networkingInteractor: networkInteractor, logger: logger, notifySubscriptionsBuilder: notifySubscriptionsBuilder, notifySubscriptionsUpdater: notifySubscriptionsUpdater)
+        let notifySubscriptionsChangedRequestSubscriber = NotifySubscriptionsChangedRequestSubscriber(keyserver: keyserverURL, networkingInteractor: networkInteractor, identityClient: identityClient, logger: logger, notifySubscriptionsUpdater: notifySubscriptionsUpdater, notifySubscriptionsBuilder: notifySubscriptionsBuilder)
         let subscriptionWatcher = SubscriptionWatcher(notifyWatchSubscriptionsRequester: notifyWatchSubscriptionsRequester, logger: logger)
         let historyService = HistoryService(keyserver: keyserverURL, networkingClient: networkInteractor, identityClient: identityClient)
+        let notifyDeleteSubscriptionSubscriber = NotifyDeleteSubscriptionSubscriber(networkingInteractor: networkInteractor, kms: kms, logger: logger, notifySubscriptionsBuilder: notifySubscriptionsBuilder, notifySubscriptionsUpdater: notifySubscriptionsUpdater)
 
         return NotifyClient(
             logger: logger,
@@ -77,33 +80,20 @@ public struct NotifyClientFactory {
             pushClient: pushClient,
             notifyMessageSubscriber: notifyMessageSubscriber,
             notifyStorage: notifyStorage,
-            deleteNotifySubscriptionRequester: deleteNotifySubscriptionRequester,
+            notifyDeleteSubscriptionRequester: notifyDeleteSubscriptionRequester,
             resubscribeService: resubscribeService,
             notifySubscribeRequester: notifySubscribeRequester,
-            notifySubscribeResponseSubscriber: notifySubscribeResponseSubscriber,
+            notifySubscribeResponseSubscriber: notifySubscribeResponseSubscriber, 
+            notifyDeleteSubscriptionSubscriber: notifyDeleteSubscriptionSubscriber,
             notifyUpdateRequester: notifyUpdateRequester,
             notifyUpdateResponseSubscriber: notifyUpdateResponseSubscriber,
             notifyAccountProvider: notifyAccountProvider,
             subscriptionsAutoUpdater: subscriptionsAutoUpdater,
             notifyWatchSubscriptionsResponseSubscriber: notifyWatchSubscriptionsResponseSubscriber, 
             notifyWatcherAgreementKeysProvider: notifyWatcherAgreementKeysProvider,
-            notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber,
+            notifySubscriptionsChangedRequestSubscriber: notifySubscriptionsChangedRequestSubscriber, 
+            notifySubscriptionsUpdater: notifySubscriptionsUpdater,
             subscriptionWatcher: subscriptionWatcher
         )
-    }
-
-    static func databasePath(appGroup: String, database: String) -> String {
-        guard let path = FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
-            .appendingPathComponent(database) else {
-
-            fatalError("Database path not exists")
-        }
-
-        return path.absoluteString
-    }
-
-    static var version: String {
-        return "1"
     }
 }

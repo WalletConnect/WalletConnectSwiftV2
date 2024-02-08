@@ -62,6 +62,9 @@ struct NotificationsView: View {
                 .listRowSeparator(.hidden)
             }
             .listStyle(PlainListStyle())
+            .safeAreaInset(edge: .bottom) {
+                Spacer().frame(height: 16)
+            }
         }
         .task {
             try? await presenter.fetch()

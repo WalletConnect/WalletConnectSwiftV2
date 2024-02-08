@@ -52,6 +52,11 @@ final class SubscriptionPresenter: ObservableObject {
         }
     }
 
+    func messageIconUrl(message: NotifyMessageViewModel) -> URL? {
+        let icons = subscription.messageIcons(ofType: message.type)
+        return try? icons.md?.asURL()
+    }
+
     func unsubscribe() {
         interactor.deleteSubscription(subscription)
         router.dismiss()
@@ -64,7 +69,8 @@ final class SubscriptionPresenter: ObservableObject {
         case .idle:
             Task(priority: .high) { @MainActor in
                 loadingState = .loading
-                isMoreDataAvailable = try await interactor.fetchHistory(after: messages.last?.id, limit: 50)
+                let isLoaded = try? await interactor.fetchHistory(after: messages.last?.id, limit: 50)
+                isMoreDataAvailable = isLoaded ?? false
                 loadingState = .idle
             }
         }

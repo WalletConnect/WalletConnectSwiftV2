@@ -20,7 +20,7 @@ final class Signer {
             return signer.signTypedData(request.params)
 
         case "eth_sendTransaction":
-            return signer.sendTransaction(request.params)
+            return try signer.sendTransaction(request.params)
 
         case "solana_signTransaction":
             return SOLSigner.signTransaction(request.params)
