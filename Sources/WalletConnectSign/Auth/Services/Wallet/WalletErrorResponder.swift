@@ -50,3 +50,14 @@ actor WalletErrorResponder {
         return (topic, keys)
     }
 }
+
+extension WalletErrorResponder.Errors: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .recordForIdNotFound:
+            return NSLocalizedString("The record for the specified ID was not found.", comment: "Record Not Found Error")
+        case .malformedAuthRequestParams:
+            return NSLocalizedString("The authentication request parameters are malformed.", comment: "Malformed Auth Request Params Error")
+        }
+    }
+}
