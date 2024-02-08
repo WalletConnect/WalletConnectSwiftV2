@@ -81,9 +81,16 @@ final class SignPresenter: ObservableObject {
     @MainActor
     func connectWalletWithSessionAuthenticate() {
         Task {
-            let uri = try await Sign.instance.authenticate(.stub())
-            walletConnectUri = uri
-            router.presentNewPairing(walletConnectUri: walletConnectUri!)
+            do {
+                ActivityIndicatorManager.shared.start()
+                let uri = try await Sign.instance.authenticate(.stub())
+                walletConnectUri = uri
+                ActivityIndicatorManager.shared.stop()
+                router.presentNewPairing(walletConnectUri: walletConnectUri!)
+            } catch {
+                ActivityIndicatorManager.shared.stop()
+            }
+
         }
     }
 
