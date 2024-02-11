@@ -98,7 +98,6 @@ final class AuthRequestPresenter: ObservableObject {
 
             let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
 
-
             let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: account)
 
             let signature = try messageSigner.sign(

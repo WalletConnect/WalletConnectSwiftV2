@@ -5,7 +5,7 @@ public enum AutoNamespacesError: Error, LocalizedError {
     case requiredAccountsNotSatisfied
     case requiredMethodsNotSatisfied
     case requiredEventsNotSatisfied
-    case emtySessionNamespacesForbidden
+    case emptySessionNamespacesForbidden
 
     public var errorDescription: String? {
         switch self {
@@ -17,7 +17,7 @@ public enum AutoNamespacesError: Error, LocalizedError {
             return "The required methods are not satisfied."
         case .requiredEventsNotSatisfied:
             return "The required events are not satisfied."
-        case .emtySessionNamespacesForbidden:
+        case .emptySessionNamespacesForbidden:
             return "Empty session namespaces are not allowed."
         }
     }
@@ -340,7 +340,7 @@ public enum AutoNamespaces {
                 }
             }
         }
-        guard !sessionNamespaces.isEmpty else { throw AutoNamespacesError.emtySessionNamespacesForbidden }
+        guard !sessionNamespaces.isEmpty else { throw AutoNamespacesError.emptySessionNamespacesForbidden }
 
         return sessionNamespaces
     }
