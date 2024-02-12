@@ -2,7 +2,7 @@
 import Foundation
 
 
-public struct SessionPayloadBuilder {
+public struct AuthPayloadBuilder {
 
     public static func build(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
         // Attempt to find a valid session recap URN from the resources

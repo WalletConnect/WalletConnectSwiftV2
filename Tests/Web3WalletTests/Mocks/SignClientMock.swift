@@ -13,7 +13,7 @@ final class SignClientMock: SignClientProtocol {
         fatalError()
     }
     
-    func makeAuthObject(authRequest: WalletConnectSign.AuthenticationRequest, signature: WalletConnectUtils.CacaoSignature, account: WalletConnectUtils.Account) throws -> WalletConnectSign.AuthObject {
+    func makeAuthObject(authPayload: WalletConnectSign.AuthPayload, signature: WalletConnectUtils.CacaoSignature, account: WalletConnectUtils.Account) throws -> WalletConnectSign.AuthObject {
         fatalError()
     }
     

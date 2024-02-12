@@ -349,8 +349,12 @@ public final class SignClient: SignClientProtocol {
         return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(account: account), includeRecapInTheStatement: true)
     }
 
-    public func makeAuthObject(authRequest: AuthenticationRequest, signature: WalletConnectUtils.CacaoSignature, account: Account) throws -> AuthObject {
-        try CacaosProvider().makeCacao(authRequest: authRequest, signature: signature, account: account)
+    public func buildSignedAuthObject(authPayload: AuthPayload, signature: WalletConnectUtils.CacaoSignature, account: Account) throws -> AuthObject {
+        try CacaosProvider().makeCacao(authPayload: authPayload, signature: signature, account: account)
+    }
+
+    public func buildAuthPayload(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
+        try AuthPayloadBuilder.build(payload: payload, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
     }
 
     //-----------------------------------------------------------------------------------

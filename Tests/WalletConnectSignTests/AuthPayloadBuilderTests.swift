@@ -14,7 +14,7 @@ class AuthPayloadBuilderTests: XCTestCase {
     func testBuildWithValidSessionRecapUrn() throws {
         let request = createSampleAuthPayload(resources: [validSessionRecapUrn, "other-resource"])
 
-        let result = try SessionPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
+        let result = try AuthPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
 
         XCTAssertEqual(result.resources?.count, 2, "Expected to have the original non-recap resource and one new session recap URN")
         XCTAssertTrue(result.resources?.contains("other-resource") ?? false, "Expected to preserve non-recap resource")
@@ -23,7 +23,7 @@ class AuthPayloadBuilderTests: XCTestCase {
     func testBuildWithNoValidSessionRecapUrn() throws {
         let request = createSampleAuthPayload(resources: [invalidSessionRecapUrn, "other-resource"])
 
-        XCTAssertThrowsError(try SessionPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)) { error in
+        XCTAssertThrowsError(try AuthPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)) { error in
             guard let error = error as? SessionRecap.Errors else {
                 return XCTFail("Expected SessionRecap.Errors")
             }
@@ -34,7 +34,7 @@ class AuthPayloadBuilderTests: XCTestCase {
     func testBuildPreservesExtraResources() throws {
         let request = createSampleAuthPayload(resources: ["additional-resource-1", validSessionRecapUrn, "additional-resource-2"])
 
-        let result = try SessionPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
+        let result = try AuthPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
 
         XCTAssertTrue(result.resources?.contains("additional-resource-1") ?? false && result.resources?.contains("additional-resource-2") ?? false, "Expected to preserve additional non-recap resources")
     }

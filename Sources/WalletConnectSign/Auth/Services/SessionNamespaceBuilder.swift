@@ -38,6 +38,10 @@ class SessionNamespaceBuilder {
         let methods = firstRecapResource.methods
         let chains = firstRecapResource.chains
 
+        guard !chains.isEmpty else {
+            throw Errors.cannotCreateSessionNamespaceFromTheRecap
+        }
+
         let sessionNamespace = SessionNamespace(chains: chains, accounts: accountsSet, methods: methods, events: [])
         return [chainsNamespace: sessionNamespace]
     }

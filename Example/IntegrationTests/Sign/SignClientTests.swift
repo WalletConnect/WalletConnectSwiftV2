@@ -773,14 +773,16 @@ final class SignClientTests: XCTestCase {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
-                let siweMessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
 
                 let signature = try signer.sign(
                     message: siweMessage,
                     privateKey: prvKey,
                     type: .eip191)
 
-                let auth = try wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
+                let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
 
                 _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
             }
@@ -811,14 +813,17 @@ final class SignClientTests: XCTestCase {
                 request.payload.chains.forEach { chain in
 
                     let account = Account(blockchain: Blockchain(chain)!, address: walletAccount.address)!
-                    let siweMessage = try! wallet.formatAuthMessage(payload: request.payload, account: account)
+
+                    let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                    let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: account)
 
                     let signature = try! signer.sign(
                         message: siweMessage,
                         privateKey: prvKey,
                         type: .eip191)
 
-                    let cacao = try! wallet.makeAuthObject(authRequest: request, signature: signature, account: account)
+                    let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: account)
                     cacaos.append(cacao)
 
                 }
@@ -885,9 +890,12 @@ final class SignClientTests: XCTestCase {
             Task(priority: .high) {
                 let invalidSignature = CacaoSignature(t: .eip1271, s: eip1271Signature)
 
-                let auth = try wallet.makeAuthObject(authRequest: request, signature: invalidSignature, account: walletAccount)
 
-                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: invalidSignature, account: walletAccount)
+
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
             }
         }
         .store(in: &publishers)
@@ -934,16 +942,18 @@ final class SignClientTests: XCTestCase {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
-                let Siwemessage = try wallet.formatAuthMessage(payload: request.payload, account: walletAccount)
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
 
-                let signature = try signer.sign(
-                    message: Siwemessage,
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+
+                let signature = try! signer.sign(
+                    message: siweMessage,
                     privateKey: prvKey,
                     type: .eip191)
 
-                let auth = try wallet.makeAuthObject(authRequest: request, signature: signature, account: walletAccount)
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
 
-                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
             }
         }
         .store(in: &publishers)

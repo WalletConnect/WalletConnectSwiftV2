@@ -237,10 +237,14 @@ public class Web3WalletClient {
         signClient.getPendingProposals(topic: topic)
     }
 
-    public func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) throws -> AuthObject {
-        try signClient.makeAuthObject(authRequest: authRequest, signature: signature, account: account)
+    public func buildSignedAuthObject(authPayload: AuthPayload, signature: CacaoSignature, account: Account) throws -> AuthObject {
+        try signClient.buildSignedAuthObject(authPayload: authPayload, signature: signature, account: account)
     }
-    
+
+    public func buildAuthPayload(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
+        try signClient.buildAuthPayload(payload: payload, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
+    }
+
     public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
         try await pushClient.register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }

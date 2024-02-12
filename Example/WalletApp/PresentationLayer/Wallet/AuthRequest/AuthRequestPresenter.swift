@@ -98,7 +98,7 @@ final class AuthRequestPresenter: ObservableObject {
 
             let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
 
-            let supportedAuthPayload = try SessionPayloadBuilder.build(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+            let supportedAuthPayload = try Web3Wallet.instance.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
 
             let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: supportedAuthPayload, account: account)
 
@@ -107,7 +107,7 @@ final class AuthRequestPresenter: ObservableObject {
                 privateKey: Data(hex: importAccount.privateKey),
                 type: .eip191)
 
-            let auth = try Web3Wallet.instance.makeAuthObject(authRequest: request, signature: signature, account: account)
+            let auth = try Web3Wallet.instance.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: account)
 
             auths.append(auth)
         }

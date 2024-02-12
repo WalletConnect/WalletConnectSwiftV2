@@ -25,13 +25,13 @@ public protocol SignClientProtocol {
     func update(topic: String, namespaces: [String: SessionNamespace]) async throws
     func extend(topic: String) async throws
     func approveSessionAuthenticate(requestId: RPCID, auths: [AuthObject]) async throws -> Session
-    func makeAuthObject(authRequest: AuthenticationRequest, signature: CacaoSignature, account: Account) throws -> AuthObject
+    func buildSignedAuthObject(authPayload: AuthPayload, signature: CacaoSignature, account: Account) throws -> AuthObject
     func respond(topic: String, requestId: RPCID, response: RPCResult) async throws
     func emit(topic: String, event: Session.Event, chainId: Blockchain) async throws
     func disconnect(topic: String) async throws
     func getSessions() -> [Session]
     func formatAuthMessage(payload: AuthPayload, account: Account) throws -> String
-
+    func buildAuthPayload(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload 
     func cleanup() async throws
     
     func getPendingRequests(topic: String?) -> [(request: Request, context: VerifyContext?)]
