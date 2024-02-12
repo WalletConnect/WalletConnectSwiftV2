@@ -78,15 +78,15 @@ class AuthResponseSubscriber {
                 throw AuthError.malformedResponseParams
             }
 
-            guard
-                let recovered = try? messageFormatter.formatMessage(
-                    from: authRequestPayload.cacaoPayload(account: account),
-                    includeRecapInTheStatement: true
-                ),
-                recovered == message
-            else {
-                throw AuthError.messageCompromised
-            }
+//            guard
+//                let recovered = try? messageFormatter.formatMessage(
+//                    from: authRequestPayload.cacaoPayload(account: account),
+//                    includeRecapInTheStatement: true
+//                ),
+//                recovered == message
+//            else {
+//                throw AuthError.messageCompromised
+//            }
 
             do {
                 try await signatureVerifier.verify(
