@@ -98,7 +98,7 @@ final class AuthRequestPresenter: ObservableObject {
 
             let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
 
-            let supportedAuthPayload = SessionPayloadBuilder.build(payload: request.payload, supportedEVMChains: [], supportedMethods: [])
+            let supportedAuthPayload = try SessionPayloadBuilder.build(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
 
             let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: supportedAuthPayload, account: account)
 
