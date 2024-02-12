@@ -208,7 +208,7 @@ extension AuthRequestParams {
             statement: statement,
             requestId: requestId,
             resources: resources,
-            methods: ["eth_sign", "personal_sign", "eth_signTypedData"]
+            methods: ["eth_sign", "personal_sign", "eth_sendTransaction"]
         )
     }
 }
