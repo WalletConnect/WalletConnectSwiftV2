@@ -70,4 +70,22 @@ class SessionRecapBuilderTests: XCTestCase {
         }
     }
 
+    func testSessionRecapBuilder_ExcludesUnsupportedMethods() throws {
+        // Given
+        let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        // Include an extra method that is not present in the requestedRecapUrn
+        let supportedMethods = ["eth_sendTransaction", "extraUnsupportedMethod"]
+
+        let requestedRecapUrn = self.requestedRecapUrn // Using the previously defined requestedRecapUrn
+
+        // When
+        let result = try SessionRecapBuilder.build(requestedSessionRecap: requestedRecapUrn, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+
+        // Then
+        // Verify that the result only contains the "eth_sendTransaction" method and not the "extraUnsupportedMethod"
+        XCTAssertTrue(result.recapData.att?["eip155"]?.keys.contains("request/eth_sendTransaction") ?? false, "Result should contain 'eth_sendTransaction'")
+        XCTAssertFalse(result.recapData.att?["eip155"]?.keys.contains("request/extraUnsupportedMethod") ?? true, "Result should not contain 'extraUnsupportedMethod'")
+    }
+
+
 }

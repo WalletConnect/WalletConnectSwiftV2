@@ -62,7 +62,7 @@ class SessionNamespaceBuilderTests: XCTestCase {
             XCTFail("Expected successful namespace creation, but received error: \(error)")
         }
     }
-
+//test wallet nie dodaje method
 
     func testMutlipleRecapsInCacaoWhereOnlyOneIsSessionRecap() {
         let expectedSessionNamespace = SessionNamespace(
