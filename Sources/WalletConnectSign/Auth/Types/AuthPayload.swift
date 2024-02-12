@@ -47,3 +47,16 @@ public struct AuthPayload: Codable, Equatable {
     }
 }
 
+
+public struct AuthResponseParams {
+
+
+}
+
+struct AuthResponseParamsBuilder {
+
+    func build(request: AuthenticationRequest, supportedEVMChains: [Blockchain], supportedMethods: [String]) {
+
+
+    }
+}

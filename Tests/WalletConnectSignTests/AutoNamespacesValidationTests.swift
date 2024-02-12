@@ -1018,7 +1018,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
             events: [],
             accounts: []
         ), "Expected to throw AutoNamespacesError.emtySessionNamespacesForbidden, but it did not") { error in
-            guard case AutoNamespacesError.emtySessionNamespacesForbidden = error else {
+            guard case AutoNamespacesError.emptySessionNamespacesForbidden = error else {
                 return XCTFail("Unexpected error type: \(error)")
             }
         }

@@ -2,7 +2,7 @@
 import Foundation
 
 struct SessionRecap {
-    struct RecapData: Decodable {
+    struct RecapData: Codable {
         var att: [String: [String: [AnyCodable]]]?
         var prf: [String]?
     }
