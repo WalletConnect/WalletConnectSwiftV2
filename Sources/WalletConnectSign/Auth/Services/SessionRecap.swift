@@ -42,5 +42,21 @@ struct SessionRecap {
             .filter{$0.hasPrefix("request/")}
             .map { String($0.dropFirst("request/".count)) })
     }
+
+    var chains: Set<Blockchain> {
+        guard let eip155Actions = recapData.att?["eip155"] else { return [] }
+
+        // Attempt to find and decode the first action's chain array from AnyCodable
+        if let firstActionKey = eip155Actions.keys.first,
+           let firstActionValues = eip155Actions[firstActionKey],
+           let firstActionValue = firstActionValues.first,
+           let dict = try? firstActionValue.get([String:[String]].self),
+           let chainsArray = dict["chains"]{
+            return Set(chainsArray.compactMap(Blockchain.init))
+        }
+
+        return []
+    }
+
 }
 

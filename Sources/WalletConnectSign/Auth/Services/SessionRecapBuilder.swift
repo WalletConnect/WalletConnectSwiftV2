@@ -28,7 +28,6 @@ struct SessionRecapBuilder {
             for method in supportedMethods {
                 let actionKey = "request/\(method)"
                 if eip155Actions.keys.contains(actionKey) {
-                    // Since the original recap doesn't contain chains, add supported chains directly
                     let supportedChainsCodable = supportedEVMChains.map { $0.absoluteString }
                     filteredActions["eip155", default: [:]][actionKey] = [AnyCodable(["chains": supportedChainsCodable])]
                 }

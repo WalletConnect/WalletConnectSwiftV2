@@ -18,12 +18,10 @@ class SessionNamespaceBuilder {
             throw Errors.emptyCacaosArrayForbidden
         }
 
-        // Attempt to initialize SessionRecapUrn from the first valid recap URN in the resources
         guard let firstRecapResource = cacaos.first?.p.resources?.compactMap({ try? SessionRecap(urn: $0) }).first else {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
         }
 
-        // Validate that all cacaos contain an equivalent SessionRecapUrn resource
         for cacao in cacaos {
             guard let resources = cacao.p.resources,
                   resources.contains(where: { (try? SessionRecap(urn: $0)) != nil }) else {
@@ -36,11 +34,11 @@ class SessionNamespaceBuilder {
         }
 
         let accounts = cacaos.compactMap { try? DIDPKH(did: $0.p.iss).account }
-
         let accountsSet = Set(accounts)
         let methods = firstRecapResource.methods
+        let chains = firstRecapResource.chains
 
-        let sessionNamespace = SessionNamespace(accounts: accountsSet, methods: methods, events: [])
+        let sessionNamespace = SessionNamespace(chains: chains, accounts: accountsSet, methods: methods, events: [])
         return [chainsNamespace: sessionNamespace]
     }
 }

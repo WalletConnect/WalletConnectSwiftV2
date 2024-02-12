@@ -6,8 +6,24 @@ class SessionNamespaceBuilderTests: XCTestCase {
     var sessionNamespaceBuilder: SessionNamespaceBuilder!
     var logger: ConsoleLogging!
 
-    // dedoded recap: {"att":{"eip155":{"request/eth_sign":[],"request/personal_sign":[],"request/eth_signTypedData":[]}}}
-    let recapUrn = "urn:recap:eyJhdHQiOnsiZWlwMTU1Ijp7InJlcXVlc3QvZXRoX3NpZ24iOltdLCJyZXF1ZXN0L3BlcnNvbmFsX3NpZ24iOltdLCJyZXF1ZXN0L2V0aF9zaWduVHlwZWREYXRhIjpbXX19fQ=="
+
+    var recapUrn: String {
+        let updatedRecap: [String: [String: [String: [[String: [String]]]]]] = [
+            "att": [
+                "eip155": [
+                    "request/eth_sign": [["chains": ["eip155:1", "eip155:137"]]],
+                    "request/personal_sign": [["chains": ["eip155:1", "eip155:137"]]],
+                    "request/eth_signTypedData": [["chains": ["eip155:1", "eip155:137"]]]
+                ]
+            ]
+        ]
+
+        let jsonData = try! JSONEncoder().encode(updatedRecap)
+        let base64EncodedRecap = jsonData.base64EncodedString()
+        return "urn:recap:\(base64EncodedRecap)"
+
+    }
+
 
     override func setUp() {
         super.setUp()
@@ -24,13 +40,15 @@ class SessionNamespaceBuilderTests: XCTestCase {
 
     func testBuildSessionNamespaces_ValidCacaos_ReturnsExpectedNamespace() {
         let expectedSessionNamespace = SessionNamespace(
+            chains: Set([Blockchain("eip155:1")!, Blockchain("eip155:137")!]),
             accounts: Set([
                 Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
                 Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
             ]),
-            methods: ["personal_sign", "eth_signTypedData", "eth_sign"],
-            events: []
+            methods: Set(["personal_sign", "eth_signTypedData", "eth_sign"]),
+            events: Set([])
         )
+
         let cacaos = [
             Cacao.stub(account: Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!, resources: [recapUrn]),
             Cacao.stub(account: Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!, resources: [recapUrn])
@@ -45,8 +63,10 @@ class SessionNamespaceBuilderTests: XCTestCase {
         }
     }
 
+
     func testMutlipleRecapsInCacaoWhereOnlyOneIsSessionRecap() {
         let expectedSessionNamespace = SessionNamespace(
+            chains: Set([Blockchain("eip155:1")!, Blockchain("eip155:137")!]),
             accounts: Set([
                 Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
             ]),
