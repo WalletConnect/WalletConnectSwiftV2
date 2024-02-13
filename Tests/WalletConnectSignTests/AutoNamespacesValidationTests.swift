@@ -18,15 +18,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
@@ -64,15 +57,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
@@ -110,15 +96,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
@@ -160,15 +139,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!],
@@ -215,15 +187,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:3")!, Blockchain("eip155:4")!],
@@ -268,15 +233,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
@@ -322,15 +280,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
@@ -371,15 +322,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
@@ -420,15 +364,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
@@ -470,15 +407,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!],
@@ -525,15 +455,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!, Blockchain("eip155:4")!, Blockchain("cosmos:cosmoshub-4")!],
@@ -585,15 +508,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         XCTAssertThrowsError(
             try AutoNamespaces.build(
                 sessionProposal: sessionProposal,
@@ -628,15 +544,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         XCTAssertThrowsError(
             try AutoNamespaces.build(
                 sessionProposal: sessionProposal,
@@ -665,15 +574,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         XCTAssertThrowsError(
             try AutoNamespaces.build(
                 sessionProposal: sessionProposal,
@@ -702,15 +604,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         XCTAssertThrowsError(
             try AutoNamespaces.build(
                 sessionProposal: sessionProposal,
@@ -739,15 +634,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         XCTAssertThrowsError(
             try AutoNamespaces.build(
                 sessionProposal: sessionProposal,
@@ -780,15 +668,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         XCTAssertThrowsError(
             try AutoNamespaces.build(
                 sessionProposal: sessionProposal,
@@ -817,15 +698,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: []
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!],
@@ -864,15 +738,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!],
@@ -911,15 +778,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: []
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!],
@@ -963,15 +823,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: []
             )
         ]
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
             chains: [Blockchain("eip155:1")!, Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
@@ -1001,15 +854,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
     }
 
     func testBuildThrowsWhenSessionNamespacesAreEmpty() {
-        let sessionProposal = Session.Proposal(
-            id: "",
-            pairingTopic: "",
-            proposer: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil)),
-            requiredNamespaces: [:],
-            optionalNamespaces: [:],
-            sessionProperties: nil,
-            proposal: SessionProposal(relays: [], proposer: Participant(publicKey: "", metadata: AppMetadata(name: "", description: "", url: "", icons: [], redirect: AppMetadata.Redirect(native: "", universal: nil))), requiredNamespaces: [:], optionalNamespaces: [:], sessionProperties: [:])
-        )
+        let sessionProposal = Session.Proposal.stub(requiredNamespaces: [:], optionalNamespaces: [:])
 
         XCTAssertThrowsError(try AutoNamespaces.build(
             sessionProposal: sessionProposal,
@@ -1022,5 +867,41 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 return XCTFail("Unexpected error type: \(error)")
             }
         }
+    }
+}
+
+fileprivate extension Session.Proposal {
+    static func stub(
+        requiredNamespaces: [String: ProposalNamespace] = [:],
+        optionalNamespaces: [String: ProposalNamespace]? = nil
+    ) -> Session.Proposal {
+        return Session.Proposal(
+            id: "mockId",
+            pairingTopic: "mockPairingTopic",
+            proposer: AppMetadata.stub(),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces,
+            sessionProperties: nil,
+            proposal: SessionProposal.stub(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+        )
+    }
+}
+
+fileprivate extension SessionProposal {
+    static func stub(
+        requiredNamespaces: [String: ProposalNamespace] = [:],
+        optionalNamespaces: [String: ProposalNamespace]? = nil,
+        proposerPubKey: String = ""
+    ) -> SessionProposal {
+        return SessionProposal(
+            relays: [],
+            proposer: Participant(
+                publicKey: proposerPubKey,
+                metadata: AppMetadata.stub()
+            ),
+            requiredNamespaces: requiredNamespaces,
+            optionalNamespaces: optionalNamespaces ?? [:],
+            sessionProperties: [:]
+        )
     }
 }

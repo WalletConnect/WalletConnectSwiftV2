@@ -180,8 +180,9 @@ public enum AutoNamespaces {
             let proposalNamespace = $0.value
 
             if let proposalChains = proposalNamespace.chains {
-                let sessionChains = Set(proposalChains).intersection(Set(chains))
-                guard !sessionChains.isEmpty else {
+                let sessionChains = proposalChains
+
+                guard !sessionChains.isEmpty && proposalChains.isSubset(of: chains) else {
                     throw AutoNamespacesError.requiredChainsNotSatisfied
                 }
                 
