@@ -11,7 +11,7 @@ public struct AuthPayloadBuilder {
         }
 
         // Use SessionRecapBuilder to create a new session recap based on the existing valid URN
-        let newSessionRecap = try SessionRecapBuilder.build(requestedSessionRecap: existingSessionRecapUrn, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
+        let newSessionRecap = try SessionRecapBuilder.build(requestedSessionRecap: existingSessionRecapUrn, requestedChains: payload.chains, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
 
         // Encode the new session recap to its URN format
         let newSessionRecapUrn = newSessionRecap.urn
