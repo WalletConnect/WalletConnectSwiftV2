@@ -13,11 +13,14 @@ final class SessionProposalInteractor {
         let supportedOptionalChains = proposal.optionalNamespaces?["eip155"]?.chains ?? []
         var supportedChains = (supportedRequiredChains ?? []).union(supportedOptionalChains) ?? []
 
+        let supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: account.address)! }
+
         let solanaChain: Set = [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!]
 
         supportedChains = supportedChains.union(solanaChain)
 
-        let supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: account.address)! }
+        let solanaAccount
+
         
         /* Use only supported values for production. I.e:
         let supportedMethods = ["eth_signTransaction", "personal_sign", "eth_signTypedData", "eth_sendTransaction", "eth_sign"]
