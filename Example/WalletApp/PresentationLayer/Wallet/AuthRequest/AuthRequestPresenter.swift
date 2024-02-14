@@ -53,10 +53,12 @@ final class AuthRequestPresenter: ObservableObject {
     @MainActor
     func approve() async {
         do {
+            ActivityIndicatorManager.shared.start()
 
             let auths = try buildAuthObjects()
 
             _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
+            ActivityIndicatorManager.shared.stop()
 
             /* Redirect */
             if let uri = request.requester.redirect?.native {
@@ -67,13 +69,15 @@ final class AuthRequestPresenter: ObservableObject {
             }
 
         } catch {
+            ActivityIndicatorManager.shared.stop()
             AlertPresenter.present(message: error.localizedDescription, type: .error)
         }
     }
 
     @MainActor
     func reject() async  {
-        
+        ActivityIndicatorManager.shared.start()
+
         do {
             try await Web3Wallet.instance.rejectSession(requestId: request.id)
 
@@ -81,8 +85,12 @@ final class AuthRequestPresenter: ObservableObject {
             if let uri = request.requester.redirect?.native {
                 WalletConnectRouter.goBack(uri: uri)
             }
+            ActivityIndicatorManager.shared.stop()
+
             router.dismiss()
         } catch {
+            ActivityIndicatorManager.shared.stop()
+
             AlertPresenter.present(message: error.localizedDescription, type: .error)
         }
     }
