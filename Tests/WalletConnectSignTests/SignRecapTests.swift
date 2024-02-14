@@ -1,14 +1,14 @@
 import XCTest
 @testable import WalletConnectSign
 
-class SessionRecapTests: XCTestCase {
+class SignRecapTests: XCTestCase {
 
     func testSessionRecapInitializationSuccess() throws {
         // dedoded recap: {"att": {"eip155": {"request/eth_signTypedData_v4": [], "request/personal_sign": []}}}
         let recapUrn = "urn:recap:eyJhdHQiOiB7ImVpcDE1NSI6IHsicmVxdWVzdC9ldGhfc2lnblR5cGVkRGF0YV92NCI6IFtdLCAicmVxdWVzdC9wZXJzb25hbF9zaWduIjogW119fX0="
 
         do {
-            let sessionRecap = try SessionRecap(urn: recapUrn)
+            let sessionRecap = try SignRecap(urn: recapUrn)
             let methods = sessionRecap.methods
             // Verify that the expected methods are present
             XCTAssertTrue(methods.contains("personal_sign"))
@@ -22,13 +22,26 @@ class SessionRecapTests: XCTestCase {
         // dedoded: {"att": {"eip155:1": {"request/eth_signTypedData_v4": [], "request/personal_sign": []}}}
         let invalidRecap = "urn:recap:eyJhdHQiOiB7ImVpcDE1NToxIjogeyJyZXF1ZXN0L2V0aF9zaWduVHlwZWREYXRhX3Y0IjogW10sICJyZXF1ZXN0L3BlcnNvbmFsX3NpZ24iOiBbXX19fQ=="
 
-        XCTAssertThrowsError(try SessionRecap(urn: invalidRecap)) { error in
-            guard let sessionRecapError = error as? SessionRecap.Errors else {
+        XCTAssertThrowsError(try SignRecap(urn: invalidRecap)) { error in
+            guard let sessionRecapError = error as? SignRecap.Errors else {
                 XCTFail("Error should be of type SessionRecap.Errors")
                 return
             }
 
-            XCTAssertEqual(sessionRecapError, SessionRecap.Errors.invalidRecapStructure)
+            XCTAssertEqual(sessionRecapError, SignRecap.Errors.invalidRecapStructure)
         }
     }
+
+    func testSignRecapInitializationSuccessWithNoMethods() throws {
+        // Encoded recap: {"att": {"eip155": {}}}
+        let recapUrn = "urn:recap:eyJhdHQiOiB7ImVpcDE1NSI6IHt9fX0="
+
+        do {
+            let signRecap = try SignRecap(urn: recapUrn)
+            XCTAssertTrue(signRecap.methods.isEmpty, "Initialization should succeed with no methods.")
+        } catch {
+            XCTFail("Initialization should not fail for valid recap URN with no methods.")
+        }
+    }
+
 }

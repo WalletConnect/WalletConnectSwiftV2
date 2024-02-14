@@ -18,13 +18,13 @@ class SessionNamespaceBuilder {
             throw Errors.emptyCacaosArrayForbidden
         }
 
-        guard let firstRecapResource = cacaos.first?.p.resources?.compactMap({ try? SessionRecap(urn: $0) }).first else {
+        guard let firstRecapResource = cacaos.first?.p.resources?.compactMap({ try? SignRecap(urn: $0) }).first else {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
         }
 
         for cacao in cacaos {
             guard let resources = cacao.p.resources,
-                  resources.contains(where: { (try? SessionRecap(urn: $0)) != nil }) else {
+                  resources.contains(where: { (try? SignRecap(urn: $0)) != nil }) else {
                 throw Errors.malformedRecap
             }
         }

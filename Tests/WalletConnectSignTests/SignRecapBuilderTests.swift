@@ -1,7 +1,7 @@
 import XCTest
 @testable import WalletConnectSign
 
-class SessionRecapBuilderTests: XCTestCase {
+class SignRecapBuilderTests: XCTestCase {
 
     var requestedRecapUrn: String {
         let requestedRecap: [String: [String: [String: [[String: [String]]]]]] = [
@@ -21,9 +21,10 @@ class SessionRecapBuilderTests: XCTestCase {
         // Given
         let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let supportedMethods = ["eth_sendTransaction"]
+        let requestedChains = ["eip155:1", "eip155:137"]
 
         // When
-        let result = try SessionRecapBuilder.build(requestedSessionRecap: requestedRecapUrn, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+        let result = try SignRecapBuilder.build(requestedSessionRecap: requestedRecapUrn, requestedChains: requestedChains, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
 
         // Expected structure after building the recap
         let expectedRecap: [String: [String: [String: [[String: [String]]]]]] = [
@@ -47,11 +48,12 @@ class SessionRecapBuilderTests: XCTestCase {
         // Given
         let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let supportedMethods = ["eth_sendTransaction", "personal_sign"]
+        let requestedChains = ["eip155:1", "eip155:137"]
 
         let urn = requestedRecapUrn
 
         // When
-        let result = try! SessionRecapBuilder.build(requestedSessionRecap: urn, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+        let result = try! SignRecapBuilder.build(requestedSessionRecap: urn, requestedChains: requestedChains, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
 
         // Then
         XCTAssertNotNil(result.recapData.att?["eip155"]?["request/eth_sendTransaction"])
@@ -63,10 +65,11 @@ class SessionRecapBuilderTests: XCTestCase {
         let urn = requestedRecapUrn
         let nonEVMChain = Blockchain("solana:1")!
         let supportedMethods = ["eth_sendTransaction"]
+        let requestedChains = ["eip155:1", "eip155:137"]
 
         // Expecting an error to be thrown for the non-EVM chain
-        XCTAssertThrowsError(try SessionRecapBuilder.build(requestedSessionRecap: urn, supportedEVMChains: [nonEVMChain], supportedMethods: supportedMethods)) { error in
-            XCTAssertEqual(error as? SessionRecapBuilder.BuilderError, .nonEVMChainNamespace)
+        XCTAssertThrowsError(try SignRecapBuilder.build(requestedSessionRecap: urn, requestedChains: requestedChains, supportedEVMChains: [nonEVMChain], supportedMethods: supportedMethods)) { error in
+            XCTAssertEqual(error as? SignRecapBuilder.BuilderError, .nonEVMChainNamespace)
         }
     }
 
@@ -75,16 +78,38 @@ class SessionRecapBuilderTests: XCTestCase {
         let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         // Include an extra method that is not present in the requestedRecapUrn
         let supportedMethods = ["eth_sendTransaction", "extraUnsupportedMethod"]
+        let requestedChains = ["eip155:1", "eip155:137"]
 
         let requestedRecapUrn = self.requestedRecapUrn // Using the previously defined requestedRecapUrn
 
         // When
-        let result = try SessionRecapBuilder.build(requestedSessionRecap: requestedRecapUrn, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+        let result = try SignRecapBuilder.build(requestedSessionRecap: requestedRecapUrn, requestedChains: requestedChains, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
 
         // Then
         // Verify that the result only contains the "eth_sendTransaction" method and not the "extraUnsupportedMethod"
         XCTAssertTrue(result.recapData.att?["eip155"]?.keys.contains("request/eth_sendTransaction") ?? false, "Result should contain 'eth_sendTransaction'")
         XCTAssertFalse(result.recapData.att?["eip155"]?.keys.contains("request/extraUnsupportedMethod") ?? true, "Result should not contain 'extraUnsupportedMethod'")
+    }
+
+    func testSignRecapBuilder_RecapWithNoMethodsIsValid() throws {
+        // Given a recap with no methods
+        let recapWithNoMethods: [String: [String: [String: [[String: [String]]]]]] = [
+            "att": [
+                "eip155": [:] // No methods
+            ]
+        ]
+        let encodedNoMethods = try! JSONEncoder().encode(recapWithNoMethods).base64EncodedString()
+        let urnWithNoMethods = "urn:recap:\(encodedNoMethods)"
+
+        let requestedChains = ["eip155:1", "eip155:137"]
+        let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        let supportedMethods = ["eth_sendTransaction", "personal_sign"]
+
+        // When
+        let result = try SignRecapBuilder.build(requestedSessionRecap: urnWithNoMethods, requestedChains: requestedChains, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+
+        // Then
+        XCTAssertTrue(result.recapData.att?["eip155"]?.isEmpty ?? false, "Recap should be considered valid even with no methods.")
     }
 
 

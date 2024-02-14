@@ -24,10 +24,10 @@ class AuthPayloadBuilderTests: XCTestCase {
         let request = createSampleAuthPayload(resources: [invalidSessionRecapUrn, "other-resource"])
 
         XCTAssertThrowsError(try AuthPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)) { error in
-            guard let error = error as? SessionRecap.Errors else {
+            guard let error = error as? SignRecap.Errors else {
                 return XCTFail("Expected SessionRecap.Errors")
             }
-            XCTAssertEqual(error, SessionRecap.Errors.invalidRecapStructure)
+            XCTAssertEqual(error, SignRecap.Errors.invalidRecapStructure)
         }
     }
 

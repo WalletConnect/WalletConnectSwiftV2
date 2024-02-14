@@ -3,7 +3,7 @@ import Foundation
 
 import Foundation
 
-struct SessionRecapBuilder {
+struct SignRecapBuilder {
 
     enum BuilderError: Error {
         case nonEVMChainNamespace
@@ -11,7 +11,7 @@ struct SessionRecapBuilder {
         case noCommonChains
     }
 
-    static func build(requestedSessionRecap urn: String, requestedChains: [String], supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> SessionRecap {
+    static func build(requestedSessionRecap urn: String, requestedChains: [String], supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> SignRecap {
         guard !supportedEVMChains.isEmpty, !supportedMethods.isEmpty else {
             throw BuilderError.emptySupportedChainsOrMethods
         }
@@ -29,7 +29,7 @@ struct SessionRecapBuilder {
             throw BuilderError.noCommonChains
         }
 
-        let requestedRecap = try SessionRecap(urn: urn)
+        let requestedRecap = try SignRecap(urn: urn)
 
         var filteredActions: [String: [String: [AnyCodable]]] = [:]
 
@@ -43,14 +43,14 @@ struct SessionRecapBuilder {
             }
         }
 
-        let modifiedRecapData = SessionRecap.RecapData(att: filteredActions, prf: requestedRecap.recapData.prf)
+        let modifiedRecapData = SignRecap.RecapData(att: filteredActions, prf: requestedRecap.recapData.prf)
         let encoder = JSONEncoder()
         guard let jsonData = try? encoder.encode(modifiedRecapData) else {
-            throw SessionRecap.Errors.invalidRecapStructure
+            throw SignRecap.Errors.invalidRecapStructure
         }
         let jsonBase64String = jsonData.base64EncodedString()
 
         let modifiedUrn = "urn:recap:\(jsonBase64String)"
-        return try SessionRecap(urn: modifiedUrn)
+        return try SignRecap(urn: modifiedUrn)
     }
 }

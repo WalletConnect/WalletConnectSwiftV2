@@ -6,18 +6,18 @@ public struct AuthPayloadBuilder {
 
     public static func build(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
         // Attempt to find a valid session recap URN from the resources
-        guard let existingSessionRecapUrn = payload.resources?.first(where: { (try? SessionRecap(urn: $0)) != nil }) else {
-            throw SessionRecap.Errors.invalidRecapStructure
+        guard let existingSessionRecapUrn = payload.resources?.first(where: { (try? SignRecap(urn: $0)) != nil }) else {
+            throw SignRecap.Errors.invalidRecapStructure
         }
 
         // Use SessionRecapBuilder to create a new session recap based on the existing valid URN
-        let newSessionRecap = try SessionRecapBuilder.build(requestedSessionRecap: existingSessionRecapUrn, requestedChains: payload.chains, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
+        let newSessionRecap = try SignRecapBuilder.build(requestedSessionRecap: existingSessionRecapUrn, requestedChains: payload.chains, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
 
         // Encode the new session recap to its URN format
         let newSessionRecapUrn = newSessionRecap.urn
 
         // Filter out the old session recap URNs, retaining all other resources
-        let updatedResources = payload.resources?.filter { (try? SessionRecap(urn: $0)) == nil }
+        let updatedResources = payload.resources?.filter { (try? SignRecap(urn: $0)) == nil }
 
         // Add the new session recap URN to the updated resources
         let finalResources = (updatedResources ?? []) + [newSessionRecapUrn]
