@@ -140,6 +140,14 @@ extension SignPresenter {
             }
             .store(in: &subscriptions)
 
+        Sign.instance.authResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                router.dismiss()
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
+            }
+            .store(in: &subscriptions)
+
         Sign.instance.sessionResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { response in
