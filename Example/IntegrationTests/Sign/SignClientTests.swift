@@ -110,7 +110,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.reject(proposalId: proposal.id, reason: .userRejectedChains) // TODO: Review reason
+                    try await wallet.reject(proposalId: proposal.id, reason: .unsupportedChains)
                     store.rejectedProposal = proposal
                     semaphore.signal()
                 } catch { XCTFail("\(error)") }
@@ -119,7 +119,7 @@ final class SignClientTests: XCTestCase {
         dapp.sessionRejectionPublisher.sink { proposal, _ in
             semaphore.wait()
             XCTAssertEqual(store.rejectedProposal, proposal)
-            sessionRejectExpectation.fulfill() // TODO: Assert reason code
+            sessionRejectExpectation.fulfill()
         }.store(in: &publishers)
         await fulfillment(of: [sessionRejectExpectation], timeout: InputConfig.defaultTimeout)
     }
