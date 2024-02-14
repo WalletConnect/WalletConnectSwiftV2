@@ -142,7 +142,13 @@ extension SignPresenter {
 
         Sign.instance.authResponsePublisher
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] _ in
+            .sink { [unowned self] response in
+                switch response.result {
+                case .success(_):
+                    break
+                case .failure(let error):
+                    AlertPresenter.present(message: error.localizedDescription, type: .error)
+                }
                 router.dismiss()
                 Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
