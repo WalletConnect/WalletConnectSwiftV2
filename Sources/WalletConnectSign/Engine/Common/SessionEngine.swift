@@ -236,6 +236,7 @@ private extension SessionEngine {
     }
 
     func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) {
+        logger.debug("Received session request")
         let protocolMethod = SessionRequestProtocolMethod()
         let topic = payload.topic
         let request = Request(
