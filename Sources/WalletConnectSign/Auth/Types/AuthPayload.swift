@@ -44,7 +44,7 @@ public struct AuthPayload: Codable, Equatable {
 
 
     init(requestParams: AuthRequestParams, iat: String) {
-        self.type = "caip122"
+        self.type = "eip4361"
         self.chains = requestParams.chains
         self.domain = requestParams.domain
         self.aud = requestParams.aud
