@@ -11,23 +11,35 @@ final class SessionProposalInteractor {
         
         let supportedRequiredChains = proposal.requiredNamespaces["eip155"]?.chains
         let supportedOptionalChains = proposal.optionalNamespaces?["eip155"]?.chains ?? []
-        let supportedChains = (supportedRequiredChains ?? []).union(supportedOptionalChains) ?? []
-        
+        var supportedChains = (supportedRequiredChains ?? []).union(supportedOptionalChains) 
+
         let supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: account.address)! }
-        
+
         /* Use only supported values for production. I.e:
         let supportedMethods = ["eth_signTransaction", "personal_sign", "eth_signTypedData", "eth_sendTransaction", "eth_sign"]
         let supportedEvents = ["accountsChanged", "chainChanged"]
         let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
         let supportedAccounts = [Account(blockchain: Blockchain("eip155:1")!, address: ETHSigner.address)!, Account(blockchain: Blockchain("eip155:137")!, address: ETHSigner.address)!]
         */
-        let sessionNamespaces = try AutoNamespaces.build(
-            sessionProposal: proposal,
-            chains: Array(supportedChains),
-            methods: Array(supportedMethods),
-            events: Array(supportedEvents),
-            accounts: supportedAccounts
-        )
+        var sessionNamespaces: [String: SessionNamespace]!
+
+        do {
+            sessionNamespaces = try AutoNamespaces.build(
+                sessionProposal: proposal,
+                chains: Array(supportedChains),
+                methods: Array(supportedMethods),
+                events: Array(supportedEvents),
+                accounts: supportedAccounts
+            )
+        } catch let error as AutoNamespacesError {
+            try await reject(proposal: proposal, reason: RejectionReason(from: error))
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
+            return false
+        } catch {
+            try await reject(proposal: proposal, reason: .userRejected)
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
+            return false
+        }
         try await Web3Wallet.instance.approve(proposalId: proposal.id, namespaces: sessionNamespaces, sessionProperties: proposal.sessionProperties)
 
         if let uri = proposal.proposer.redirect?.native {
@@ -38,7 +50,7 @@ final class SessionProposalInteractor {
         }
     }
 
-    func reject(proposal: Session.Proposal) async throws {
+    func reject(proposal: Session.Proposal, reason: RejectionReason = .userRejected) async throws {
         try await Web3Wallet.instance.reject(proposalId: proposal.id, reason: .userRejected)
         
         /* Redirect */

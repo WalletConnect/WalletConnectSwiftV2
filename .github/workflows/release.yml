@@ -2,6 +2,14 @@ name: release
 
 on:
   workflow_dispatch:
+    inputs:
+      app:
+        type: choice
+        description: Which sample app to release
+        options: 
+        - DApp
+        - WalletApp
+        - Showcase
 
 jobs:
   build:
@@ -32,4 +40,4 @@ jobs:
         APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
         WALLETAPP_SENTRY_DSN: ${{ secrets.WALLETAPP_SENTRY_DSN }}
       run: |
-        make release_wallet APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }} WALLETAPP_SENTRY_DSN=${{ secrets.WALLETAPP_SENTRY_DSN }} MIXPANEL_TOKEN=${{secrets.MIXPANEL_TOKEN}}
+        make release APPLE_ID=${{ secrets.APPLE_ID }} TOKEN=$(echo -n $GH_USER:$GH_TOKEN | base64) PROJECT_ID=${{ secrets.RELEASE_PROJECT_ID }} WALLETAPP_SENTRY_DSN=${{ secrets.WALLETAPP_SENTRY_DSN }} MIXPANEL_TOKEN=${{secrets.MIXPANEL_TOKEN}} APP=${{ github.event.inputs.app }}

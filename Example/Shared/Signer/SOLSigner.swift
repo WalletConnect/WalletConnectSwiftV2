@@ -9,7 +9,7 @@ struct SOLSigner {
         return account.publicKey.base58EncodedString
     }
 
-    private static let account: Account = {
+    static let account: Account = {
         let key = "4eN1YZm598FtdigriE5int7Gf5dxs58rzVh3ftRwxjkYXxkiDiweuvkop2Kr5Td174DcbVdDxzjWqQ96uir3NYka"
         return try! Account(secretKey: Data(Base58.decode(key)))
     }()
