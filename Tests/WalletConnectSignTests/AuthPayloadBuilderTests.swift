@@ -21,14 +21,17 @@ class AuthPayloadBuilderTests: XCTestCase {
     }
 
     func testBuildWithNoValidSessionRecapUrn() throws {
-        let request = createSampleAuthPayload(resources: [invalidSessionRecapUrn, "other-resource"])
+        let originalPayload = createSampleAuthPayload(resources: [invalidSessionRecapUrn, "other-resource"])
 
-        XCTAssertThrowsError(try AuthPayloadBuilder.build(payload: request, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)) { error in
-            guard let error = error as? SignRecap.Errors else {
-                return XCTFail("Expected SessionRecap.Errors")
-            }
-            XCTAssertEqual(error, SignRecap.Errors.invalidRecapStructure)
-        }
+        let supportedChains = [Blockchain("eip155:1")!]
+        let supportedMethods = ["eth_sendTransaction"]
+
+        // When
+        let resultPayload = try AuthPayloadBuilder.build(payload: originalPayload, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+
+        // Then
+        XCTAssertEqual(resultPayload, originalPayload, "Expected the original payload to be returned when no valid session recap URN is found")
+
     }
 
     func testBuildPreservesExtraResources() throws {

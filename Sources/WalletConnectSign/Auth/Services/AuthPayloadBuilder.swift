@@ -7,7 +7,7 @@ public struct AuthPayloadBuilder {
     public static func build(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
         // Attempt to find a valid session recap URN from the resources
         guard let existingSessionRecapUrn = payload.resources?.first(where: { (try? SignRecap(urn: $0)) != nil }) else {
-            throw SignRecap.Errors.invalidRecapStructure
+            return payload
         }
 
         // Use SessionRecapBuilder to create a new session recap based on the existing valid URN

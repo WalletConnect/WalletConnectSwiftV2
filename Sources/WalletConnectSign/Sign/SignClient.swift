@@ -109,8 +109,8 @@ public final class SignClient: SignClientProtocol {
     /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
     ///
     /// Emited result may be an error.
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Session, AuthError>), Never> {
-        authResponsePublisherSubject.eraseToAnyPublisher()
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Session?, AuthError>), Never> {
+        authResposeSubscriber.authResponsePublisher
     }
     //---------------------------------------------------------------------------------
     public var logsPublisher: AnyPublisher<Log, Never> {
@@ -173,7 +173,6 @@ public final class SignClient: SignClientProtocol {
     private let sessionExtendPublisherSubject = PassthroughSubject<(sessionTopic: String, date: Date), Never>()
     private let pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Session, AuthError>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthenticationRequest, context: VerifyContext?), Never>()
 
     private var publishers = Set<AnyCancellable>()
@@ -328,7 +327,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
-    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> Session {
+    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
         try await authResponder.respond(requestId: requestId, auths: auths)
     }
 
@@ -524,9 +523,6 @@ public final class SignClient: SignClientProtocol {
         }
         sessionEngine.onSessionsUpdate = { [unowned self] sessions in
             sessionsPublisherSubject.send(sessions)
-        }
-        authResposeSubscriber.onResponse = { [unowned self] (id, result) in
-            authResponsePublisherSubject.send((id, result))
         }
         authRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)

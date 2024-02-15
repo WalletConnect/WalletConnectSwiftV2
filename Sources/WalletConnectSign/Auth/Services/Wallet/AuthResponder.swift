@@ -41,7 +41,7 @@ actor AuthResponder {
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
     }
 
-    func respond(requestId: RPCID, auths: [Cacao]) async throws -> Session {
+    func respond(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
         let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
         let (responseTopic, responseKeys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
@@ -111,7 +111,7 @@ actor AuthResponder {
         pairingTopic: String,
         request: SessionAuthenticateRequestParams,
         sessionTopic: String
-    ) throws -> Session {
+    ) throws -> Session? {
 
 
         let selfParticipant = response.responder
@@ -123,7 +123,10 @@ actor AuthResponder {
 
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
-        let sessionNamespaces = try sessionNamespaceBuilder.buildSessionNamespaces(cacaos: response.cacaos)
+        guard let sessionNamespaces = try? sessionNamespaceBuilder.buildSessionNamespaces(cacaos: response.cacaos) else {
+            logger.debug("Failed to create session from recap")
+            return nil
+        }
 
         let settleParams = SessionType.SettleParams(
             relay: relay,

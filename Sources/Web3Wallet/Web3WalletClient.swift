@@ -202,12 +202,11 @@ public class Web3WalletClient {
     }
 
     //---------------------------------------AUTH------------------------------------
-    // TODO - add publishers for authenticated session
     /// For a wallet to respond on authentication request
     /// - Parameters:
     ///   - requestId: authentication request id
-    ///   - signature: CACAO signature of requested message
-    public func approveSessionAuthenticate(requestId: RPCID, auths: [AuthObject]) async throws -> Session {
+    ///   - auths: CACAO objects
+    public func approveSessionAuthenticate(requestId: RPCID, auths: [AuthObject]) async throws -> Session? {
         try await signClient.approveSessionAuthenticate(requestId: requestId, auths: auths)
     }
 

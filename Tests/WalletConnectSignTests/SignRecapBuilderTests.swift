@@ -91,26 +91,4 @@ class SignRecapBuilderTests: XCTestCase {
         XCTAssertFalse(result.recapData.att?["eip155"]?.keys.contains("request/extraUnsupportedMethod") ?? true, "Result should not contain 'extraUnsupportedMethod'")
     }
 
-    func testSignRecapBuilder_RecapWithNoMethodsIsValid() throws {
-        // Given a recap with no methods
-        let recapWithNoMethods: [String: [String: [String: [[String: [String]]]]]] = [
-            "att": [
-                "eip155": [:] // No methods
-            ]
-        ]
-        let encodedNoMethods = try! JSONEncoder().encode(recapWithNoMethods).base64EncodedString()
-        let urnWithNoMethods = "urn:recap:\(encodedNoMethods)"
-
-        let requestedChains = ["eip155:1", "eip155:137"]
-        let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
-        let supportedMethods = ["eth_sendTransaction", "personal_sign"]
-
-        // When
-        let result = try SignRecapBuilder.build(requestedSessionRecap: urnWithNoMethods, requestedChains: requestedChains, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
-
-        // Then
-        XCTAssertTrue(result.recapData.att?["eip155"]?.isEmpty ?? false, "Recap should be considered valid even with no methods.")
-    }
-
-
 }

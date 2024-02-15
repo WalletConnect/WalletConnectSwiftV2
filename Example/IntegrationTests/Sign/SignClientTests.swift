@@ -849,7 +849,7 @@ final class SignClientTests: XCTestCase {
 
                     let account = Account(blockchain: Blockchain(chain)!, address: walletAccount.address)!
 
-                    let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+                    let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_sendTransaction", "personal_sign"])
 
                     let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: account)
 
@@ -867,7 +867,8 @@ final class SignClientTests: XCTestCase {
         }
         .store(in: &publishers)
         dapp.authResponsePublisher.sink { (_, result) in
-            guard case .success(let session) = result else { XCTFail(); return }
+            guard case .success(let session) = result,
+                let session = session else { XCTFail(); return }
             XCTAssertEqual(session.accounts.count, 2)
             XCTAssertEqual(session.namespaces["eip155"]?.methods.count, 2)
             XCTAssertEqual(session.namespaces["eip155"]?.accounts.count, 2)
@@ -977,7 +978,7 @@ final class SignClientTests: XCTestCase {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
 
-                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_sendTransaction", "personal_sign"])
 
                 let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
 
@@ -993,8 +994,8 @@ final class SignClientTests: XCTestCase {
         }
         .store(in: &publishers)
         dapp.authResponsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let session) = result else { XCTFail(); return }
-
+            guard case .success(let session) = result,
+                let session = session else { XCTFail(); return }
             Task(priority: .high) {
                 let request = try Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain)
                 try await dapp.request(params: request)

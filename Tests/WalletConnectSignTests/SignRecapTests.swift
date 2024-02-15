@@ -28,19 +28,7 @@ class SignRecapTests: XCTestCase {
                 return
             }
 
-            XCTAssertEqual(sessionRecapError, SignRecap.Errors.invalidNamespaceFormat)
-        }
-    }
-
-    func testSignRecapInitializationSuccessWithNoMethods() throws {
-        // Encoded recap: {"att": {"eip155": {}}}
-        let recapUrn = "urn:recap:eyJhdHQiOiB7ImVpcDE1NSI6IHt9fX0="
-
-        do {
-            let signRecap = try SignRecap(urn: recapUrn)
-            XCTAssertTrue(signRecap.methods.isEmpty, "Initialization should succeed with no methods.")
-        } catch {
-            XCTFail("Initialization should not fail for valid recap URN with no methods.")
+            XCTAssertEqual(sessionRecapError, SignRecap.Errors.invalidRecapStructure)
         }
     }
 

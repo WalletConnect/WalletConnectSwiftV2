@@ -12,8 +12,10 @@ class AuthResponseSubscriber {
     private let sessionStore: WCSessionStorage
     private let kms: KeyManagementServiceProtocol
     private let sessionNamespaceBuilder: SessionNamespaceBuilder
-
-    var onResponse: ((_ id: RPCID, _ result: Result<Session, AuthError>) -> Void)?
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Session?, AuthError>), Never>()
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Session?, AuthError>), Never> {
+        authResponsePublisherSubject.eraseToAnyPublisher()
+    }
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -40,7 +42,7 @@ class AuthResponseSubscriber {
         networkingInteractor.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
-                onResponse?(payload.id, .failure(error))
+                authResponsePublisherSubject.send((payload.id, .failure(error)))
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
@@ -58,12 +60,12 @@ class AuthResponseSubscriber {
                     do {
                         try await recoverAndVerifySignature(authRequestPayload: payload.request.authPayload, cacaos: cacaos)
                     } catch {
-                        onResponse?(requestId, .failure(error as! AuthError))
+                        authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
                     }
                     let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, authRequestPayload: authRequestPayload)
 
-                    onResponse?(requestId, .success(session))
+                    authResponsePublisherSubject.send((requestId, .success(session)))
                 }
 
             }.store(in: &publishers)
@@ -107,7 +109,7 @@ class AuthResponseSubscriber {
         selfParticipant: Participant,
         pairingTopic: String,
         authRequestPayload: AuthPayload
-    ) throws -> Session {
+    ) throws -> Session? {
 
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
         let agreementKeys = try kms.performKeyAgreement(selfPublicKey: selfPublicKey, peerPublicKey: response.responder.publicKey)
@@ -123,7 +125,10 @@ class AuthResponseSubscriber {
 
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
-        let sessionNamespaces = try sessionNamespaceBuilder.buildSessionNamespaces(cacaos: response.cacaos)
+        guard let sessionNamespaces = try? sessionNamespaceBuilder.buildSessionNamespaces(cacaos: response.cacaos) else {
+            logger.debug("Failed to create session from recap")
+            return nil
+        }
 
         let settleParams = SessionType.SettleParams(
             relay: relay,

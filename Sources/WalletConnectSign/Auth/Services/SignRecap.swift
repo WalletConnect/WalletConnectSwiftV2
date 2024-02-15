@@ -12,7 +12,6 @@ struct SignRecap {
     enum Errors: Error {
         case invalidUrnPrefix
         case invalidRecapStructure
-        case invalidNamespaceFormat
     }
 
     init(urn: String) throws {
@@ -26,9 +25,9 @@ struct SignRecap {
             throw Errors.invalidRecapStructure
         }
 
-        // Additional check for validating the namespace format within the `att` dictionary
-        guard decodedData.att?.keys.contains(where: { $0 == "eip155" }) ?? false else {
-            throw Errors.invalidNamespaceFormat
+        // Validate the structure specifically for 'eip155' with 'request/' prefixed actions
+        guard let eip155Actions = decodedData.att?["eip155"], !eip155Actions.isEmpty else {
+            throw Errors.invalidRecapStructure
         }
 
         self.urn = urn
