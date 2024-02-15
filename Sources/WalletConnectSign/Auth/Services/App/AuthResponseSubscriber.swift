@@ -58,7 +58,7 @@ class AuthResponseSubscriber {
 
                 Task {
                     do {
-                        try await recoverAndVerifySignature(authRequestPayload: payload.request.authPayload, cacaos: cacaos)
+                        try await recoverAndVerifySignature(cacaos: cacaos)
                     } catch {
                         authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
@@ -71,7 +71,7 @@ class AuthResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func recoverAndVerifySignature(authRequestPayload: AuthPayload, cacaos: [Cacao]) async throws {
+    private func recoverAndVerifySignature(cacaos: [Cacao]) async throws {
         try await cacaos.asyncForEach { [unowned self] cacao in
             guard
                 let account = try? DIDPKH(did: cacao.p.iss).account,
@@ -79,17 +79,6 @@ class AuthResponseSubscriber {
             else {
                 throw AuthError.malformedResponseParams
             }
-
-//            guard
-//                let recovered = try? messageFormatter.formatMessage(
-//                    from: authRequestPayload.cacaoPayload(account: account),
-//                    includeRecapInTheStatement: true
-//                ),
-//                recovered == message
-//            else {
-//                throw AuthError.messageCompromised
-//            }
-
             do {
                 try await signatureVerifier.verify(
                     signature: cacao.s,
@@ -100,7 +89,6 @@ class AuthResponseSubscriber {
                 logger.error("Signature verification failed with: \(error.localizedDescription)")
                 throw AuthError.signatureVerificationFailed
             }
-
         }
     }
 

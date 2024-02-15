@@ -918,7 +918,7 @@ final class SignClientTests: XCTestCase {
 //    }
 
     func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
-        let responseExpectation = expectation(description: "error response delivered")
+        let requestExpectation = expectation(description: "error response delivered")
         let uri = try! await dapp.authenticate(AuthRequestParams.stub())
 
         try? await walletPairingClient.pair(uri: uri)
@@ -931,17 +931,12 @@ final class SignClientTests: XCTestCase {
 
                 let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: invalidSignature, account: walletAccount)
 
-                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
+                await XCTAssertThrowsErrorAsync(try await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao]))
+                requestExpectation.fulfill()
             }
         }
         .store(in: &publishers)
-        dapp.authResponsePublisher.sink { (_, result) in
-            guard case let .failure(error) = result,
-                  error == .signatureVerificationFailed else { XCTFail(); return }
-            responseExpectation.fulfill()
-        }
-        .store(in: &publishers)
-        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+        await fulfillment(of: [requestExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSessionAuthenticateUserRespondError() async {

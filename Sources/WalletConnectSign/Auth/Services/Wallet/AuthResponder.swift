@@ -8,6 +8,8 @@ actor AuthResponder {
     }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
+    private let messageFormatter: SIWECacaoFormatting
+    private let signatureVerifier: MessageVerifier
     private let rpcHistory: RPCHistory
     private let verifyContextStore: CodableStore<VerifyContext>
     private let logger: ConsoleLogging
@@ -22,6 +24,8 @@ actor AuthResponder {
         logger: ConsoleLogging,
         kms: KeyManagementService,
         rpcHistory: RPCHistory,
+        signatureVerifier: MessageVerifier,
+        messageFormatter: SIWECacaoFormatting,
         verifyContextStore: CodableStore<VerifyContext>,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,
@@ -39,9 +43,12 @@ actor AuthResponder {
         self.metadata = metadata
         self.sessionStore = sessionStore
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
+        self.signatureVerifier = signatureVerifier
+        self.messageFormatter = messageFormatter
     }
 
     func respond(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
+        try await recoverAndVerifySignature(cacaos: auths)
         let (sessionAuthenticateRequestParams, pairingTopic) = try getsessionAuthenticateRequestParams(requestId: requestId)
         let (responseTopic, responseKeys) = try generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
@@ -154,6 +161,27 @@ actor AuthResponder {
         }
 
         return session.publicRepresentation()
+    }
+
+    private func recoverAndVerifySignature(cacaos: [Cacao]) async throws {
+        try await cacaos.asyncForEach { [unowned self] cacao in
+            guard
+                let account = try? DIDPKH(did: cacao.p.iss).account,
+                let message = try? messageFormatter.formatMessage(from: cacao.p, includeRecapInTheStatement: true)
+            else {
+                throw AuthError.malformedResponseParams
+            }
+            do {
+                try await signatureVerifier.verify(
+                    signature: cacao.s,
+                    message: message,
+                    account: account
+                )
+            } catch {
+                logger.error("Signature verification failed with: \(error.localizedDescription)")
+                throw AuthError.signatureVerificationFailed
+            }
+        }
     }
 }
 
