@@ -202,15 +202,15 @@ extension SignPresenter: SceneViewModel {}
 // MARK: - Authenticate request stub
 extension AuthRequestParams {
     static func stub(
-        domain: String = "service.invalid",
+        domain: String = "app.web3inbox",
         chains: [String] = ["eip155:1", "eip155:137"],
         nonce: String = "32891756",
-        aud: String = "https://service.invalid/login",
+        aud: String = "https://app.web3inbox.com/login",
         nbf: String? = nil,
         exp: String? = nil,
-        statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
+        statement: String? = "I accept the ServiceOrg Terms of Service: https://app.web3inbox.com/tos",
         requestId: String? = nil,
-        resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
+        resources: [String]? = ["urn:recap:ewogICAiYXR0IjogewogICAgICAid2FsbGV0Y29ubmVjdC1ub3RpZnkiOiB7CiAgICAgICAgICJtYW5hZ2UtYWxsLWFwcHMvbm90aWZpY2F0aW9ucyI6IFtdLAogICAgICB9CiAgIH0KfQ==", "ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
     ) -> AuthRequestParams {
         return AuthRequestParams(
             domain: domain,

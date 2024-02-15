@@ -12,6 +12,7 @@ struct SignRecap {
     enum Errors: Error {
         case invalidUrnPrefix
         case invalidRecapStructure
+        case invalidNamespaceFormat
     }
 
     init(urn: String) throws {
@@ -23,6 +24,11 @@ struct SignRecap {
         guard let jsonData = Data(base64Encoded: String(base64Part)),
               let decodedData = try? JSONDecoder().decode(RecapData.self, from: jsonData) else {
             throw Errors.invalidRecapStructure
+        }
+
+        // Additional check for validating the namespace format within the `att` dictionary
+        guard decodedData.att?.keys.contains(where: { $0 == "eip155" }) ?? false else {
+            throw Errors.invalidNamespaceFormat
         }
 
         self.urn = urn

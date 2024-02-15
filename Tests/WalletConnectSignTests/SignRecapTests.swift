@@ -28,7 +28,7 @@ class SignRecapTests: XCTestCase {
                 return
             }
 
-            XCTAssertEqual(sessionRecapError, SignRecap.Errors.invalidRecapStructure)
+            XCTAssertEqual(sessionRecapError, SignRecap.Errors.invalidNamespaceFormat)
         }
     }
 
