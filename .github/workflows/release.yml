@@ -13,8 +13,7 @@ on:
 
 jobs:
   build:
-    runs-on: 
-      group: apple-silicon
+    runs-on: macos-latest-xlarge
 
     steps:
     - uses: actions/checkout@v3
