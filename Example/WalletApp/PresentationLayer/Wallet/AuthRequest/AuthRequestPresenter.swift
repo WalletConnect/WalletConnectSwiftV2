@@ -106,13 +106,13 @@ final class AuthRequestPresenter: ObservableObject {
 
             let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
 
+            var supportedAuthPayload: AuthPayload!
             do {
-                let supportedAuthPayload = try Web3Wallet.instance.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!, Blockchain("eip155:69")!], supportedMethods: ["personal_sign", "eth_sendTransaction"])
+                supportedAuthPayload = try Web3Wallet.instance.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!, Blockchain("eip155:69")!], supportedMethods: ["personal_sign", "eth_sendTransaction"])
             } catch {
-                await reject()
-                throw 
+                Task { await reject() }
+                throw error
             }
-
             let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: supportedAuthPayload, account: account)
 
             let signature = try messageSigner.sign(
