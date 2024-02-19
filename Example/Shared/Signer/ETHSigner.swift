@@ -32,12 +32,14 @@ struct ETHSigner {
         return AnyCodable(result)
     }
 
-    func sendTransaction(_ params: AnyCodable) -> AnyCodable {
-        let params = try! params.get([EthereumTransaction].self)
+    func sendTransaction(_ params: AnyCodable) throws -> AnyCodable {
+        let params = try params.get([EthereumTransaction].self)
         var transaction = params[0]
         transaction.gas = EthereumQuantity(quantity: BigUInt("1234"))
+        transaction.nonce = EthereumQuantity(quantity: BigUInt("0"))
+        transaction.gasPrice = EthereumQuantity(quantity: BigUInt(0))
         print(transaction.description)
-        let signedTx = try! transaction.sign(with: self.privateKey, chainId: 4)
+        let signedTx = try transaction.sign(with: self.privateKey, chainId: 4)
         let (r, s, v) = (signedTx.r, signedTx.s, signedTx.v)
         let result = r.hex() + s.hex().dropFirst(2) + String(v.quantity, radix: 16)
         return AnyCodable(result)

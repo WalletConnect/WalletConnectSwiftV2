@@ -1,3 +1,4 @@
+
 //import Foundation
 //import XCTest
 //import WalletConnectUtils
@@ -244,7 +245,7 @@
 //            try await walletNotifyClientA.deleteSubscription(topic: notifyMessageRecord.topic)
 //        }
 //    }
-//
+
 //    func testFetchHistory() async throws {
 //        let subscribeExpectation = expectation(description: "fetch notify subscription")
 //        let account = Account("eip155:1:0x622b17376F76d72C43527a917f59273247A917b4")!
@@ -268,6 +269,24 @@
 //        XCTAssertTrue(hasMore)
 //        XCTAssertTrue(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count == 20)
 //    }
+//}
+//
+//
+//private extension NotifyTests {
+//    func sign(_ message: String) -> CacaoSignature {
+//        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+//        return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+//    }
+//}
+//
+//private extension NotifyClient {
+//
+//    func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping (String) -> CacaoSignature) async throws {
+//        let params = try await prepareRegistration(account: account, domain: domain)
+//        let signature = onSign(params.message)
+//        try await register(params: params, signature: signature)
+//    }
+//}
 //}
 //
 //

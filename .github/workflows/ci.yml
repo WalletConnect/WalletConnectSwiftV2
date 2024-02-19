@@ -22,8 +22,7 @@ jobs:
 
   prepare:
     needs: authorize
-    runs-on: 
-      group: apple-silicon
+    runs-on: macos-latest-xlarge
     steps:
       - uses: actions/checkout@v3
         with:
@@ -36,8 +35,7 @@ jobs:
 
   test:
     needs: prepare
-    runs-on: 
-      group: apple-silicon
+    runs-on: macos-latest-xlarge
     timeout-minutes: 15
     strategy:
       fail-fast: false
