@@ -109,7 +109,7 @@ public final class SignClient: SignClientProtocol {
     /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
     ///
     /// Emited result may be an error.
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Session?, AuthError>), Never> {
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<(Session?, [Cacao]), AuthError>), Never> {
         authResposeSubscriber.authResponsePublisher
     }
     //---------------------------------------------------------------------------------

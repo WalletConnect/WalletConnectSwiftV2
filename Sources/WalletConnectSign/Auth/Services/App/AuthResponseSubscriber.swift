@@ -12,8 +12,8 @@ class AuthResponseSubscriber {
     private let sessionStore: WCSessionStorage
     private let kms: KeyManagementServiceProtocol
     private let sessionNamespaceBuilder: SessionNamespaceBuilder
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Session?, AuthError>), Never>()
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Session?, AuthError>), Never> {
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<(Session?, [Cacao]), AuthError>), Never>()
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<(Session?, [Cacao]), AuthError>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -65,7 +65,7 @@ class AuthResponseSubscriber {
                     }
                     let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, authRequestPayload: authRequestPayload)
 
-                    authResponsePublisherSubject.send((requestId, .success(session)))
+                    authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
                 }
 
             }.store(in: &publishers)
