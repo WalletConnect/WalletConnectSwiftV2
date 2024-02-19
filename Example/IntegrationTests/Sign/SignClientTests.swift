@@ -329,10 +329,14 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
             Task(priority: .high) {
-                try! await wallet.update(topic: settledSession.topic, namespaces: sessionNamespaces)
+                let updateNamespace = SessionNamespace.make(
+                    toRespond: ProposalNamespace.stubRequired(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!])
+                )
+                try! await wallet.update(topic: settledSession.topic, namespaces: updateNamespace)
             }
         }.store(in: &publishers)
-        dapp.sessionUpdatePublisher.sink { _, _ in
+        dapp.sessionUpdatePublisher.sink { _, namespace in
+            XCTAssertEqual(namespace.values.first?.accounts.count, 2)
             expectation.fulfill()
         }.store(in: &publishers)
         let uri = try! await dappPairingClient.create()
