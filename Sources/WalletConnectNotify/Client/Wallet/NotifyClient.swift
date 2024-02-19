@@ -106,6 +106,7 @@ public class NotifyClient {
         try await identityClient.unregister(account: account)
         notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
         try notifyStorage.clearDatabase(account: account)
+        Task { try await pushClient.unregister()}
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()
     }
