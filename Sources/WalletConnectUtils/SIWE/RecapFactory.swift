@@ -1,13 +1,14 @@
 import Foundation
+fileprivate struct Empty: Codable { }
 
 public class RecapFactory {
-    static public func createRecap(resource: String, actions: [String]) -> [String: [String: [String: [String]]]] {
-        var recap: [String: [String: [String: [String]]]] = ["att": [:]]
+    static public func createRecap(resource: String, actions: [String]) -> [String: [String: [String: [AnyCodable]]]] {
+        var recap: [String: [String: [String: [AnyCodable]]]] = ["att": [:]]
 
-        var resourceRecap: [String: [String]] = [:]
+        var resourceRecap: [String: [AnyCodable]] = [:]
 
         for action in actions {
-            resourceRecap[action] = []
+            resourceRecap[action] = [AnyCodable(Empty())]
         }
 
         recap["att"]![resource] = resourceRecap
