@@ -12,8 +12,8 @@ class RecapFactoryTests: XCTestCase {
         let expectedOutput: [String: [String: [String: [AnyCodable]]]] = [
             "att": [
                 "eip155:1": [
-                    "request/eth_sendTransaction": [AnyCodable(RecapFactory.Empty())],
-                    "request/personal_sign": [AnyCodable(RecapFactory.Empty())]
+                    "request/eth_sendTransaction": [AnyCodable(RecapFactory.EmptyObject())],
+                    "request/personal_sign": [AnyCodable(RecapFactory.EmptyObject())]
                 ]
             ]
         ]
