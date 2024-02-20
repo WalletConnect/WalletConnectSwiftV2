@@ -144,7 +144,10 @@ extension SignPresenter {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] response in
                 switch response.result {
-                case .success(_):
+                case .success(let (session, _)):
+                    if session == nil {
+                        AlertPresenter.present(message: "Wallet Succesfully Authenticated", type: .success)
+                    }
                     break
                 case .failure(let error):
                     AlertPresenter.present(message: error.localizedDescription, type: .error)

@@ -114,7 +114,7 @@ class AuthResponseSubscriber {
         let relay = RelayProtocolOptions(protocol: "irn", data: nil)
 
         guard let sessionNamespaces = try? sessionNamespaceBuilder.buildSessionNamespaces(cacaos: response.cacaos) else {
-            logger.debug("Failed to create session from recap")
+            logger.debug("Cacao doesn't contain valid Sign Recap, session won't be created")
             return nil
         }
 
