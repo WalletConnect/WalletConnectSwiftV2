@@ -93,6 +93,7 @@ extension WalletPairService.Errors: LocalizedError {
         switch self {
         case .pairingAlreadyExist(let topic):   return "Pairing with topic (\(topic)) is already active"
         case .networkNotConnected:              return "Pairing failed. You seem to be offline"
+        case .noPendingRequest: return "No pending requests"
         }
     }
 }
