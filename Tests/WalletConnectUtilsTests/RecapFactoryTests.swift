@@ -9,11 +9,11 @@ class RecapFactoryTests: XCTestCase {
 
         let recap = RecapFactory.createRecap(resource: resource, actions: actions)
 
-        let expectedOutput: [String: [String: [String: [String]]]] = [
+        let expectedOutput: [String: [String: [String: [AnyCodable]]]] = [
             "att": [
                 "eip155:1": [
-                    "request/eth_sendTransaction": [],
-                    "request/personal_sign": []
+                    "request/eth_sendTransaction": [AnyCodable(RecapFactory.Empty())],
+                    "request/personal_sign": [AnyCodable(RecapFactory.Empty())]
                 ]
             ]
         ]

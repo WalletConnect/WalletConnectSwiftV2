@@ -1,7 +1,7 @@
 import Foundation
-fileprivate struct Empty: Codable { }
 
 public class RecapFactory {
+    struct Empty: Codable { }
     static public func createRecap(resource: String, actions: [String]) -> [String: [String: [String: [AnyCodable]]]] {
         var recap: [String: [String: [String: [AnyCodable]]]] = ["att": [:]]
 
