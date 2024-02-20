@@ -4,6 +4,7 @@ actor WalletPairService {
     enum Errors: Error {
         case pairingAlreadyExist(topic: String)
         case networkNotConnected
+        case noPendingRequest
     }
 
     let networkingInteractor: NetworkInteracting
@@ -30,7 +31,7 @@ actor WalletPairService {
         logger.debug("Pairing with uri: \(uri)")
         guard try !pairingHasPendingRequest(for: uri.topic) else {
             logger.debug("Pairing with topic (\(uri.topic)) has pending request")
-            return
+            throw Errors.noPendingRequest
         }
         
         let pairing = WCPairing(uri: uri)
