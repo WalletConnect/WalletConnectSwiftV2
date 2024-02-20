@@ -210,7 +210,7 @@ extension AuthRequestParams {
         exp: String? = nil,
         statement: String? = "I accept the ServiceOrg Terms of Service: https://app.web3inbox.com/tos",
         requestId: String? = nil,
-        resources: [String]? = ["urn:recap:ewogICAiYXR0IjogewogICAgICAid2FsbGV0Y29ubmVjdC1ub3RpZnkiOiB7CiAgICAgICAgICJtYW5hZ2UtYWxsLWFwcHMvbm90aWZpY2F0aW9ucyI6IFtdLAogICAgICB9CiAgIH0KfQ==", "ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
+        resources: [String]? = ["urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9ub3RpZnkud2FsbGV0Y29ubmVjdC5jb20vYWxsLWFwcHMiOnsiY3J1ZC9ub3RpZmljYXRpb25zIjpbe31dLCJjcnVkL3N1YnNjcmlwdGlvbnMiOlt7fV19fX0K", "ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"]
     ) -> AuthRequestParams {
         return AuthRequestParams(
             domain: domain,
