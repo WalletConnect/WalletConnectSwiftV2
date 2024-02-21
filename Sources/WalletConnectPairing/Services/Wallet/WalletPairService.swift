@@ -4,7 +4,6 @@ actor WalletPairService {
     enum Errors: Error {
         case pairingAlreadyExist(topic: String)
         case networkNotConnected
-        case noPendingRequest
     }
 
     let networkingInteractor: NetworkInteracting
@@ -31,7 +30,7 @@ actor WalletPairService {
         logger.debug("Pairing with uri: \(uri)")
         guard try !pairingHasPendingRequest(for: uri.topic) else {
             logger.debug("Pairing with topic (\(uri.topic)) has pending request")
-            throw Errors.noPendingRequest
+            return
         }
         
         let pairing = WCPairing(uri: uri)
@@ -93,7 +92,6 @@ extension WalletPairService.Errors: LocalizedError {
         switch self {
         case .pairingAlreadyExist(let topic):   return "Pairing with topic (\(topic)) is already active"
         case .networkNotConnected:              return "Pairing failed. You seem to be offline"
-        case .noPendingRequest: return "No pending requests"
         }
     }
 }
