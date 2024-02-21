@@ -16,9 +16,8 @@ final class AuthRequestPresenter: ObservableObject {
     }
 
     func buildFormattedMessages(request: AuthenticationRequest, account: Account) -> [(String, String)] {
-        request.payload.chains.enumerated().compactMap { index, chain in
-            guard let blockchain = Blockchain(chain),
-                  let chainAccount = Account(blockchain: blockchain, address: account.address) else {
+        getCommonAndRequestedChainsIntersection().enumerated().compactMap { index, chain in
+            guard let chainAccount = Account(blockchain: chain, address: account.address) else {
                 return nil
             }
             guard let formattedMessage = try? Web3Wallet.instance.formatAuthMessage(payload: request.payload, account: chainAccount) else {
@@ -102,9 +101,9 @@ final class AuthRequestPresenter: ObservableObject {
     private func buildAuthObjects() throws -> [AuthObject] {
         var auths = [AuthObject]()
 
-        try request.payload.chains.forEach { chain in
+        try getCommonAndRequestedChainsIntersection().forEach { chain in
 
-            let account = Account(blockchain: Blockchain(chain)!, address: importAccount.account.address)!
+            let account = Account(blockchain: chain, address: importAccount.account.address)!
 
             var supportedAuthPayload: AuthPayload!
             do {
@@ -125,6 +124,12 @@ final class AuthRequestPresenter: ObservableObject {
             auths.append(auth)
         }
         return auths
+    }
+
+    func getCommonAndRequestedChainsIntersection() -> Set<Blockchain> {
+        let requestedChains: Set<Blockchain> = Set(request.payload.chains.compactMap { Blockchain($0) })
+        let supportedChains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        return requestedChains.intersection(supportedChains)
     }
 
     func dismiss() {
