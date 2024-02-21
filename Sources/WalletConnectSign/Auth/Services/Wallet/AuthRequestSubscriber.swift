@@ -44,7 +44,7 @@ class AuthRequestSubscriber {
                 }
                 
                 if var pairing = pairingStore.getPairing(forTopic: payload.topic) {
-                    pairing.activate()
+                    pairing.receivedRequest()
                     pairingStore.setPairing(pairing)
                 }
                 logger.debug("AuthRequestSubscriber: Received request")
