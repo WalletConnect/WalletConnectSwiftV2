@@ -891,8 +891,7 @@ final class SignClientTests: XCTestCase {
 //        let account = Account(chainIdentifier: "eip155:1", address: "0x2faf83c542b68f1b4cdc0e770e8cb9f567b08f71")!
 //
 //        let responseExpectation = expectation(description: "successful response delivered")
-//        let uri = try! await dappPairingClient.create()
-//        try! await dapp.authenticate(RequestParams(
+//        let uri = try! await dapp.authenticate(AuthRequestParams(
 //            domain: "localhost",
 //            chains: ["eip155:1"],
 //            nonce: "1665443015700",
@@ -901,15 +900,17 @@ final class SignClientTests: XCTestCase {
 //            exp: "2022-10-11T23:03:35.700Z",
 //            statement: nil,
 //            requestId: nil,
-//            resources: nil
-//        ), topic: uri.topic)
+//            resources: nil,
+//            methods: nil
+//        ))
 //
 //        try await walletPairingClient.pair(uri: uri)
 //
-//        wallet.authRequestPublisher.sink { [unowned self] request in
+//        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
 //            Task(priority: .high) {
 //                let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
-//                try! await wallet.approveSessionAuthenticate(requestId: request.0.id, signature: signature, account: account)
+//                let cacao = try! wallet.buildSignedAuthObject(authPayload: request.payload, signature: signature, account: walletAccount)
+//                await XCTAssertThrowsErrorAsync(try await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao]))
 //            }
 //        }
 //        .store(in: &publishers)
@@ -918,7 +919,7 @@ final class SignClientTests: XCTestCase {
 //            responseExpectation.fulfill()
 //        }
 //        .store(in: &publishers)
-//        wait(for: [responseExpectation], timeout: InputConfig.defaultTimeout)
+//        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
 //    }
 
     func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
