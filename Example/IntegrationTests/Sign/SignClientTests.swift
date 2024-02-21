@@ -871,7 +871,7 @@ final class SignClientTests: XCTestCase {
         }
         .store(in: &publishers)
         dapp.authResponsePublisher.sink { (_, result) in
-            guard case .success(let session) = result,
+            guard case .success(let (session, _)) = result,
                 let session = session else { XCTFail(); return }
             XCTAssertEqual(session.accounts.count, 2)
             XCTAssertEqual(session.namespaces["eip155"]?.methods.count, 2)
@@ -993,7 +993,7 @@ final class SignClientTests: XCTestCase {
         }
         .store(in: &publishers)
         dapp.authResponsePublisher.sink { [unowned self] (_, result) in
-            guard case .success(let session) = result,
+            guard case .success(let (session, _)) = result,
                 let session = session else { XCTFail(); return }
             Task(priority: .high) {
                 let request = try Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain)
