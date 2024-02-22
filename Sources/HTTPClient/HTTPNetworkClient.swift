@@ -60,8 +60,15 @@ public actor HTTPNetworkClient: HTTPClient {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
+        print("REQUEST")
+        print(request.description)
+        if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
+            print(bodyString)
+        }
         session.dataTask(with: request) { data, response, error in
             do {
+                print("RESPONSE")
+                 print(response)
                 try HTTPNetworkClient.validate(response, error)
                 completion(.success(()))
             } catch {
