@@ -21,7 +21,7 @@ extension Cacao {
         account: Account = Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
         resources: [String] = ["https://example.com/my-web2-claim.json"]
     ) -> Cacao {
-        let header = CacaoHeader(t: "caip122")
+        let header = CacaoHeader(t: "eip4361")
         let payload = CacaoPayload(
             iss: "did:pkh:\(account.absoluteString)",
             domain: "service.invalid",
