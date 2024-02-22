@@ -17,7 +17,7 @@ final class SignClientTests: XCTestCase {
     private var publishers = Set<AnyCancellable>()
     let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
-    let eip1271Signature = "0xc1505719b2504095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c"
+    let eip1271Signature = "0xdeaddeaddead4095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c"
 
     static private func makeClients(name: String) -> (PairingClient, SignClient) {
         let logger = ConsoleLogger(prefix: name, loggingLevel: .debug)
@@ -886,41 +886,42 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
-//    func testEIP1271SessionAuthenticated() async throws {
-//
-//        let account = Account(chainIdentifier: "eip155:1", address: "0x2faf83c542b68f1b4cdc0e770e8cb9f567b08f71")!
-//
-//        let responseExpectation = expectation(description: "successful response delivered")
-//        let uri = try! await dapp.authenticate(AuthRequestParams(
-//            domain: "localhost",
-//            chains: ["eip155:1"],
-//            nonce: "1665443015700",
-//            aud: "http://localhost:3000/",
-//            nbf: nil,
-//            exp: "2022-10-11T23:03:35.700Z",
-//            statement: nil,
-//            requestId: nil,
-//            resources: nil,
-//            methods: nil
-//        ))
-//
-//        try await walletPairingClient.pair(uri: uri)
-//
-//        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
-//            Task(priority: .high) {
-//                let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
-//                let cacao = try! wallet.buildSignedAuthObject(authPayload: request.payload, signature: signature, account: walletAccount)
-//                await XCTAssertThrowsErrorAsync(try await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao]))
-//            }
-//        }
-//        .store(in: &publishers)
-//        dapp.authResponsePublisher.sink { (_, result) in
-//            guard case .success = result else { XCTFail(); return }
-//            responseExpectation.fulfill()
-//        }
-//        .store(in: &publishers)
-//        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
-//    }
+    func testEIP1271SessionAuthenticated() async throws {
+
+        let account = Account(chainIdentifier: "eip155:1", address: "0x6DF3d14554742D67068BB7294C80107a3c655A56")!
+        let eip1271Signature = "0xb518b65724f224f8b12dedeeb06f8b278eb7d3b42524959bed5d0dfa49801bd776c7ee05de396eadc38ee693c917a04d93b20981d68c4a950cbc42ea7f4264bc1c"
+
+        let responseExpectation = expectation(description: "successful response delivered")
+        let uri = try! await dapp.authenticate(AuthRequestParams(
+            domain: "etherscan.io",
+            chains: ["eip155:1"],
+            nonce: "DTYxeNr95Ne7Sape5",
+            aud: "https://etherscan.io/verifiedSignatures#",
+            nbf: nil,
+            exp: nil,
+            statement: "Sign message to verify ownership of the address 0x6DF3d14554742D67068BB7294C80107a3c655A56 on etherscan.io",
+            requestId: nil,
+            resources: nil,
+            methods: nil
+        ))
+
+        try await walletPairingClient.pair(uri: uri)
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: request.payload, signature: signature, account: account)
+                _ = try await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
 
     func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
         let requestExpectation = expectation(description: "error response delivered")
