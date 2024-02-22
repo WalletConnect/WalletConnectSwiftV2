@@ -41,9 +41,10 @@ public actor HTTPNetworkClient: HTTPClient {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
+        
         session.dataTask(with: request) { data, response, error in
             do {
-                try HTTPNetworkClient.validate(response, error)
+                try HTTPNetworkClient.validate(response, error, data: data)
                 guard let validData = data else {
                     throw HTTPError.responseDataNil
                 }
@@ -60,16 +61,10 @@ public actor HTTPNetworkClient: HTTPClient {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
-        print("REQUEST")
-        print(request.description)
-        if let bodyData = request.httpBody, let bodyString = String(data: bodyData, encoding: .utf8) {
-            print(bodyString)
-        }
+
         session.dataTask(with: request) { data, response, error in
             do {
-                print("RESPONSE")
-                 print(response)
-                try HTTPNetworkClient.validate(response, error)
+                try HTTPNetworkClient.validate(response, error, data: data)
                 completion(.success(()))
             } catch {
                 completion(.failure(error))
@@ -77,7 +72,7 @@ public actor HTTPNetworkClient: HTTPClient {
         }.resume()
     }
 
-    private static func validate(_ urlResponse: URLResponse?, _ error: Error?) throws {
+    private static func validate(_ urlResponse: URLResponse?, _ error: Error?, data: Data?) throws {
         if let error = (error as? NSError), error.code == -1004 {
             throw HTTPError.couldNotConnect
         }
@@ -88,6 +83,9 @@ public actor HTTPNetworkClient: HTTPClient {
             throw HTTPError.noResponse
         }
         guard (200..<300) ~= httpResponse.statusCode else {
+            if let data = data {
+                print("HTTP error: \(String(decoding: data, as: UTF8.self))")
+            }
             throw HTTPError.badStatusCode(httpResponse.statusCode)
         }
     }
