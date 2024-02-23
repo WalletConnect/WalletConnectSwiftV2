@@ -292,19 +292,21 @@ extension ModalViewModel: WalletDeeplinkHandler {
             let nativeUrlString = try formatNativeUrlString(nativeScheme)
             let universalUrlString = try formatUniversalUrlString(universalScheme)
             
-            if let nativeUrl = nativeUrlString?.toURL(), !preferUniversal {
-                uiApplicationWrapper.openURL(nativeUrl) { success in
-                    if !success {
-                        self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
-                    }
-                }
-            } else if let universalUrl = universalUrlString?.toURL() {
+            if let universalUrl = universalUrlString?.toURL(), preferUniversal {
                 uiApplicationWrapper.openURL(universalUrl) { success in
                     if !success {
                         self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
                     }
                 }
-            } else {
+            } 
+            else if let nativeUrl = nativeUrlString?.toURL() {
+                uiApplicationWrapper.openURL(nativeUrl) { success in
+                    if !success {
+                        self.toast = Toast(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
+                    }
+                }
+            }
+            else {
                 throw DeeplinkErrors.noWalletLinkFound
             }
         } catch {
