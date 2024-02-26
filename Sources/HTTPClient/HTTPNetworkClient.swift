@@ -84,7 +84,7 @@ public actor HTTPNetworkClient: HTTPClient {
         }
         guard (200..<300) ~= httpResponse.statusCode else {
             if let data = data {
-                print("HTTP error: \(String(decoding: data, as: UTF8.self)) code: \(httpResponse.statusCode), host: \(httpResponse.url?.host ?? "unknown")")
+                print("HTTP error: \(String(decoding: data, as: UTF8.self)) code: \(httpResponse.statusCode), host: \(httpResponse.url?.host ?? "unknown"), path: \(httpResponse.url?.path ?? "unknown")")
             }
             throw HTTPError.badStatusCode(httpResponse.statusCode)
         }
