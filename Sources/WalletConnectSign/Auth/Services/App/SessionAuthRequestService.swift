@@ -9,17 +9,20 @@ actor SessionAuthRequestService {
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
     private let iatProvader: IATProvider
+    private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
 
     init(networkingInteractor: NetworkInteracting,
          kms: KeyManagementService,
          appMetadata: AppMetadata,
          logger: ConsoleLogging,
-         iatProvader: IATProvider) {
+         iatProvader: IATProvider,
+         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.appMetadata = appMetadata
         self.logger = logger
         self.iatProvader = iatProvader
+        self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
     }
 
     func request(params: AuthRequestParams, topic: String) async throws {
@@ -40,6 +43,8 @@ actor SessionAuthRequestService {
         let requester = Participant(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
         let payload = AuthPayload(requestParams: params, iat: iatProvader.iat)
         let sessionAuthenticateRequestParams = SessionAuthenticateRequestParams(requester: requester, authPayload: payload)
+        let authResponseTopicRecord = AuthResponseTopicRecord(topic: responseTopic, unixTimestamp: sessionAuthenticateRequestParams.expiryTimestamp)
+        authResponseTopicRecordsStore.set(authResponseTopicRecord, forKey: responseTopic)
         let request = RPCRequest(method: protocolMethod.method, params: sessionAuthenticateRequestParams)
         try kms.setPublicKey(publicKey: pubKey, for: responseTopic)
         logger.debug("AppRequestService: Subscribibg for response topic: \(responseTopic)")

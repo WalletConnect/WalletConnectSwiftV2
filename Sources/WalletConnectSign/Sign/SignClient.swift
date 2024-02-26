@@ -161,6 +161,7 @@ public final class SignClient: SignClientProtocol {
     private let authResposeSubscriber: AuthResponseSubscriber
     private let authRequestSubscriber: AuthRequestSubscriber
     private let authResponder: AuthResponder
+    private let authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
     private let socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
@@ -202,7 +203,8 @@ public final class SignClient: SignClientProtocol {
          pendingRequestsProvider: PendingRequestsProvider,
          proposalExpiryWatcher: ProposalExpiryWatcher,
          pendingProposalsProvider: PendingProposalsProvider,
-         requestsExpiryWatcher: RequestsExpiryWatcher
+         requestsExpiryWatcher: RequestsExpiryWatcher,
+         authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -228,6 +230,7 @@ public final class SignClient: SignClientProtocol {
         self.proposalExpiryWatcher = proposalExpiryWatcher
         self.pendingProposalsProvider = pendingProposalsProvider
         self.requestsExpiryWatcher = requestsExpiryWatcher
+        self.authResponseTopicResubscriptionService = authResponseTopicResubscriptionService
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()

@@ -94,18 +94,20 @@ public struct SignClientFactory {
 
 
         //Auth
+        let authResponseTopicRecordsStore = CodableStore<AuthResponseTopicRecord>(defaults: keyValueStorage, identifier: SignStorageIdentifiers.authResponseTopicRecord.rawValue)
         let messageFormatter = SIWECacaoFormatter()
-        let appRequestService = SessionAuthRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
+        let appRequestService = SessionAuthRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
 
         let messageVerifierFactory = MessageVerifierFactory(crypto: crypto)
         let signatureVerifier = messageVerifierFactory.create(projectId: projectId)
         let sessionNameSpaceBuilder = SessionNamespaceBuilder(logger: logger)
-        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder)
-        
+        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
+
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory)
         let authRequestSubscriber = AuthRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, verifyClient: verifyClient, verifyContextStore: verifyContextStore, pairingStore: pairingStore)
         let authResponder = AuthResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, messageFormatter: messageFormatter, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, sessionStore: sessionStore, sessionNamespaceBuilder: sessionNameSpaceBuilder)
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: rpcHistory, verifyContextStore: verifyContextStore)
+        let authResponseTopicResubscriptionService = AuthResponseTopicResubscriptionService(networkingInteractor: networkingClient, logger: logger, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
 
 
         let client = SignClient(
@@ -132,7 +134,8 @@ public struct SignClientFactory {
             pendingRequestsProvider: pendingRequestsProvider,
             proposalExpiryWatcher: proposalExpiryWatcher,
             pendingProposalsProvider: pendingProposalsProvider,
-            requestsExpiryWatcher: requestsExpiryWatcher
+            requestsExpiryWatcher: requestsExpiryWatcher,
+            authResponseTopicResubscriptionService: authResponseTopicResubscriptionService
         )
         return client
     }

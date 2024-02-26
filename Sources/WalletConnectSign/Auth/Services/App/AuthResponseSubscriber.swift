@@ -16,6 +16,7 @@ class AuthResponseSubscriber {
     public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<(Session?, [Cacao]), AuthError>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
+    private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -25,7 +26,8 @@ class AuthResponseSubscriber {
          kms: KeyManagementServiceProtocol,
          sessionStore: WCSessionStorage,
          messageFormatter: SIWECacaoFormatting,
-         sessionNamespaceBuilder: SessionNamespaceBuilder) {
+         sessionNamespaceBuilder: SessionNamespaceBuilder,
+         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -35,6 +37,7 @@ class AuthResponseSubscriber {
         self.messageFormatter = messageFormatter
         self.pairingRegisterer = pairingRegisterer
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
+        self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         subscribeForResponse()
     }
 
@@ -43,6 +46,7 @@ class AuthResponseSubscriber {
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
                 authResponsePublisherSubject.send((payload.id, .failure(error)))
+                removeResponseTopicRecord(responseTopic: payload.topic)
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
@@ -50,11 +54,11 @@ class AuthResponseSubscriber {
 
                 let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
+                removeResponseTopicRecord(responseTopic: payload.topic)
 
                 let requestId = payload.id
                 let cacaos = payload.response.cacaos
                 let authRequestPayload = payload.request.authPayload
-
 
                 Task {
                     do {
@@ -146,5 +150,9 @@ class AuthResponseSubscriber {
         return session.publicRepresentation()
     }
 
+    func removeResponseTopicRecord(responseTopic: String) {
+        authResponseTopicRecordsStore.delete(forKey: responseTopic)
+        networkingInteractor.unsubscribe(topic: responseTopic)
+    }
 }
 
