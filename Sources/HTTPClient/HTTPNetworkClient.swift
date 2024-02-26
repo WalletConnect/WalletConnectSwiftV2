@@ -31,7 +31,7 @@ public actor HTTPNetworkClient: HTTPClient {
             }
         }
     }
-    
+
     public func updateHost(host: String) async {
         self.host = host
     }
@@ -41,7 +41,7 @@ public actor HTTPNetworkClient: HTTPClient {
             completion(.failure(HTTPError.malformedURL(service)))
             return
         }
-        
+
         session.dataTask(with: request) { data, response, error in
             do {
                 try HTTPNetworkClient.validate(response, error, data: data)
@@ -84,7 +84,7 @@ public actor HTTPNetworkClient: HTTPClient {
         }
         guard (200..<300) ~= httpResponse.statusCode else {
             if let data = data {
-                print("HTTP error: \(String(decoding: data, as: UTF8.self))")
+                print("HTTP error: \(String(decoding: data, as: UTF8.self)) code: \(httpResponse.statusCode), host: \(httpResponse.url?.host ?? "unknown")")
             }
             throw HTTPError.badStatusCode(httpResponse.statusCode)
         }
