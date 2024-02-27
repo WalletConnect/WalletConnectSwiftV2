@@ -27,15 +27,17 @@ actor IdentityService {
 
     func prepareRegistration(account: Account,
         domain: String,
-        statement: String,
+        statement: String? = nil,
         resources: [String]) throws -> IdentityRegistrationParams {
 
         let identityKey = SigningPrivateKey()
 
+        let uri = buildUri(domain: domain, didKey: identityKey.publicKey.did)
+
         let payload = CacaoPayload(
             iss: account.did,
             domain: domain,
-            aud: identityKey.publicKey.did,
+            aud: uri,
             version: getVersion(),
             nonce: getNonce(),
             iat: iatProvader.iat,
@@ -48,6 +50,11 @@ actor IdentityService {
         let message = try messageFormatter.formatMessage(from: payload)
 
         return IdentityRegistrationParams(message: message, payload: payload, privateIdentityKey: identityKey)
+    }
+
+    func buildUri(domain: String, didKey: String) -> String {
+        let identityKey = SigningPrivateKey()
+        return "\(domain)?walletconnect_identity_token=\(didKey)"
     }
 
     // TODO: Verifications

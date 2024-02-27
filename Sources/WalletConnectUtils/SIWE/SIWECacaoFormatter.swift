@@ -5,7 +5,7 @@ public protocol SIWECacaoFormatting {
 }
 public extension SIWECacaoFormatting {
     func formatMessage(from payload: CacaoPayload) throws -> String {
-        return try formatMessage(from: payload, includeRecapInTheStatement: false)
+        return try formatMessage(from: payload, includeRecapInTheStatement: true)
     }
 }
 public struct SIWECacaoFormatter: SIWECacaoFormatting {

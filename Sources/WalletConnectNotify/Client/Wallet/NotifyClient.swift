@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 
+
 public class NotifyClient {
 
     private var publishers = Set<AnyCancellable>()
@@ -87,13 +88,18 @@ public class NotifyClient {
         self.subscriptionWatcher = subscriptionWatcher
     }
 
-    public func prepareRegistration(account: Account, domain: String, allApps: Bool = true) async throws -> IdentityRegistrationParams {
+    public func prepareRegistration(account: Account, domain: String) async throws -> IdentityRegistrationParams {
         return try await identityClient.prepareRegistration(
             account: account,
             domain: domain,
-            statement: makeStatement(allApps: allApps),
-            resources: [keyserverURL.absoluteString]
+            resources: [keyserverURL.absoluteString, createAuthorizationRecap()]
         )
+    }
+
+    /// returns notify recap for all apps
+    public func createAuthorizationRecap() -> String {
+        // {"att":{"walletconnect-notify":{"manage/all-apps-notifications":[{}]}}}
+        "urn:recap:eyJhdHQiOnsid2FsbGV0Y29ubmVjdC1ub3RpZnkiOnsibWFuYWdlL2FsbC1hcHBzLW5vdGlmaWNhdGlvbnMiOlt7fV19fX0="
     }
 
     public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
