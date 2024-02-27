@@ -53,7 +53,6 @@ actor IdentityService {
     }
 
     func buildUri(domain: String, didKey: String) -> String {
-        let identityKey = SigningPrivateKey()
         return "\(domain)?walletconnect_identity_token=\(didKey)"
     }
 
