@@ -96,12 +96,6 @@ public class NotifyClient {
         )
     }
 
-    /// returns notify recap for all apps
-    public func createAuthorizationRecap() -> String {
-        // {"att":{"walletconnect-notify":{"manage/all-apps-notifications":[{}]}}}
-        "urn:recap:eyJhdHQiOnsid2FsbGV0Y29ubmVjdC1ub3RpZnkiOnsibWFuYWdlL2FsbC1hcHBzLW5vdGlmaWNhdGlvbnMiOlt7fV19fX0="
-    }
-
     public func register(params: IdentityRegistrationParams, signature: CacaoSignature) async throws {
         try await identityClient.register(params: params, signature: signature)
         notifyAccountProvider.setAccount(try params.account)
@@ -177,6 +171,12 @@ public class NotifyClient {
         try notifyStorage.setMessages(records)
 
         return messages.count == limit
+    }
+
+    /// returns notify recap for all apps
+    private func createAuthorizationRecap() -> String {
+        // {"att":{"walletconnect-notify":{"manage/all-apps-notifications":[{}]}}}
+        "urn:recap:eyJhdHQiOnsid2FsbGV0Y29ubmVjdC1ub3RpZnkiOnsibWFuYWdlL2FsbC1hcHBzLW5vdGlmaWNhdGlvbnMiOlt7fV19fX0="
     }
 }
 

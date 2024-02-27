@@ -281,7 +281,7 @@ private extension NotifyTests {
 
 private extension NotifyClient {
 
-    func register(account: Account, domain: String, isLimited: Bool = false, onSign: @escaping (String) -> CacaoSignature) async throws {
+    func register(account: Account, domain: String, onSign: @escaping (String) -> CacaoSignature) async throws {
         let params = try await prepareRegistration(account: account, domain: domain)
         let signature = onSign(params.message)
         try await register(params: params, signature: signature)
