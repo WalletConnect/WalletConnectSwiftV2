@@ -228,7 +228,7 @@ extension AuthRequestParams {
         statement: String? = "I accept the ServiceOrg Terms of Service: https://app.web3inbox.com/tos",
         requestId: String? = nil,
         resources: [String]? = ["urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9ub3RpZnkud2FsbGV0Y29ubmVjdC5jb20vYWxsLWFwcHMiOnsiY3J1ZC9ub3RpZmljYXRpb25zIjpbe31dLCJjcnVkL3N1YnNjcmlwdGlvbnMiOlt7fV19fX0K", "ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"],
-        methods: [String]? = ["eth_sign", "personal_sign", "eth_sendTransaction"]
+        methods: [String]? = ["personal_sign", "eth_sendTransaction"]
     ) -> AuthRequestParams {
         return try! AuthRequestParams(
             domain: domain,
