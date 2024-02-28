@@ -109,7 +109,7 @@ public final class RelayClient {
             cancellable = requestAcknowledgePublisher
                 .filter { $0 == request.id }
                 .setFailureType(to: RelayError.self)
-                .timeout(.seconds(10), scheduler: concurrentQueue, customError: { .requestTimeout })
+                .timeout(.seconds(60), scheduler: concurrentQueue, customError: { .requestTimeout })
                 .sink(receiveCompletion: { [unowned self] result in
                     switch result {
                     case .failure(let error):
