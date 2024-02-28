@@ -179,7 +179,7 @@ class SIWEMessageFormatterTests: XCTestCase {
 
         let uri = "https://service.invalid?walletconnect_notify_key=did:key:z6MktW4hKdsvcXgt9wXmYbSD5sH4NCk5GmNZnokP9yh2TeCf"
         let payload = try AuthPayload.stub(
-            requestParams: AuthRequestParams.stub(aud: uri, statement: nil,resources: [recap1, recap2])
+            requestParams: AuthRequestParams.stub(uri: uri, statement: nil,resources: [recap1, recap2])
         ).cacaoPayload(account: Account.stub())
 
         let message = try sut.formatMessage(from: payload, includeRecapInTheStatement: true)

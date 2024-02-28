@@ -34,7 +34,7 @@ class CacaoSignerTest: XCTestCase {
         domain: "service.invalid",
         chains: ["eip155:1"],
         nonce: "32891756",
-        aud: "https://service.invalid/login",
+        uri: "https://service.invalid/login",
         nbf: nil,
         exp: nil,
         statement: "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",

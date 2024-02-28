@@ -8,7 +8,7 @@ public struct AuthRequestParams {
     public let domain: String
     public let chains: [String]
     public let nonce: String
-    public let aud: String
+    public let uri: String
     public let nbf: String?
     public let exp: String?
     public let statement: String?
@@ -20,7 +20,7 @@ public struct AuthRequestParams {
         domain: String,
         chains: [String],
         nonce: String,
-        aud: String,
+        uri: String,
         nbf: String?,
         exp: String?,
         statement: String?,
@@ -31,7 +31,7 @@ public struct AuthRequestParams {
         self.domain = domain
         self.chains = chains
         self.nonce = nonce
-        self.aud = aud
+        self.uri = uri
         self.nbf = nbf
         self.exp = exp
         self.statement = statement
@@ -51,7 +51,7 @@ extension AuthRequestParams {
     static func stub(domain: String = "service.invalid",
                      chains: [String] = ["eip155:1"],
                      nonce: String = "32891756",
-                     aud: String = "https://service.invalid/login",
+                     uri: String = "https://service.invalid/login",
                      nbf: String? = nil,
                      exp: String? = nil,
                      statement: String? = "I accept the ServiceOrg Terms of Service: https://service.invalid/tos",
@@ -61,7 +61,7 @@ extension AuthRequestParams {
         return AuthRequestParams(domain: domain,
                              chains: chains,
                              nonce: nonce,
-                             aud: aud,
+                             uri: uri,
                              nbf: nbf,
                              exp: exp,
                              statement: statement,

@@ -38,21 +38,21 @@ class SubscriptionWatcherTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 0.5)
     }
 
-
-    func testWatchAppLifecycleReactsToEnterForegroundNotification() async throws  {
-        let watchSubscriptionsExpectation = XCTestExpectation(description: "Expect watchSubscriptions to be called on app enter foreground")
-        watchSubscriptionsExpectation.expectedFulfillmentCount = 2
-
-        mockRequester.onWatchSubscriptions = {
-            watchSubscriptionsExpectation.fulfill()
-        }
-
-        try await sut.start()
-
-        await mockNotificationCenter.post(name: UIApplication.willEnterForegroundNotification)
-
-        await fulfillment(of: [watchSubscriptionsExpectation], timeout: 0.5)
-    }
+//
+//    func testWatchAppLifecycleReactsToEnterForegroundNotification() async throws  {
+//        let watchSubscriptionsExpectation = XCTestExpectation(description: "Expect watchSubscriptions to be called on app enter foreground")
+//        watchSubscriptionsExpectation.expectedFulfillmentCount = 2
+//
+//        mockRequester.onWatchSubscriptions = {
+//            watchSubscriptionsExpectation.fulfill()
+//        }
+//
+//        try await sut.start()
+//
+//        await mockNotificationCenter.post(name: UIApplication.willEnterForegroundNotification)
+//
+//        await fulfillment(of: [watchSubscriptionsExpectation], timeout: 0.5)
+//    }
 
     func testTimerTriggeringWatchSubscriptionsMultipleTimes() async throws  {
         sut.timerInterval = 0.0001

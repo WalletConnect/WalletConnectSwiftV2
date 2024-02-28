@@ -896,7 +896,7 @@ final class SignClientTests: XCTestCase {
             domain: "etherscan.io",
             chains: ["eip155:1"],
             nonce: "DTYxeNr95Ne7Sape5",
-            aud: "https://etherscan.io/verifiedSignatures#",
+            uri: "https://etherscan.io/verifiedSignatures#",
             nbf: nil,
             exp: nil,
             statement: "Sign message to verify ownership of the address 0x6DF3d14554742D67068BB7294C80107a3c655A56 on etherscan.io",

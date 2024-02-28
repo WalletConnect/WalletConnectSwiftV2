@@ -182,16 +182,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AuthTests"
-               BuildableName = "AuthTests"
-               BlueprintName = "AuthTests"
-               ReferencedContainer = "container:..">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "CommonsTests"
                BuildableName = "CommonsTests"
                BlueprintName = "CommonsTests"
@@ -272,16 +262,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Web3WalletTests"
-               BuildableName = "Web3WalletTests"
-               BlueprintName = "Web3WalletTests"
-               ReferencedContainer = "container:..">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "NotifyTests"
                BuildableName = "NotifyTests"
                BlueprintName = "NotifyTests"
@@ -307,6 +287,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "Web3Inbox"
+            BuildableName = "Web3Inbox"
+            BlueprintName = "Web3Inbox"
+            ReferencedContainer = "container:..">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
