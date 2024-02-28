@@ -103,7 +103,7 @@ public final class RelayClient {
         logger.debug("[Publish] Sending payload on topic: \(topic)")
 
         Task {try await dispatcher.protectedSend(message)}
-x§
+
         return try await withUnsafeThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
             cancellable = requestAcknowledgePublisher
