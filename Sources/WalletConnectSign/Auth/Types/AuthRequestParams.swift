@@ -5,6 +5,9 @@ import Foundation
 /// https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-74.md
 /// https://eips.ethereum.org/EIPS/eip-4361
 public struct AuthRequestParams {
+    public enum Errors: Error {
+        case invalidTtl
+    }
     public let domain: String
     public let chains: [String]
     public let nonce: String
@@ -15,6 +18,11 @@ public struct AuthRequestParams {
     public let requestId: String?
     public var resources: [String]?
     public let methods: [String]?
+    public let ttl: TimeInterval
+
+    // TTL bounds
+    static let minTtl: TimeInterval = 300    // 5 minutes
+    static let maxTtl: TimeInterval = 604800 // 7 days
 
     public init(
         domain: String,
@@ -26,8 +34,13 @@ public struct AuthRequestParams {
         statement: String?,
         requestId: String?,
         resources: [String]?,
-        methods: [String]?
-    ) {
+        methods: [String]?,
+        ttl: TimeInterval = 3600
+    ) throws {
+        guard ttl >= Request.minTtl && ttl <= Request.maxTtl else {
+            throw Errors.invalidTtl
+        }
+
         self.domain = domain
         self.chains = chains
         self.nonce = nonce
@@ -38,6 +51,7 @@ public struct AuthRequestParams {
         self.requestId = requestId
         self.resources = resources
         self.methods = methods
+        self.ttl = ttl
     }
 
     mutating func addResource(resource: String) {
@@ -58,7 +72,7 @@ extension AuthRequestParams {
                      requestId: String? = nil,
                      resources: [String]? = ["ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"],
                      methods: [String]? = ["personal_sign", "eth_sendTransaction"]) -> AuthRequestParams {
-        return AuthRequestParams(domain: domain,
+        return try! AuthRequestParams(domain: domain,
                              chains: chains,
                              nonce: nonce,
                              uri: uri,
