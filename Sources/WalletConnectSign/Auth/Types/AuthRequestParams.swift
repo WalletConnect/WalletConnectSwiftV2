@@ -55,7 +55,11 @@ public struct AuthRequestParams {
     }
 
     mutating func addResource(resource: String) {
-        resources?.append(resource)
+        if resources != nil {
+            resources?.append(resource)
+        } else {
+            resources = [resource]
+        }
     }
 }
 
