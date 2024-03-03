@@ -1031,4 +1031,30 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
+    func testFalbackForm_2_5_DappToSessionProposeOnWallet() async throws {
+
+        let fallbackExpectation = expectation(description: "fallback to wc_sessionPropose")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+
+        wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
+            Task(priority: .high) {
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionSettlePublisher.sink { settledSession in
+            Task(priority: .high) {
+                fallbackExpectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+        let uriStringWithoutMethods = uri.absoluteString.replacingOccurrences(of: "&methods=wc_sessionAuthenticate", with: "")
+        let uriWithoutMethods = try WalletConnectURI(uriString: uriStringWithoutMethods)
+        try await walletPairingClient.pair(uri: uriWithoutMethods)
+        await fulfillment(of: [fallbackExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
 }
