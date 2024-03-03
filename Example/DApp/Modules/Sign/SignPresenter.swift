@@ -166,7 +166,6 @@ extension SignPresenter {
                 case .failure(let error):
                     AlertPresenter.present(message: error.localizedDescription, type: .error)
                 }
-                router.dismiss()
                 Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
