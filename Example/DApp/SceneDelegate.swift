@@ -48,6 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             metadata: metadata
         )
         
+        Sign.instance.logger.setLogging(level: .debug)
 
         Sign.instance.logsPublisher.sink { log in
             switch log {
