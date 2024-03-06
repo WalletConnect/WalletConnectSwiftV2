@@ -67,6 +67,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }.store(in: &publishers)
 
+        Web3Modal.instance.disableAnalytics()
         setupWindow(scene: scene)
     }
 
