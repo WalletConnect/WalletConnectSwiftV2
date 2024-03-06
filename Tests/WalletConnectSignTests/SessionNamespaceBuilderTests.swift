@@ -46,7 +46,7 @@ class SessionNamespaceBuilderTests: XCTestCase {
                 Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
             ]),
             methods: Set(["personal_sign", "eth_signTypedData", "eth_sign"]),
-            events: Set([])
+            events: Set(["chainChanged", "accountsChanged"])
         )
 
         let cacaos = [
@@ -56,6 +56,7 @@ class SessionNamespaceBuilderTests: XCTestCase {
 
         do {
             let namespaces = try sessionNamespaceBuilder.buildSessionNamespaces(cacaos: cacaos)
+            XCTAssertTrue(namespaces.first!.value.events.isSuperset(of: ["chainChanged", "accountsChanged"]), "Contains required events")
             XCTAssertEqual(namespaces.count, 1, "There should be one namespace")
             XCTAssertEqual(expectedSessionNamespace, namespaces.first!.value, "The namespace is equal to the expected one")
         } catch {
@@ -71,7 +72,7 @@ class SessionNamespaceBuilderTests: XCTestCase {
                 Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
             ]),
             methods: ["personal_sign", "eth_signTypedData", "eth_sign"],
-            events: []
+            events: ["chainChanged", "accountsChanged"]
         )
         let cacao = Cacao.stub(account: Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!, resources: ["urn:recap:eyJh", recapUrn, "urn:recap:eyJh"])
 
