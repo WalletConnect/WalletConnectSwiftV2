@@ -165,11 +165,11 @@
       },
       {
         "package": "CoinbaseWalletSDK",
-        "repositoryURL": "https://github.com/coinbase/wallet-mobile-sdk.git",
+        "repositoryURL": "https://github.com/WalletConnect/wallet-mobile-sdk",
         "state": {
           "branch": null,
-          "revision": "b0641bab0832108bf573923f7a47d2fc22875aba",
-          "version": "1.1.0"
+          "revision": "b6dfb7d6b8447c7c5b238a10443a1ac28223f38f",
+          "version": "1.0.0"
         }
       },
       {
@@ -186,8 +186,8 @@
         "repositoryURL": "https://github.com/WalletConnect/web3modal-swift",
         "state": {
           "branch": null,
-          "revision": "2b377bdb52a3eeadb488301a13f1545a1777c2e2",
-          "version": "1.2.0"
+          "revision": "f7050eb6979a8822a214cb710e68e827895647c7",
+          "version": null
         }
       }
     ]

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767DC83428997F8E00080FA9 /* EthSendTransaction.swift */; };
 		7694A5262874296A0001257E /* RegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7694A5252874296A0001257E /* RegistryTests.swift */; };
-		842B1D102B972814007F1EF8 /* Web3Modal in Frameworks */ = {isa = PBXBuildFile; productRef = 842B1D0F2B972814007F1EF8 /* Web3Modal */; settings = {ATTRIBUTES = (Required, ); }; };
 		84310D05298BC980000C15B6 /* MainInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84310D04298BC980000C15B6 /* MainInteractor.swift */; };
 		8439CB89293F658E00F2F2E2 /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8439CB88293F658E00F2F2E2 /* PushMessage.swift */; };
 		844749F629B9E5B9005F520B /* RelayClientEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844749F529B9E5B9005F520B /* RelayClientEndToEndTests.swift */; };
@@ -696,7 +695,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8448F1D427E4726F0000B866 /* WalletConnect in Frameworks */,
-				842B1D102B972814007F1EF8 /* Web3Modal in Frameworks */,
 				C5BE01DF2AF692D80064FC88 /* WalletConnectRouter in Frameworks */,
 				A5B6C0F12A6EAB0800927332 /* WalletConnectNotify in Frameworks */,
 				A54195A52934E83F0035AD19 /* Web3 in Frameworks */,
@@ -1950,7 +1948,6 @@
 				C5BE01DE2AF692D80064FC88 /* WalletConnectRouter */,
 				CFDB50712B2869AA00A0CBC2 /* WalletConnectModal */,
 				8486EDD22B4F2EA6008E53C3 /* SwiftMessages */,
-				842B1D0F2B972814007F1EF8 /* Web3Modal */,
 			);
 			productName = DApp;
 			productReference = 84CE641C27981DED00142511 /* DApp.app */;
@@ -2155,7 +2152,7 @@
 				8487A9422A836C2A0003D5AF /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				84943C792A9BA206007EBAC2 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 				84AEC2522B4D43CD00E27A5B /* XCRemoteSwiftPackageReference "SwiftMessages" */,
-				842B1D0E2B9727CF007F1EF8 /* XCRemoteSwiftPackageReference "web3modal-swift" */,
+				842B1D112B987D40007F1EF8 /* XCRemoteSwiftPackageReference "web3modal-swift" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -3263,12 +3260,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		842B1D0E2B9727CF007F1EF8 /* XCRemoteSwiftPackageReference "web3modal-swift" */ = {
+		842B1D112B987D40007F1EF8 /* XCRemoteSwiftPackageReference "web3modal-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.0;
+				kind = revision;
+				revision = f7050eb6979a8822a214cb710e68e827895647c7;
 			};
 		};
 		8487A9422A836C2A0003D5AF /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
@@ -3338,11 +3335,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		842B1D0F2B972814007F1EF8 /* Web3Modal */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 842B1D0E2B9727CF007F1EF8 /* XCRemoteSwiftPackageReference "web3modal-swift" */;
-			productName = Web3Modal;
-		};
 		844749FC29B9E6B2005F520B /* WalletConnectNetworking */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectNetworking;
