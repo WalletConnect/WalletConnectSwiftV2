@@ -29,18 +29,61 @@ public struct SIWEMessage: Equatable {
         self.resources = resources
     }
 
-    public var formatted: String {
-        return """
-                \(domain) wants you to sign in with your Ethereum account:
-                \(address)
-                \(statementLine)
+    public func formatted() throws -> String {
 
-                URI: \(uri)
-                Version: \(version)
-                Chain ID: \(chainId)
-                Nonce: \(nonce)
-                Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
-                """
+        let statementLine = try getStatementLine()
+        return """
+               \(domain) wants you to sign in with your Ethereum account:
+               \(address)
+               \(statementLine)
+
+               URI: \(uri)
+               Version: \(version)
+               Chain ID: \(chainId)
+               Nonce: \(nonce)
+               Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
+               """
+    }
+
+    private func getStatementLine() throws -> String {
+        if let recaps = resources?.compactMap({ try? RecapUrn(urn: $0) }),
+           !recaps.isEmpty {
+            do {
+                let recapStatement = try RecapStatementBuilder.buildRecapStatement(recapUrns: recaps)
+                if let statement = statement {
+                    return "\n\(statement) \(recapStatement)"
+                } else {
+                    return "\n\(recapStatement)"
+                }
+            } catch {
+                throw error
+            }
+        } else {
+            guard let statement = statement else { return "" }
+            return "\n\(statement)"
+        }
+
+    }
+
+    
+
+    private func decodeUrnToJson(urn: String) -> [String: [String: [String: [String]]]]? {
+        // Check if the URN is in the correct format
+        guard urn.starts(with: "urn:recap:") else { return nil }
+
+        // Extract the Base64 encoded JSON part from the URN
+        let base64EncodedJson = urn.replacingOccurrences(of: "urn:recap:", with: "")
+
+        // Decode the Base64 encoded JSON
+        guard let jsonData = Data(base64Encoded: base64EncodedJson) else { return nil }
+
+        // Deserialize the JSON data into the desired dictionary
+        do {
+            let decodedDictionary = try JSONDecoder().decode([String: [String: [String: [String]]]].self, from: jsonData)
+            return decodedDictionary
+        } catch {
+            return nil
+        }
     }
 }
 
@@ -49,11 +92,6 @@ private extension SIWEMessage {
     var expLine: String {
         guard  let exp = exp else { return "" }
         return "\nExpiration Time: \(exp)"
-    }
-
-    var statementLine: String {
-        guard let statement = statement else { return "" }
-        return "\n\(statement)"
     }
 
     var nbfLine: String {

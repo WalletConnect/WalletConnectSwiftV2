@@ -4,11 +4,11 @@ import Combine
 
 class RequestsExpiryWatcher {
 
-    private let requestExpirationPublisherSubject: PassthroughSubject<Request, Never> = .init()
+    private let requestExpirationPublisherSubject: PassthroughSubject<RPCID, Never> = .init()
     private let rpcHistory: RPCHistory
     private let historyService: HistoryService
 
-    var requestExpirationPublisher: AnyPublisher<Request, Never> {
+    var requestExpirationPublisher: AnyPublisher<RPCID, Never> {
         return requestExpirationPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -31,11 +31,12 @@ class RequestsExpiryWatcher {
     }
 
     func checkForRequestExpiry() {
-        let requests = historyService.getPendingRequestsWithRecordId()
-        requests.forEach { (request: Request, recordId: RPCID) in
+        let requests = historyService.getPendingExpirableRequestsWithId()
+        requests.forEach { (request: Expirable, recordId: RPCID) in
             guard request.isExpired() else { return }
-            requestExpirationPublisherSubject.send(request)
+            requestExpirationPublisherSubject.send(recordId)
             rpcHistory.delete(id: recordId)
         }
     }
+
 }

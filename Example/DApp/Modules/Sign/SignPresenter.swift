@@ -62,25 +62,52 @@ final class SignPresenter: ObservableObject {
     }
     
     @MainActor
-    func connectWalletWithSign() {
+    func connectWalletWithSessionPropose() {
         Task {
-            let uri = try await Pair.instance.create()
-            walletConnectUri = uri
             do {
                 ActivityIndicatorManager.shared.start()
-                try await Sign.instance.connect(
+                walletConnectUri = try await Sign.instance.connect(
                     requiredNamespaces: Proposal.requiredNamespaces,
-                    optionalNamespaces: Proposal.optionalNamespaces,
-                    topic: uri.topic
+                    optionalNamespaces: Proposal.optionalNamespaces
                 )
                 ActivityIndicatorManager.shared.stop()
-                router.presentNewPairing(walletConnectUri: uri)
+                router.presentNewPairing(walletConnectUri: walletConnectUri!)
             } catch {
                 ActivityIndicatorManager.shared.stop()
             }
         }
     }
-    
+
+    @MainActor
+    func connectWalletWithSessionAuthenticate() {
+        Task {
+            do {
+                ActivityIndicatorManager.shared.start()
+                let uri = try await Sign.instance.authenticate(.stub())
+                walletConnectUri = uri
+                ActivityIndicatorManager.shared.stop()
+                router.presentNewPairing(walletConnectUri: walletConnectUri!)
+            } catch {
+                ActivityIndicatorManager.shared.stop()
+            }
+        }
+    }
+
+    @MainActor
+    func connectWalletWithSessionAuthenticateSIWEOnly() {
+        Task {
+            do {
+                ActivityIndicatorManager.shared.start()
+                let uri = try await Sign.instance.authenticate(.stub(methods: nil))
+                walletConnectUri = uri
+                ActivityIndicatorManager.shared.stop()
+                router.presentNewPairing(walletConnectUri: walletConnectUri!)
+            } catch {
+                ActivityIndicatorManager.shared.stop()
+            }
+        }
+    }
+
     func disconnect() {
         if let session {
             Task { @MainActor in
@@ -127,6 +154,22 @@ extension SignPresenter {
             }
             .store(in: &subscriptions)
 
+        Sign.instance.authResponsePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] response in
+                switch response.result {
+                case .success(let (session, _)):
+                    if session == nil {
+                        AlertPresenter.present(message: "Wallet Succesfully Authenticated", type: .success)
+                    }
+                    break
+                case .failure(let error):
+                    AlertPresenter.present(message: error.localizedDescription, type: .error)
+                }
+                Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
+            }
+            .store(in: &subscriptions)
+
         Sign.instance.sessionResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { response in
@@ -134,6 +177,13 @@ extension SignPresenter {
             }
             .store(in: &subscriptions)
 
+        Sign.instance.sessionsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                self.router.dismiss()
+                self.getSession()
+            }
+            .store(in: &subscriptions)
         Sign.instance.requestExpirationPublisher
             .receive(on: DispatchQueue.main)
             .sink { _ in
@@ -141,7 +191,6 @@ extension SignPresenter {
                 AlertPresenter.present(message: "Session Request has expired", type: .warning)
             }
             .store(in: &subscriptions)
-
     }
     
     private func getSession() {
@@ -164,3 +213,34 @@ extension SignPresenter {
 
 // MARK: - SceneViewModel
 extension SignPresenter: SceneViewModel {}
+
+
+// MARK: - Authenticate request stub
+extension AuthRequestParams {
+    static func stub(
+        domain: String = "app.web3inbox",
+        chains: [String] = ["eip155:1", "eip155:137"],
+        nonce: String = "32891756",
+        uri: String = "https://app.web3inbox.com/login",
+        nbf: String? = nil,
+        exp: String? = nil,
+        statement: String? = "I accept the ServiceOrg Terms of Service: https://app.web3inbox.com/tos",
+        requestId: String? = nil,
+        resources: [String]? = nil,
+        methods: [String]? = ["personal_sign", "eth_sendTransaction"]
+    ) -> AuthRequestParams {
+        return try! AuthRequestParams(
+            domain: domain,
+            chains: chains,
+            nonce: nonce,
+            uri: uri,
+            nbf: nbf,
+            exp: exp,
+            statement: statement,
+            requestId: requestId,
+            resources: resources,
+            methods: methods
+        )
+    }
+}
+

@@ -16,7 +16,7 @@ public struct DefaultIATProvider: IATProvider {
 #if DEBUG
 struct IATProviderMock: IATProvider {
     var iat: String {
-        return "2022-10-10T23:03:35.700Z"
+        return "2024-02-05T13:09:08.427Z"
     }
 }
 #endif

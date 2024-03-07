@@ -1,6 +1,15 @@
 import Foundation
 
-public struct Request: Codable, Equatable {
+protocol Expirable {
+    func isExpired(currentDate: Date) -> Bool
+}
+extension Expirable {
+    func isExpired(currentDate: Date = Date()) -> Bool {
+        return isExpired(currentDate: currentDate)
+    }
+}
+
+public struct Request: Codable, Equatable, Expirable {
     public enum Errors: Error {
         case invalidTtl
         case requestExpired

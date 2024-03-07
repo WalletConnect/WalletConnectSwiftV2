@@ -57,7 +57,7 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectPairing", "WalletConnectVerify"],
+            dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner"],
             path: "Sources/WalletConnectSign"),
         .target(
             name: "WalletConnectChat",
@@ -69,7 +69,7 @@ let package = Package(
             path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
-            dependencies: ["Auth", "WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
+            dependencies: ["WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
             path: "Sources/Web3Wallet"),
         .target(
             name: "WalletConnectNotify",
@@ -145,9 +145,6 @@ let package = Package(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
         .testTarget(
-            name: "Web3WalletTests",
-            dependencies: ["Web3Wallet", "TestingUtils"]),
-        .testTarget(
             name: "WalletConnectPairingTests",
             dependencies: ["WalletConnectPairing", "TestingUtils"]),
         .testTarget(
@@ -156,9 +153,6 @@ let package = Package(
         .testTarget(
             name: "NotifyTests",
             dependencies: ["WalletConnectNotify", "TestingUtils"]),
-        .testTarget(
-            name: "AuthTests",
-            dependencies: ["Auth", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
         .testTarget(
             name: "RelayerTests",
             dependencies: ["WalletConnectRelay", "WalletConnectUtils", "TestingUtils"]),

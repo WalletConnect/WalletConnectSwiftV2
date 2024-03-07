@@ -1,3 +1,4 @@
+
 import Foundation
 import XCTest
 import WalletConnectUtils
@@ -245,35 +246,35 @@ final class NotifyTests: XCTestCase {
         }
     }
 
-//    func testFetchHistory() async throws {
-//        let subscribeExpectation = expectation(description: "fetch notify subscription")
-//        let account = Account("eip155:1:0x622b17376F76d72C43527a917f59273247A917b4")!
-//
-//        var subscription: NotifySubscription!
-//        walletNotifyClientA.subscriptionsPublisher
-//            .sink { subscriptions in
-//                subscription = subscriptions.first
-//                subscribeExpectation.fulfill()
-//            }.store(in: &publishers)
-//
-//        try await walletNotifyClientA.register(account: account, domain: gmDappDomain) { message in
-//            let privateKey = Data(hex: "c3ff8a0ae33ac5d58e515055c5870fa2f220d070997bd6fd77a5f2c148528ff0")
-//            let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
-//            return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
-//        }
-//
-//        await fulfillment(of: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
-//
-//        let hasMore = try await walletNotifyClientA.fetchHistory(subscription: subscription, after: nil, limit: 20)
-//        XCTAssertTrue(hasMore)
-//        XCTAssertTrue(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count == 20)
-//    }
+    func testFetchHistory() async throws {
+        let subscribeExpectation = expectation(description: "fetch notify subscription")
+        let account = Account("eip155:1:0x622b17376F76d72C43527a917f59273247A917b4")!
+
+        var subscription: NotifySubscription!
+        walletNotifyClientA.subscriptionsPublisher
+            .sink { subscriptions in
+                subscription = subscriptions.first
+                subscribeExpectation.fulfill()
+            }.store(in: &publishers)
+
+        try await walletNotifyClientA.register(account: account, domain: gmDappDomain) { message in
+            let privateKey = Data(hex: "c3ff8a0ae33ac5d58e515055c5870fa2f220d070997bd6fd77a5f2c148528ff0")
+            let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
+            return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
+        }
+
+        await fulfillment(of: [subscribeExpectation], timeout: InputConfig.defaultTimeout)
+
+        let hasMore = try await walletNotifyClientA.fetchHistory(subscription: subscription, after: nil, limit: 20)
+        XCTAssertTrue(hasMore)
+        XCTAssertTrue(walletNotifyClientA.getMessageHistory(topic: subscription.topic).count == 20)
+    }
 }
 
 
 private extension NotifyTests {
     func sign(_ message: String) -> CacaoSignature {
-        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create(projectId: InputConfig.projectId)
+        let signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
         return try! signer.sign(message: message, privateKey: privateKey, type: .eip191)
     }
 }
@@ -286,3 +287,4 @@ private extension NotifyClient {
         try await register(params: params, signature: signature)
     }
 }
+

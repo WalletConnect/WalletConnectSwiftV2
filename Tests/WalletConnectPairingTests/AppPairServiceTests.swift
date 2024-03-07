@@ -26,7 +26,7 @@ final class AppPairServiceTests: XCTestCase {
     }
 
     func testCreate() async {
-        let uri = try! await service.create()
+        let uri = try! await service.create(supportedMethods: nil)
         XCTAssert(cryptoMock.hasSymmetricKey(for: uri.topic), "Proposer must store the symmetric key matching the URI.")
         XCTAssert(storageMock.hasPairing(forTopic: uri.topic), "The engine must store a pairing after creating one")
         XCTAssert(networkingInteractor.didSubscribe(to: uri.topic), "Proposer must subscribe to pairing topic.")

@@ -64,13 +64,14 @@ extension WalletPairService {
                 (record.topic == pairing.topic) ? record.request : nil
             }
 
-        if let pendingRequest = pendingRequests.first {
-            networkingInteractor.handleHistoryRequest(topic: topic, request: pendingRequest)
-            return true
+
+        guard !pendingRequests.isEmpty else { return false }
+        pendingRequests.forEach { request in
+            networkingInteractor.handleHistoryRequest(topic: topic, request: request)
         }
-        return false
+        return true
     }
-    
+
     private func resolveNetworkConnectionStatus() async -> NetworkConnectionStatus {
         return await withCheckedContinuation { continuation in
             let cancellable = networkingInteractor.networkConnectionStatusPublisher.sink { value in

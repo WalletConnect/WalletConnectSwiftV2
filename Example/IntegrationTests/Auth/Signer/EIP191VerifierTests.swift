@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-@testable import Auth
 @testable import WalletConnectSigner
 
 class EIP191VerifierTests: XCTestCase {
@@ -15,6 +14,8 @@ class EIP191VerifierTests: XCTestCase {
         try await verifier.verify(signature: signature, message: message, address: address)
     }
 
+    // passes with https://etherscan.io/verifiedSignatures#
+    // for testing with etherscan remove prefix
     func testEtherscanSignature() async throws {
         let address = "0x6721591d424c18b7173d55895efa1839aa57d9c2"
         let message = "\u{19}Ethereum Signed Message:\n139[Etherscan.io 12/08/2022 09:26:23] I, hereby verify that I am the owner/creator of the address [0x7e77dcb127f99ece88230a64db8d595f31f1b068]".data(using: .utf8)!

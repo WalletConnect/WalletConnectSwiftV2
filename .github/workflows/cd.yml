@@ -13,8 +13,7 @@ env:
   PACKAGE_VERSION: ${{ github.event.pull_request.title }}
 jobs:
   set-user-agent:
-    runs-on: 
-      group: apple-silicon
+    runs-on: macos-latest-xlarge
     steps:
       - uses: actions/checkout@v2
         with:

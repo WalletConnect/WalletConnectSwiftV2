@@ -27,8 +27,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: 
-      group: apple-silicon
+    runs-on: macos-latest-xlarge
     steps:
       - name: Checkout
         uses: actions/checkout@v3

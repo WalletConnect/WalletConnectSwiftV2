@@ -69,9 +69,10 @@ final class SessionEngine {
         logger.debug("will request on session topic: \(request.topic)")
         guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(request.topic)")
-            return // TODO: Marked to review on developer facing error cases
+            return
         }
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
+            logger.debug("Invalid namespaces")
             throw WalletConnectError.invalidPermissions
         }
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiryTimestamp: request.expiryTimestamp)
