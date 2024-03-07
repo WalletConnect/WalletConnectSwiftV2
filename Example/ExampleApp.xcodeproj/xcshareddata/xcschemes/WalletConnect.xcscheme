@@ -14,20 +14,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "WalletConnect"
-               BuildableName = "WalletConnect"
-               BlueprintName = "WalletConnect"
-               ReferencedContainer = "container:..">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Web3Inbox"
                BuildableName = "Web3Inbox"
                BlueprintName = "Web3Inbox"
@@ -196,16 +182,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AuthTests"
-               BuildableName = "AuthTests"
-               BlueprintName = "AuthTests"
-               ReferencedContainer = "container:..">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "CommonsTests"
                BuildableName = "CommonsTests"
                BlueprintName = "CommonsTests"
@@ -286,16 +262,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Web3WalletTests"
-               BuildableName = "Web3WalletTests"
-               BlueprintName = "Web3WalletTests"
-               ReferencedContainer = "container:..">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "NotifyTests"
                BuildableName = "NotifyTests"
                BlueprintName = "NotifyTests"
@@ -324,9 +290,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "WalletConnect"
-            BuildableName = "WalletConnect"
-            BlueprintName = "WalletConnect"
+            BlueprintIdentifier = "Web3Inbox"
+            BuildableName = "Web3Inbox"
+            BlueprintName = "Web3Inbox"
             ReferencedContainer = "container:..">
          </BuildableReference>
       </MacroExpansion>

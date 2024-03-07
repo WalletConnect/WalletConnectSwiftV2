@@ -37,7 +37,7 @@ final class MainRouter {
             .presentFullScreen(from: viewController, transparentBackground: true)
     }
 
-    func present(request: AuthRequest, importAccount: ImportAccount, context: VerifyContext?) {
+    func present(request: AuthenticationRequest, importAccount: ImportAccount, context: VerifyContext?) {
         AuthRequestModule.create(app: app, request: request, importAccount: importAccount, context: context)
             .presentFullScreen(from: viewController, transparentBackground: true)
     }

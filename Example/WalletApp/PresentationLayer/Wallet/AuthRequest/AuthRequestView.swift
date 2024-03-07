@@ -11,7 +11,21 @@ struct AuthRequestView: View {
             
             VStack {
                 Spacer()
-                
+
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            presenter.dismiss()
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                                .padding()
+                        }
+                    }
+                    .padding()
+                }
+
                 VStack(spacing: 0) {
                     Image("header")
                         .resizable()
@@ -115,36 +129,48 @@ struct AuthRequestView: View {
     private func authRequestView() -> some View {
         VStack {
             VStack(alignment: .leading) {
-                Text("Message")
+                Text("Messages")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.whiteBackground)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color.grey70)
+                    .background(Color.blue)
                     .cornerRadius(28, corners: .allCorners)
                     .padding(.leading, 15)
                     .padding(.top, 9)
-                
-                VStack(spacing: 0) {
-                    ScrollView {
-                        Text(presenter.message)
-                            .foregroundColor(.grey50)
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(Array(presenter.messages.enumerated()), id: \.offset) { _, messageTuple in
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("\(messageTuple.0)")
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .foregroundColor(.black)
+                                    .padding([.top, .horizontal])
+
+                                Text(messageTuple.1)
+                                    .foregroundColor(.grey50)
+                                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                                    .padding(.horizontal)
+                                    .padding(.bottom)
+                            }
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 2)
+                        }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 10)
-                    .frame(height: 150)
+                    .padding(.horizontal, 5)
+                    .padding(.bottom, 5)
                 }
-                .background(Color.whiteBackground)
-                .cornerRadius(20, corners: .allCorners)
-                .padding(.horizontal, 5)
-                .padding(.bottom, 5)
+                .frame(maxHeight: .infinity)
             }
-            .background(.thinMaterial)
+            .background(Color(.systemBackground)) // Adjusted for theme compatibility
             .cornerRadius(25, corners: .allCorners)
         }
         .padding(.vertical, 30)
     }
+
+
     
     private func verifyBadgeView(imageName: String, title: String, color: Color) -> some View {
         HStack(spacing: 5) {
@@ -187,8 +213,8 @@ struct AuthRequestView: View {
     
     private func declineButton() -> some View {
         Button {
-            Task(priority: .userInitiated) { try await
-                presenter.onReject()
+            Task(priority: .userInitiated) { await
+                presenter.reject()
             }
         } label: {
             Text("Decline")
@@ -211,8 +237,8 @@ struct AuthRequestView: View {
     
     private func allowButton() -> some View {
         Button {
-            Task(priority: .userInitiated) { try await
-                presenter.onApprove()
+            Task(priority: .userInitiated) { await
+                presenter.approve()
             }
         } label: {
             Text(presenter.validationStatus == .scam ? "Proceed anyway" : "Allow")

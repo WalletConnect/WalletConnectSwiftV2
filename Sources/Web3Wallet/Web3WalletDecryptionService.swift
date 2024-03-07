@@ -7,15 +7,13 @@ public final class Web3WalletDecryptionService {
     public enum RequestMethod: UInt {
         case sessionRequest = 1108
         case sessionProposal = 1100
-        case authRequest = 3000
+        case authRequest = 1116
     }
 
     private let signDecryptionService: SignDecryptionService
-    private let authDecryptionService: AuthDecryptionService
-    private static let w3wTags: [UInt] = [1108, 1100, 3000]
+    private static let w3wTags: [UInt] = [1108, 1100, 1116]
 
     public init(groupIdentifier: String) throws {
-        self.authDecryptionService = try AuthDecryptionService(groupIdentifier: groupIdentifier)
         self.signDecryptionService = try SignDecryptionService(groupIdentifier: groupIdentifier)
     }
 
@@ -24,11 +22,7 @@ public final class Web3WalletDecryptionService {
     }
 
     public func getMetadata(topic: String) -> AppMetadata? {
-        if let metadata = signDecryptionService.getMetadata(topic: topic) {
-            return metadata
-        } else {
-            return authDecryptionService.getMetadata(topic: topic)
-        }
+        signDecryptionService.getMetadata(topic: topic)
     }
 
     public func decryptMessage(topic: String, ciphertext: String, tag: UInt) throws -> DecryptedPayloadProtocol {
@@ -41,8 +35,8 @@ public final class Web3WalletDecryptionService {
             let request = try signDecryptionService.decryptRequest(topic: topic, ciphertext: ciphertext)
             return RequestPayload(request: request)
         case .authRequest:
-            let request = try authDecryptionService.decryptAuthRequest(topic: topic, ciphertext: ciphertext)
-            return AuthRequestPayload(authRequest: request)
+            let authRequest = try signDecryptionService.decryptAuthRequest(topic: topic, ciphertext: ciphertext)
+            return AuthRequestPayload(authRequest: authRequest)
         }
     }
 
@@ -65,5 +59,5 @@ public struct ProposalPayload: DecryptedPayloadProtocol {
 
 public struct AuthRequestPayload: DecryptedPayloadProtocol {
     public var requestMethod: Web3WalletDecryptionService.RequestMethod { .authRequest }
-    public var authRequest: AuthRequest
+    public var authRequest: AuthenticationRequest
 }

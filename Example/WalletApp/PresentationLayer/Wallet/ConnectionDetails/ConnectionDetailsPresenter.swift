@@ -1,7 +1,6 @@
 import UIKit
 import Combine
 
-import Auth
 import Web3Wallet
 
 final class ConnectionDetailsPresenter: ObservableObject {

@@ -24,7 +24,6 @@ public class Web3Wallet {
             fatalError("Error - you must call Web3Wallet.configure(_:) before accessing the shared instance.")
         }
         return Web3WalletClientFactory.create(
-            authClient: Auth.instance,
             signClient: Sign.instance,
             pairingClient: Pair.instance as! PairingClient,
             pushClient: Push.instance
@@ -46,8 +45,8 @@ public class Web3Wallet {
         environment: APNSEnvironment = .production
     ) {
         Pair.configure(metadata: metadata)
-        Auth.configure(crypto: crypto)
         Push.configure(pushHost: pushHost, environment: environment)
+        Sign.configure(crypto: crypto)
         Web3Wallet.config = Web3Wallet.Config(crypto: crypto)
     }
 }

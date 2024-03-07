@@ -20,13 +20,29 @@ public class Sign {
 
     /// Sign client instance
     public static var instance: SignClient = {
+        guard let config = Sign.config else {
+            fatalError("Error - you must call Sign.configure(_:) before accessing the shared instance.")
+        }
         return SignClientFactory.create(
             metadata: Pair.metadata,
             pairingClient: Pair.instance as! PairingClient,
-            networkingClient: Networking.instance as! NetworkingInteractor,
+            projectId: Networking.projectId,
+            crypto: config.crypto,
+            networkingClient: Networking.interactor,
             groupIdentifier: Networking.groupIdentifier
+
         )
     }()
 
+    private static var config: Config?
+
     private init() { }
+
+    /// Sign instance config method
+    /// - Parameters:
+    ///   - metadata: App metadata
+    static public func configure(crypto: CryptoProvider) {
+        Sign.config = Sign.Config(crypto: crypto)
+    }
 }
+

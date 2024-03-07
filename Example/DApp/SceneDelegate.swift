@@ -2,7 +2,6 @@ import UIKit
 
 import Web3Modal
 import WalletConnectModal
-import Auth
 import WalletConnectRelay
 import WalletConnectNetworking
 import Combine
@@ -19,8 +18,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )
-        Auth.configure(crypto: DefaultCryptoProvider())
-        
+        Sign.configure(crypto: DefaultCryptoProvider())
+
         let metadata = AppMetadata(
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
@@ -49,6 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             metadata: metadata
         )
         
+        Sign.instance.logger.setLogging(level: .debug)
 
         Sign.instance.logsPublisher.sink { log in
             switch log {
@@ -67,6 +67,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }.store(in: &publishers)
 
+        Web3Modal.instance.disableAnalytics()
         setupWindow(scene: scene)
     }
 

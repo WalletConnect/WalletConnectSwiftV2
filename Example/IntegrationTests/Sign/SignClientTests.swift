@@ -4,6 +4,7 @@ import JSONRPC
 @testable import WalletConnectKMS
 @testable import WalletConnectSign
 @testable import WalletConnectRelay
+@testable import WalletConnectUtils
 import WalletConnectPairing
 import WalletConnectNetworking
 import Combine
@@ -14,7 +15,9 @@ final class SignClientTests: XCTestCase {
     var wallet: SignClient!
     var walletPairingClient: PairingClient!
     private var publishers = Set<AnyCancellable>()
-
+    let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
+    let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
+    let eip1271Signature = "0xdeaddeaddead4095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c"
 
     static private func makeClients(name: String) -> (PairingClient, SignClient) {
         let logger = ConsoleLogger(prefix: name, loggingLevel: .debug)
@@ -48,7 +51,10 @@ final class SignClientTests: XCTestCase {
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
             pairingClient: pairingClient,
-            networkingClient: networkingClient
+            networkingClient: networkingClient,
+            iatProvider: IATProviderMock(),
+            projectId: InputConfig.projectId,
+            crypto: DefaultCryptoProvider()
         )
 
         let clientId = try! networkingClient.getClientId()
@@ -58,8 +64,8 @@ final class SignClientTests: XCTestCase {
     }
 
     override func setUp() async throws {
-        (dappPairingClient, dapp) = Self.makeClients(name: "🍏P")
-        (walletPairingClient, wallet) = Self.makeClients(name: "🍎R")
+        (dappPairingClient, dapp) = Self.makeClients(name: "🍏Dapp")
+        (walletPairingClient, wallet) = Self.makeClients(name: "🍎Wallet")
     }
 
     override func tearDown() {
@@ -76,7 +82,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -85,7 +91,7 @@ final class SignClientTests: XCTestCase {
         dapp.sessionSettlePublisher.sink { _ in
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
-        dapp.sessionSettlePublisher.sink { _ in
+        wallet.sessionSettlePublisher.sink { _ in
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
@@ -110,7 +116,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.reject(proposalId: proposal.id, reason: .unsupportedChains)
+                    try await wallet.rejectSession(proposalId: proposal.id, reason: .unsupportedChains)
                     store.rejectedProposal = proposal
                     semaphore.signal()
                 } catch { XCTFail("\(error)") }
@@ -131,7 +137,7 @@ final class SignClientTests: XCTestCase {
 
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
-                do { try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
             }
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
@@ -194,7 +200,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch {
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch {
                     XCTFail("\(error)")
                 }
             }
@@ -285,7 +291,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -323,10 +329,14 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { [unowned self] settledSession in
             Task(priority: .high) {
-                try! await wallet.update(topic: settledSession.topic, namespaces: sessionNamespaces)
+                let updateNamespace = SessionNamespace.make(
+                    toRespond: ProposalNamespace.stubRequired(chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!])
+                )
+                try! await wallet.update(topic: settledSession.topic, namespaces: updateNamespace)
             }
         }.store(in: &publishers)
-        dapp.sessionUpdatePublisher.sink { _, _ in
+        dapp.sessionUpdatePublisher.sink { _, namespace in
+            XCTAssertEqual(namespace.values.first?.accounts.count, 2)
             expectation.fulfill()
         }.store(in: &publishers)
         let uri = try! await dappPairingClient.create()
@@ -482,7 +492,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -551,13 +561,13 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
             }
         }.store(in: &publishers)
-        dapp.sessionSettlePublisher.sink { [unowned self] _ in
+        dapp.sessionSettlePublisher.sink { _ in
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
         wallet.sessionSettlePublisher.sink { _ in
@@ -610,7 +620,7 @@ final class SignClientTests: XCTestCase {
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
-                    try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                 } catch {
                     XCTFail("\(error)")
                 }
@@ -676,7 +686,7 @@ final class SignClientTests: XCTestCase {
             wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
                     do {
-                        try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                        _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                     } catch {
                         settlementFailedExpectation.fulfill()
                     }
@@ -742,7 +752,7 @@ final class SignClientTests: XCTestCase {
             wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
                 Task(priority: .high) {
                     do {
-                        try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
+                        _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
                     } catch {
                         settlementFailedExpectation.fulfill()
                     }
@@ -757,4 +767,294 @@ final class SignClientTests: XCTestCase {
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [settlementFailedExpectation], timeout: 1)
     }
+
+
+    func testEIP191SessionAuthenticated() async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+
+                let signature = try signer.sign(
+                    message: siweMessage,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testEIP191SessionAuthenticateEmptyMethods() async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+
+                let signature = try signer.sign(
+                    message: siweMessage,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub(methods: nil))
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testEIP191SessionAuthenticatedMultiCacao() async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                var cacaos = [Cacao]()
+
+                request.payload.chains.forEach { chain in
+
+                    let account = Account(blockchain: Blockchain(chain)!, address: walletAccount.address)!
+
+                    let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_sendTransaction", "personal_sign"])
+
+                    let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: account)
+
+                    let signature = try! signer.sign(
+                        message: siweMessage,
+                        privateKey: prvKey,
+                        type: .eip191)
+
+                    let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: account)
+                    cacaos.append(cacao)
+
+                }
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: cacaos)
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success(let (session, _)) = result,
+                let session = session else { XCTFail(); return }
+            XCTAssertEqual(session.accounts.count, 2)
+            XCTAssertEqual(session.namespaces["eip155"]?.methods.count, 2)
+            XCTAssertEqual(session.namespaces["eip155"]?.accounts.count, 2)
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub(chains: ["eip155:1", "eip155:137"]))
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testEIP1271SessionAuthenticated() async throws {
+
+        let account = Account(chainIdentifier: "eip155:1", address: "0x6DF3d14554742D67068BB7294C80107a3c655A56")!
+        let eip1271Signature = "0xb518b65724f224f8b12dedeeb06f8b278eb7d3b42524959bed5d0dfa49801bd776c7ee05de396eadc38ee693c917a04d93b20981d68c4a950cbc42ea7f4264bc1c"
+
+        let responseExpectation = expectation(description: "successful response delivered")
+        let uri = try! await dapp.authenticate(AuthRequestParams(
+            domain: "etherscan.io",
+            chains: ["eip155:1"],
+            nonce: "DTYxeNr95Ne7Sape5",
+            uri: "https://etherscan.io/verifiedSignatures#",
+            nbf: nil,
+            exp: nil,
+            statement: "Sign message to verify ownership of the address 0x6DF3d14554742D67068BB7294C80107a3c655A56 on etherscan.io",
+            requestId: nil,
+            resources: nil,
+            methods: nil
+        ))
+
+        try await walletPairingClient.pair(uri: uri)
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: request.payload, signature: signature, account: account)
+                _ = try await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testEIP191SessionAuthenticateSignatureVerificationFailed() async {
+        let requestExpectation = expectation(description: "error response delivered")
+        let uri = try! await dapp.authenticate(AuthRequestParams.stub())
+
+        try? await walletPairingClient.pair(uri: uri)
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let invalidSignature = CacaoSignature(t: .eip1271, s: eip1271Signature)
+
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: invalidSignature, account: walletAccount)
+
+                await XCTAssertThrowsErrorAsync(try await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao]))
+                requestExpectation.fulfill()
+            }
+        }
+        .store(in: &publishers)
+        await fulfillment(of: [requestExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testSessionAuthenticateUserRespondError() async {
+        let responseExpectation = expectation(description: "error response delivered")
+        let uri = try! await dapp.authenticate(AuthRequestParams.stub())
+
+        try? await walletPairingClient.pair(uri: uri)
+        wallet.authRequestPublisher.sink { [unowned self] request in
+            Task(priority: .high) {
+                try! await wallet.rejectSession(requestId: request.0.id)
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .failure(let error) = result else { XCTFail(); return }
+            XCTAssertEqual(error, .userRejeted)
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testSessionRequestOnAuthenticatedSession() async throws {
+        let requestExpectation = expectation(description: "Wallet expects to receive a request")
+        let responseExpectation = expectation(description: "Dapp expects to receive a response")
+        
+        let requestMethod = "eth_sendTransaction"
+        let requestParams = [EthSendTransaction.stub()]
+        let responseParams = "0xdeadbeef"
+        let chain = Blockchain("eip155:1")!
+
+        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_sendTransaction", "personal_sign"])
+
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+
+                let signature = try! signer.sign(
+                    message: siweMessage,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { [unowned self] (_, result) in
+            guard case .success(let (session, _)) = result,
+                let session = session else { XCTFail(); return }
+            Task(priority: .high) {
+                let request = try Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: chain)
+                try await dapp.request(params: request)
+            }
+        }
+        .store(in: &publishers)
+
+        wallet.sessionRequestPublisher.sink { [unowned self] (sessionRequest, _) in
+            let receivedParams = try! sessionRequest.params.get([EthSendTransaction].self)
+            XCTAssertEqual(receivedParams, requestParams)
+            XCTAssertEqual(sessionRequest.method, requestMethod)
+            requestExpectation.fulfill()
+            Task(priority: .high) {
+                try await wallet.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .response(AnyCodable(responseParams)))
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionResponsePublisher.sink { response in
+            switch response.result {
+            case .response(let response):
+                XCTAssertEqual(try! response.get(String.self), responseParams)
+            case .error:
+                XCTFail()
+            }
+            responseExpectation.fulfill()
+        }.store(in: &publishers)
+
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testFalbackForm_2_5_DappToSessionProposeOnWallet() async throws {
+
+        let fallbackExpectation = expectation(description: "fallback to wc_sessionPropose")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+
+        wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
+            Task(priority: .high) {
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionSettlePublisher.sink { settledSession in
+            Task(priority: .high) {
+                fallbackExpectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+        let uriStringWithoutMethods = uri.absoluteString.replacingOccurrences(of: "&methods=wc_sessionAuthenticate", with: "")
+        let uriWithoutMethods = try WalletConnectURI(uriString: uriStringWithoutMethods)
+        try await walletPairingClient.pair(uri: uriWithoutMethods)
+        await fulfillment(of: [fallbackExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
 }

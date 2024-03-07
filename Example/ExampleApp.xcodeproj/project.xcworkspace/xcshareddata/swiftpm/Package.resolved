@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "db51c407d3be4a051484a141bf0bff36c43d3b1e",
-          "version": "1.8.0"
+          "revision": "7892a123f7e8d0fe62f9f03728b17bbd4f94df5c",
+          "version": "1.8.1"
         }
       },
       {
@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/mixpanel/mixpanel-swift",
         "state": {
           "branch": "master",
-          "revision": "c6336881a077d283db6f6d6e2f242977250230bd",
+          "revision": "9438b4a5f76bf2108b09f8fed1abbad8f353e1a2",
           "version": null
         }
       },
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "74cf23b2946c92550fb1185612077151497e648e",
-          "version": "8.17.1"
+          "revision": "38f4f70d07117b9f958a76b1bff278c2f29ffe0e",
+          "version": "8.21.0"
         }
       },
       {
@@ -164,6 +164,15 @@
         }
       },
       {
+        "package": "CoinbaseWalletSDK",
+        "repositoryURL": "https://github.com/WalletConnect/wallet-mobile-sdk",
+        "state": {
+          "branch": null,
+          "revision": "b6dfb7d6b8447c7c5b238a10443a1ac28223f38f",
+          "version": "1.0.0"
+        }
+      },
+      {
         "package": "Web3",
         "repositoryURL": "https://github.com/WalletConnect/Web3.swift",
         "state": {
@@ -177,8 +186,8 @@
         "repositoryURL": "https://github.com/WalletConnect/web3modal-swift",
         "state": {
           "branch": null,
-          "revision": "296b2b72c116807a862e4c08ecf0a78ff044f87a",
-          "version": "1.0.16"
+          "revision": "4f2f4ca6497b7335a53c7b5c4fb3db554e0351ba",
+          "version": "1.3.0"
         }
       }
     ]

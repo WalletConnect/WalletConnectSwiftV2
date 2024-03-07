@@ -1,7 +1,7 @@
 import Foundation
 import CryptoSwift
 import Web3
-import Auth
+import WalletConnectSigner
 
 public struct DefaultSignerFactory: SignerFactory {
 

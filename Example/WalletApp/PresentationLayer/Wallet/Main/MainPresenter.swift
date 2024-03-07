@@ -1,6 +1,7 @@
 import UIKit
 import Combine
 import SwiftUI
+import WalletConnectUtils
 
 final class MainPresenter {
     private let interactor: MainInteractor
@@ -59,9 +60,17 @@ extension MainPresenter {
             }.store(in: &disposeBag)
 
         
-        interactor.requestPublisher
+        interactor.authenticateRequestPublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] result in
+                let requestedChains: Set<Blockchain> = Set(result.request.payload.chains.compactMap { Blockchain($0) })
+                let supportedChains: Set<Blockchain> = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+                // Check if there's an intersection between the requestedChains and supportedChains
+                let commonChains = requestedChains.intersection(supportedChains)
+                guard !commonChains.isEmpty else {
+                    AlertPresenter.present(message: "No common chains", type: .error)
+                    return
+                }
                 router.present(request: result.request, importAccount: importAccount, context: result.context)
             }
             .store(in: &disposeBag)

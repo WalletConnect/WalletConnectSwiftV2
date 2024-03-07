@@ -1,15 +1,23 @@
 import XCTest
 @testable import WalletConnectUtils
 
-private func stubURI() -> (uri: WalletConnectURI, string: String) {
+private func stubURI(includeMethods: Bool = true) -> (uri: WalletConnectURI, string: String) {
     let topic = Data.randomBytes(count: 32).toHexString()
     let symKey = Data.randomBytes(count: 32).toHexString()
     let protocolName = "irn"
+    let timestamp = UInt64(Date().timeIntervalSince1970) + 5 * 60
+    var uriString = "wc:\(topic)@2?symKey=\(symKey)&relay-protocol=\(protocolName)&expiryTimestamp=\(timestamp)"
+    let methods = ["wc_sessionPropose", "wc_sessionAuthenticate"]
+    if includeMethods {
+        let methodsString = methods.joined(separator: ",")
+        uriString.append("&methods=\(methodsString)")
+    }
     let uri = WalletConnectURI(
         topic: topic,
         symKey: symKey,
-        relay: RelayProtocolOptions(protocol: protocolName, data: nil))
-    let uriString = uri.absoluteString 
+        relay: RelayProtocolOptions(protocol: protocolName, data: nil),
+        methods: includeMethods ? methods : nil)
+
     return (uri, uriString)
 }
 
@@ -62,6 +70,33 @@ final class WalletConnectURITests: XCTestCase {
         let input = stubURI()
         let inputURIString = input.string.replacingOccurrences(of: "&relay-protocol=\(input.uri.relay.protocol)", with: "")
         XCTAssertThrowsError(try WalletConnectURI(uriString: inputURIString))
+    }
+
+    func testInitURIWithStringIncludingMethods() {
+        let (expectedURI, uriStringWithMethods) = stubURI()
+        guard let uri = WalletConnectURI(string: uriStringWithMethods) else {
+            XCTFail("Initialization of URI failed")
+            return
+        }
+        XCTAssertEqual(uri.methods, expectedURI.methods)
+        XCTAssertEqual(uri.topic, expectedURI.topic)
+        XCTAssertEqual(uri.symKey, expectedURI.symKey)
+        XCTAssertEqual(uri.relay.protocol, expectedURI.relay.protocol)
+        XCTAssertEqual(uri.absoluteString, expectedURI.absoluteString)
+    }
+
+    func testInitURIWithStringExcludingMethods() {
+        let (expectedURI, uriStringWithoutMethods) = stubURI(includeMethods: false)
+        guard let uri = WalletConnectURI(string: uriStringWithoutMethods) else {
+            XCTFail("Initialization of URI failed")
+            return
+        }
+
+        XCTAssertNil(uri.methods)
+        XCTAssertEqual(uri.topic, expectedURI.topic)
+        XCTAssertEqual(uri.symKey, expectedURI.symKey)
+        XCTAssertEqual(uri.relay.protocol, expectedURI.relay.protocol)
+        XCTAssertEqual(uri.absoluteString, expectedURI.absoluteString)
     }
 
     func testInitHandlesURLEncodedString() throws {

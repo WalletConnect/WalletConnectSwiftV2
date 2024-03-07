@@ -6,6 +6,7 @@ import Combine
 /// Cannot be instantiated outside of the SDK
 ///
 /// Access via `Auth.instance`
+@available(*, deprecated, message: "Use SignClient for dApps and Web3Wallet interface for wallets instead.")
 public class AuthClient: AuthClientProtocol {
 
     // MARK: - Public Properties
@@ -13,6 +14,7 @@ public class AuthClient: AuthClientProtocol {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
+    @available(*, deprecated, message: "Use SignClient for dApps and Web3Wallet interface for wallets instead.")
     public var authRequestPublisher: AnyPublisher<(request: AuthRequest, context: VerifyContext?), Never> {
         authRequestPublisherSubject.eraseToAnyPublisher()
     }
@@ -22,11 +24,13 @@ public class AuthClient: AuthClientProtocol {
     /// App should subscribe for events in order to receive CACAO object with a signature matching authentication request.
     ///
     /// Emited result may be an error.
+    @available(*, deprecated, message: "Use SignClient for dApps and Web3Wallet interface for wallets instead.")
     public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
     /// Publisher that sends web socket connection status
+    @available(*, deprecated, message: "Use Web3Wallet interface for managing socket connection status.")
     public let socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
     /// An object that loggs SDK's errors and info messages
@@ -67,6 +71,7 @@ public class AuthClient: AuthClientProtocol {
     /// For a dapp to send an authentication request to a wallet
     /// - Parameter params: Set of parameters required to request authentication
     /// - Parameter topic: Pairing topic that wallet already subscribes for
+    @available(*, deprecated, message: "Use SignClient for sending authentication requests.")
     public func request(_ params: RequestParams, topic: String) async throws {
         logger.debug("Requesting Authentication on existing pairing")
         try pairingRegisterer.validatePairingExistance(topic)
@@ -77,22 +82,26 @@ public class AuthClient: AuthClientProtocol {
     /// - Parameters:
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
+    @available(*, deprecated, message: "Use Web3Wallet interface for responding to authentication requests.")
     public func respond(requestId: RPCID, signature: CacaoSignature, from account: Account) async throws {
         try await walletRespondService.respond(requestId: requestId, signature: signature, account: account)
     }
 
     /// For wallet to reject authentication request
     /// - Parameter requestId: authentication request id
+    @available(*, deprecated, message: "Use Web3Wallet interface for rejecting authentication requests.")
     public func reject(requestId: RPCID) async throws {
         try await walletRespondService.respondError(requestId: requestId)
     }
 
     /// Query pending authentication requests
     /// - Returns: Pending authentication requests
+    @available(*, deprecated, message: "Use SignClient for managing pending authentication requests.")
     public func getPendingRequests() throws -> [(AuthRequest, VerifyContext?)] {
         return try pendingRequestsProvider.getPendingRequests()
     }
 
+    @available(*, deprecated, message: "Use SignClient or Web3Wallet for message formatting.")
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
         return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(address: address))
     }

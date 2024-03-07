@@ -1,10 +1,10 @@
 import WalletConnectSign
 
 extension ProposalNamespace {
-    static func stubRequired() -> [String: ProposalNamespace] {
+    static func stubRequired(chains: Set<Blockchain> = [Blockchain("eip155:1")!]) -> [String: ProposalNamespace] {
         return [
             "eip155": ProposalNamespace(
-                chains: [Blockchain("eip155:1")!],
+                chains: chains,
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["any"])
         ]

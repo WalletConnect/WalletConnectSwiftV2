@@ -41,10 +41,21 @@ final class HistoryService {
         return requests
     }
 
-    func getPendingRequestsWithRecordId() -> [(request: Request, recordId: RPCID)] {
-        return history.getPending()
-            .compactMap { mapRequestRecord($0) }
-            .map { (request: $0.0, recordId: $0.1) } 
+    func getPendingExpirableRequestsWithId() -> [(Expirable, RPCID)] {
+        let pendingRequests = history.getPending()
+        var expirableRpcIds: [(Expirable, RPCID)] = []
+
+        for record in pendingRequests {
+
+            if let requestParams = try? record.request.params?.get(SessionType.RequestParams.self) {
+                expirableRpcIds.append((requestParams.request, record.id))
+            }
+            else if let authRequestParams = try? record.request.params?.get(SessionAuthenticateRequestParams.self) {
+                expirableRpcIds.append((authRequestParams, record.id))
+            }
+        }
+
+        return expirableRpcIds
     }
 
     func getPendingRequests(topic: String) -> [(request: Request, context: VerifyContext?)] {

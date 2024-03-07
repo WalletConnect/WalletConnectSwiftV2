@@ -9,24 +9,25 @@ public struct WalletConnectURI: Equatable {
     public let version: String
     public let symKey: String
     public let relay: RelayProtocolOptions
+    public let methods: [String]?
     public let expiryTimestamp: UInt64
 
     public var absoluteString: String {
-        return "wc:\(topic)@\(version)?symKey=\(symKey)&\(relayQuery)&expiryTimestamp=\(expiryTimestamp)"
+        return "wc:\(topic)@\(version)?\(queryString)"
     }
+
 
     public var deeplinkUri: String {
         return absoluteString
             .addingPercentEncoding(withAllowedCharacters: .rfc3986) ?? absoluteString
     }
 
-    public init(topic: String, symKey: String, relay: RelayProtocolOptions) {
+    public init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [String]? = nil) {
         self.version = "2"
         self.topic = topic
         self.symKey = symKey
         self.relay = relay
-
-        // Only after all properties are initialized, you can use self or its methods
+        self.methods = methods
         self.expiryTimestamp = fiveMinutesFromNow
     }
 
@@ -57,6 +58,8 @@ public struct WalletConnectURI: Equatable {
         }
 
         let relayData = query?["relay-data"]
+        let methodsString = query?["methods"]
+        let methods = methodsString?.components(separatedBy: ",")
 
         // Check if expiryTimestamp is provided and valid
         if let expiryTimestampString = query?["expiryTimestamp"],
@@ -69,9 +72,8 @@ public struct WalletConnectURI: Equatable {
         self.topic = topic
         self.symKey = symKey
         self.relay = RelayProtocolOptions(protocol: relayProtocol, data: relayData)
-        // Set expiryTimestamp to 5 minutes in the future if not included in the uri
+        self.methods = methods
         self.expiryTimestamp = UInt64(query?["expiryTimestamp"] ?? "") ?? fiveMinutesFromNow
-
     }
 
 
@@ -80,12 +82,16 @@ public struct WalletConnectURI: Equatable {
         try self.init(uriString: uriString)
     }
 
-    private var relayQuery: String {
-        var query = "relay-protocol=\(relay.protocol)"
+    private var queryString: String {
+        var parts = ["symKey=\(symKey)", "relay-protocol=\(relay.protocol)", "expiryTimestamp=\(expiryTimestamp)"]
         if let relayData = relay.data {
-            query = "\(query)&relay-data=\(relayData)"
+            parts.append("relay-data=\(relayData)")
         }
-        return query
+        if let methods = methods {
+            let encodedMethods = methods.joined(separator: ",")
+            parts.append("methods=\(encodedMethods)")
+        }
+        return parts.joined(separator: "&")
     }
 
     private static func parseURIComponents(from string: String) -> URLComponents? {
@@ -93,6 +99,7 @@ public struct WalletConnectURI: Equatable {
         guard decodedString.hasPrefix("wc:") else {
             return nil
         }
+
         let urlString = !decodedString.hasPrefix("wc://") ? decodedString.replacingOccurrences(of: "wc:", with: "wc://") : decodedString
         return URLComponents(string: urlString)
     }
@@ -140,13 +147,13 @@ extension WalletConnectURI {
 
 #if DEBUG
 extension WalletConnectURI {
-    init(topic: String, symKey: String, relay: RelayProtocolOptions, expiryTimestamp: UInt64) {
+    init(topic: String, symKey: String, relay: RelayProtocolOptions, methods: [String]? = nil, expiryTimestamp: UInt64) {
         self.version = "2"
         self.topic = topic
         self.symKey = symKey
         self.relay = relay
+        self.methods = methods
         self.expiryTimestamp = expiryTimestamp
     }
-
 }
 #endif

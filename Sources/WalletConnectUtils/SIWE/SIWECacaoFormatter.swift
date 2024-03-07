@@ -1,14 +1,18 @@
 import Foundation
 
 public protocol SIWECacaoFormatting {
-    func formatMessage(from payload: CacaoPayload) throws -> String
+    func formatMessage(from payload: CacaoPayload, includeRecapInTheStatement: Bool) throws -> String
 }
-
+public extension SIWECacaoFormatting {
+    func formatMessage(from payload: CacaoPayload) throws -> String {
+        return try formatMessage(from: payload, includeRecapInTheStatement: false)
+    }
+}
 public struct SIWECacaoFormatter: SIWECacaoFormatting {
 
     public init() { }
 
-    public func formatMessage(from payload: CacaoPayload) throws -> String {
+    public func formatMessage(from payload: CacaoPayload, includeRecapInTheStatement: Bool) throws -> String {
         let iss = try DIDPKH(did: payload.iss)
         let message = SIWEMessage(
             domain: payload.domain,
@@ -24,6 +28,7 @@ public struct SIWECacaoFormatter: SIWECacaoFormatting {
             requestId: payload.requestId,
             resources: payload.resources
         )
-        return message.formatted
+        return try message.formatted()
     }
 }
+

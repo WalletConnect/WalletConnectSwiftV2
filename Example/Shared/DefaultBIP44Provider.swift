@@ -1,8 +1,8 @@
 import Foundation
-import Auth
 import Web3
 import CryptoSwift
 import HDWalletKit
+import WalletConnectSigner
 
 struct DefaultBIP44Provider: BIP44Provider {
 

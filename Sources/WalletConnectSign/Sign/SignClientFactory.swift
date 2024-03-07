@@ -14,17 +14,31 @@ public struct SignClientFactory {
     public static func create(
         metadata: AppMetadata,
         pairingClient: PairingClient,
+        projectId: String,
+        crypto: CryptoProvider,
         networkingClient: NetworkingInteractor,
         groupIdentifier: String
     ) -> SignClient {
-        let logger = ConsoleLogger(prefix: "📝", loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: "📝", loggingLevel: .off)
 
         guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
             fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")
         }
         let keychainStorage = KeychainStorage(serviceIdentifier: "com.walletconnect.sdk", accessGroup: groupIdentifier)
-        
-        return SignClientFactory.create(metadata: metadata, logger: logger, keyValueStorage: keyValueStorage, keychainStorage: keychainStorage, pairingClient: pairingClient, networkingClient: networkingClient)
+
+        let iatProvider = DefaultIATProvider()
+
+        return SignClientFactory.create(
+            metadata: metadata,
+            logger: logger,
+            keyValueStorage: keyValueStorage,
+            keychainStorage: keychainStorage,
+            pairingClient: pairingClient,
+            networkingClient: networkingClient,
+            iatProvider: iatProvider,
+            projectId: projectId,
+            crypto: crypto
+        )
     }
 
     static func create(
@@ -33,7 +47,10 @@ public struct SignClientFactory {
         keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
         pairingClient: PairingClient,
-        networkingClient: NetworkingInteractor
+        networkingClient: NetworkingInteractor,
+        iatProvider: IATProvider,
+        projectId: String,
+        crypto: CryptoProvider
     ) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
@@ -75,6 +92,24 @@ public struct SignClientFactory {
         let pendingProposalsProvider = PendingProposalsProvider(proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
         let requestsExpiryWatcher = RequestsExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, rpcHistory: rpcHistory, historyService: historyService)
 
+
+        //Auth
+        let authResponseTopicRecordsStore = CodableStore<AuthResponseTopicRecord>(defaults: keyValueStorage, identifier: SignStorageIdentifiers.authResponseTopicRecord.rawValue)
+        let messageFormatter = SIWECacaoFormatter()
+        let appRequestService = SessionAuthRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
+
+        let messageVerifierFactory = MessageVerifierFactory(crypto: crypto)
+        let signatureVerifier = messageVerifierFactory.create(projectId: projectId)
+        let sessionNameSpaceBuilder = SessionNamespaceBuilder(logger: logger)
+        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
+
+        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory)
+        let authRequestSubscriber = AuthRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, verifyClient: verifyClient, verifyContextStore: verifyContextStore, pairingStore: pairingStore)
+        let authResponder = AuthResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, messageFormatter: messageFormatter, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, sessionStore: sessionStore, sessionNamespaceBuilder: sessionNameSpaceBuilder)
+        let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: rpcHistory, verifyContextStore: verifyContextStore)
+        let authResponseTopicResubscriptionService = AuthResponseTopicResubscriptionService(networkingInteractor: networkingClient, logger: logger, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
+
+
         let client = SignClient(
             logger: logger,
             networkingClient: networkingClient,
@@ -92,9 +127,15 @@ public struct SignClientFactory {
             historyService: historyService,
             cleanupService: cleanupService,
             pairingClient: pairingClient,
+            appRequestService: appRequestService,
+            appRespondSubscriber: appRespondSubscriber,
+            authRequestSubscriber: authRequestSubscriber,
+            authResponder: authResponder,
+            pendingRequestsProvider: pendingRequestsProvider,
             proposalExpiryWatcher: proposalExpiryWatcher,
             pendingProposalsProvider: pendingProposalsProvider,
-            requestsExpiryWatcher: requestsExpiryWatcher
+            requestsExpiryWatcher: requestsExpiryWatcher,
+            authResponseTopicResubscriptionService: authResponseTopicResubscriptionService
         )
         return client
     }

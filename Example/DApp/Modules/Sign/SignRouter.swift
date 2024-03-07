@@ -23,6 +23,10 @@ final class SignRouter {
             .push(from: viewController)
     }
 
+    func dismissNewPairing() {
+        newPairingViewController?.dismiss()
+    }
+
     func dismiss() {
         viewController.dismiss(animated: true)
     }
