@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 public protocol SignClientProtocol {
+    var logger: ConsoleLogging { get }
     var sessionProposalPublisher: AnyPublisher<(proposal: Session.Proposal, context: VerifyContext?), Never> { get }
     var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> { get }
     var sessionsPublisher: AnyPublisher<[Session], Never> { get }

@@ -45,8 +45,7 @@ class AuthResponseSubscriber {
         networkingInteractor.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
-                authResponsePublisherSubject.send((payload.id, .failure(error)))
-                removeResponseTopicRecord(responseTopic: payload.topic)
+                authResponsePublisherSubject.send((payload.id, .failure(error)))                
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())

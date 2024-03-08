@@ -102,14 +102,14 @@ public final class RelayClient {
         
         logger.debug("[Publish] Sending payload on topic: \(topic)")
 
-        try await dispatcher.protectedSend(message)
+        Task {try await dispatcher.protectedSend(message)}
 
         return try await withUnsafeThrowingContinuation { continuation in
             var cancellable: AnyCancellable?
             cancellable = requestAcknowledgePublisher
                 .filter { $0 == request.id }
                 .setFailureType(to: RelayError.self)
-                .timeout(.seconds(10), scheduler: concurrentQueue, customError: { .requestTimeout })
+                .timeout(.seconds(60), scheduler: concurrentQueue, customError: { .requestTimeout })
                 .sink(receiveCompletion: { [unowned self] result in
                     switch result {
                     case .failure(let error):

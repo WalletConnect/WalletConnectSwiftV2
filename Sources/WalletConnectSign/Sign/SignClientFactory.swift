@@ -19,7 +19,7 @@ public struct SignClientFactory {
         networkingClient: NetworkingInteractor,
         groupIdentifier: String
     ) -> SignClient {
-        let logger = ConsoleLogger(prefix: "📝", loggingLevel: .debug)
+        let logger = ConsoleLogger(prefix: "📝", loggingLevel: .off)
 
         guard let keyValueStorage = UserDefaults(suiteName: groupIdentifier) else {
             fatalError("Could not instantiate UserDefaults for a group identifier \(groupIdentifier)")

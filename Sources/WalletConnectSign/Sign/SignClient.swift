@@ -286,7 +286,7 @@ public final class SignClient: SignClientProtocol {
 
     /// For a dApp to propose an authenticated session to a wallet.
     /// Function will propose a session on existing pairing.
-    public func sessionAuthenticate(
+    public func authenticate(
         _ params: AuthRequestParams,
         topic: String
     ) async throws {

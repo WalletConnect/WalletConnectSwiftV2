@@ -37,7 +37,6 @@ class AuthResponseTopicResubscriptionService {
         networkingInteractor.socketConnectionStatusPublisher
             .sink { [unowned self] status in
                 guard status == .connected else { return }
-                logger.debug("Resubscribing to auth response topics")
                 let topics = authResponseTopicRecordsStore.getAll().map{$0.topic}
                 Task(priority: .high) {
                     try await networkingInteractor.batchSubscribe(topics: topics)

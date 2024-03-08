@@ -48,6 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             metadata: metadata
         )
         
+        Sign.instance.logger.setLogging(level: .debug)
 
         Sign.instance.logsPublisher.sink { log in
             switch log {
@@ -66,6 +67,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }.store(in: &publishers)
 
+        Web3Modal.instance.disableAnalytics()
         setupWindow(scene: scene)
     }
 

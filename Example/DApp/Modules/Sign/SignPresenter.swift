@@ -166,7 +166,6 @@ extension SignPresenter {
                 case .failure(let error):
                     AlertPresenter.present(message: error.localizedDescription, type: .error)
                 }
-                router.dismiss()
                 Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
             }
             .store(in: &subscriptions)
@@ -222,19 +221,19 @@ extension AuthRequestParams {
         domain: String = "app.web3inbox",
         chains: [String] = ["eip155:1", "eip155:137"],
         nonce: String = "32891756",
-        aud: String = "https://app.web3inbox.com/login",
+        uri: String = "https://app.web3inbox.com/login",
         nbf: String? = nil,
         exp: String? = nil,
         statement: String? = "I accept the ServiceOrg Terms of Service: https://app.web3inbox.com/tos",
         requestId: String? = nil,
-        resources: [String]? = ["urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9ub3RpZnkud2FsbGV0Y29ubmVjdC5jb20vYWxsLWFwcHMiOnsiY3J1ZC9ub3RpZmljYXRpb25zIjpbe31dLCJjcnVkL3N1YnNjcmlwdGlvbnMiOlt7fV19fX0K", "ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/", "https://example.com/my-web2-claim.json"],
-        methods: [String]? = ["eth_sign", "personal_sign", "eth_sendTransaction"]
+        resources: [String]? = nil,
+        methods: [String]? = ["personal_sign", "eth_sendTransaction"]
     ) -> AuthRequestParams {
-        return AuthRequestParams(
+        return try! AuthRequestParams(
             domain: domain,
             chains: chains,
             nonce: nonce,
-            aud: aud,
+            uri: uri,
             nbf: nbf,
             exp: exp,
             statement: statement,

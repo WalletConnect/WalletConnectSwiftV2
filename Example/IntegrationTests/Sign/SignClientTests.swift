@@ -896,7 +896,7 @@ final class SignClientTests: XCTestCase {
             domain: "etherscan.io",
             chains: ["eip155:1"],
             nonce: "DTYxeNr95Ne7Sape5",
-            aud: "https://etherscan.io/verifiedSignatures#",
+            uri: "https://etherscan.io/verifiedSignatures#",
             nbf: nil,
             exp: nil,
             statement: "Sign message to verify ownership of the address 0x6DF3d14554742D67068BB7294C80107a3c655A56 on etherscan.io",
@@ -1029,6 +1029,32 @@ final class SignClientTests: XCTestCase {
 
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testFalbackForm_2_5_DappToSessionProposeOnWallet() async throws {
+
+        let fallbackExpectation = expectation(description: "fallback to wc_sessionPropose")
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+
+
+        wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
+            Task(priority: .high) {
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionSettlePublisher.sink { settledSession in
+            Task(priority: .high) {
+                fallbackExpectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+        let uriStringWithoutMethods = uri.absoluteString.replacingOccurrences(of: "&methods=wc_sessionAuthenticate", with: "")
+        let uriWithoutMethods = try WalletConnectURI(uriString: uriStringWithoutMethods)
+        try await walletPairingClient.pair(uri: uriWithoutMethods)
+        await fulfillment(of: [fallbackExpectation], timeout: InputConfig.defaultTimeout)
     }
 
 }
