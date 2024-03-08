@@ -175,8 +175,8 @@ public class NotifyClient {
 
     /// returns notify recap for all apps
     private func createAuthorizationRecap() -> String {
-        // {"att":{"walletconnect-notify":{"manage/all-apps-notifications":[{}]}}}
-        "urn:recap:eyJhdHQiOnsid2FsbGV0Y29ubmVjdC1ub3RpZnkiOnsibWFuYWdlL2FsbC1hcHBzLW5vdGlmaWNhdGlvbnMiOlt7fV19fX0="
+        // {"att":{"https://notify.walletconnect.com":{"manage/all-apps-notifications":[{}]}}}
+        "urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9ub3RpZnkud2FsbGV0Y29ubmVjdC5jb20iOnsibWFuYWdlL2FsbC1hcHBzLW5vdGlmaWNhdGlvbnMiOlt7fV19fX0="
     }
 }
 
