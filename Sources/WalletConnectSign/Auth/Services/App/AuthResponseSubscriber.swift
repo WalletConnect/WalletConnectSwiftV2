@@ -6,7 +6,7 @@ class AuthResponseSubscriber {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageVerifier
-    private let messageFormatter: SIWECacaoFormatting
+    private let messageFormatter: SIWEFromCacaoFormatting
     private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
     private let sessionStore: WCSessionStorage
@@ -25,7 +25,7 @@ class AuthResponseSubscriber {
          pairingRegisterer: PairingRegisterer,
          kms: KeyManagementServiceProtocol,
          sessionStore: WCSessionStorage,
-         messageFormatter: SIWECacaoFormatting,
+         messageFormatter: SIWEFromCacaoFormatting,
          sessionNamespaceBuilder: SessionNamespaceBuilder,
          authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>) {
         self.networkingInteractor = networkingInteractor

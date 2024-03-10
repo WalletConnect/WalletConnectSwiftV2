@@ -11,7 +11,7 @@ public final class IdentityClientFactory {
         let httpService = HTTPNetworkClient(host: keyserver.host!)
         let identityStorage = IdentityStorage(keychain: keychain)
         let identityNetworkService = IdentityNetworkService(httpService: httpService)
-        let identityService = IdentityService(keyserverURL: keyserver, kms: kms, storage: identityStorage, networkService: identityNetworkService, iatProvader: DefaultIATProvider(), messageFormatter: SIWECacaoFormatter())
+        let identityService = IdentityService(keyserverURL: keyserver, kms: kms, storage: identityStorage, networkService: identityNetworkService, iatProvader: DefaultIATProvider(), messageFormatter: SIWEFromCacaoPayloadFormatter())
         return IdentityClient(
             identityService: identityService,
             identityStorage: identityStorage,

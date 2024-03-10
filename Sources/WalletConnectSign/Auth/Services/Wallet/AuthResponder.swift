@@ -8,7 +8,7 @@ actor AuthResponder {
     }
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementService
-    private let messageFormatter: SIWECacaoFormatting
+    private let messageFormatter: SIWEFromCacaoFormatting
     private let signatureVerifier: MessageVerifier
     private let rpcHistory: RPCHistory
     private let verifyContextStore: CodableStore<VerifyContext>
@@ -25,7 +25,7 @@ actor AuthResponder {
         kms: KeyManagementService,
         rpcHistory: RPCHistory,
         signatureVerifier: MessageVerifier,
-        messageFormatter: SIWECacaoFormatting,
+        messageFormatter: SIWEFromCacaoFormatting,
         verifyContextStore: CodableStore<VerifyContext>,
         walletErrorResponder: WalletErrorResponder,
         pairingRegisterer: PairingRegisterer,

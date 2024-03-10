@@ -7,7 +7,7 @@ actor IdentityService {
     private let storage: IdentityStorage
     private let networkService: IdentityNetworking
     private let iatProvader: IATProvider
-    private let messageFormatter: SIWECacaoFormatting
+    private let messageFormatter: SIWEFromCacaoFormatting
 
     init(
         keyserverURL: URL,
@@ -15,7 +15,7 @@ actor IdentityService {
         storage: IdentityStorage,
         networkService: IdentityNetworking,
         iatProvader: IATProvider,
-        messageFormatter: SIWECacaoFormatting
+        messageFormatter: SIWEFromCacaoFormatting
     ) {
         self.keyserverURL = keyserverURL
         self.kms = kms

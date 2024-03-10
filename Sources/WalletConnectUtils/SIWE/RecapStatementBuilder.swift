@@ -1,6 +1,6 @@
 import Foundation
 
-struct RecapUrn {
+public struct RecapUrn {
     enum Errors: Error {
         case invalidUrn
         case invalidPayload
@@ -10,7 +10,7 @@ struct RecapUrn {
     let urn: String
     let recapData: RecapData
 
-    init(urn: String) throws {
+    public init(urn: String) throws {
         guard urn.hasPrefix("urn:recap") else { throw Errors.invalidUrn }
 
         let components = urn.components(separatedBy: ":")
@@ -28,7 +28,7 @@ struct RecapUrn {
     }
 }
 
-struct RecapData: Codable {
+public struct RecapData: Codable {
     var att: [String: [String: [AnyCodable]]]?
     var prf: [String]?
 }

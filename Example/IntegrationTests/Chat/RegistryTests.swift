@@ -27,7 +27,7 @@ final class RegistryTests: XCTestCase {
             storage: storage,
             networkService: identityNetworkService,
             iatProvader: DefaultIATProvider(),
-            messageFormatter: SIWECacaoFormatter()
+            messageFormatter: SIWEFromCacaoPayloadFormatter()
         )
         signer = MessageSignerFactory(signerFactory: DefaultSignerFactory()).create()
     }

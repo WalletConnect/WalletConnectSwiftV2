@@ -1,12 +1,12 @@
 import Foundation
 
-class RecapUrnMergingService {
-    enum Errors: Error {
+public class RecapUrnMergingService {
+    public enum Errors: Error {
         case emptyRecapUrns
         case encodingFailed
     }
 
-    static func merge(recapUrns: [RecapUrn]) throws -> RecapUrn {
+    public static func merge(recapUrns: [RecapUrn]) throws -> RecapUrn {
         guard !recapUrns.isEmpty else {
             throw Errors.emptyRecapUrns
         }

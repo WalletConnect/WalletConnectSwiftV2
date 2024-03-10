@@ -1,14 +1,14 @@
 import Foundation
 
-public protocol SIWECacaoFormatting {
+public protocol SIWEFromCacaoFormatting {
     func formatMessage(from payload: CacaoPayload, includeRecapInTheStatement: Bool) throws -> String
 }
-public extension SIWECacaoFormatting {
+public extension SIWEFromCacaoFormatting {
     func formatMessage(from payload: CacaoPayload) throws -> String {
         return try formatMessage(from: payload, includeRecapInTheStatement: true)
     }
 }
-public struct SIWECacaoFormatter: SIWECacaoFormatting {
+public struct SIWEFromCacaoPayloadFormatter: SIWEFromCacaoFormatting {
 
     public init() { }
 
@@ -28,7 +28,7 @@ public struct SIWECacaoFormatter: SIWECacaoFormatting {
             requestId: payload.requestId,
             resources: payload.resources
         )
-        return try SiweMessageFormatter.format(message)
+        return try SiweMessageFormatter.format(siwe: message)
     }
 }
 
