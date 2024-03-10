@@ -34,6 +34,18 @@ actor IdentityService {
 
         let uri = buildUri(domain: domain, didKey: identityKey.publicKey.did)
 
+        let recapUrns = resources.compactMap { try? RecapUrn(urn: $0)}
+
+        let mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recapUrns)
+        var payloadStatement: String?
+        if let mergedRecapUrn = mergedRecap {
+            // If there's a merged recap, generate its statement
+            payloadStatement = try SiweStatementBuilder.buildSiweStatement(statement: statement, mergedRecapUrn: mergedRecapUrn)
+        } else {
+            // If no merged recap, use the original statement
+            payloadStatement = statement
+        }
+
         let payload = CacaoPayload(
             iss: account.did,
             domain: domain,
@@ -42,7 +54,7 @@ actor IdentityService {
             nonce: getNonce(),
             iat: iatProvader.iat,
             nbf: nil, exp: nil,
-            statement: statement,
+            statement: payloadStatement,
             requestId: nil,
             resources: resources
         )

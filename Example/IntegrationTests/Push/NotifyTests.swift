@@ -124,9 +124,9 @@ final class NotifyTests: XCTestCase {
             expectation.fulfill()
         }.store(in: &publishers)
 
-        try! await walletNotifyClientA.register(account: account, domain: "https://\(gmDappDomain)", onSign: sign)
+        try! await walletNotifyClientA.register(account: account, domain: gmDappDomain, onSign: sign)
         try! await walletNotifyClientA.subscribe(appDomain: gmDappDomain, account: account)
-        try! await clientB.register(account: account, domain: "https://\(gmDappDomain)", onSign: sign)
+        try! await clientB.register(account: account, domain: gmDappDomain, onSign: sign)
 
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
 
@@ -282,7 +282,7 @@ private extension NotifyTests {
 private extension NotifyClient {
 
     func register(account: Account, domain: String, onSign: @escaping (String) -> CacaoSignature) async throws {
-        let params = try await prepareRegistration(account: account, domain: domain)
+        let params = try await prepareRegistration(account: account, domain: "https://\(domain)")
         let signature = onSign(params.message)
         try await register(params: params, signature: signature)
     }
