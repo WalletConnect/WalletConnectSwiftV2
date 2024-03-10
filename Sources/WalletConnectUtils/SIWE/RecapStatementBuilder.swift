@@ -7,8 +7,8 @@ public struct RecapUrn {
         case invalidJsonStructure
     }
 
-    let urn: String
-    let recapData: RecapData
+    public let urn: String
+    public let recapData: RecapData
 
     public init(urn: String) throws {
         guard urn.hasPrefix("urn:recap") else { throw Errors.invalidUrn }

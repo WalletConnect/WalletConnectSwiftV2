@@ -16,7 +16,23 @@ struct CacaoPayloadBuilder {
         let recapUrns = authPayload.resources?.compactMap { try? RecapUrn(urn: $0)} ?? []
 
         let mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recapUrns)
-        let statement = try SiweStatementBuilder.buildSiweStatement(statement: authPayload.statement, mergedRecapUrn: mergedRecap)
+        var statement: String?
+        if let mergedRecapUrn = mergedRecap {
+            // If there's a merged recap, generate its statement
+            statement = try SiweStatementBuilder.buildSiweStatement(statement: authPayload.statement, mergedRecapUrn: mergedRecapUrn)
+        } else {
+            // If no merged recap, use the original statement
+            statement = authPayload.statement
+        }
+
+        // Filter out any resources starting with "urn:recap:", then if mergedRecap exists, add its URN as the last element
+        var resources = authPayload.resources?.filter { !$0.starts(with: "urn:recap:") } ?? []
+        if let mergedRecapUrn = mergedRecap {
+            // Assuming RecapUrn can be converted back to its string representation
+            let mergedRecapUrnString = mergedRecapUrn.urn
+            resources.append(mergedRecapUrnString)
+        }
+
         return CacaoPayload(
             iss: account.did,
             domain: authPayload.domain,
@@ -28,8 +44,7 @@ struct CacaoPayloadBuilder {
             exp: authPayload.exp,
             statement: statement,
             requestId: authPayload.requestId,
-            resources: authPayload.resources
+            resources: resources
         )
     }
-
 }

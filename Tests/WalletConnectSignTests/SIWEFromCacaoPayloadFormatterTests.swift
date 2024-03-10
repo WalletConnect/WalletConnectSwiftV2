@@ -179,15 +179,14 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             Resources:
-            - urn:recap:ewogICAiYXR0Ijp7CiAgICAgICJlaXAxNTUiOnsKICAgICAgICAgInJlcXVlc3QvZXRoX3NlbmRUcmFuc2FjdGlvbiI6IFt7fV0sCiAgICAgICAgICJyZXF1ZXN0L3BlcnNvbmFsX3NpZ24iOiBbe31dCiAgICAgIH0KICAgfQp9
-            - urn:recap:ewogICAiYXR0Ijp7CiAgICAgICJodHRwczovL25vdGlmeS53YWxsZXRjb25uZWN0LmNvbS9hbGwtYXBwcyI6ewogICAgICAgICAiY3J1ZC9ub3RpZmljYXRpb25zIjogW3t9XSwKICAgICAgICAgImNydWQvc3Vic2NyaXB0aW9ucyI6IFt7fV0KICAgICAgfQogICB9Cn0=
+            - urn:recap:eyJhdHQiOnsiZWlwMTU1Ijp7InJlcXVlc3RcL2V0aF9zZW5kVHJhbnNhY3Rpb24iOlt7fV0sInJlcXVlc3RcL3BlcnNvbmFsX3NpZ24iOlt7fV19LCJodHRwczpcL1wvbm90aWZ5LndhbGxldGNvbm5lY3QuY29tXC9hbGwtYXBwcyI6eyJjcnVkXC9ub3RpZmljYXRpb25zIjpbe31dLCJjcnVkXC9zdWJzY3JpcHRpb25zIjpbe31dfX19
             """
 
 
         let uri = "https://service.invalid?walletconnect_notify_key=did:key:z6MktW4hKdsvcXgt9wXmYbSD5sH4NCk5GmNZnokP9yh2TeCf"
         let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
-                requestParams: AuthRequestParams.stub(statement: nil, resources: [recap1, recap2])
+                requestParams: AuthRequestParams.stub(uri: uri, statement: nil, resources: [recap1, recap2])
             ),
             account: Account.stub())
         let message = try sut.formatMessage(from: cacaoPayload)

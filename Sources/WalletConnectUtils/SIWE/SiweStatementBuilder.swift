@@ -16,7 +16,7 @@ public class SiweStatementBuilder {
             }
         }
 
-        return finalStatement.isEmpty ? "" : "\n\(finalStatement)"
+        return finalStatement.isEmpty ? "" : "\(finalStatement)"
     }
 }
 
