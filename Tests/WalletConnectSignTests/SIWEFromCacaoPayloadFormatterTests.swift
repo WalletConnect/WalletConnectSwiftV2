@@ -28,7 +28,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(authPayload: AuthPayload.stub(), account: Account.stub())
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(authPayload: AuthPayload.stub(), account: Account.stub())
         let message = try sut.formatMessage(from: cacaoPayload)
         XCTAssertEqual(message, expectedMessage)
     }
@@ -49,7 +49,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             - ipfs://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq/
             - https://example.com/my-web2-claim.json
             """
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
                 requestParams: AuthRequestParams.stub(statement: nil)
             ),
@@ -72,7 +72,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             """
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
                 requestParams: AuthRequestParams.stub(resources: nil)
             ),
@@ -94,7 +94,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             Nonce: 32891756
             Issued At: 2021-09-30T16:25:24Z
             """
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
                 requestParams: AuthRequestParams.stub(statement: nil, resources: nil)
             ),
@@ -123,7 +123,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             """
 
 
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
                 requestParams: AuthRequestParams.stub(resources: [validRecapUrn])
             ),
@@ -152,7 +152,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
             - urn:recap:eyJhdHQiOiB7ImVpcDE1NSI6IHsicmVxdWVzdC9ldGhfc2VuZFRyYW5zYWN0aW9uIjogW10sICJyZXF1ZXN0L3BlcnNvbmFsX3NpZ24iOiBbXX19fQ==
             """
 
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
                 requestParams: AuthRequestParams.stub(statement: nil, resources: [validRecapUrn])
             ),
@@ -185,7 +185,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
 
 
         let uri = "https://service.invalid?walletconnect_notify_key=did:key:z6MktW4hKdsvcXgt9wXmYbSD5sH4NCk5GmNZnokP9yh2TeCf"
-        let cacaoPayload = CacaoPayloadBuilder.makeCacaoPayload(
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
             authPayload: AuthPayload.stub(
                 requestParams: AuthRequestParams.stub(statement: nil, resources: [recap1, recap2])
             ),
