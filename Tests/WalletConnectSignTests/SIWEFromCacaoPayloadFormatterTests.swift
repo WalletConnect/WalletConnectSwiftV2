@@ -164,7 +164,7 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
     func testWithSignAndNotifyRecaps() throws {
         let recap1 = "urn:recap:ewogICAiYXR0Ijp7CiAgICAgICJlaXAxNTUiOnsKICAgICAgICAgInJlcXVlc3QvZXRoX3NlbmRUcmFuc2FjdGlvbiI6IFt7fV0sCiAgICAgICAgICJyZXF1ZXN0L3BlcnNvbmFsX3NpZ24iOiBbe31dCiAgICAgIH0KICAgfQp9"
 
-        let recap2 = "urn:recap:ewogICAiYXR0Ijp7CiAgICAgICJodHRwczovL25vdGlmeS53YWxsZXRjb25uZWN0LmNvbS9hbGwtYXBwcyI6ewogICAgICAgICAiY3J1ZC9ub3RpZmljYXRpb25zIjogW3t9XSwKICAgICAgICAgImNydWQvc3Vic2NyaXB0aW9ucyI6IFt7fV0KICAgICAgfQogICB9Cn0="
+        let recap2 = "urn:recap:ewogICAiYXR0Ijp7CiAgICAgICJodHRwczovL25vdGlmeS53YWxsZXRjb25uZWN0LmNvbS9hbGwtYXBwcyI6ewogICAgICAgICAiY3J1ZC9ub3RpZmljYXRpb25zIjogW3t9XSwKICAgICAgICAgImNydWQvc3Vic2NyaXB0aW9ucyI6IFt7fV0KICAgICAgfQogICB9Cn0"
 
         let expectedMessage =
             """

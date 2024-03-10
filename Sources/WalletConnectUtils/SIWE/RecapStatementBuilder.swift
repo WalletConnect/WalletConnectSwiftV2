@@ -1,38 +1,5 @@
 import Foundation
 
-public struct RecapUrn {
-    enum Errors: Error {
-        case invalidUrn
-        case invalidPayload
-        case invalidJsonStructure
-    }
-
-    public let urn: String
-    public let recapData: RecapData
-
-    public init(urn: String) throws {
-        guard urn.hasPrefix("urn:recap") else { throw Errors.invalidUrn }
-
-        let components = urn.components(separatedBy: ":")
-        guard components.count > 2, let jsonData = Data(base64Encoded: components.dropFirst(2).joined(separator: ":")) else {
-            throw Errors.invalidPayload
-        }
-
-        do {
-            self.recapData = try JSONDecoder().decode(RecapData.self, from: jsonData)
-        } catch {
-            throw Errors.invalidJsonStructure
-        }
-
-        self.urn = urn
-    }
-}
-
-public struct RecapData: Codable {
-    var att: [String: [String: [AnyCodable]]]?
-    var prf: [String]?
-}
-
 struct RecapStatementBuilder {
     enum Errors: Error {
         case noActionsAuthorized
