@@ -28,7 +28,7 @@ public struct SIWECacaoFormatter: SIWECacaoFormatting {
             requestId: payload.requestId,
             resources: payload.resources
         )
-        return try message.formatted()
+        return try SiweMessageFormatter.format(message)
     }
 }
 

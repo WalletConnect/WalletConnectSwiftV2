@@ -28,29 +28,32 @@ public struct SIWEMessage: Equatable {
         self.requestId = requestId
         self.resources = resources
     }
+}
 
-    public func formatted() throws -> String {
+import Foundation
 
-        let statementLine = try getStatementLine()
+public class SiweMessageFormatter {
+    public static func format(_ message: SIWEMessage) throws -> String {
+        let statementLine = try getStatementLine(for: message)
         return """
-               \(domain) wants you to sign in with your Ethereum account:
-               \(address)
+               \(message.domain) wants you to sign in with your Ethereum account:
+               \(message.address)
                \(statementLine)
 
-               URI: \(uri)
-               Version: \(version)
-               Chain ID: \(chainId)
-               Nonce: \(nonce)
-               Issued At: \(iat)\(expLine)\(nbfLine)\(requestIdLine)\(resourcesSection)
+               URI: \(message.uri)
+               Version: \(message.version)
+               Chain ID: \(message.chainId)
+               Nonce: \(message.nonce)
+               Issued At: \(message.iat)\(getExpLine(for: message))\(getNbfLine(for: message))\(getRequestIdLine(for: message))\(getResourcesSection(for: message))
                """
     }
 
-    private func getStatementLine() throws -> String {
-        if let recaps = resources?.compactMap({ try? RecapUrn(urn: $0) }),
+    private static func getStatementLine(for message: SIWEMessage) throws -> String {
+        if let recaps = message.resources?.compactMap({ try? RecapUrn(urn: $0) }),
            let mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recaps) {
             do {
                 let recapStatement = try RecapStatementBuilder.buildRecapStatement(recapUrn: mergedRecap)
-                if let statement = statement {
+                if let statement = message.statement {
                     return "\n\(statement) \(recapStatement)"
                 } else {
                     return "\n\(recapStatement)"
@@ -59,53 +62,28 @@ public struct SIWEMessage: Equatable {
                 throw error
             }
         } else {
-            guard let statement = statement else { return "" }
+            guard let statement = message.statement else { return "" }
             return "\n\(statement)"
         }
-
     }
 
-    
-
-    private func decodeUrnToJson(urn: String) -> [String: [String: [String: [String]]]]? {
-        // Check if the URN is in the correct format
-        guard urn.starts(with: "urn:recap:") else { return nil }
-
-        // Extract the Base64 encoded JSON part from the URN
-        let base64EncodedJson = urn.replacingOccurrences(of: "urn:recap:", with: "")
-
-        // Decode the Base64 encoded JSON
-        guard let jsonData = Data(base64Encoded: base64EncodedJson) else { return nil }
-
-        // Deserialize the JSON data into the desired dictionary
-        do {
-            let decodedDictionary = try JSONDecoder().decode([String: [String: [String: [String]]]].self, from: jsonData)
-            return decodedDictionary
-        } catch {
-            return nil
-        }
-    }
-}
-
-private extension SIWEMessage {
-
-    var expLine: String {
-        guard  let exp = exp else { return "" }
+    private static func getExpLine(for message: SIWEMessage) -> String {
+        guard let exp = message.exp else { return "" }
         return "\nExpiration Time: \(exp)"
     }
 
-    var nbfLine: String {
-        guard let nbf = nbf else { return "" }
+    private static func getNbfLine(for message: SIWEMessage) -> String {
+        guard let nbf = message.nbf else { return "" }
         return "\nNot Before: \(nbf)"
     }
 
-    var requestIdLine: String {
-        guard let requestId = requestId else { return "" }
+    private static func getRequestIdLine(for message: SIWEMessage) -> String {
+        guard let requestId = message.requestId else { return "" }
         return "\nRequest ID: \(requestId)"
     }
 
-    var resourcesSection: String {
-        guard let resources = resources else { return "" }
+    private static func getResourcesSection(for message: SIWEMessage) -> String {
+        guard let resources = message.resources else { return "" }
         return resources.reduce("\nResources:") { $0 + "\n- \($1)" }
     }
 }

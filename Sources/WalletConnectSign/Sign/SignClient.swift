@@ -352,7 +352,7 @@ public final class SignClient: SignClientProtocol {
     }
 
     public func buildSignedAuthObject(authPayload: AuthPayload, signature: WalletConnectUtils.CacaoSignature, account: Account) throws -> AuthObject {
-        try CacaosProvider().makeCacao(authPayload: authPayload, signature: signature, account: account)
+        try CacaosBuilder().makeCacao(authPayload: authPayload, signature: signature, account: account)
     }
 
     public func buildAuthPayload(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
