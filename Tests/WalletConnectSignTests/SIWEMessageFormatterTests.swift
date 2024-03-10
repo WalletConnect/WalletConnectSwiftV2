@@ -149,7 +149,7 @@ class SIWEMessageFormatterTests: XCTestCase {
         let payload = try AuthPayload.stub(
             requestParams: AuthRequestParams.stub(statement: nil,resources: [validRecapUrn])
         ).cacaoPayload(account: Account.stub())
-
+x
         let message = try sut.formatMessage(from: payload, includeRecapInTheStatement: true)
         XCTAssertEqual(message, expectedMessage)
     }

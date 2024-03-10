@@ -28,7 +28,7 @@ struct RecapUrn {
     }
 }
 
-struct RecapData: Decodable {
+struct RecapData: Codable {
     var att: [String: [String: [AnyCodable]]]?
     var prf: [String]?
 }
@@ -36,18 +36,16 @@ struct RecapData: Decodable {
 struct RecapStatementBuilder {
     enum Errors: Error {
         case noActionsAuthorized
-        case emptyRecapsForbidden
     }
 
-    static func buildRecapStatement(recapUrns: [RecapUrn]) throws -> String {
-        guard recapUrns.count > 0 else { throw Errors.emptyRecapsForbidden }
-        var statementParts: [String] = []
-        var actionCounter = 1
+    static func buildRecapStatement(recapUrn: RecapUrn) throws -> String {
+            var statementParts: [String] = []
+            var actionCounter = 1
 
-        recapUrns.forEach { urn in
-            let decodedRecap = urn.recapData
+            // Processing only the last URN.
+            let decodedRecap = recapUrn.recapData
 
-            guard let attValue = decodedRecap.att else { return }
+            guard let attValue = decodedRecap.att else { throw Errors.noActionsAuthorized }
 
             let sortedResourceKeys = attValue.keys.sorted()
 
@@ -67,13 +65,12 @@ struct RecapStatementBuilder {
                     actionCounter += 1
                 }
             }
-        }
 
-        if statementParts.isEmpty {
-            throw Errors.noActionsAuthorized
-        } else {
-            let formattedStatement = statementParts.joined(separator: ". ")
-            return "I further authorize the stated URI to perform the following actions on my behalf: \(formattedStatement)."
+            if statementParts.isEmpty {
+                throw Errors.noActionsAuthorized
+            } else {
+                let formattedStatement = statementParts.joined(separator: ". ")
+                return "I further authorize the stated URI to perform the following actions on my behalf: \(formattedStatement)."
+            }
         }
-    }
 }

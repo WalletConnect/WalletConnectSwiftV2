@@ -47,9 +47,9 @@ public struct SIWEMessage: Equatable {
 
     private func getStatementLine() throws -> String {
         if let recaps = resources?.compactMap({ try? RecapUrn(urn: $0) }),
-           !recaps.isEmpty {
+           let mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recaps) {
             do {
-                let recapStatement = try RecapStatementBuilder.buildRecapStatement(recapUrns: recaps)
+                let recapStatement = try RecapStatementBuilder.buildRecapStatement(recapUrn: mergedRecap)
                 if let statement = statement {
                     return "\n\(statement) \(recapStatement)"
                 } else {
