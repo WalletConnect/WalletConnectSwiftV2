@@ -65,7 +65,7 @@ actor IdentityService {
     }
 
     func buildUri(domain: String, didKey: String) -> String {
-        return "\(domain)?walletconnect_identity_key=\(didKey)"
+        return "bundleid://\(domain)?walletconnect_identity_key=\(didKey)"
     }
 
     // TODO: Verifications
