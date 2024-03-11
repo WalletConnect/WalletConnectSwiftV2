@@ -54,8 +54,7 @@ public struct SIWEFromCacaoPayloadFormatter: SIWEFromCacaoFormatting {
     }
 
     private func formatResourcesSection(resources: [String]?) -> String {
-        guard let resources = resources else { return "" }
-        let resourcesList = resources.reduce("") { $0 + "\n- \($1)" }
-        return resources.isEmpty ? "" : "\nResources:" + resourcesList
+        let resourcesList = resources?.reduce("") { $0 + "\n- \($1)" } ?? ""
+        return "\nResources:" + resourcesList
     }
 }
