@@ -83,7 +83,7 @@ final class SignPresenter: ObservableObject {
         Task {
             do {
                 ActivityIndicatorManager.shared.start()
-                let uri = try await Sign.instance.authenticate(.stub())
+                let uri = try await Sign.instance.authenticate(.stub(resources: ["urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9ub3RpZnkud2FsbGV0Y29ubmVjdC5jb20iOnsibWFuYWdlL3BhbmNha2Vzd2FwLmNvbS1ub3RpZmljYXRpb25zIjpbe31dfX19"]))
                 walletConnectUri = uri
                 ActivityIndicatorManager.shared.stop()
                 router.presentNewPairing(walletConnectUri: walletConnectUri!)
