@@ -459,7 +459,7 @@ final class SignClientTests: XCTestCase {
                 events: ["any"]
             ),
             "solana": ProposalNamespace(
-                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                chains: [Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!],
                 methods: ["solana_signMessage"],
                 events: ["any"]
             )
@@ -481,12 +481,12 @@ final class SignClientTests: XCTestCase {
                 Blockchain("eip155:137")!,
                 Blockchain("eip155:1")!,
                 Blockchain("eip155:5")!,
-                Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
+                Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!
             ],
             methods: ["personal_sign", "eth_sendTransaction", "solana_signMessage"],
             events: ["any"],
             accounts: [
-                Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                Account(blockchain: Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!, address: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!,
                 Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!,
                 Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!,
                 Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!

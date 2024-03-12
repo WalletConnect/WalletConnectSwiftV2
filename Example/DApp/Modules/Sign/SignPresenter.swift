@@ -16,7 +16,7 @@ final class SignPresenter: ObservableObject {
     let chains = [
         Chain(name: "Ethereum", id: "eip155:1"),
         Chain(name: "Polygon", id: "eip155:137"),
-        Chain(name: "Solana", id: "solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")
+        Chain(name: "Solana", id: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
     ]
     
     private let interactor: SignInteractor
