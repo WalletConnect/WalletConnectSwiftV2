@@ -103,7 +103,7 @@ public class AuthClient: AuthClientProtocol {
 
     @available(*, deprecated, message: "Use SignClient or Web3Wallet for message formatting.")
     public func formatMessage(payload: AuthPayload, address: String) throws -> String {
-        return try SIWECacaoFormatter().formatMessage(from: payload.cacaoPayload(address: address))
+        return try SIWEFromCacaoPayloadFormatter().formatMessage(from: payload.cacaoPayload(address: address))
     }
 
     private func setUpPublishers() {
