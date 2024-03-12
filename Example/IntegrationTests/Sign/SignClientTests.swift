@@ -196,7 +196,9 @@ final class SignClientTests: XCTestCase {
         let requestParams = [EthSendTransaction.stub()]
         let responseParams = "0xdeadbeef"
         let chain = Blockchain("eip155:1")!
-
+        
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
@@ -247,6 +249,8 @@ final class SignClientTests: XCTestCase {
 
         let chain = Blockchain("eip155:1")!
 
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
@@ -973,7 +977,8 @@ final class SignClientTests: XCTestCase {
         let requestParams = [EthSendTransaction.stub()]
         let responseParams = "0xdeadbeef"
         let chain = Blockchain("eip155:1")!
-
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
