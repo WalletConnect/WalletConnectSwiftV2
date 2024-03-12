@@ -57,7 +57,6 @@ class AuthResponseSubscriber {
 
                 let requestId = payload.id
                 let cacaos = payload.response.cacaos
-                let authRequestPayload = payload.request.authPayload
 
                 Task {
                     do {
@@ -66,7 +65,7 @@ class AuthResponseSubscriber {
                         authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
                     }
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, authRequestPayload: authRequestPayload)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
 
                     authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
                 }
@@ -98,8 +97,7 @@ class AuthResponseSubscriber {
     private func createSession(
         from response: SessionAuthenticateResponseParams,
         selfParticipant: Participant,
-        pairingTopic: String,
-        authRequestPayload: AuthPayload
+        pairingTopic: String
     ) throws -> Session? {
 
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
