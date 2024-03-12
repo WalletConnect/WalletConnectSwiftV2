@@ -81,6 +81,30 @@ class SIWEFromCacaoPayloadFormatterTests: XCTestCase {
         XCTAssertEqual(message, expectedMessage)
     }
 
+    func testResourcesEmptyArray() throws {
+        let expectedMessage =
+            """
+            service.invalid wants you to sign in with your Ethereum account:
+            0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+
+            I accept the ServiceOrg Terms of Service: https://service.invalid/tos
+
+            URI: https://service.invalid/login
+            Version: 1
+            Chain ID: 1
+            Nonce: 32891756
+            Issued At: 2021-09-30T16:25:24Z
+            Resources:
+            """
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(
+            authPayload: AuthPayload.stub(
+                requestParams: AuthRequestParams.stub(resources: [])
+            ),
+            account: Account.stub())
+        let message = try sut.formatMessage(from: cacaoPayload)
+        XCTAssertEqual(message, expectedMessage)
+    }
+
     func testNilAllOptionalParams() throws {
         let expectedMessage =
             """

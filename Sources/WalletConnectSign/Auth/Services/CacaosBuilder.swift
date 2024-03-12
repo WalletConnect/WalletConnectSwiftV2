@@ -13,24 +13,24 @@ struct CacaosBuilder {
 
 struct CacaoPayloadBuilder {
     public static func makeCacaoPayload(authPayload: AuthPayload, account: WalletConnectUtils.Account) throws -> CacaoPayload {
-        let recapUrns = authPayload.resources?.compactMap { try? RecapUrn(urn: $0)} ?? []
+        var mergedRecap: RecapUrn?
+        var resources: [String]? = nil
 
-        let mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recapUrns)
-        var statement: String?
-        if let mergedRecapUrn = mergedRecap {
-            // If there's a merged recap, generate its statement
-            statement = try SiweStatementBuilder.buildSiweStatement(statement: authPayload.statement, mergedRecapUrn: mergedRecapUrn)
-        } else {
-            // If no merged recap, use the original statement
-            statement = authPayload.statement
+        if let recapUrns = authPayload.resources?.compactMap({ try? RecapUrn(urn: $0) }), !recapUrns.isEmpty {
+            mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recapUrns)
         }
 
-        // Filter out any resources starting with "urn:recap:", then if mergedRecap exists, add its URN as the last element
-        var resources = authPayload.resources?.filter { !$0.starts(with: "urn:recap:") } ?? []
+        var statement: String? = authPayload.statement
         if let mergedRecapUrn = mergedRecap {
-            // Assuming RecapUrn can be converted back to its string representation
-            let mergedRecapUrnString = mergedRecapUrn.urn
-            resources.append(mergedRecapUrnString)
+            statement = try SiweStatementBuilder.buildSiweStatement(statement: authPayload.statement, mergedRecapUrn: mergedRecapUrn)
+        }
+
+        // Initialize resources with the filtered list only if authPayload.resources was not nil
+        if authPayload.resources != nil {
+            resources = authPayload.resources?.filter { !$0.starts(with: "urn:recap:") }
+            if let mergedRecapUrnString = mergedRecap?.urn {
+                resources?.append(mergedRecapUrnString)
+            }
         }
 
         return CacaoPayload(
@@ -48,3 +48,5 @@ struct CacaoPayloadBuilder {
         )
     }
 }
+
+
