@@ -38,7 +38,7 @@ public struct RecapUrn {
     }
 }
 
-extension Data {
+public extension Data {
     /// Initializes a Data object with a base64url encoded String.
     init?(base64urlEncoded: String) {
         var base64 = base64urlEncoded

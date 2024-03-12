@@ -20,7 +20,7 @@ struct SignRecap {
         }
 
         let base64Part = urn.dropFirst("urn:recap:".count)
-        guard let jsonData = Data(base64Encoded: String(base64Part)),
+        guard let jsonData = Data(base64urlEncoded: String(base64Part)),
               let decodedData = try? JSONDecoder().decode(RecapData.self, from: jsonData) else {
             throw Errors.invalidRecapStructure
         }
