@@ -9,16 +9,19 @@ struct ProposalNamespaceBuilder {
     }
 
     static func buildNamespace(from params: AuthRequestParams) throws -> [String: ProposalNamespace] {
+        var methods = Set(params.methods ?? [])
+        if methods.isEmpty {
+            methods = ["personal_sign"]
+        }
         let chains: Set<Blockchain> = Set(params.chains.compactMap { Blockchain($0) })
         guard chains.allSatisfy({$0.namespace == "eip155"}) else {
             throw Errors.unsupportedChain
         }
-        let methods = Set(params.methods ?? [])
         return [
             "eip155": ProposalNamespace(
                 chains: chains,
                 methods: methods,
-                events: []
+                events: ["chainChanged", "accountsChanged"]
             )]
     }
 }

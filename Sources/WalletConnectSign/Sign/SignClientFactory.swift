@@ -95,7 +95,7 @@ public struct SignClientFactory {
 
         //Auth
         let authResponseTopicRecordsStore = CodableStore<AuthResponseTopicRecord>(defaults: keyValueStorage, identifier: SignStorageIdentifiers.authResponseTopicRecord.rawValue)
-        let messageFormatter = SIWECacaoFormatter()
+        let messageFormatter = SIWEFromCacaoPayloadFormatter()
         let appRequestService = SessionAuthRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
 
         let messageVerifierFactory = MessageVerifierFactory(crypto: crypto)

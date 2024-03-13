@@ -42,7 +42,7 @@ public struct AuthClientFactory {
     ) -> AuthClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let history = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
-        let messageFormatter = SIWECacaoFormatter()
+        let messageFormatter = SIWEFromCacaoPayloadFormatter()
         let appRequestService = AppRequestService(networkingInteractor: networkingClient, kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider)
         let verifyClient = VerifyClientFactory.create()
         let verifyContextStore = CodableStore<VerifyContext>(defaults: keyValueStorage, identifier: VerifyStorageIdentifiers.context.rawValue)

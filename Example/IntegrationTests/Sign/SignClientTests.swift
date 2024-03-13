@@ -196,7 +196,9 @@ final class SignClientTests: XCTestCase {
         let requestParams = [EthSendTransaction.stub()]
         let responseParams = "0xdeadbeef"
         let chain = Blockchain("eip155:1")!
-
+        
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 do {
@@ -247,6 +249,8 @@ final class SignClientTests: XCTestCase {
 
         let chain = Blockchain("eip155:1")!
 
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
             Task(priority: .high) {
                 try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
@@ -455,7 +459,7 @@ final class SignClientTests: XCTestCase {
                 events: ["any"]
             ),
             "solana": ProposalNamespace(
-                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                chains: [Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!],
                 methods: ["solana_signMessage"],
                 events: ["any"]
             )
@@ -477,12 +481,12 @@ final class SignClientTests: XCTestCase {
                 Blockchain("eip155:137")!,
                 Blockchain("eip155:1")!,
                 Blockchain("eip155:5")!,
-                Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
+                Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!
             ],
             methods: ["personal_sign", "eth_sendTransaction", "solana_signMessage"],
             events: ["any"],
             accounts: [
-                Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                Account(blockchain: Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!, address: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!,
                 Account(blockchain: Blockchain("eip155:1")!, address: "0x00")!,
                 Account(blockchain: Blockchain("eip155:137")!, address: "0x00")!,
                 Account(blockchain: Blockchain("eip155:5")!, address: "0x00")!
@@ -973,7 +977,8 @@ final class SignClientTests: XCTestCase {
         let requestParams = [EthSendTransaction.stub()]
         let responseParams = "0xdeadbeef"
         let chain = Blockchain("eip155:1")!
-
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
         wallet.authRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()

@@ -50,8 +50,8 @@ class CacaoSignerTest: XCTestCase {
 
     func testCacaoSign() throws {
         let account = Account("eip155:1:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")!
-        let cacaoPayload = try payload.cacaoPayload(account: account)
-        let formatted = try SIWECacaoFormatter().formatMessage(from: cacaoPayload)
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(authPayload: payload, account: account)
+        let formatted = try SIWEFromCacaoPayloadFormatter().formatMessage(from: cacaoPayload)
         XCTAssertEqual(formatted, message)
         XCTAssertEqual(try signer.sign(payload: cacaoPayload, privateKey: privateKey, type: .eip191), signature)
     }

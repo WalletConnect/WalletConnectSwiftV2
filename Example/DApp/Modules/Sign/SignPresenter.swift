@@ -16,7 +16,7 @@ final class SignPresenter: ObservableObject {
     let chains = [
         Chain(name: "Ethereum", id: "eip155:1"),
         Chain(name: "Polygon", id: "eip155:137"),
-        Chain(name: "Solana", id: "solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")
+        Chain(name: "Solana", id: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
     ]
     
     private let interactor: SignInteractor
@@ -98,7 +98,7 @@ final class SignPresenter: ObservableObject {
         Task {
             do {
                 ActivityIndicatorManager.shared.start()
-                let uri = try await Sign.instance.authenticate(.stub(methods: nil))
+                let uri = try await Sign.instance.authenticate(.stub(methods: ["personal_sign"]))
                 walletConnectUri = uri
                 ActivityIndicatorManager.shared.stop()
                 router.presentNewPairing(walletConnectUri: walletConnectUri!)

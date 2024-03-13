@@ -24,7 +24,7 @@ public final class IdentityClient {
 
     public func prepareRegistration(account: Account,
         domain: String,
-        statement: String,
+        statement: String? = nil,
         resources: [String]) async throws -> IdentityRegistrationParams
     {
         let registration = try await identityService.prepareRegistration(account: account, domain: domain, statement: statement, resources: resources)

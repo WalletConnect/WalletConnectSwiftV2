@@ -6,7 +6,7 @@ class AppRespondSubscriber {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageVerifier
-    private let messageFormatter: SIWECacaoFormatting
+    private let messageFormatter: SIWEFromCacaoPayloadFormatter
     private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
 
@@ -17,7 +17,7 @@ class AppRespondSubscriber {
          rpcHistory: RPCHistory,
          signatureVerifier: MessageVerifier,
          pairingRegisterer: PairingRegisterer,
-         messageFormatter: SIWECacaoFormatting) {
+         messageFormatter: SIWEFromCacaoPayloadFormatter) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
