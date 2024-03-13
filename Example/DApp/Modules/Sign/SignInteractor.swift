@@ -6,8 +6,7 @@ enum Proposal {
     static let requiredNamespaces: [String: ProposalNamespace] = [
         "eip155": ProposalNamespace(
             chains: [
-                Blockchain("eip155:1")!,
-                Blockchain("eip155:137")!
+                Blockchain("eip155:1")!
             ],
             methods: [
                 "eth_sendTransaction",
@@ -20,11 +19,21 @@ enum Proposal {
     static let optionalNamespaces: [String: ProposalNamespace] = [
         "solana": ProposalNamespace(
             chains: [
-                Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
+                Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!
             ],
             methods: [
                 "solana_signMessage",
                 "solana_signTransaction"
+            ], events: []
+        ),
+        "eip155": ProposalNamespace(
+            chains: [
+                Blockchain("eip155:137")!
+            ],
+            methods: [
+                "eth_sendTransaction",
+                "personal_sign",
+                "eth_signTypedData"
             ], events: []
         )
     ]

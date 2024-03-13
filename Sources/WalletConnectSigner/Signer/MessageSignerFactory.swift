@@ -11,7 +11,7 @@ public struct MessageSignerFactory {
     public func create() -> MessageSigner {
         return MessageSigner(
             signer: signerFactory.createEthereumSigner(),
-            messageFormatter: SIWECacaoFormatter()
+            messageFormatter: SIWEFromCacaoPayloadFormatter()
         )
     }
 }

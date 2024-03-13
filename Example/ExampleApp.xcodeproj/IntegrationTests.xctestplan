@@ -58,7 +58,6 @@
         "ChatTests",
         "ENSResolverTests",
         "HistoryTests",
-        "SignClientTests\/testEIP1271SessionAuthenticated()",
         "SyncDerivationServiceTests",
         "SyncTests"
       ],

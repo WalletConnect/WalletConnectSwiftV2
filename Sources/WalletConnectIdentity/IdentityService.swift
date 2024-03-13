@@ -7,7 +7,7 @@ actor IdentityService {
     private let storage: IdentityStorage
     private let networkService: IdentityNetworking
     private let iatProvader: IATProvider
-    private let messageFormatter: SIWECacaoFormatting
+    private let messageFormatter: SIWEFromCacaoFormatting
 
     init(
         keyserverURL: URL,
@@ -15,7 +15,7 @@ actor IdentityService {
         storage: IdentityStorage,
         networkService: IdentityNetworking,
         iatProvader: IATProvider,
-        messageFormatter: SIWECacaoFormatting
+        messageFormatter: SIWEFromCacaoFormatting
     ) {
         self.keyserverURL = keyserverURL
         self.kms = kms
@@ -27,20 +27,34 @@ actor IdentityService {
 
     func prepareRegistration(account: Account,
         domain: String,
-        statement: String,
+        statement: String? = nil,
         resources: [String]) throws -> IdentityRegistrationParams {
 
         let identityKey = SigningPrivateKey()
 
+        let uri = buildUri(domain: domain, didKey: identityKey.publicKey.did)
+
+        let recapUrns = resources.compactMap { try? RecapUrn(urn: $0)}
+
+        let mergedRecap = try? RecapUrnMergingService.merge(recapUrns: recapUrns)
+        var payloadStatement: String?
+        if let mergedRecapUrn = mergedRecap {
+            // If there's a merged recap, generate its statement
+            payloadStatement = try SiweStatementBuilder.buildSiweStatement(statement: statement, mergedRecapUrn: mergedRecapUrn)
+        } else {
+            // If no merged recap, use the original statement
+            payloadStatement = statement
+        }
+
         let payload = CacaoPayload(
             iss: account.did,
             domain: domain,
-            aud: identityKey.publicKey.did,
+            aud: uri,
             version: getVersion(),
             nonce: getNonce(),
             iat: iatProvader.iat,
             nbf: nil, exp: nil,
-            statement: statement,
+            statement: payloadStatement,
             requestId: nil,
             resources: resources
         )
@@ -48,6 +62,10 @@ actor IdentityService {
         let message = try messageFormatter.formatMessage(from: payload)
 
         return IdentityRegistrationParams(message: message, payload: payload, privateIdentityKey: identityKey)
+    }
+
+    func buildUri(domain: String, didKey: String) -> String {
+        return "bundleid://\(domain)?walletconnect_identity_key=\(didKey)"
     }
 
     // TODO: Verifications

@@ -803,7 +803,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
     func testAutoNamespacesDifferentChainEmptyOptinalEvents() {
         let accounts = [
             Account(blockchain: Blockchain("eip155:1")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
-            Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!
+            Account(blockchain: Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!, address: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!
         ]
         let requiredNamespaces = [
             "eip155": ProposalNamespace(
@@ -818,7 +818,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: []
             ),
             "solana": ProposalNamespace(
-                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                chains: [Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!],
                 methods: ["solana_signMessage"],
                 events: []
             )
@@ -827,7 +827,7 @@ final class AutoNamespacesValidationTests: XCTestCase {
 
         let sessionNamespaces = try! AutoNamespaces.build(
             sessionProposal: sessionProposal,
-            chains: [Blockchain("eip155:1")!, Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+            chains: [Blockchain("eip155:1")!, Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!],
             methods: ["personal_sign", "eth_sendTransaction", "eth_signTypedData_v4", "eth_signTransaction", "eth_signTypedData", "eth_sign", "solana_signMessage", "solana_signMessage"],
             events: ["chainChanged", "accountsChanged"],
             accounts: accounts
@@ -842,9 +842,9 @@ final class AutoNamespacesValidationTests: XCTestCase {
                 events: ["chainChanged", "accountsChanged"]
             ),
             "solana": SessionNamespace(
-                chains: [Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!],
+                chains: [Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!],
                 accounts: Set([
-                    Account(blockchain: Blockchain("solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!, address: "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ")!,
+                    Account(blockchain: Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!, address: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!,
                 ]),
                 methods: ["solana_signMessage"],
                 events: []

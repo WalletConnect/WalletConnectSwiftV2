@@ -14,7 +14,7 @@ class RecapUrnTests: XCTestCase {
         let invalidPayloadUrn = "urn:recap:invalidPayload"
 
         XCTAssertThrowsError(try RecapUrn(urn: invalidPayloadUrn)) { error in
-            XCTAssertEqual(error as? RecapUrn.Errors, RecapUrn.Errors.invalidPayload)
+            XCTAssertEqual(error as? RecapUrn.Errors, RecapUrn.Errors.invalidJsonStructure)
         }
     }
 

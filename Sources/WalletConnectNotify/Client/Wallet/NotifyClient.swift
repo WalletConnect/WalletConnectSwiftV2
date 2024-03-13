@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 
+
 public class NotifyClient {
 
     private var publishers = Set<AnyCancellable>()
@@ -87,12 +88,11 @@ public class NotifyClient {
         self.subscriptionWatcher = subscriptionWatcher
     }
 
-    public func prepareRegistration(account: Account, domain: String, allApps: Bool = true) async throws -> IdentityRegistrationParams {
+    public func prepareRegistration(account: Account, domain: String) async throws -> IdentityRegistrationParams {
         return try await identityClient.prepareRegistration(
             account: account,
             domain: domain,
-            statement: makeStatement(allApps: allApps),
-            resources: [keyserverURL.absoluteString]
+            resources: [keyserverURL.absoluteString, createAuthorizationRecap()]
         )
     }
 
@@ -171,6 +171,12 @@ public class NotifyClient {
         try notifyStorage.setMessages(records)
 
         return messages.count == limit
+    }
+
+    /// returns notify recap for all apps
+    private func createAuthorizationRecap() -> String {
+        // {"att":{"https://notify.walletconnect.com":{"manage/all-apps-notifications":[{}]}}}
+        "urn:recap:eyJhdHQiOnsiaHR0cHM6Ly9ub3RpZnkud2FsbGV0Y29ubmVjdC5jb20iOnsibWFuYWdlL2FsbC1hcHBzLW5vdGlmaWNhdGlvbnMiOlt7fV19fX0"
     }
 }
 

@@ -1,53 +1,18 @@
 import Foundation
 
-struct RecapUrn {
-    enum Errors: Error {
-        case invalidUrn
-        case invalidPayload
-        case invalidJsonStructure
-    }
-
-    let urn: String
-    let recapData: RecapData
-
-    init(urn: String) throws {
-        guard urn.hasPrefix("urn:recap") else { throw Errors.invalidUrn }
-
-        let components = urn.components(separatedBy: ":")
-        guard components.count > 2, let jsonData = Data(base64Encoded: components.dropFirst(2).joined(separator: ":")) else {
-            throw Errors.invalidPayload
-        }
-
-        do {
-            self.recapData = try JSONDecoder().decode(RecapData.self, from: jsonData)
-        } catch {
-            throw Errors.invalidJsonStructure
-        }
-
-        self.urn = urn
-    }
-}
-
-struct RecapData: Decodable {
-    var att: [String: [String: [AnyCodable]]]?
-    var prf: [String]?
-}
-
 struct RecapStatementBuilder {
     enum Errors: Error {
         case noActionsAuthorized
-        case emptyRecapsForbidden
     }
 
-    static func buildRecapStatement(recapUrns: [RecapUrn]) throws -> String {
-        guard recapUrns.count > 0 else { throw Errors.emptyRecapsForbidden }
-        var statementParts: [String] = []
-        var actionCounter = 1
+    static func buildRecapStatement(recapUrn: RecapUrn) throws -> String {
+            var statementParts: [String] = []
+            var actionCounter = 1
 
-        recapUrns.forEach { urn in
-            let decodedRecap = urn.recapData
+            // Processing only the last URN.
+            let decodedRecap = recapUrn.recapData
 
-            guard let attValue = decodedRecap.att else { return }
+            guard let attValue = decodedRecap.att else { throw Errors.noActionsAuthorized }
 
             let sortedResourceKeys = attValue.keys.sorted()
 
@@ -67,13 +32,12 @@ struct RecapStatementBuilder {
                     actionCounter += 1
                 }
             }
-        }
 
-        if statementParts.isEmpty {
-            throw Errors.noActionsAuthorized
-        } else {
-            let formattedStatement = statementParts.joined(separator: ". ")
-            return "I further authorize the stated URI to perform the following actions on my behalf: \(formattedStatement)."
+            if statementParts.isEmpty {
+                throw Errors.noActionsAuthorized
+            } else {
+                let formattedStatement = statementParts.joined(separator: ". ")
+                return "I further authorize the stated URI to perform the following actions on my behalf: \(formattedStatement)."
+            }
         }
-    }
 }
