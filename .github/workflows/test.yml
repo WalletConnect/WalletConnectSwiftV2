@@ -20,7 +20,7 @@ jobs:
 
     - name: Release
       env:
-        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD_TALHA }}
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         GH_USER: ${{ secrets.GH_USER }}
         APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
