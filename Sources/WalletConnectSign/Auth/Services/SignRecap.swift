@@ -40,7 +40,7 @@ struct SignRecap {
             .filter { $0.hasPrefix("request/") }
             .map { String($0.dropFirst("request/".count)) })
     }
-    var chains: Set<Blockchain> {
+    var chains: [Blockchain] {
         guard let eip155Actions = recapData.att?["eip155"] else { return [] }
 
         // Attempt to find and decode the first action's chain array from AnyCodable
@@ -49,7 +49,7 @@ struct SignRecap {
            let firstActionValue = firstActionValues.first,
            let dict = try? firstActionValue.get([String:[String]].self),
            let chainsArray = dict["chains"]{
-            return Set(chainsArray.compactMap(Blockchain.init))
+            return chainsArray.compactMap(Blockchain.init)
         }
 
         return []

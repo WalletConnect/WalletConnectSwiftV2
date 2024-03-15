@@ -40,7 +40,7 @@ class SessionNamespaceBuilderTests: XCTestCase {
 
     func testBuildSessionNamespaces_ValidCacaos_ReturnsExpectedNamespace() {
         let expectedSessionNamespace = SessionNamespace(
-            chains: Set([Blockchain("eip155:1")!, Blockchain("eip155:137")!]),
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
             accounts: Set([
                 Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
                 Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
@@ -67,7 +67,7 @@ class SessionNamespaceBuilderTests: XCTestCase {
 
     func testMutlipleRecapsInCacaoWhereOnlyOneIsSessionRecap() {
         let expectedSessionNamespace = SessionNamespace(
-            chains: Set([Blockchain("eip155:1")!, Blockchain("eip155:137")!]),
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
             accounts: Set([
                 Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
             ]),
