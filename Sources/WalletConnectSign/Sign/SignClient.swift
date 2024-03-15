@@ -100,7 +100,7 @@ public final class SignClient: SignClientProtocol {
     /// Publisher that sends authentication requests
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
-    public var authRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
+    public var authenticateRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
         return authRequestPublisherSubject
             .handleEvents(receiveSubscription: { [unowned self] _ in
                 authRequestSubscribersTracking.increment()

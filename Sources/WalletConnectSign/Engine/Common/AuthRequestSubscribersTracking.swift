@@ -1,5 +1,6 @@
 import Foundation
 
+// purpose of this class is to allow fallback to session propose in case wallet did not subscribe to authenticateRequestPublisher and dapp request wc_sessionAuthenticate
 class AuthRequestSubscribersTracking {
     private var subscribersCount: Int = 0
     private let serialQueue = DispatchQueue(label: "com.walletconnect.AuthRequestSubscribersTrackingQueue")
