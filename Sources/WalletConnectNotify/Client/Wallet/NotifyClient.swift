@@ -180,17 +180,6 @@ public class NotifyClient {
     }
 }
 
-private extension NotifyClient {
-
-    func makeStatement(allApps: Bool) -> String {
-        switch allApps {
-        case false:
-            return "I further authorize this app to send me notifications. Read more at https://walletconnect.com/notifications"
-        case true:
-            return "I further authorize this app to view and manage my notifications for ALL apps. Read more at https://walletconnect.com/notifications"
-        }
-    }
-}
 
 #if targetEnvironment(simulator)
 extension NotifyClient {

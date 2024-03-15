@@ -77,7 +77,8 @@ final class AppProposalServiceTests: XCTestCase {
             pairingStore: storageMock,
             sessionStore: WCSessionStorageMock(),
             verifyClient: VerifyClientMock(),
-            rpcHistory: history
+            rpcHistory: history,
+            authRequestSubscribersTracking: AuthRequestSubscribersTracking(logger: logger)
         )
     }
 

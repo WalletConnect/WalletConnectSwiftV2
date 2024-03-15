@@ -51,7 +51,8 @@ final class ApproveEngineTests: XCTestCase {
             pairingStore: pairingStorageMock,
             sessionStore: sessionStorageMock,
             verifyClient: VerifyClientMock(),
-            rpcHistory: history
+            rpcHistory: history,
+            authRequestSubscribersTracking: AuthRequestSubscribersTracking(logger: ConsoleLoggerMock())
         )
     }
 

@@ -27,7 +27,7 @@ public class Web3WalletClient {
     ///
     /// Wallet should subscribe on events in order to receive auth requests.
     public var authenticateRequestPublisher: AnyPublisher<(request: AuthenticationRequest, context: VerifyContext?), Never> {
-        signClient.authRequestPublisher.eraseToAnyPublisher()
+        signClient.authenticateRequestPublisher.eraseToAnyPublisher()
     }
     
     /// Publisher that sends sessions on every sessions update
