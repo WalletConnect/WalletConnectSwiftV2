@@ -776,7 +776,7 @@ final class SignClientTests: XCTestCase {
     func testEIP191SessionAuthenticated() async throws {
         let responseExpectation = expectation(description: "successful response delivered")
 
-        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
@@ -811,7 +811,7 @@ final class SignClientTests: XCTestCase {
     func testEIP191SessionAuthenticateEmptyMethods() async throws {
         let responseExpectation = expectation(description: "successful response delivered")
 
-        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
@@ -846,7 +846,7 @@ final class SignClientTests: XCTestCase {
     func testEIP191SessionAuthenticatedMultiCacao() async throws {
         let responseExpectation = expectation(description: "successful response delivered")
 
-        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
@@ -911,7 +911,7 @@ final class SignClientTests: XCTestCase {
 
         try await walletPairingClient.pair(uri: uri)
 
-        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signature = CacaoSignature(t: .eip1271, s: eip1271Signature)
                 let cacao = try! wallet.buildSignedAuthObject(authPayload: request.payload, signature: signature, account: account)
@@ -932,7 +932,7 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dapp.authenticate(AuthRequestParams.stub())
 
         try? await walletPairingClient.pair(uri: uri)
-        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let invalidSignature = CacaoSignature(t: .eip1271, s: eip1271Signature)
 
@@ -954,7 +954,7 @@ final class SignClientTests: XCTestCase {
         let uri = try! await dapp.authenticate(AuthRequestParams.stub())
 
         try? await walletPairingClient.pair(uri: uri)
-        wallet.authRequestPublisher.sink { [unowned self] request in
+        wallet.authenticateRequestPublisher.sink { [unowned self] request in
             Task(priority: .high) {
                 try! await wallet.rejectSession(requestId: request.0.id)
             }
@@ -979,7 +979,7 @@ final class SignClientTests: XCTestCase {
         let chain = Blockchain("eip155:1")!
         // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
         sleep(1)
-        wallet.authRequestPublisher.sink { [unowned self] (request, _) in
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
@@ -1060,6 +1060,30 @@ final class SignClientTests: XCTestCase {
         let uriWithoutMethods = try WalletConnectURI(uriString: uriStringWithoutMethods)
         try await walletPairingClient.pair(uri: uriWithoutMethods)
         await fulfillment(of: [fallbackExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+
+    func testFallbackToSessionProposeIfWalletIsNotSubscribingSessionAuthenticate()  async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+        
+        wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
+            Task(priority: .high) {
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionSettlePublisher.sink { settledSession in
+            Task(priority: .high) {
+                responseExpectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
 }

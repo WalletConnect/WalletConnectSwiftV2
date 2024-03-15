@@ -68,6 +68,7 @@ public struct SignClientFactory {
         let sessionExtendRequestSubscriber = SessionExtendRequestSubscriber(networkingInteractor: networkingClient, sessionStore: sessionStore, logger: logger)
         let sessionExtendResponseSubscriber = SessionExtendResponseSubscriber(networkingInteractor: networkingClient, sessionStore: sessionStore, logger: logger)
         let sessionTopicToProposal = CodableStore<Session.Proposal>(defaults: RuntimeKeyValueStorage(), identifier: SignStorageIdentifiers.sessionTopicToProposal.rawValue)
+        let authRequestSubscribersTracking = AuthRequestSubscribersTracking(logger: logger)
         let approveEngine = ApproveEngine(
             networkingInteractor: networkingClient,
             proposalPayloadsStore: proposalPayloadsStore,
@@ -80,7 +81,8 @@ public struct SignClientFactory {
             pairingStore: pairingStore,
             sessionStore: sessionStore,
             verifyClient: verifyClient,
-            rpcHistory: rpcHistory
+            rpcHistory: rpcHistory,
+            authRequestSubscribersTracking: authRequestSubscribersTracking
         )
         let cleanupService = SignCleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionTopicToProposal: sessionTopicToProposal, networkInteractor: networkingClient, rpcHistory: rpcHistory)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -135,7 +137,8 @@ public struct SignClientFactory {
             proposalExpiryWatcher: proposalExpiryWatcher,
             pendingProposalsProvider: pendingProposalsProvider,
             requestsExpiryWatcher: requestsExpiryWatcher,
-            authResponseTopicResubscriptionService: authResponseTopicResubscriptionService
+            authResponseTopicResubscriptionService: authResponseTopicResubscriptionService,
+            authRequestSubscribersTracking: authRequestSubscribersTracking
         )
         return client
     }
