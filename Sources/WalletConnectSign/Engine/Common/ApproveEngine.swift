@@ -29,6 +29,7 @@ final class ApproveEngine {
     private let kms: KeyManagementServiceProtocol
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
+    private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
 
     private var publishers = Set<AnyCancellable>()
 
@@ -44,7 +45,8 @@ final class ApproveEngine {
         pairingStore: WCPairingStorage,
         sessionStore: WCSessionStorage,
         verifyClient: VerifyClientProtocol,
-        rpcHistory: RPCHistory
+        rpcHistory: RPCHistory,
+        authRequestSubscribersTracking: AuthRequestSubscribersTracking
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -58,6 +60,7 @@ final class ApproveEngine {
         self.sessionStore = sessionStore
         self.verifyClient = verifyClient
         self.rpcHistory = rpcHistory
+        self.authRequestSubscribersTracking = authRequestSubscribersTracking
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
@@ -217,7 +220,7 @@ private extension ApproveEngine {
                 guard let pairing = pairingStore.getPairing(forTopic: payload.topic) else { return }
                 if let methods = pairing.methods,
                    methods.flatMap({ $0 })
-                    .contains(SessionAuthenticatedProtocolMethod().method) {
+                    .contains(SessionAuthenticatedProtocolMethod().method), authRequestSubscribersTracking.hasSubscribers() {
                     logger.debug("Ignoring Session Proposal")
                     // respond with an error?
                     return

@@ -1062,4 +1062,28 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [fallbackExpectation], timeout: InputConfig.defaultTimeout)
     }
 
+
+    func testFallbackToSessionProposeIfWalletIsNotSubscribingSessionAuthenticate()  async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        let requiredNamespaces = ProposalNamespace.stubRequired()
+        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
+        
+        wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
+            Task(priority: .high) {
+                do { _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces) } catch { XCTFail("\(error)") }
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionSettlePublisher.sink { settledSession in
+            Task(priority: .high) {
+                responseExpectation.fulfill()
+            }
+        }.store(in: &publishers)
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub())
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
 }
