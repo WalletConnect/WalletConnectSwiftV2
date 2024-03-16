@@ -28,5 +28,6 @@ jobs:
         APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
         WALLETAPP_SENTRY_DSN: ${{ secrets.WALLETAPP_SENTRY_DSN }}
         MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        FASTLANE_USER: ${{ secrets.APPLE_DEVELOPER_ACCOUNT_EMAIL }}
       run: |
         fastlane release_testflight_test username:${{ secrets.APPLE_ID }} token:$(echo -n $GH_USER:$GH_TOKEN | base64) relay_host:$(RELAY_HOST) project_id:${{ secrets.RELEASE_PROJECT_ID }} sentry_dsn:${{ secrets.WALLETAPP_SENTRY_DSN }} mixpanel_token:${{secrets.MIXPANEL_TOKEN}} --env DApp
