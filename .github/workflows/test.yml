@@ -18,10 +18,16 @@ jobs:
     - name: Install Fastlane
       run: gem install fastlane
 
+    - name: List SSHs
+      run: ssh-add -L
+
     - name: Setup SSH agent
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.MATCH_SSH_KEY }}
+
+    - name: List SSHs
+      run: ssh-add -L
 
     - name: Release
       env:
