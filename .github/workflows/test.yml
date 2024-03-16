@@ -21,7 +21,7 @@ jobs:
     - name: Add SSH key
       run: |
         eval "$(ssh-agent -s)"
-        echo "${{ secrets.MATCH_SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
+        echo "${{ secrets.MATCH_SSH_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
