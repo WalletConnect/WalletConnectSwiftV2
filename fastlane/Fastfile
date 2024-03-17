@@ -147,7 +147,7 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "match AppStore com.walletconnect.dapp" : "com.walletconnect.dapp"
+          "match AppStore com.walletconnect.dapp": "com.walletconnect.dapp"
         },
         allowProvisioningUpdates: true
       },
