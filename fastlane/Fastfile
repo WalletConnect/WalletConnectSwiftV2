@@ -146,8 +146,9 @@ platform :ios do
       scheme: ENV["SCHEME"],
       export_method: "app-store",
       export_options: {
+        signingStyle: "manual",
         provisioningProfiles: {
-          "match AppStore com.walletconnect.dapp": "com.walletconnect.dapp"
+          "com.walletconnect.dapp": "match AppStore com.walletconnect.dapp"
         },
         allowProvisioningUpdates: true
       },
