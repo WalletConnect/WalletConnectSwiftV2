@@ -140,14 +140,14 @@ platform :ios do
       build_number: number + 1,
       xcodeproj: "Example/ExampleApp.xcodeproj"
     )
-    install_provisioning_profile(
-      path: ENV["sigh_com.walletconnect.dapp_appstore_profile-path"]
-    )
-    update_project_provisioning(
-      xcodeproj: "Example/ExampleApp.xcodeproj",
-      profile: ENV["sigh_#{ENV["APP_IDENTIFIER"]}_appstore_profile-path"],
-      build_configuration: "Release"
-    )
+#     install_provisioning_profile(
+#       path: ENV["sigh_com.walletconnect.dapp_appstore_profile-path"]
+#     )
+#     update_project_provisioning(
+#       xcodeproj: "Example/ExampleApp.xcodeproj",
+#       profile: ENV["sigh_#{ENV["APP_IDENTIFIER"]}_appstore_profile-path"],
+#       build_configuration: "Release"
+#     )
 
 #     export_options: {
 #     signingStyle: "automatic",
