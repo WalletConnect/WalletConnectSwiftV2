@@ -142,21 +142,23 @@ platform :ios do
     )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
-      profile: "/Users/runner/Library/MobileDevice/Provisioning Profiles/a6ba4083-a6fd-4d4f-b2f1-4098d8234e42.mobileprovision",
+      profile: ENV["sigh_com.walletconnect.dapp_appstore_profile-path"],
       build_configuration: "Release"
     )
+
+#     export_options: {
+#     signingStyle: "automatic",
 #     provisioningProfiles: {
-#           "com.walletconnect.dapp": "match AppStore com.walletconnect.dapp"
-#         },
+#     "com.walletconnect.dapp": "match AppStore com.walletconnect.dapp"
+#   },
+#   allowProvisioningUpdates: true
+# },
+
     gym(
       configuration: "Release",
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
-      export_options: {
-        signingStyle: "automatic",
-        allowProvisioningUpdates: true
-      },
       xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
     )
     upload_to_testflight(
