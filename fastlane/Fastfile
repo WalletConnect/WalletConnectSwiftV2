@@ -140,6 +140,9 @@ platform :ios do
       build_number: number + 1,
       xcodeproj: "Example/ExampleApp.xcodeproj"
     )
+    install_provisioning_profile(
+      path: ENV["sigh_com.walletconnect.dapp_appstore_profile-path"]
+    )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
       profile: ENV["sigh_com.walletconnect.dapp_appstore_profile-path"],
@@ -159,6 +162,9 @@ platform :ios do
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
+      export_options: {
+        signingStyle: "manual"
+      },
       xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
     )
     upload_to_testflight(
