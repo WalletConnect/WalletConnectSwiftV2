@@ -142,7 +142,7 @@ platform :ios do
     )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
-      profile: "~/Library/MobileDevice/Provisioning Profiles/a6ba4083-a6fd-4d4f-b2f1-4098d8234e42.mobileprovision",
+      profile: "/Users/runner/Library/MobileDevice/Provisioning Profiles/a6ba4083-a6fd-4d4f-b2f1-4098d8234e42.mobileprovision",
       build_configuration: "Release"
     )
     gym(
