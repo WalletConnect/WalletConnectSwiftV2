@@ -145,7 +145,7 @@ platform :ios do
     )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
-      profile: "profilename.mobileprovision",
+      profile: "./profilename.mobileprovision",
       build_configuration: "Release"
     )
     gym(
