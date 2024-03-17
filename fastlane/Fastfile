@@ -120,7 +120,7 @@ platform :ios do
   lane :release_testflight_test do |options|
     setup_ci
     match(
-      readonly: false,
+      readonly: true,
       type: "appstore",
       app_identifier: ENV["MATCH_IDENTIFIERS"],
       api_key: app_store_connect_api_key(
@@ -129,6 +129,7 @@ platform :ios do
         ),
       include_all_certificates: true,
       force_for_new_devices: true,
+      include_mac_in_profiles: true
       force_for_new_certificates: true
     )
     number = latest_testflight_build_number(
