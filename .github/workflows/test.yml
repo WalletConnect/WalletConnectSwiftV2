@@ -38,7 +38,6 @@ jobs:
         MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         FASTLANE_USER: ${{ secrets.APPLE_DEVELOPER_ACCOUNT_EMAIL }}
         APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-        APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
         APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
       run: |
         fastlane release_testflight_test username:${{ secrets.APPLE_ID }} token:$(echo -n $GH_USER:$GH_TOKEN | base64) relay_host:$(RELAY_HOST) project_id:${{ secrets.RELEASE_PROJECT_ID }} sentry_dsn:${{ secrets.WALLETAPP_SENTRY_DSN }} mixpanel_token:${{secrets.MIXPANEL_TOKEN}} --env DApp
