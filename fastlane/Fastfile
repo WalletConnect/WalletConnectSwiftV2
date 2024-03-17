@@ -116,7 +116,7 @@ platform :ios do
     )
     clean_build_artifacts()
   end
-#       git_basic_authorization: options[:token],
+
   lane :release_testflight_test do |options|
     setup_ci
     match(
@@ -145,16 +145,16 @@ platform :ios do
       profile: "/Users/runner/Library/MobileDevice/Provisioning Profiles/a6ba4083-a6fd-4d4f-b2f1-4098d8234e42.mobileprovision",
       build_configuration: "Release"
     )
+#     provisioningProfiles: {
+#           "com.walletconnect.dapp": "match AppStore com.walletconnect.dapp"
+#         },
     gym(
       configuration: "Release",
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
       export_options: {
-        signingStyle: "manual",
-        provisioningProfiles: {
-          "com.walletconnect.dapp": "match AppStore com.walletconnect.dapp"
-        },
+        signingStyle: "automatic",
         allowProvisioningUpdates: true
       },
       xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
