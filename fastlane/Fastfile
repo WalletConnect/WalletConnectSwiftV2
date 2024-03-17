@@ -141,11 +141,11 @@ platform :ios do
       xcodeproj: "Example/ExampleApp.xcodeproj"
     )
     install_provisioning_profile(
-      path: "./profilename.mobileprovision"
+      path: "profiles/profile.mobileprovision"
     )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
-      profile: "./profilename.mobileprovision",
+      profile: "profiles/profile.mobileprovision",
       build_configuration: "Release"
     )
     gym(
