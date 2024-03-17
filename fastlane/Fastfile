@@ -145,7 +145,7 @@ platform :ios do
     )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
-      profile: ENV["sigh_com.walletconnect.dapp_appstore_profile-path"],
+      profile: ENV["sigh_#{ENV["APP_IDENTIFIER"]}_appstore_profile-path"],
       build_configuration: "Release"
     )
 
@@ -165,7 +165,7 @@ platform :ios do
       export_options: {
         signingStyle: "manual"
       },
-      xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
+      xcargs: "-allowProvisioningUpdates RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
     )
     upload_to_testflight(
       apple_id: ENV["APPLE_ID"],
