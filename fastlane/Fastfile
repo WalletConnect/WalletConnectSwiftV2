@@ -129,7 +129,7 @@ platform :ios do
         ),
       include_all_certificates: true,
       force_for_new_devices: true,
-      include_mac_in_profiles: true
+      include_mac_in_profiles: true,
       force_for_new_certificates: true
     )
     number = latest_testflight_build_number(
