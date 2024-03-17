@@ -141,7 +141,7 @@ platform :ios do
       xcodeproj: "Example/ExampleApp.xcodeproj"
     )
     install_provisioning_profile(
-      path: "profilename.mobileprovision"
+      path: "./profilename.mobileprovision"
     )
     update_project_provisioning(
       xcodeproj: "Example/ExampleApp.xcodeproj",
