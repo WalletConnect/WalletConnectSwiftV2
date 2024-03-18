@@ -25,7 +25,7 @@ public class AuthClient: AuthClientProtocol {
     ///
     /// Emited result may be an error.
     @available(*, deprecated, message: "Use SignClient for dApps and Web3Wallet interface for wallets instead.")
-    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthError>), Never> {
+    public var authResponsePublisher: AnyPublisher<(id: RPCID, result: Result<Cacao, AuthErrors>), Never> {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -40,7 +40,7 @@ public class AuthClient: AuthClientProtocol {
 
     private let pairingRegisterer: PairingRegisterer
 
-    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthError>), Never>()
+    private var authResponsePublisherSubject = PassthroughSubject<(id: RPCID, result: Result<Cacao, AuthErrors>), Never>()
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthRequest, context: VerifyContext?), Never>()
     private let appRequestService: AppRequestService
     private let appRespondSubscriber: AppRespondSubscriber

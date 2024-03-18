@@ -1,7 +1,7 @@
 import Foundation
 
 /// Authentication error
-public enum AuthError: Codable, Equatable, Error {
+public enum AuthErrors: Codable, Equatable, Error {
     case methodUnsupported
     case userDisconnected
     case userRejeted
@@ -11,7 +11,7 @@ public enum AuthError: Codable, Equatable, Error {
     case signatureVerificationFailed
 }
 
-extension AuthError: Reason {
+extension AuthErrors: Reason {
 
     init?(code: Int) {
         switch code {

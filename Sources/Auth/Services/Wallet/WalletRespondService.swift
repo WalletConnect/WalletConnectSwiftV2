@@ -53,7 +53,7 @@ actor WalletRespondService {
     }
 
     func respondError(requestId: RPCID) async throws {
-        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        try await walletErrorResponder.respondError(AuthErrors.userRejeted, requestId: requestId)
         verifyContextStore.delete(forKey: requestId.string)
     }
 

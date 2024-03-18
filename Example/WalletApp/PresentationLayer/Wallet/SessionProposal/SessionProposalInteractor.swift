@@ -9,9 +9,9 @@ final class SessionProposalInteractor {
         let supportedMethods = Set(proposal.requiredNamespaces.flatMap { $0.value.methods } + (proposal.optionalNamespaces?.flatMap { $0.value.methods } ?? []))
         let supportedEvents = Set(proposal.requiredNamespaces.flatMap { $0.value.events } + (proposal.optionalNamespaces?.flatMap { $0.value.events } ?? []))
         
-        let supportedRequiredChains = proposal.requiredNamespaces["eip155"]?.chains
+        let supportedRequiredChains = proposal.requiredNamespaces["eip155"]?.chains ?? []
         let supportedOptionalChains = proposal.optionalNamespaces?["eip155"]?.chains ?? []
-        var supportedChains = (supportedRequiredChains ?? []).union(supportedOptionalChains) 
+        var supportedChains = supportedRequiredChains + supportedOptionalChains 
 
         let supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: account.address)! }
 

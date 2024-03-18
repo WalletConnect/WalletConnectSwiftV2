@@ -10,7 +10,7 @@ class AppRespondSubscriber {
     private let pairingRegisterer: PairingRegisterer
     private var publishers = [AnyCancellable]()
 
-    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, AuthError>) -> Void)?
+    var onResponse: ((_ id: RPCID, _ result: Result<Cacao, AuthErrors>) -> Void)?
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -30,7 +30,7 @@ class AppRespondSubscriber {
     private func subscribeForResponse() {
         networkingInteractor.responseErrorSubscription(on: AuthRequestProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<AuthRequestParams>) in
-                guard let error = AuthError(code: payload.error.code) else { return }
+                guard let error = AuthErrors(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)
 
