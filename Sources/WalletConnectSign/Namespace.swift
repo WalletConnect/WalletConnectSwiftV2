@@ -182,7 +182,7 @@ public enum AutoNamespaces {
             if let proposalChains = proposalNamespace.chains {
                 let sessionChains = proposalChains
 
-                guard !sessionChains.isEmpty && proposalChains.isSubset(of: chains) else {
+                guard !sessionChains.isEmpty && Set(proposalChains).isSubset(of: chains) else {
                     throw AutoNamespacesError.requiredChainsNotSatisfied
                 }
                 
@@ -250,7 +250,6 @@ public enum AutoNamespaces {
                         methods: sessionMethods,
                         events: sessionEvents
                     )
-                    print("$0 \($0)")
                     if sessionNamespaces[network] == nil {
                         sessionNamespaces[network] = sessionNamespace
                     } else {
@@ -273,8 +272,6 @@ public enum AutoNamespaces {
 
             if let proposalChains = proposalNamespace.chains {
                 let sessionChains = proposalChains.intersection(chains)
-                print("session chains: \(sessionChains)")
-                print("proposal chains: \(proposalChains)")
                 guard !sessionChains.isEmpty else {
                     return
                 }
@@ -297,9 +294,6 @@ public enum AutoNamespaces {
                     sessionNamespaces[caip2Namespace] = sessionNamespace
                 } else {
                     let unionChains = (sessionNamespaces[caip2Namespace]?.chains ?? []).orderedUnion(sessionNamespace.chains ?? [])
-                    print("caip2namespace chains: \(sessionNamespaces[caip2Namespace]?.chains)")
-                    print("sessionNamespace.chains \(sessionNamespace.chains)")
-                    print("union chains: \(unionChains)")
                     sessionNamespaces[caip2Namespace]?.chains = unionChains
                     let unionAccounts = sessionNamespaces[caip2Namespace]?.accounts.orderedUnion(sessionNamespace.accounts)
                     sessionNamespaces[caip2Namespace]?.accounts = unionAccounts ?? []
@@ -316,8 +310,6 @@ public enum AutoNamespaces {
                     guard !sessionChains.isEmpty else {
                         return
                     }
-
-                    print("session chains: \(sessionChains)")
 
                     let sessionMethods = Set(proposalNamespace.methods).intersection(Set(methods))
                     guard !sessionMethods.isEmpty else {
@@ -355,19 +347,7 @@ public enum AutoNamespaces {
 }
 
 
-extension Array where Element: Hashable {
-
-    // Checks if the current array is a subset of the provided array.
-    func isSubset(of other: [Element]) -> Bool {
-        let otherSet = Set(other)
-        for element in self {
-            if !otherSet.contains(element) {
-                return false
-            }
-        }
-        return true
-    }
-
+fileprivate extension Array where Element: Hashable {
     // Returns the intersection of the current array and the provided array.
     // Elements are returned in the order they appear in the current array.
     func intersection(_ other: [Element]) -> [Element] {
