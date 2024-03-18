@@ -175,6 +175,8 @@ public enum AutoNamespaces {
     ) throws -> [String: SessionNamespace] {
         var sessionNamespaces = [String: SessionNamespace]()
 
+        let chains = chains.removeDuplicates()
+        let accounts = accounts.removeDuplicates()
         try sessionProposal.requiredNamespaces.forEach {
             let caip2Namespace = $0.key
             let proposalNamespace = $0.value
@@ -365,4 +367,19 @@ fileprivate extension Array where Element: Hashable {
         }
         return combined
     }
+
+    func removeDuplicates() -> [Element] {
+        var uniqueElements = [Element]()
+        var seenElements = Set<Element>()
+
+        for element in self {
+            if !seenElements.contains(element) {
+                uniqueElements.append(element)
+                seenElements.insert(element)
+            }
+        }
+
+        return uniqueElements
+    }
+
 }
