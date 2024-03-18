@@ -157,13 +157,13 @@ platform :ios do
 #   },
 #   allowProvisioningUpdates: true
 # },
-
+# -allowProvisioningUpdates 
     gym(
       configuration: "Release",
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
+      xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
     )
     upload_to_testflight(
       apple_id: ENV["APPLE_ID"],
