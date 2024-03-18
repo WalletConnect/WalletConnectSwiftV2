@@ -37,18 +37,18 @@ public struct ProposalNamespace: Equatable, Codable {
 
 public struct SessionNamespace: Equatable, Codable {
     public var chains: [Blockchain]?
-    public var accounts: Set<Account>
+    public var accounts: [Account]
     public var methods: Set<String>
     public var events: Set<String>
 
-    public init(chains: [Blockchain]? = nil, accounts: Set<Account>, methods: Set<String>, events: Set<String>) {
+    public init(chains: [Blockchain]? = nil, accounts: [Account], methods: Set<String>, events: Set<String>) {
         self.chains = chains
         self.accounts = accounts
         self.methods = methods
         self.events = events
     }
 
-    static func accountsAreCompliant(_ accounts: Set<Account>, toChains chains: [Blockchain]) -> Bool {
+    static func accountsAreCompliant(_ accounts: [Account], toChains chains: [Blockchain]) -> Bool {
         for chain in chains {
             guard accounts.contains(where: { $0.blockchain == chain }) else {
                 return false
@@ -203,7 +203,7 @@ public enum AutoNamespaces {
 
                 let sessionNamespace = SessionNamespace(
                     chains: sessionChains,
-                    accounts: Set(accounts).filter { sessionChains.contains($0.blockchain) },
+                    accounts: accounts.filter { sessionChains.contains($0.blockchain) },
                     methods: sessionMethods,
                     events: sessionEvents
                 )
@@ -213,7 +213,7 @@ public enum AutoNamespaces {
                 } else {
                     let unionChains = (sessionNamespaces[caip2Namespace]?.chains ?? []).orderedUnion(sessionNamespace.chains ?? [])
                     sessionNamespaces[caip2Namespace]?.chains = unionChains
-                    let unionAccounts = sessionNamespaces[caip2Namespace]?.accounts.union(sessionNamespace.accounts)
+                    let unionAccounts = sessionNamespaces[caip2Namespace]?.accounts.orderedUnion(sessionNamespace.accounts)
                     sessionNamespaces[caip2Namespace]?.accounts = unionAccounts ?? []
                     let unionMethods = sessionNamespaces[caip2Namespace]?.methods.union(sessionNamespace.methods)
                     sessionNamespaces[caip2Namespace]?.methods = unionMethods ?? []
@@ -256,7 +256,7 @@ public enum AutoNamespaces {
                     } else {
                         let unionChains = (sessionNamespaces[network]?.chains ?? []).orderedUnion(sessionNamespace.chains ?? [])
                         sessionNamespaces[network]?.chains = unionChains
-                        let unionAccounts = sessionNamespaces[network]?.accounts.union(sessionNamespace.accounts)
+                        let unionAccounts = sessionNamespaces[network]?.accounts.orderedUnion(sessionNamespace.accounts)
                         sessionNamespaces[network]?.accounts = unionAccounts ?? []
                         let unionMethods = sessionNamespaces[network]?.methods.union(sessionNamespace.methods)
                         sessionNamespaces[network]?.methods = unionMethods ?? []
@@ -288,7 +288,7 @@ public enum AutoNamespaces {
 
                 let sessionNamespace = SessionNamespace(
                     chains: sessionChains,
-                    accounts: Set(accounts).filter { sessionChains.contains($0.blockchain) },
+                    accounts: accounts.filter { sessionChains.contains($0.blockchain) },
                     methods: sessionMethods,
                     events: sessionEvents
                 )
@@ -301,7 +301,7 @@ public enum AutoNamespaces {
                     print("sessionNamespace.chains \(sessionNamespace.chains)")
                     print("union chains: \(unionChains)")
                     sessionNamespaces[caip2Namespace]?.chains = unionChains
-                    let unionAccounts = sessionNamespaces[caip2Namespace]?.accounts.union(sessionNamespace.accounts)
+                    let unionAccounts = sessionNamespaces[caip2Namespace]?.accounts.orderedUnion(sessionNamespace.accounts)
                     sessionNamespaces[caip2Namespace]?.accounts = unionAccounts ?? []
                     let unionMethods = sessionNamespaces[caip2Namespace]?.methods.union(sessionNamespace.methods)
                     sessionNamespaces[caip2Namespace]?.methods = unionMethods ?? []
@@ -328,7 +328,7 @@ public enum AutoNamespaces {
                     
                     let sessionNamespace = SessionNamespace(
                         chains: [Blockchain(namespace: network, reference: chain)!],
-                        accounts: Set(accounts).filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
+                        accounts: accounts.filter { $0.blockchain == Blockchain(namespace: network, reference: chain)! },
                         methods: sessionMethods,
                         events: sessionEvents
                     )
@@ -338,7 +338,7 @@ public enum AutoNamespaces {
                     } else {
                         let unionChains = (sessionNamespaces[network]?.chains ?? []).orderedUnion(sessionNamespace.chains ?? [])
                         sessionNamespaces[network]?.chains = unionChains
-                        let unionAccounts = sessionNamespaces[network]?.accounts.union(sessionNamespace.accounts)
+                        let unionAccounts = sessionNamespaces[network]?.accounts.orderedUnion(sessionNamespace.accounts)
                         sessionNamespaces[network]?.accounts = unionAccounts ?? []
                         let unionMethods = sessionNamespaces[network]?.methods.union(sessionNamespace.methods)
                         sessionNamespaces[network]?.methods = unionMethods ?? []
