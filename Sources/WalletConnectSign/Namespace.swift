@@ -224,7 +224,7 @@ public enum AutoNamespaces {
                 if let network = $0.key.components(separatedBy: ":").first,
                    let chain = $0.key.components(separatedBy: ":").last
                 {
-                    let sessionChains = Set([Blockchain(namespace: network, reference: chain)]).intersection(Set(chains))
+                    let sessionChains = [Blockchain(namespace: network, reference: chain)].intersection(chains)
                     guard !sessionChains.isEmpty else {
                         throw AutoNamespacesError.requiredChainsNotSatisfied
                     }
@@ -240,7 +240,7 @@ public enum AutoNamespaces {
                     }
                     
                     let availableAccountsBlockchains = accounts.map { $0.blockchain }
-                    guard !sessionChains.intersection(Set(availableAccountsBlockchains)).isEmpty else {
+                    guard !sessionChains.intersection(availableAccountsBlockchains).isEmpty else {
                         throw AutoNamespacesError.requiredAccountsNotSatisfied
                     }
 
@@ -273,6 +273,8 @@ public enum AutoNamespaces {
 
             if let proposalChains = proposalNamespace.chains {
                 let sessionChains = proposalChains.intersection(chains)
+                print("session chains: \(sessionChains)")
+                print("proposal chains: \(proposalChains)")
                 guard !sessionChains.isEmpty else {
                     return
                 }
@@ -295,6 +297,9 @@ public enum AutoNamespaces {
                     sessionNamespaces[caip2Namespace] = sessionNamespace
                 } else {
                     let unionChains = (sessionNamespaces[caip2Namespace]?.chains ?? []).orderedUnion(sessionNamespace.chains ?? [])
+                    print("caip2namespace chains: \(sessionNamespaces[caip2Namespace]?.chains)")
+                    print("sessionNamespace.chains \(sessionNamespace.chains)")
+                    print("union chains: \(unionChains)")
                     sessionNamespaces[caip2Namespace]?.chains = unionChains
                     let unionAccounts = sessionNamespaces[caip2Namespace]?.accounts.union(sessionNamespace.accounts)
                     sessionNamespaces[caip2Namespace]?.accounts = unionAccounts ?? []
@@ -307,11 +312,13 @@ public enum AutoNamespaces {
                 if let network = $0.key.components(separatedBy: ":").first,
                    let chain = $0.key.components(separatedBy: ":").last
                 {
-                    let sessionChains = Set([Blockchain(namespace: network, reference: chain)]).intersection(Set(chains))
+                    let sessionChains = [Blockchain(namespace: network, reference: chain)].intersection(chains)
                     guard !sessionChains.isEmpty else {
                         return
                     }
-                    
+
+                    print("session chains: \(sessionChains)")
+
                     let sessionMethods = Set(proposalNamespace.methods).intersection(Set(methods))
                     guard !sessionMethods.isEmpty else {
                         return
