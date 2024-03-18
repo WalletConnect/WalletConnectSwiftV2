@@ -250,7 +250,7 @@ public enum AutoNamespaces {
                         methods: sessionMethods,
                         events: sessionEvents
                     )
-                    
+                    print("$0 \($0)")
                     if sessionNamespaces[network] == nil {
                         sessionNamespaces[network] = sessionNamespace
                     } else {

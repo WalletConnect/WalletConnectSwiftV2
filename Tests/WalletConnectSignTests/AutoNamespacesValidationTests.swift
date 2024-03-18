@@ -122,12 +122,10 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!,
             Account(blockchain: Blockchain("eip155:3")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
+
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -167,22 +165,15 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
         ]
         let optionalNamespaces = [
             "eip155": ProposalNamespace(
-                chains: [Blockchain("eip155:3")!],
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:4": ProposalNamespace(
+                chains: [Blockchain("eip155:3")!, Blockchain("eip155:4")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -213,11 +204,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -260,11 +248,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -306,11 +291,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -348,11 +330,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -391,11 +370,8 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:4")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
                 events: ["chainChanged"]
             )
@@ -652,14 +628,10 @@ final class AutoNamespacesValidationTests: XCTestCase {
             Account(blockchain: Blockchain("eip155:2")!, address: "0x57f48fAFeC1d76B27e3f29b8d277b6218CDE6092")!
         ]
         let requiredNamespaces = [
-            "eip155:1": ProposalNamespace(
+            "eip155": ProposalNamespace(
+                chains: [Blockchain("eip155:1")!, Blockchain("eip155:2")!],
                 methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            ),
-            "eip155:2": ProposalNamespace(
-                methods: ["personal_sign", "eth_sendTransaction"],
-                events: ["chainChanged"]
-            )
+                events: ["chainChanged", "accountsChanged"])
         ]
         let optionalNamespaces = [
             "eip155": ProposalNamespace(
