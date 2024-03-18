@@ -120,8 +120,8 @@ platform :ios do
   lane :release_testflight_test do |options|
     setup_ci
     api_key = app_store_connect_api_key(
-    is_key_content_base64: true,
-    in_house: false,
+      is_key_content_base64: true,
+      in_house: false,
     )
     match(
       readonly: true,
