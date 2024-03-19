@@ -29,13 +29,13 @@ class AppRespondSubscriber {
 
     private func subscribeForResponse() {
         networkingInteractor.responseErrorSubscription(on: AuthRequestProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<AuthRequestParams>) in
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<Auth_RequestParams>) in
                 guard let error = AuthErrors(code: payload.error.code) else { return }
                 onResponse?(payload.id, .failure(error))
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: AuthRequestProtocolMethod())
-            .sink { [unowned self] (payload: ResponseSubscriptionPayload<AuthRequestParams, Cacao>)  in
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<Auth_RequestParams, Cacao>)  in
 
                 pairingRegisterer.activate(pairingTopic: payload.topic, peerMetadata: nil)
 

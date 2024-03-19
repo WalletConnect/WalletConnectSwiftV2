@@ -1,12 +1,12 @@
 import Foundation
 
 /// wc_authRequest RPC method request param
-struct AuthRequestParams: Codable, Equatable {
+struct Auth_RequestParams: Codable, Equatable {
     let requester: Requester
-    let payloadParams: AuthPayload
+    let payloadParams: AuthPayloadStruct
 }
 
-extension AuthRequestParams {
+extension Auth_RequestParams {
     struct Requester: Codable, Equatable {
         let publicKey: String
         let metadata: AppMetadata

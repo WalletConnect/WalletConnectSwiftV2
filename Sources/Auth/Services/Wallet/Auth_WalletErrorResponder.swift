@@ -1,6 +1,6 @@
 import Foundation
 
-actor WalletErrorResponder {
+actor Auth_WalletErrorResponder {
     enum Errors: Error {
         case recordForIdNotFound
         case malformedAuthRequestParams
@@ -31,17 +31,17 @@ actor WalletErrorResponder {
         try await networkingInteractor.respondError(topic: topic, requestId: requestId, protocolMethod: AuthRequestProtocolMethod(), reason: error, envelopeType: envelopeType)
     }
 
-    private func getAuthRequestParams(requestId: RPCID) throws -> AuthRequestParams {
+    private func getAuthRequestParams(requestId: RPCID) throws -> Auth_RequestParams {
         guard let request = rpcHistory.get(recordId: requestId)?.request
         else { throw Errors.recordForIdNotFound }
 
-        guard let authRequestParams = try request.params?.get(AuthRequestParams.self)
+        guard let authRequestParams = try request.params?.get(Auth_RequestParams.self)
         else { throw Errors.malformedAuthRequestParams }
 
         return authRequestParams
     }
 
-    private func generateAgreementKeys(requestParams: AuthRequestParams) throws -> (topic: String, keys: AgreementKeys) {
+    private func generateAgreementKeys(requestParams: Auth_RequestParams) throws -> (topic: String, keys: AgreementKeys) {
         let peerPubKey = try AgreementPublicKey(hex: requestParams.requester.publicKey)
         let topic = peerPubKey.rawRepresentation.sha256().toHexString()
         let selfPubKey = try kms.createX25519KeyPair()

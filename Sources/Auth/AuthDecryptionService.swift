@@ -21,7 +21,7 @@ public class AuthDecryptionService {
     public func decryptAuthRequest(topic: String, ciphertext: String) throws -> AuthRequest {
         let (rpcRequest, _, _): (RPCRequest, String?, Data) = try serializer.deserialize(topic: topic, encodedEnvelope: ciphertext)
         setPairingMetadata(rpcRequest: rpcRequest, topic: topic)
-        if let params = try rpcRequest.params?.get(AuthRequestParams.self),
+        if let params = try rpcRequest.params?.get(Auth_RequestParams.self),
            let id = rpcRequest.id {
             let authRequest = AuthRequest(id: id, topic: topic, payload: params.payloadParams, requester: params.requester.metadata)
             return authRequest
@@ -37,7 +37,7 @@ public class AuthDecryptionService {
     private func setPairingMetadata(rpcRequest: RPCRequest, topic: String) {
         guard var pairing = pairingStorage.getPairing(forTopic: topic),
               pairing.peerMetadata == nil,
-              let peerMetadata = try? rpcRequest.params?.get(AuthRequestParams.self).requester.metadata
+              let peerMetadata = try? rpcRequest.params?.get(Auth_RequestParams.self).requester.metadata
         else { return }
 
         pairing.updatePeerMetadata(peerMetadata)
