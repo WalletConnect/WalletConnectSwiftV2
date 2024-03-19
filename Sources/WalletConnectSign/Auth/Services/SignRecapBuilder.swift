@@ -1,6 +1,5 @@
 import Foundation
 
-
 struct SignRecapBuilder {
 
     enum BuilderError: Error {

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RespondParams: Equatable {
+public struct AuthRespondParams: Equatable {
     let id: RPCID
     let signature: CacaoSignature
 

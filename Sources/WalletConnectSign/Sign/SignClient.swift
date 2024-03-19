@@ -361,7 +361,7 @@ public final class SignClient: SignClientProtocol {
         return try SIWEFromCacaoPayloadFormatter().formatMessage(from: cacaoPayload)
     }
 
-    public func buildSignedAuthObject(authPayload: AuthPayload, signature: WalletConnectUtils.CacaoSignature, account: Account) throws -> AuthObject {
+    public func buildSignedAuthObject(authPayload: AuthPayload, signature: CacaoSignature, account: Account) throws -> AuthObject {
         try CacaosBuilder.makeCacao(authPayload: authPayload, signature: signature, account: account)
     }
 

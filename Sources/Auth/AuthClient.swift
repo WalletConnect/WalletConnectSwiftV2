@@ -46,13 +46,13 @@ public class AuthClient: AuthClientProtocol {
     private let appRespondSubscriber: AppRespondSubscriber
     private let walletRequestSubscriber: WalletRequestSubscriber
     private let walletRespondService: WalletRespondService
-    private let pendingRequestsProvider: PendingRequestsProvider
+    private let pendingRequestsProvider: Auth_PendingRequestsProvider
 
     init(appRequestService: AppRequestService,
          appRespondSubscriber: AppRespondSubscriber,
          walletRequestSubscriber: WalletRequestSubscriber,
          walletRespondService: WalletRespondService,
-         pendingRequestsProvider: PendingRequestsProvider,
+         pendingRequestsProvider: Auth_PendingRequestsProvider,
          logger: ConsoleLogging,
          socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
          pairingRegisterer: PairingRegisterer
@@ -102,7 +102,7 @@ public class AuthClient: AuthClientProtocol {
     }
 
     @available(*, deprecated, message: "Use SignClient or Web3Wallet for message formatting.")
-    public func formatMessage(payload: AuthPayload, address: String) throws -> String {
+    public func formatMessage(payload: AuthPayloadStruct, address: String) throws -> String {
         return try SIWEFromCacaoPayloadFormatter().formatMessage(from: payload.cacaoPayload(address: address))
     }
 
