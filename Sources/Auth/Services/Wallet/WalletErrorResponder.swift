@@ -21,7 +21,7 @@ actor WalletErrorResponder {
         self.rpcHistory = rpcHistory
     }
 
-    func respondError(_ error: AuthError, requestId: RPCID) async throws {
+    func respondError(_ error: AuthErrors, requestId: RPCID) async throws {
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
 

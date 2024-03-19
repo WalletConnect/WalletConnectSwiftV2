@@ -13,7 +13,7 @@ struct ProposalNamespaceBuilder {
         if methods.isEmpty {
             methods = ["personal_sign"]
         }
-        let chains: Set<Blockchain> = Set(params.chains.compactMap { Blockchain($0) })
+        let chains: [Blockchain] = params.chains.compactMap { Blockchain($0) }
         guard chains.allSatisfy({$0.namespace == "eip155"}) else {
             throw Errors.unsupportedChain
         }

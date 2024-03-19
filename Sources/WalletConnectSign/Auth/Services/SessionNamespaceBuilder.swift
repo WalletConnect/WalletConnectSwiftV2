@@ -34,7 +34,7 @@ class SessionNamespaceBuilder {
         }
 
         let accounts = cacaos.compactMap { try? DIDPKH(did: $0.p.iss).account }
-        let accountsSet = Set(accounts)
+        let accountsSet = accounts
         let methods = firstRecapResource.methods
         let chains = firstRecapResource.chains
         let events: Set<String> = ["chainChanged", "accountsChanged"]

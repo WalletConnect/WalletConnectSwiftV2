@@ -31,6 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Web3Modal.configure(
             projectId: InputConfig.projectId,
             metadata: metadata,
+            crypto: DefaultCryptoProvider(),
             customWallets: [
                 .init(
                     id: "swift-sample",
