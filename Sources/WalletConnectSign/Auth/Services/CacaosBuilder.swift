@@ -1,6 +1,4 @@
-
 import Foundation
-import WalletConnectUtils
 
 struct CacaosBuilder {
     public static func makeCacao(authPayload: AuthPayload, signature: WalletConnectUtils.CacaoSignature, account: WalletConnectUtils.Account) throws -> Cacao {
