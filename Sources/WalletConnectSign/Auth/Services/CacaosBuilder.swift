@@ -1,7 +1,7 @@
 import Foundation
 
 struct CacaosBuilder {
-    public static func makeCacao(authPayload: AuthPayload, signature: WalletConnectUtils.CacaoSignature, account: WalletConnectUtils.Account) throws -> Cacao {
+    public static func makeCacao(authPayload: AuthPayload, signature: CacaoSignature, account: Account) throws -> Cacao {
         let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(authPayload: authPayload, account: account)
         let header = CacaoHeader(t: "eip4361")
         return Cacao(h: header, p: cacaoPayload, s: signature)
@@ -10,7 +10,7 @@ struct CacaosBuilder {
 }
 
 struct CacaoPayloadBuilder {
-    public static func makeCacaoPayload(authPayload: AuthPayload, account: WalletConnectUtils.Account) throws -> CacaoPayload {
+    public static func makeCacaoPayload(authPayload: AuthPayload, account: Account) throws -> CacaoPayload {
         var mergedRecap: RecapUrn?
         var resources: [String]? = nil
 
