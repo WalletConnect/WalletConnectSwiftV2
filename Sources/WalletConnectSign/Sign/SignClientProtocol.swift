@@ -36,7 +36,7 @@ public protocol SignClientProtocol {
     func cleanup() async throws
     
     func getPendingRequests(topic: String?) -> [(request: Request, context: VerifyContext?)]
-    func getPendingAuthRequests() throws -> [(WalletConnectSign.AuthenticationRequest, VerifyContext?)] 
+    func getPendingAuthRequests() throws -> [(AuthenticationRequest, VerifyContext?)]
     func getPendingProposals(topic: String?) -> [(proposal: Session.Proposal, context: VerifyContext?)]
 }
 
