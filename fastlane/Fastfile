@@ -166,7 +166,8 @@ platform :ios do
       export_options: {
       provisioningProfiles: {
           ENV["SCHEME"] => "sigh_#{ENV["SCHEME"]}_appstore_profile-name"
-        }
+        },
+        allowProvisioningUpdates: true
       },
       xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
     )
