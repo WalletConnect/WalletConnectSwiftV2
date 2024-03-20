@@ -85,6 +85,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'WalletConnectSign' do |ss|
     ss.source_files = 'Sources/WalletConnectSign/**/*.{h,m,swift}'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectPairing'
+    ss.dependency 'WalletConnectSwiftV2/WalletConnectSigner'
     ss.dependency 'WalletConnectSwiftV2/WalletConnectVerify'
   end
 
