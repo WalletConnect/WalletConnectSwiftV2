@@ -162,7 +162,7 @@ platform :ios do
       configuration: "Release",
       project: "Example/ExampleApp.xcodeproj",
       scheme: ENV["SCHEME"],
-      export_method: "app-store",
+      export_method: "development",
       export_options: {
       provisioningProfiles: {
           ENV["SCHEME"] => "sigh_#{ENV["SCHEME"]}_appstore_profile-name"
