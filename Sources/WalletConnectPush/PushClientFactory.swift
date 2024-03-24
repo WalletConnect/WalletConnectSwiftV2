@@ -42,7 +42,8 @@ public struct PushClientFactory {
         let pushAuthenticator = PushAuthenticator(clientIdStorage: clientIdStorage, pushHost: pushHost)
 
         let registerService = PushRegisterService(httpClient: httpClient, projectId: projectId, clientIdStorage: clientIdStorage, pushAuthenticator: pushAuthenticator, logger: logger, environment: environment)
+        let unregisterService = UnregisterService(httpClient: httpClient, projectId: projectId, clientIdStorage: clientIdStorage, pushAuthenticator: pushAuthenticator, logger: logger, pushHost: pushHost, environment: environment)
 
-        return PushClient(registerService: registerService, logger: logger)
+        return PushClient(registerService: registerService, logger: logger, unregisterService: unregisterService)
     }
 }
