@@ -52,7 +52,8 @@ let package = Package(
         .target(
             name: "WalletConnectSign",
             dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner"],
-            path: "Sources/WalletConnectSign"),
+            path: "Sources/WalletConnectSign",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "Auth",
             dependencies: ["WalletConnectPairing", "WalletConnectSigner", "WalletConnectVerify"],
@@ -60,7 +61,8 @@ let package = Package(
         .target(
             name: "Web3Wallet",
             dependencies: ["WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
-            path: "Sources/Web3Wallet"),
+            path: "Sources/Web3Wallet",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectNotify",
             dependencies: ["WalletConnectPairing", "WalletConnectIdentity", "WalletConnectPush", "WalletConnectSigner", "Database"],
@@ -73,7 +75,7 @@ let package = Package(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectJWT"],
             path: "Sources/WalletConnectRelay",
-            resources: [.copy("PackageConfig.json")]),
+            resources: [.copy("PackageConfig.json"), .process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectKMS",
             dependencies: ["WalletConnectUtils"],
