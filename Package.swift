@@ -14,9 +14,6 @@ let package = Package(
             name: "WalletConnect",
             targets: ["WalletConnectSign"]),
         .library(
-            name: "WalletConnectChat",
-            targets: ["WalletConnectChat"]),
-        .library(
             name: "WalletConnectAuth",
             targets: ["Auth"]),
         .library(
@@ -38,9 +35,6 @@ let package = Package(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
         .library(
-            name: "WalletConnectSync",
-            targets: ["WalletConnectSync"]),
-        .library(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
         .library(
@@ -59,10 +53,6 @@ let package = Package(
             name: "WalletConnectSign",
             dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner"],
             path: "Sources/WalletConnectSign"),
-        .target(
-            name: "WalletConnectChat",
-            dependencies: ["WalletConnectIdentity", "WalletConnectSync"],
-            path: "Sources/Chat"),
         .target(
             name: "Auth",
             dependencies: ["WalletConnectPairing", "WalletConnectSigner", "WalletConnectVerify"],
@@ -138,18 +128,12 @@ let package = Package(
                 .copy("Resources/Assets.xcassets")
             ]
         ),
-        .target(
-            name: "WalletConnectSync",
-            dependencies: ["WalletConnectSigner"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
         .testTarget(
             name: "WalletConnectPairingTests",
             dependencies: ["WalletConnectPairing", "TestingUtils"]),
-        .testTarget(
-            name: "ChatTests",
-            dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "NotifyTests",
             dependencies: ["WalletConnectNotify", "TestingUtils"]),
