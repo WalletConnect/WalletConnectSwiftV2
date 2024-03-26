@@ -14,9 +14,6 @@ let package = Package(
             name: "WalletConnect",
             targets: ["WalletConnectSign"]),
         .library(
-            name: "WalletConnectChat",
-            targets: ["WalletConnectChat"]),
-        .library(
             name: "WalletConnectAuth",
             targets: ["Auth"]),
         .library(
@@ -38,9 +35,6 @@ let package = Package(
             name: "WalletConnectNetworking",
             targets: ["WalletConnectNetworking"]),
         .library(
-            name: "WalletConnectSync",
-            targets: ["WalletConnectSync"]),
-        .library(
             name: "WalletConnectVerify",
             targets: ["WalletConnectVerify"]),
         .library(
@@ -58,11 +52,8 @@ let package = Package(
         .target(
             name: "WalletConnectSign",
             dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner"],
-            path: "Sources/WalletConnectSign"),
-        .target(
-            name: "WalletConnectChat",
-            dependencies: ["WalletConnectIdentity", "WalletConnectSync"],
-            path: "Sources/Chat"),
+            path: "Sources/WalletConnectSign",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "Auth",
             dependencies: ["WalletConnectPairing", "WalletConnectSigner", "WalletConnectVerify"],
@@ -70,27 +61,31 @@ let package = Package(
         .target(
             name: "Web3Wallet",
             dependencies: ["WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
-            path: "Sources/Web3Wallet"),
+            path: "Sources/Web3Wallet",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectNotify",
             dependencies: ["WalletConnectPairing", "WalletConnectIdentity", "WalletConnectPush", "WalletConnectSigner", "Database"],
-            path: "Sources/WalletConnectNotify"),
+            path: "Sources/WalletConnectNotify",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectPush",
             dependencies: ["WalletConnectNetworking", "WalletConnectJWT"],
-            path: "Sources/WalletConnectPush"),
+            path: "Sources/WalletConnectPush",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectJWT"],
             path: "Sources/WalletConnectRelay",
-            resources: [.copy("PackageConfig.json")]),
+            resources: [.copy("PackageConfig.json"), .process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectKMS",
             dependencies: ["WalletConnectUtils"],
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectNetworking"]),
+            dependencies: ["WalletConnectNetworking"],
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
@@ -99,7 +94,8 @@ let package = Package(
             dependencies: ["WalletConnectKMS"]),
         .target(
             name: "WalletConnectIdentity",
-            dependencies: ["WalletConnectNetworking"]),
+            dependencies: ["WalletConnectNetworking"],
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["JSONRPC"]),
@@ -125,7 +121,8 @@ let package = Package(
             path: "Sources/WalletConnectRouter/Router"),
         .target(
             name: "WalletConnectVerify",
-            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"],
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "Database",
             dependencies: ["WalletConnectUtils"]),
@@ -135,21 +132,16 @@ let package = Package(
             exclude: ["Secrets/secrets.json.sample"],
             resources: [
                 .copy("Secrets/secrets.json"),
-                .copy("Resources/Assets.xcassets")
+                .copy("Resources/Assets.xcassets"),
+                .process("Resources/PrivacyInfo.xcprivacy"),
             ]
         ),
-        .target(
-            name: "WalletConnectSync",
-            dependencies: ["WalletConnectSigner"]),
         .testTarget(
             name: "WalletConnectSignTests",
             dependencies: ["WalletConnectSign", "WalletConnectUtils", "TestingUtils", "WalletConnectVerify"]),
         .testTarget(
             name: "WalletConnectPairingTests",
             dependencies: ["WalletConnectPairing", "TestingUtils"]),
-        .testTarget(
-            name: "ChatTests",
-            dependencies: ["WalletConnectChat", "WalletConnectUtils", "TestingUtils"]),
         .testTarget(
             name: "NotifyTests",
             dependencies: ["WalletConnectNotify", "TestingUtils"]),
