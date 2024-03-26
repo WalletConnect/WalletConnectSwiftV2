@@ -59,6 +59,8 @@ public extension Envelope {
         /// type 1 = tp + pk + iv + ct + tag
         case type1(pubKey: Data)
 
+        
+
         var representingByte: UInt8 {
             switch self {
             case .type0:

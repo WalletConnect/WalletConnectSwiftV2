@@ -333,6 +333,13 @@ public final class SignClient: SignClientProtocol {
         return pairingURI
     }
 
+    public func authenticateLinkMode(
+        _ params: AuthRequestParams,
+        walletUniversalLink: String
+    ) async throws {
+
+    }
+
 
 
     /// For a wallet to respond on authentication request

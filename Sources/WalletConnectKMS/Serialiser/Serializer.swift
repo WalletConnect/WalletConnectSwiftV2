@@ -57,6 +57,14 @@ public class Serializer: Serializing {
         return Envelope(type: envelopeType, sealbox: sealbox).serialised()
     }
 
+    public func serialize(encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
+        let messageJson = try JSONEncoder().encode(encodable)
+
+        let encoded = messageJson.base64EncodedString()
+        return Envelope(type: envelopeType, sealbox: sealbox).serialised()
+    }
+
+
     /// Deserializes and decrypts an object
     /// - Parameters:
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
