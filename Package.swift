@@ -66,11 +66,13 @@ let package = Package(
         .target(
             name: "WalletConnectNotify",
             dependencies: ["WalletConnectPairing", "WalletConnectIdentity", "WalletConnectPush", "WalletConnectSigner", "Database"],
-            path: "Sources/WalletConnectNotify"),
+            path: "Sources/WalletConnectNotify",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectPush",
             dependencies: ["WalletConnectNetworking", "WalletConnectJWT"],
-            path: "Sources/WalletConnectPush"),
+            path: "Sources/WalletConnectPush",
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectRelay",
             dependencies: ["WalletConnectJWT"],
@@ -82,7 +84,8 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectNetworking"]),
+            dependencies: ["WalletConnectNetworking"],
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectSigner",
             dependencies: ["WalletConnectNetworking"]),
@@ -91,7 +94,8 @@ let package = Package(
             dependencies: ["WalletConnectKMS"]),
         .target(
             name: "WalletConnectIdentity",
-            dependencies: ["WalletConnectNetworking"]),
+            dependencies: ["WalletConnectNetworking"],
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectUtils",
             dependencies: ["JSONRPC"]),
@@ -117,7 +121,8 @@ let package = Package(
             path: "Sources/WalletConnectRouter/Router"),
         .target(
             name: "WalletConnectVerify",
-            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"],
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "Database",
             dependencies: ["WalletConnectUtils"]),
@@ -127,7 +132,8 @@ let package = Package(
             exclude: ["Secrets/secrets.json.sample"],
             resources: [
                 .copy("Secrets/secrets.json"),
-                .copy("Resources/Assets.xcassets")
+                .copy("Resources/Assets.xcassets"),
+                .process("Resources/PrivacyInfo.xcprivacy"),
             ]
         ),
         .testTarget(
