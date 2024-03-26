@@ -6,4 +6,8 @@ final class SettingsInteractor {
     func notifyUnregister(account: Account) async throws {
         try await Notify.instance.unregister(account: account)
     }
+
+    func pushUnregister() async throws {
+        try await Push.instance.unregister()
+    }
 }

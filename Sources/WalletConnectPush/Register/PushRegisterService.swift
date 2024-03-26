@@ -13,6 +13,7 @@ actor PushRegisterService {
     
     enum Errors: Error {
         case registrationFailed
+        case unregisterFailed
     }
 
     init(httpClient: HTTPClient,
@@ -57,7 +58,21 @@ actor PushRegisterService {
             throw error
         }
     }
-    
+
+    func unregister() async throws {
+        let clientId = try clientIdStorage.getClientId()
+        let auth = try pushAuthenticator.createAuthToken()
+
+        let response = try await httpClient.request(
+            PushResponse.self,
+            at: PushAPI.unregister(clientId: clientId, projectId: projectId, auth: auth)
+        )
+        guard response.status == .success else {
+            throw Errors.unregisterFailed
+        }
+        logger.debug("Successfully unregistered at Push Server")
+    }
+
     func echoHostFallback() async {
         await httpClient.updateHost(host: "echo.walletconnect.org")
     }
