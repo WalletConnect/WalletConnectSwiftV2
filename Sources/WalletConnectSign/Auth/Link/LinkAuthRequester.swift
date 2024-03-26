@@ -63,7 +63,8 @@ actor LinkAuthRequester {
     }
 }
 
-
+#if os(iOS)
+import UIKit
 class LinkTransportInteractor {
     private let serializer: Serializing
     private let logger: ConsoleLogging
@@ -75,16 +76,15 @@ class LinkTransportInteractor {
 
     func request(request: RPCRequest, walletUniversalLink: String) async throws {
 
-        let message = try serializer.serialize(topic: <#T##String#>, encodable: request, envelopeType: <#T##Envelope.EnvelopeType#>)
+        let envelope = try serializer.serializeEnvelopeType2(encodable: request)
 
         guard var components = URLComponents(string: walletUniversalLink) else { throw URLError(.badURL) }
 
-
-
-        components.queryItems = [URLQueryItem(name: "wc_envelope", value: base64EncodedRequest)]
+        components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope)]
 
         guard let finalURL = components.url else { throw URLError(.badURL) }
 
-        UIApplication.shared.open(finalURL)
+        await UIApplication.shared.open(finalURL)
     }
 }
+#endif

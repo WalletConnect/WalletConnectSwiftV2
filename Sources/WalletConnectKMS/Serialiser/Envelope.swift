@@ -15,7 +15,7 @@ public struct Envelope: Equatable {
     /// pk = public key (32 bytes)
     /// iv = initialization vector (12 bytes)
     /// ct = ciphertext (N bytes)
-    /// sealbox = iv + ct + tag
+    /// sealbox: in case of envelope type 0 and 1: = iv + ct + tag, in case of type 2 - raw data representation of a json object
     /// type0: tp + sealbox
     /// type1: tp + pk + sealbox
     init(_ base64encoded: String) throws {
@@ -31,7 +31,11 @@ public struct Envelope: Equatable {
             let pubKey = envelopeData.subdata(in: 1..<33)
             self.type = .type1(pubKey: pubKey)
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
-        } else {
+        } else if envelopeTypeByte == 2 {
+            self.type = .type2
+            self.sealbox = base64encoded.rawRepresentation
+        }
+        else {
             throw Errors.unsupportedEnvelopeType
         }
     }
@@ -47,6 +51,8 @@ public struct Envelope: Equatable {
             return (type.representingByte.data + sealbox).base64EncodedString()
         case .type1(let pubKey):
             return (type.representingByte.data + pubKey + sealbox).base64EncodedString()
+        case .type2:
+            return (type.representingByte.data + sealbox).base64EncodedString()
         }
     }
 
@@ -59,7 +65,7 @@ public extension Envelope {
         /// type 1 = tp + pk + iv + ct + tag
         case type1(pubKey: Data)
 
-        
+        case type2
 
         var representingByte: UInt8 {
             switch self {
@@ -67,6 +73,8 @@ public extension Envelope {
                 return 0
             case .type1:
                 return 1
+            case .type2:
+                return 2
             }
         }
     }

@@ -57,11 +57,10 @@ public class Serializer: Serializing {
         return Envelope(type: envelopeType, sealbox: sealbox).serialised()
     }
 
-    public func serialize(encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
-        let messageJson = try JSONEncoder().encode(encodable)
-
-        let encoded = messageJson.base64EncodedString()
-        return Envelope(type: envelopeType, sealbox: sealbox).serialised()
+    /// Serializes envelope type 2
+    public func serializeEnvelopeType2(encodable: Encodable) throws -> String {
+        let messageData = try JSONEncoder().encode(encodable)
+        return Envelope(type: .type2, sealbox: messageData).serialised()
     }
 
 
@@ -78,6 +77,9 @@ public class Serializer: Serializing {
             return (deserialisedType.object, nil, deserialisedType.data)
         case .type1(let peerPubKey):
             return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
+        case .type2:
+            let decodedType: T = try handleType2Envelope(envelope: envelope)
+            return (decodedType, nil, Data())
         }
     }
 
@@ -98,7 +100,7 @@ public class Serializer: Serializing {
             throw error
         }
     }
-    
+
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, Data) {
         guard let selfPubKey = kms.getPublicKey(for: topic)
         else {
@@ -112,6 +114,10 @@ public class Serializer: Serializing {
         let derivedTopic = agreementKeys.derivedTopic()
         try kms.setAgreementSecret(agreementKeys, topic: derivedTopic)
         return (decodedType.object, derivedTopic, decodedType.data)
+    }
+
+    private func handleType2Envelope<T: Codable>(envelope: Envelope) throws -> T {
+        try JSONDecoder().decode(T.self, from: envelope.sealbox)
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> (T, Data) {
