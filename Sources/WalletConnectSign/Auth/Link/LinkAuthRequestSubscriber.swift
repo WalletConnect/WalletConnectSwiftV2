@@ -1,0 +1,33 @@
+import Foundation
+import Combine
+
+class LinkAuthRequestSubscriber {
+    private let logger: ConsoleLogging
+    private let kms: KeyManagementServiceProtocol
+    private var publishers = [AnyCancellable]()
+    private let envelopesDispatcher: EnvelopesDispatcher
+
+    var onRequest: (((request: AuthenticationRequest, context: VerifyContext?)) -> Void)?
+
+    init(
+        logger: ConsoleLogging,
+        kms: KeyManagementServiceProtocol,
+        envelopesDispatcher: EnvelopesDispatcher
+    ) {
+        self.logger = logger
+        self.kms = kms
+        self.envelopesDispatcher = envelopesDispatcher
+        subscribeForRequest()
+    }
+
+    private func subscribeForRequest() {
+
+        envelopesDispatcher.requestSubscription(on: SessionAuthenticatedProtocolMethod().method)
+            .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
+
+                print(payload)
+            }.store(in: &publishers)
+
+    }
+
+}

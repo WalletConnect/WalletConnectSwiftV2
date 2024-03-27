@@ -89,16 +89,70 @@ class LinkTransportInteractor {
 }
 #endif
 
-actor EnvelopeHandler {
+
+
+import Combine
+class EnvelopesDispatcher {
     private let serializer: Serializing
     private let logger: ConsoleLogging
+
+    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
+
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
+        requestPublisherSubject.eraseToAnyPublisher()
+    }
+
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never> {
+        responsePublisherSubject.eraseToAnyPublisher()
+    }
 
     init(serializer: Serializing, logger: ConsoleLogging) {
         self.serializer = serializer
         self.logger = logger
     }
 
-    func handleEnvelope(_ envelope: String) {
-        serializer.tryDeserialize(topic: <#T##String#>, encodedEnvelope: <#T##String#>)
+    func dispatchEnvelope(_ envelope: String, topic: String) {
+        manageSubscription(topic, envelope)
+    }
+
+
+    public func requestSubscription<RequestParams: Codable>(on method: String) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
+        return requestPublisher
+            .filter { rpcRequest in
+                return rpcRequest.request.method == method
+            }
+            .compactMap { [weak self] topic, rpcRequest in
+                do {
+                    guard let id = rpcRequest.id, let request = try rpcRequest.params?.get(RequestParams.self) else {
+                        return nil
+                    }
+                    return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil)
+                } catch {
+                    self?.logger.debug(error)
+                }
+                return nil
+            }
+
+            .eraseToAnyPublisher()
+    }
+
+    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
+        if let (deserializedJsonRpcRequest, _, _): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+            handleRequest(topic: topic, request: deserializedJsonRpcRequest)
+        } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+//            handleResponse(topic: topic, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
+        } else {
+            logger.debug("Networking Interactor - Received unknown object type from networking relay")
+        }
+    }
+
+    private func handleRequest(topic: String, request: RPCRequest) {
+        do {
+//            try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote)
+            requestPublisherSubject.send((topic, request))
+        } catch {
+            logger.debug(error)
+        }
     }
 }

@@ -187,6 +187,7 @@ public final class SignClient: SignClientProtocol {
 
     // Link Model
     private let linkAuthRequester: LinkAuthRequester?
+    private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber?
 
     private var publishers = Set<AnyCancellable>()
 
@@ -218,7 +219,8 @@ public final class SignClient: SignClientProtocol {
          requestsExpiryWatcher: RequestsExpiryWatcher,
          authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService,
          authRequestSubscribersTracking: AuthRequestSubscribersTracking,
-         linkAuthRequester: LinkAuthRequester
+         linkAuthRequester: LinkAuthRequester,
+         linkAuthRequestSubscriber: LinkAuthRequestSubscriber
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -247,6 +249,7 @@ public final class SignClient: SignClientProtocol {
         self.authResponseTopicResubscriptionService = authResponseTopicResubscriptionService
         self.authRequestSubscribersTracking = authRequestSubscribersTracking
         self.linkAuthRequester = linkAuthRequester
+        self.linkAuthRequestSubscriber = linkAuthRequestSubscriber
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()

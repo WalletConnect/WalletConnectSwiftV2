@@ -111,7 +111,11 @@ public struct SignClientFactory {
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: rpcHistory, verifyContextStore: verifyContextStore)
         let authResponseTopicResubscriptionService = AuthResponseTopicResubscriptionService(networkingInteractor: networkingClient, logger: logger, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
 
+        let serializer = Serializer(kms: kms, logger: logger)
 
+        let envelopesDispatcher = EnvelopesDispatcher(serializer: serializer, logger: logger)
+        let linkAuthRequester = LinkAuthRequester(kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
+        let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: envelopesDispatcher)
         let client = SignClient(
             logger: logger,
             networkingClient: networkingClient,
@@ -138,7 +142,9 @@ public struct SignClientFactory {
             pendingProposalsProvider: pendingProposalsProvider,
             requestsExpiryWatcher: requestsExpiryWatcher,
             authResponseTopicResubscriptionService: authResponseTopicResubscriptionService,
-            authRequestSubscribersTracking: authRequestSubscribersTracking
+            authRequestSubscribersTracking: authRequestSubscribersTracking,
+            linkAuthRequester: linkAuthRequester,
+            linkAuthRequestSubscriber: linkAuthRequestSubscriber
         )
         return client
     }
