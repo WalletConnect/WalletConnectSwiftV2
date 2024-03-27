@@ -75,6 +75,9 @@ import UIKit
 
 import Combine
 class LinkEnvelopesDispatcher {
+    enum Errors: Error {
+        case invalidURL
+    }
     private let serializer: Serializing
     private let logger: ConsoleLogging
 
@@ -94,8 +97,17 @@ class LinkEnvelopesDispatcher {
         self.logger = logger
     }
 
-    func dispatchEnvelope(_ envelope: String, topic: String) {
-        manageSubscription(topic, envelope)
+    func dispatchEnvelope(_ envelope: String, topic: String) throws {
+        guard let envelopeURL = URL(string: envelope) else {
+            throw Errors.invalidURL
+        }
+
+        // Use URLComponents to parse the URL for query items
+        guard let components = URLComponents(url: envelopeURL, resolvingAgainstBaseURL: true),
+              let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_envelope" })?.value else {
+            throw Errors.invalidURL
+        }
+        manageSubscription(topic, wcEnvelope)
     }
 
     func request(request: RPCRequest, walletUniversalLink: String) async throws -> String {

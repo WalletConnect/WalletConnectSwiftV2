@@ -357,8 +357,8 @@ public final class SignClient: SignClientProtocol {
         return try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
     }
 
-    public func dispatchEnvelope(_ envelope: String, topic: String) {
-        linkEnvelopesDispatcher.dispatchEnvelope(envelope, topic: topic)
+    public func dispatchEnvelope(_ envelope: String, topic: String) throws {
+        try linkEnvelopesDispatcher.dispatchEnvelope(envelope, topic: topic)
     }
 
 
