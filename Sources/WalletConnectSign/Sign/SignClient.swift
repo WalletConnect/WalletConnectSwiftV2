@@ -7,9 +7,10 @@ import Combine
 ///
 /// Access via `Sign.instance`
 public final class SignClient: SignClientProtocol {
-    
+
     enum Errors: Error {
         case sessionForTopicNotFound
+        case linkModeUnsupported
     }
 
     // MARK: - Public Properties
@@ -183,6 +184,10 @@ public final class SignClient: SignClientProtocol {
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthenticationRequest, context: VerifyContext?), Never>()
     private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
 
+
+    // Link Model
+    private let linkAuthRequester: LinkAuthRequester?
+
     private var publishers = Set<AnyCancellable>()
 
     // MARK: - Initialization
@@ -212,7 +217,8 @@ public final class SignClient: SignClientProtocol {
          pendingProposalsProvider: PendingProposalsProvider,
          requestsExpiryWatcher: RequestsExpiryWatcher,
          authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService,
-         authRequestSubscribersTracking: AuthRequestSubscribersTracking
+         authRequestSubscribersTracking: AuthRequestSubscribersTracking,
+         linkAuthRequester: LinkAuthRequester
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -240,6 +246,7 @@ public final class SignClient: SignClientProtocol {
         self.requestsExpiryWatcher = requestsExpiryWatcher
         self.authResponseTopicResubscriptionService = authResponseTopicResubscriptionService
         self.authRequestSubscribersTracking = authRequestSubscribersTracking
+        self.linkAuthRequester = linkAuthRequester
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -333,10 +340,18 @@ public final class SignClient: SignClientProtocol {
         return pairingURI
     }
 
+    // Link mode
     public func authenticateLinkMode(
         _ params: AuthRequestParams,
         walletUniversalLink: String
     ) async throws {
+        guard let linkAuthRequester = linkAuthRequester else {
+            throw Errors.linkModeUnsupported
+        }
+        try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
+    }
+
+    public func handleWCEnvelope(_ envelope: String) {
 
     }
 

@@ -88,3 +88,17 @@ class LinkTransportInteractor {
     }
 }
 #endif
+
+actor EnvelopeHandler {
+    private let serializer: Serializing
+    private let logger: ConsoleLogging
+
+    init(serializer: Serializing, logger: ConsoleLogging) {
+        self.serializer = serializer
+        self.logger = logger
+    }
+
+    func handleEnvelope(_ envelope: String) {
+        serializer.tryDeserialize(topic: <#T##String#>, encodedEnvelope: <#T##String#>)
+    }
+}
