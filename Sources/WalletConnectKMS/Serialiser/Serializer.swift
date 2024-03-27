@@ -6,6 +6,7 @@ public class Serializer: Serializing {
     enum Errors: Error, CustomStringConvertible {
         case symmetricKeyForTopicNotFound(String)
         case publicKeyForTopicNotFound
+        case invalidType2Envelope
 
         var description: String {
             switch self {
@@ -13,6 +14,8 @@ public class Serializer: Serializing {
                 return "Error: Symmetric key for topic '\(topic)' was not found."
             case .publicKeyForTopicNotFound:
                 return "Error: Public key for topic was not found."
+            case .invalidType2Envelope:
+                return "Error: Invalid type 2 envelope."
             }
         }
     }
@@ -117,7 +120,13 @@ public class Serializer: Serializing {
     }
 
     private func handleType2Envelope<T: Codable>(envelope: Envelope) throws -> T {
-        try JSONDecoder().decode(T.self, from: envelope.sealbox)
+        do {
+            let deserialised = try JSONDecoder().decode(T.self, from: envelope.sealbox)
+            return deserialised
+        } catch {
+            print(error)
+            throw error
+        }
     }
 
     private func decode<T: Codable>(sealbox: Data, symmetricKey: Data) throws -> (T, Data) {

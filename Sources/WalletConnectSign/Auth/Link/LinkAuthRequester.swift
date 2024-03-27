@@ -10,22 +10,26 @@ actor LinkAuthRequester {
     private let logger: ConsoleLogging
     private let iatProvader: IATProvider
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
+    private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
 
     init(kms: KeyManagementService,
          appMetadata: AppMetadata,
          logger: ConsoleLogging,
          iatProvader: IATProvider,
-         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>) {
+         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher) {
         self.kms = kms
         self.appMetadata = appMetadata
         self.logger = logger
         self.iatProvader = iatProvader
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
+        self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
     }
 
-    func request(params: AuthRequestParams, walletUniversalLink: String) async throws {
+    func request(params: AuthRequestParams, walletUniversalLink: String) async throws -> String {
 
 
+        print("LinkAuthRequester: creating request")
         var params = params
         let pubKey = try kms.createX25519KeyPair()
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
@@ -56,6 +60,8 @@ actor LinkAuthRequester {
 
         logger.debug("LinkAuthRequester: sending request")
 
+        return try await linkEnvelopesDispatcher.request(request: request, walletUniversalLink: walletUniversalLink)
+
     }
 
     private func createRecapUrn(methods: [String]) throws -> String {
@@ -65,34 +71,10 @@ actor LinkAuthRequester {
 
 #if os(iOS)
 import UIKit
-class LinkTransportInteractor {
-    private let serializer: Serializing
-    private let logger: ConsoleLogging
-
-    init(serializer: Serializing, logger: ConsoleLogging) {
-        self.serializer = serializer
-        self.logger = logger
-    }
-
-    func request(request: RPCRequest, walletUniversalLink: String) async throws {
-
-        let envelope = try serializer.serializeEnvelopeType2(encodable: request)
-
-        guard var components = URLComponents(string: walletUniversalLink) else { throw URLError(.badURL) }
-
-        components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope)]
-
-        guard let finalURL = components.url else { throw URLError(.badURL) }
-
-        await UIApplication.shared.open(finalURL)
-    }
-}
-#endif
-
 
 
 import Combine
-class EnvelopesDispatcher {
+class LinkEnvelopesDispatcher {
     private let serializer: Serializing
     private let logger: ConsoleLogging
 
@@ -114,6 +96,21 @@ class EnvelopesDispatcher {
 
     func dispatchEnvelope(_ envelope: String, topic: String) {
         manageSubscription(topic, envelope)
+    }
+
+    func request(request: RPCRequest, walletUniversalLink: String) async throws -> String {
+
+        let envelope = try serializer.serializeEnvelopeType2(encodable: request)
+
+        guard var components = URLComponents(string: walletUniversalLink) else { throw URLError(.badURL) }
+
+        components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope)]
+
+        guard let finalURL = components.url else { throw URLError(.badURL) }
+
+
+//        await UIApplication.shared.open(finalURL)
+        return finalURL.absoluteString
     }
 
 
@@ -156,3 +153,4 @@ class EnvelopesDispatcher {
         }
     }
 }
+#endif

@@ -188,6 +188,7 @@ public final class SignClient: SignClientProtocol {
     // Link Model
     private let linkAuthRequester: LinkAuthRequester?
     private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber?
+    private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
 
     private var publishers = Set<AnyCancellable>()
 
@@ -220,7 +221,8 @@ public final class SignClient: SignClientProtocol {
          authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService,
          authRequestSubscribersTracking: AuthRequestSubscribersTracking,
          linkAuthRequester: LinkAuthRequester,
-         linkAuthRequestSubscriber: LinkAuthRequestSubscriber
+         linkAuthRequestSubscriber: LinkAuthRequestSubscriber,
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -250,6 +252,7 @@ public final class SignClient: SignClientProtocol {
         self.authRequestSubscribersTracking = authRequestSubscribersTracking
         self.linkAuthRequester = linkAuthRequester
         self.linkAuthRequestSubscriber = linkAuthRequestSubscriber
+        self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -344,18 +347,18 @@ public final class SignClient: SignClientProtocol {
     }
 
     // Link mode
-    public func authenticateLinkMode(
+    @discardableResult public func authenticateLinkMode(
         _ params: AuthRequestParams,
         walletUniversalLink: String
-    ) async throws {
+    ) async throws -> String {
         guard let linkAuthRequester = linkAuthRequester else {
             throw Errors.linkModeUnsupported
         }
-        try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
+        return try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
     }
 
-    public func handleWCEnvelope(_ envelope: String) {
-
+    public func dispatchEnvelope(_ envelope: String, topic: String) {
+        linkEnvelopesDispatcher.dispatchEnvelope(envelope, topic: topic)
     }
 
 

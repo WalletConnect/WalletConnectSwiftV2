@@ -33,7 +33,7 @@ public struct Envelope: Equatable {
             self.sealbox = envelopeData.subdata(in: 33..<envelopeData.count)
         } else if envelopeTypeByte == 2 {
             self.type = .type2
-            self.sealbox = base64encoded.rawRepresentation
+            self.sealbox = envelopeData.subdata(in: 1..<envelopeData.count)
         }
         else {
             throw Errors.unsupportedEnvelopeType

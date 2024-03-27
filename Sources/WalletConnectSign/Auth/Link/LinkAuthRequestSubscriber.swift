@@ -5,14 +5,14 @@ class LinkAuthRequestSubscriber {
     private let logger: ConsoleLogging
     private let kms: KeyManagementServiceProtocol
     private var publishers = [AnyCancellable]()
-    private let envelopesDispatcher: EnvelopesDispatcher
+    private let envelopesDispatcher: LinkEnvelopesDispatcher
 
     var onRequest: (((request: AuthenticationRequest, context: VerifyContext?)) -> Void)?
 
     init(
         logger: ConsoleLogging,
         kms: KeyManagementServiceProtocol,
-        envelopesDispatcher: EnvelopesDispatcher
+        envelopesDispatcher: LinkEnvelopesDispatcher
     ) {
         self.logger = logger
         self.kms = kms

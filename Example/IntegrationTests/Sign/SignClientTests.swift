@@ -1086,4 +1086,42 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
+    // Link Mode
+
+    func testLinkAuthRequest() async throws {
+        let responseExpectation = expectation(description: "successful response delivered")
+
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
+            print("💯💯💯💯💯💯💯💯💯💯")
+//            Task(priority: .high) {
+//                let signerFactory = DefaultSignerFactory()
+//                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+//
+//                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+//
+//                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+//
+//                let signature = try signer.sign(
+//                    message: siweMessage,
+//                    privateKey: prvKey,
+//                    type: .eip191)
+//
+//                let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+//
+//                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+//            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+            responseExpectation.fulfill()
+        }
+        .store(in: &publishers)
+
+
+        let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: "")
+        try await wallet.dispatchEnvelope(requestEnvelope, topic: "")
+        await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
 }

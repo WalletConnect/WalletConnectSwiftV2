@@ -42,4 +42,24 @@ final class SerializerTests: XCTestCase {
         let (deserializedMessage, _, _): (String, String?, Data) = mySerializer.tryDeserialize(topic: topic, encodedEnvelope: serializedMessage)!
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
+
+    func testSerializeDeserializeType2Envelope() {
+
+        let messageToSerialize = "todo - change for request object"
+
+        // Serialize the sample object with Type 2 envelope
+        guard let serializedMessage = try? mySerializer.serializeEnvelopeType2(encodable: messageToSerialize) else {
+            XCTFail("Serialization failed for Type 2 envelope.")
+            return
+        }
+
+        // Deserialize the serialized message back into the original object
+        guard let (deserializedMessage, _, _): (String, String?, Data) = mySerializer.tryDeserialize(topic: "", encodedEnvelope: serializedMessage) else {
+            XCTFail("Deserialization failed for Type 2 envelope.")
+            return
+        }
+
+        XCTAssertEqual(messageToSerialize, deserializedMessage)
+    }
+
 }
