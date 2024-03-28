@@ -187,7 +187,7 @@ public final class SignClient: SignClientProtocol {
 
     // Link Model
     private let linkAuthRequester: LinkAuthRequester?
-    private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber?
+    private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
 
     private var publishers = Set<AnyCancellable>()

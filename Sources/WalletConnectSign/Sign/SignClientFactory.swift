@@ -114,9 +114,8 @@ public struct SignClientFactory {
         let serializer = Serializer(kms: kms, logger: logger)
 
         let linkEnvelopesDispatcher = LinkEnvelopesDispatcher(serializer: serializer, logger: logger)
-        let envelopesDispatcher = LinkEnvelopesDispatcher(serializer: serializer, logger: logger)
         let linkAuthRequester = LinkAuthRequester(kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher)
-        let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: envelopesDispatcher)
+        let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: linkEnvelopesDispatcher)
         let client = SignClient(
             logger: logger,
             networkingClient: networkingClient,

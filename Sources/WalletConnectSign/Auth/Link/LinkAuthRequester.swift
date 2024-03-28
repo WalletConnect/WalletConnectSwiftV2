@@ -80,6 +80,8 @@ class LinkEnvelopesDispatcher {
     }
     private let serializer: Serializing
     private let logger: ConsoleLogging
+    private var publishers = Set<AnyCancellable>()
+
 
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
@@ -95,6 +97,11 @@ class LinkEnvelopesDispatcher {
     init(serializer: Serializing, logger: ConsoleLogging) {
         self.serializer = serializer
         self.logger = logger
+
+        requestPublisher.sink { (topic: String, request: RPCRequest) in
+            print(request)
+//todo to remove this subscription and publisheers
+        }.store(in: &publishers)
     }
 
     func dispatchEnvelope(_ envelope: String, topic: String) throws {
