@@ -568,6 +568,9 @@ public final class SignClient: SignClientProtocol {
         authRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
         }
+        linkAuthRequestSubscriber.onRequest = { [unowned self] request in
+            authRequestPublisherSubject.send(request)
+        }
     }
 
     private func setUpConnectionObserving() {

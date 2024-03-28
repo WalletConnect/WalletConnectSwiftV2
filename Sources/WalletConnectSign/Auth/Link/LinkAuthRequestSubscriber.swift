@@ -25,7 +25,18 @@ class LinkAuthRequestSubscriber {
         envelopesDispatcher.requestSubscription(on: SessionAuthenticatedProtocolMethod().method)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
 
-                print(payload)
+                logger.debug("LinkAuthRequestSubscriber: Received request")
+
+
+                let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.authPayload, requester: payload.request.requester.metadata)
+
+
+                // TODO fix verify context
+
+                let verifyContext = VerifyContext(origin: "", validation: .valid)
+                
+                onRequest?((request, verifyContext))
+
             }.store(in: &publishers)
 
     }
