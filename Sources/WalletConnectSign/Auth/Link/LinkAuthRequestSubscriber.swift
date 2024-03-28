@@ -34,7 +34,7 @@ class LinkAuthRequestSubscriber {
                 // TODO fix verify context
 
                 let verifyContext = VerifyContext(origin: "", validation: .valid)
-                
+
                 onRequest?((request, verifyContext))
 
             }.store(in: &publishers)

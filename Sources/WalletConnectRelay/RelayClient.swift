@@ -223,7 +223,7 @@ public final class RelayClient {
             if let params = try? request.params?.get(Subscription.Params.self) {
                 do {
                     try acknowledgeRequest(request)
-                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
+                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote, transportType: .relay)
                     logger.debug("received message: \(params.data.message) on topic: \(params.data.topic)")
                     messagePublisherSubject.send((params.data.topic, params.data.message, params.data.publishedAt))
                 } catch {

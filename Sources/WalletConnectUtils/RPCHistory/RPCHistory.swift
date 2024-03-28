@@ -7,12 +7,17 @@ public final class RPCHistory {
             case local
             case remote
         }
+        public enum TransportType: Codable {
+            case relay
+            case linkMode
+        }
         public let id: RPCID
         public let topic: String
         let origin: Origin
         public let request: RPCRequest
         public let response: RPCResponse?
         public var timestamp: Date?
+        public let transportType: TransportType
     }
 
     enum HistoryError: Error, LocalizedError {
@@ -50,14 +55,14 @@ public final class RPCHistory {
         try? storage.get(key: recordId.string)
     }
 
-    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin, time: TimeProvider = DefaultTimeProvider()) throws {
+    public func set(_ request: RPCRequest, forTopic topic: String, emmitedBy origin: Record.Origin, time: TimeProvider = DefaultTimeProvider(), transportType: RPCHistory.Record.TransportType) throws {
         guard let id = request.id else {
             throw HistoryError.unidentifiedRequest
         }
         guard get(recordId: id) == nil else {
             throw HistoryError.requestDuplicateNotAllowed
         }
-        let record = Record(id: id, topic: topic, origin: origin, request: request, response: nil, timestamp: time.currentDate)
+        let record = Record(id: id, topic: topic, origin: origin, request: request, response: nil, timestamp: time.currentDate, transportType: transportType)
         storage.set(record, forKey: "\(record.id)")
     }
 

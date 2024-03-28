@@ -201,7 +201,7 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     public func request(_ request: RPCRequest, topic: String, protocolMethod: ProtocolMethod, envelopeType: Envelope.EnvelopeType) async throws {
-        try rpcHistory.set(request, forTopic: topic, emmitedBy: .local)
+        try rpcHistory.set(request, forTopic: topic, emmitedBy: .local, transportType: .relay)
 
         do {
             let message = try serializer.serialize(topic: topic, encodable: request, envelopeType: envelopeType)
@@ -257,7 +257,7 @@ public class NetworkingInteractor: NetworkInteracting {
 
     private func handleRequest(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?) {
         do {
-            try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote)
+            try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote, transportType: .relay)
             requestPublisherSubject.send((topic, request, decryptedPayload, publishedAt, derivedTopic))
         } catch {
             logger.debug(error)

@@ -185,7 +185,7 @@ public final class SignClient: SignClientProtocol {
     private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
 
 
-    // Link Model
+    // Link Mode
     private let linkAuthRequester: LinkAuthRequester?
     private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
