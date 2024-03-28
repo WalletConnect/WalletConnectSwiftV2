@@ -66,10 +66,10 @@ class SessionNamespaceBuilderTests: XCTestCase {
         let expectedSessionNamespace = SessionNamespace(
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
             accounts: [
-                Account("eip155:1:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!,
-                Account("eip155:137:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!,
                 Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
-                Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
+                Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
+                Account("eip155:1:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!,
+                Account("eip155:137:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!
             ],
             methods: Set(["personal_sign", "eth_signTypedData", "eth_sign"]),
             events: Set(["chainChanged", "accountsChanged"])

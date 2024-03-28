@@ -5,6 +5,9 @@ import Web3Wallet
 import WalletConnectRouter
 
 final class AuthRequestPresenter: ObservableObject {
+    enum Errors: Error {
+        case noCommonChains
+    }
     private let router: AuthRequestRouter
 
     let importAccount: ImportAccount
@@ -74,6 +77,30 @@ final class AuthRequestPresenter: ObservableObject {
     }
 
     @MainActor
+    func signOne() async {
+        do {
+            ActivityIndicatorManager.shared.start()
+
+            let auths = try buildOneAuthObject()
+
+            _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
+            ActivityIndicatorManager.shared.stop()
+
+            /* Redirect */
+            if let uri = request.requester.redirect?.native {
+                WalletConnectRouter.goBack(uri: uri)
+                router.dismiss()
+            } else {
+                showSignedSheet.toggle()
+            }
+
+        } catch {
+            ActivityIndicatorManager.shared.stop()
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
+        }
+    }
+
+    @MainActor
     func reject() async  {
         ActivityIndicatorManager.shared.start()
 
@@ -98,33 +125,39 @@ final class AuthRequestPresenter: ObservableObject {
         router.dismiss()
     }
 
+    private func createAuthObjectForChain(chain: Blockchain) throws -> AuthObject {
+        let account = Account(blockchain: chain, address: importAccount.account.address)!
+
+        let supportedAuthPayload = try Web3Wallet.instance.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!, Blockchain("eip155:69")!], supportedMethods: ["personal_sign", "eth_sendTransaction"])
+
+        let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: supportedAuthPayload, account: account)
+
+        let signature = try messageSigner.sign(message: SIWEmessages, privateKey: Data(hex: importAccount.privateKey), type: .eip191)
+
+        let auth = try Web3Wallet.instance.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: account)
+
+        return auth
+    }
+
     private func buildAuthObjects() throws -> [AuthObject] {
+        guard let chain = getCommonAndRequestedChainsIntersection().first else {
+            throw Errors.noCommonChains
+        }
+
+        let auth = try createAuthObjectForChain(chain: chain)
+        return [auth]
+    }
+
+    private func buildOneAuthObject() throws -> [AuthObject] {
         var auths = [AuthObject]()
 
         try getCommonAndRequestedChainsIntersection().forEach { chain in
-
-            let account = Account(blockchain: chain, address: importAccount.account.address)!
-
-            var supportedAuthPayload: AuthPayload!
-            do {
-                supportedAuthPayload = try Web3Wallet.instance.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!, Blockchain("eip155:69")!], supportedMethods: ["personal_sign", "eth_sendTransaction"])
-            } catch {
-                Task { await reject() }
-                throw error
-            }
-            let SIWEmessages = try Web3Wallet.instance.formatAuthMessage(payload: supportedAuthPayload, account: account)
-
-            let signature = try messageSigner.sign(
-                message: SIWEmessages,
-                privateKey: Data(hex: importAccount.privateKey),
-                type: .eip191)
-
-            let auth = try Web3Wallet.instance.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: account)
-
+            let auth = try createAuthObjectForChain(chain: chain)
             auths.append(auth)
         }
         return auths
     }
+
 
     func getCommonAndRequestedChainsIntersection() -> Set<Blockchain> {
         let requestedChains: Set<Blockchain> = Set(request.payload.chains.compactMap { Blockchain($0) })

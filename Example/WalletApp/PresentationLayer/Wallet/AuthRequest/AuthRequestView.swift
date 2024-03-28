@@ -93,20 +93,8 @@ struct AuthRequestView: View {
                         }
                     }
                     
-                    if case .scam = presenter.validationStatus {
-                        VStack(spacing: 20) {
-                            declineButton()
-                            allowButton()
-                        }
-                        .padding(.top, 25)
-                    } else {
-                        HStack {
-                            declineButton()
-                            allowButton()
-                        }
-                        .padding(.top, 25)
-                    }
-                    
+                    buttonGroup()
+
                     
                 }
                 .padding(20)
@@ -241,7 +229,7 @@ struct AuthRequestView: View {
                 presenter.approve()
             }
         } label: {
-            Text(presenter.validationStatus == .scam ? "Proceed anyway" : "Allow")
+            Text(presenter.validationStatus == .scam ? "Proceed anyway" : "Sign Multi")
                 .frame(maxWidth: .infinity)
                 .foregroundColor(presenter.validationStatus == .scam ? .grey50 : .white)
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
@@ -265,6 +253,50 @@ struct AuthRequestView: View {
         }
         .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
     }
+
+    private func signOneButton() -> some View {
+        Button {
+            Task(priority: .userInitiated) {
+                await presenter.signOne()
+            }
+        } label: {
+            Text("Sign One")
+                .frame(maxWidth: .infinity)
+                .foregroundColor(.white)
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .padding(.vertical, 11)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.blue, .purple]), // Example gradient, adjust as needed
+                        startPoint: .top, endPoint: .bottom
+                    )
+                )
+                .cornerRadius(20)
+        }
+        .shadow(color: .white.opacity(0.25), radius: 8, y: 2)
+    }
+
+    // Adjusted layout to include the signOneButton
+    private func buttonGroup() -> some View {
+        Group {
+            if case .scam = presenter.validationStatus {
+                VStack(spacing: 20) {
+                    declineButton()
+                    signOneButton() // Place the "Sign One" button between "Decline" and "Allow"
+                    allowButton()
+                }
+                .padding(.top, 25)
+            } else {
+                HStack {
+                    declineButton()
+                    signOneButton() // Include the "Sign One" button in the horizontal stack
+                    allowButton()
+                }
+                .padding(.top, 25)
+            }
+        }
+    }
+
 }
 
 #if DEBUG

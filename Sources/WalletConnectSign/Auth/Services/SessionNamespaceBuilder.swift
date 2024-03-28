@@ -38,7 +38,7 @@ class SessionNamespaceBuilder {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
         }
 
-        let addresses = Set(cacaos.compactMap { try? DIDPKH(did: $0.p.iss).account.address })
+        let addresses = getUniqueAddresses(from: cacaos)
         var accounts = [Account]()
 
         for address in addresses {
@@ -54,6 +54,19 @@ class SessionNamespaceBuilder {
 
         let sessionNamespace = SessionNamespace(chains: chains, accounts: accounts, methods: methods, events: events)
         return [chainsNamespace: sessionNamespace]
+    }
+
+    func getUniqueAddresses(from cacaos: [Cacao]) -> [String] {
+        var seenAddresses = Set<String>()
+        var uniqueAddresses = [String]()
+
+        for cacao in cacaos {
+            if let address = try? DIDPKH(did: cacao.p.iss).account.address, !seenAddresses.contains(address) {
+                uniqueAddresses.append(address)
+                seenAddresses.insert(address)
+            }
+        }
+        return uniqueAddresses
     }
 
 }
