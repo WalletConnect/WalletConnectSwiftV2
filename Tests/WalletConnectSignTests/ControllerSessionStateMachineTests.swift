@@ -70,7 +70,7 @@ class ControllerSessionStateMachineTests: XCTestCase {
         let twoDays = 2*Time.day
         await XCTAssertNoThrowAsync(try await sessionExtendRequester.extend(topic: session.topic, by: Int64(twoDays)))
         let extendedSession = storageMock.getAll().first {$0.topic == session.topic}!
-        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSinceReferenceDate, TimeTraveler.dateByAdding(days: 2).timeIntervalSinceReferenceDate, accuracy: 1)
+        XCTAssertEqual(extendedSession.expiryDate.timeIntervalSince1970, TimeTraveler.dateByAdding(days: 2).timeIntervalSince1970, accuracy: 1)
     }
 
     func testUpdateExpiryTtlTooHigh() async {
