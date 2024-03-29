@@ -17,7 +17,7 @@ public final class RPCHistory {
         public let request: RPCRequest
         public let response: RPCResponse?
         public var timestamp: Date?
-        public let transportType: TransportType
+        public let transportType: TransportType?
     }
 
     enum HistoryError: Error, LocalizedError {

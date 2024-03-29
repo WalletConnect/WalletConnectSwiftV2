@@ -35,7 +35,7 @@ final class WalletPairServiceTestsTests: XCTestCase {
         var pairing = storageMock.getPairing(forTopic: uri.topic)
         pairing?.receivedRequest()
         storageMock.setPairing(pairing!)
-        try! rpcHistory.set(rpcRequest, forTopic: uri.topic, emmitedBy: .local)
+        try! rpcHistory.set(rpcRequest, forTopic: uri.topic, emmitedBy: .local, transportType: .relay)
         
         try! await service.pair(uri)
         XCTAssertTrue(networkingInteractor.didCallHandleHistoryRequest)

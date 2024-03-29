@@ -48,7 +48,7 @@ final class SerializerTests: XCTestCase {
         let messageToSerialize = "todo - change for request object"
 
         // Serialize the sample object with Type 2 envelope
-        guard let serializedMessage = try? mySerializer.serializeEnvelopeType2(encodable: messageToSerialize) else {
+        guard let serializedMessage = try? mySerializer.serialize(topic: "", encodable: messageToSerialize, envelopeType: .type2) else {
             XCTFail("Serialization failed for Type 2 envelope.")
             return
         }

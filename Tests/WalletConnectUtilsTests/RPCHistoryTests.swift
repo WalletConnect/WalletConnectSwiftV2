@@ -20,7 +20,7 @@ final class RPCHistoryTests: XCTestCase {
 
     func testRoundTrip() throws {
         let request = RPCRequest.stub()
-        try sut.set(request, forTopic: String.randomTopic(), emmitedBy: .local)
+        try sut.set(request, forTopic: String.randomTopic(), emmitedBy: .local, transportType: .relay)
         let record = sut.get(recordId: request.id!)
         XCTAssertNil(record?.response)
         XCTAssertEqual(record?.request, request)
@@ -31,8 +31,8 @@ final class RPCHistoryTests: XCTestCase {
         let requestB = RPCRequest.stub()
         let responseA = RPCResponse(matchingRequest: requestA, result: true)
         let responseB = RPCResponse(matchingRequest: requestB, error: .internalError)
-        try sut.set(requestA, forTopic: String.randomTopic(), emmitedBy: .remote)
-        try sut.set(requestB, forTopic: String.randomTopic(), emmitedBy: .local)
+        try sut.set(requestA, forTopic: String.randomTopic(), emmitedBy: .remote, transportType: .relay)
+        try sut.set(requestB, forTopic: String.randomTopic(), emmitedBy: .local, transportType: .relay)
         try sut.resolve(responseA)
         try sut.resolve(responseB)
         XCTAssertNil(sut.get(recordId: requestA.id!))
@@ -42,7 +42,7 @@ final class RPCHistoryTests: XCTestCase {
     func testDelete() throws {
         let requests = (1...5).map { _ in RPCRequest.stub() }
         let topic = String.randomTopic()
-        try requests.forEach { try sut.set($0, forTopic: topic, emmitedBy: .local) }
+        try requests.forEach { try sut.set($0, forTopic: topic, emmitedBy: .local, transportType: .relay) }
         sut.deleteAll(forTopic: topic)
         requests.forEach {
             XCTAssertNil(sut.get(recordId: $0.id!))
@@ -55,7 +55,7 @@ final class RPCHistoryTests: XCTestCase {
         let expectedError = RPCHistory.HistoryError.unidentifiedRequest
 
         let request = RPCRequest.notification(method: "notify")
-        XCTAssertThrowsError(try sut.set(request, forTopic: String.randomTopic(), emmitedBy: .local)) { error in
+        XCTAssertThrowsError(try sut.set(request, forTopic: String.randomTopic(), emmitedBy: .local, transportType: .relay)) { error in
             XCTAssertEqual(expectedError, error as? RPCHistory.HistoryError)
         }
     }
@@ -68,8 +68,8 @@ final class RPCHistoryTests: XCTestCase {
         let requestB = RPCRequest.stub(method: "method-2", id: id)
         let topic = String.randomTopic()
 
-        try sut.set(requestA, forTopic: topic, emmitedBy: .local)
-        XCTAssertThrowsError(try sut.set(requestB, forTopic: topic, emmitedBy: .local)) { error in
+        try sut.set(requestA, forTopic: topic, emmitedBy: .local, transportType: .relay)
+        XCTAssertThrowsError(try sut.set(requestB, forTopic: topic, emmitedBy: .local, transportType: .relay)) { error in
             XCTAssertEqual(expectedError, error as? RPCHistory.HistoryError)
         }
     }
@@ -99,7 +99,7 @@ final class RPCHistoryTests: XCTestCase {
         let responseA = RPCResponse(matchingRequest: request, result: true)
         let responseB = RPCResponse(matchingRequest: request, result: false)
 
-        try sut.set(request, forTopic: String.randomTopic(), emmitedBy: .local)
+        try sut.set(request, forTopic: String.randomTopic(), emmitedBy: .local, transportType: .relay)
         try sut.resolve(responseA)
         XCTAssertThrowsError(try sut.resolve(responseB)) { error in
             XCTAssertEqual(expectedError, error as? RPCHistory.HistoryError)
@@ -113,8 +113,8 @@ final class RPCHistoryTests: XCTestCase {
         let time1 = TestTimeProvider(currentDate: .distantPast)
         let time2 = TestTimeProvider(currentDate: Date())
 
-        try sut.set(request1, forTopic: .randomTopic(), emmitedBy: .local, time: time1)
-        try sut.set(request2, forTopic: .randomTopic(), emmitedBy: .local, time: time2)
+        try sut.set(request1, forTopic: .randomTopic(), emmitedBy: .local, time: time1, transportType: .relay)
+        try sut.set(request2, forTopic: .randomTopic(), emmitedBy: .local, time: time2, transportType: .relay)
 
         XCTAssertEqual(sut.get(recordId: request1.id!)?.request, request1)
         XCTAssertEqual(sut.get(recordId: request2.id!)?.request, request2)

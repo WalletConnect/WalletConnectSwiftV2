@@ -26,7 +26,7 @@ actor ApproveSessionAuthenticateDispatcher {
 
         switch transportType {
 
-        case .relay:
+        case .relay, .none:
             return try await relaySessionAuthenticateResponder.respond(requestId: requestId, auths: auths)
         case .linkMode:
             return try await linkSessionAuthenticateResponder.respond(requestId: requestId, auths: auths)

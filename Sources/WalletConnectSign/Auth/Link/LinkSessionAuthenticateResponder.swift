@@ -8,7 +8,6 @@ actor LinkSessionAuthenticateResponder {
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let kms: KeyManagementService
     private let logger: ConsoleLogging
-    private let walletErrorResponder: WalletErrorResponder
     private let metadata: AppMetadata
     private let util: ApproveSessionAuthenticateUtil
 
@@ -16,14 +15,12 @@ actor LinkSessionAuthenticateResponder {
         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
         logger: ConsoleLogging,
         kms: KeyManagementService,
-        walletErrorResponder: WalletErrorResponder,
         metadata: AppMetadata,
         approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil
     ) {
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.logger = logger
         self.kms = kms
-        self.walletErrorResponder = walletErrorResponder
         self.metadata = metadata
         self.util = approveSessionAuthenticateUtil
     }
@@ -68,7 +65,8 @@ actor LinkSessionAuthenticateResponder {
     }
 
     func respondError(requestId: RPCID) async throws {
-        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        
+        //TODO
     }
 
 }
