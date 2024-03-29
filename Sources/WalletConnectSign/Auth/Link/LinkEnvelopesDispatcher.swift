@@ -48,20 +48,47 @@ class LinkEnvelopesDispatcher {
         manageSubscription(topic, wcEnvelope)
     }
 
-    func request(request: RPCRequest, walletUniversalLink: String) async throws -> String {
+    func request(topic: String, request: RPCRequest, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
 
-        let envelope = try serializer.serializeEnvelopeType2(encodable: request)
+        try rpcHistory.set(request, forTopic: topic, emmitedBy: .local, transportType: .relay)
 
-        guard var components = URLComponents(string: walletUniversalLink) else { throw URLError(.badURL) }
+        var envelopeUrl: URL!
+        do {
+            envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: request, envelopeType: envelopeType, topic: topic)
+
+            //        await UIApplication.shared.open(finalURL)
+        } catch {
+            if let id = request.id {
+                rpcHistory.delete(id: id)
+            }
+            throw error
+        }
+
+
+        return envelopeUrl.absoluteString
+    }
+
+    func respond(topic: String, response: RPCResponse, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
+        try rpcHistory.validate(response)
+        let envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: response, envelopeType: envelopeType, topic: topic)
+
+        //        await UIApplication.shared.open(finalURL)
+        try rpcHistory.resolve(response)
+
+        return envelopeUrl.absoluteString
+    }
+
+    private func serializeAndCreateUrl(peerUniversalLink: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType, topic: String?) throws -> URL {
+        let envelope = try serializer.serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
+
+        guard var components = URLComponents(string: peerUniversalLink) else { throw URLError(.badURL) }
 
         components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope)]
 
         guard let finalURL = components.url else { throw URLError(.badURL) }
-
-
-//        await UIApplication.shared.open(finalURL)
-        return finalURL.absoluteString
+        return finalURL
     }
+
 
 
     public func requestSubscription<RequestParams: Codable>(on method: String) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {

@@ -167,7 +167,7 @@ public final class SignClient: SignClientProtocol {
     private let appRequestService: SessionAuthRequestService
     private let authResposeSubscriber: AuthResponseSubscriber
     private let authRequestSubscriber: AuthRequestSubscriber
-    private let authResponder: AuthResponder
+    private let authResponder: SessionAuthenticateResponder
     private let authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
@@ -213,7 +213,7 @@ public final class SignClient: SignClientProtocol {
          appRequestService: SessionAuthRequestService,
          appRespondSubscriber: AuthResponseSubscriber,
          authRequestSubscriber: AuthRequestSubscriber,
-         authResponder: AuthResponder,
+         authResponder: SessionAuthenticateResponder,
          pendingRequestsProvider: PendingRequestsProvider,
          proposalExpiryWatcher: ProposalExpiryWatcher,
          pendingProposalsProvider: PendingProposalsProvider,

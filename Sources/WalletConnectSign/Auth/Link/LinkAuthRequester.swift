@@ -60,7 +60,9 @@ actor LinkAuthRequester {
 
         logger.debug("LinkAuthRequester: sending request")
 
-        return try await linkEnvelopesDispatcher.request(request: request, walletUniversalLink: walletUniversalLink)
+        
+
+        return try await linkEnvelopesDispatcher.request(topic: UUID().uuidString,request: request, peerUniversalLink: walletUniversalLink, envelopeType: .type2)
 
     }
 

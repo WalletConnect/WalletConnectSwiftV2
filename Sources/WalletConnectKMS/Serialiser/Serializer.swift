@@ -7,6 +7,7 @@ public class Serializer: Serializing {
         case symmetricKeyForTopicNotFound(String)
         case publicKeyForTopicNotFound
         case invalidType2Envelope
+        case topicNotFound
 
         var description: String {
             switch self {
@@ -16,6 +17,8 @@ public class Serializer: Serializing {
                 return "Error: Public key for topic was not found."
             case .invalidType2Envelope:
                 return "Error: Invalid type 2 envelope."
+            case .topicNotFound:
+                return "Error: Topic not found."
             }
         }
     }
@@ -49,7 +52,15 @@ public class Serializer: Serializing {
     ///   - encodable: Object to encrypt and serialize
     ///   - envelopeType: type of envelope
     /// - Returns: Serialized String
-    public func serialize(topic: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
+    public func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
+        if envelopeType == .type2 {
+            return try serializeEnvelopeType2(encodable: encodable)
+        }
+        guard let topic = topic else {
+            let error = Errors.topicNotFound
+            logger.error("\(error)")
+            throw error
+        }
         let messageJson = try encodable.json()
         guard let symmetricKey = kms.getSymmetricKeyRepresentable(for: topic) else {
             let error = Errors.symmetricKeyForTopicNotFound(topic)
@@ -59,13 +70,6 @@ public class Serializer: Serializing {
         let sealbox = try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
         return Envelope(type: envelopeType, sealbox: sealbox).serialised()
     }
-
-    /// Serializes envelope type 2
-    public func serializeEnvelopeType2(encodable: Encodable) throws -> String {
-        let messageData = try JSONEncoder().encode(encodable)
-        return Envelope(type: .type2, sealbox: messageData).serialised()
-    }
-
 
     /// Deserializes and decrypts an object
     /// - Parameters:
@@ -102,6 +106,12 @@ public class Serializer: Serializing {
             logger.error("\(error)")
             throw error
         }
+    }
+
+    /// Serializes envelope type 2
+    private func serializeEnvelopeType2(encodable: Encodable) throws -> String {
+        let messageData = try JSONEncoder().encode(encodable)
+        return Envelope(type: .type2, sealbox: messageData).serialised()
     }
 
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, Data) {
