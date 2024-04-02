@@ -8,6 +8,7 @@ class LinkEnvelopesDispatcher {
     enum Errors: Error {
         case invalidURL
         case envelopeNotFound
+        case topicNotFound
     }
     private let serializer: Serializing
     private let logger: ConsoleLogging
@@ -45,7 +46,9 @@ class LinkEnvelopesDispatcher {
         guard let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_envelope" })?.value else {
             throw Errors.envelopeNotFound
         }
-        let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value
+        guard let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value else {
+            throw Errors.topicNotFound
+        }
         manageSubscription(topic, wcEnvelope)
     }
 
@@ -112,7 +115,7 @@ class LinkEnvelopesDispatcher {
             .eraseToAnyPublisher()
     }
 
-    private func manageSubscription(_ topic: String?, _ encodedEnvelope: String) {
+    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         if let (deserializedJsonRpcRequest, _, _): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest)
         } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
