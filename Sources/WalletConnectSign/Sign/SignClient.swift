@@ -167,7 +167,7 @@ public final class SignClient: SignClientProtocol {
     private let appRequestService: SessionAuthRequestService
     private let authResposeSubscriber: AuthResponseSubscriber
     private let authRequestSubscriber: AuthRequestSubscriber
-    private let authResponder: SessionAuthenticateResponder
+    private let approveSessionAuthenticateDispatcher: ApproveSessionAuthenticateDispatcher
     private let authResponseTopicResubscriptionService: AuthResponseTopicResubscriptionService
 
     private let sessionProposalPublisherSubject = PassthroughSubject<(proposal: Session.Proposal, context: VerifyContext?), Never>()
@@ -213,7 +213,7 @@ public final class SignClient: SignClientProtocol {
          appRequestService: SessionAuthRequestService,
          appRespondSubscriber: AuthResponseSubscriber,
          authRequestSubscriber: AuthRequestSubscriber,
-         authResponder: SessionAuthenticateResponder,
+         approveSessionAuthenticateDispatcher: ApproveSessionAuthenticateDispatcher,
          pendingRequestsProvider: PendingRequestsProvider,
          proposalExpiryWatcher: ProposalExpiryWatcher,
          pendingProposalsProvider: PendingProposalsProvider,
@@ -242,7 +242,7 @@ public final class SignClient: SignClientProtocol {
         self.pairingClient = pairingClient
         self.appRequestService = appRequestService
         self.authRequestSubscriber = authRequestSubscriber
-        self.authResponder = authResponder
+        self.approveSessionAuthenticateDispatcher = approveSessionAuthenticateDispatcher
         self.authResposeSubscriber = appRespondSubscriber
         self.pendingRequestsProvider = pendingRequestsProvider
         self.proposalExpiryWatcher = proposalExpiryWatcher
@@ -368,13 +368,20 @@ public final class SignClient: SignClientProtocol {
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
     public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
-        try await authResponder.respond(requestId: requestId, auths: auths)
+        let (session, universalLink) = try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
+        return session
     }
+
+    #if DEBUG
+    func approveSessionAuthenticateLinkMode(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String?) {
+        return try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
+    }
+    #endif
 
     /// For wallet to reject authentication request
     /// - Parameter requestId: authentication request id
     public func rejectSession(requestId: RPCID) async throws {
-        try await authResponder.respondError(requestId: requestId)
+        try await approveSessionAuthenticateDispatcher.respondError(requestId: requestId)
     }
 
 

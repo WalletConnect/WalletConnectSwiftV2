@@ -110,7 +110,7 @@ public struct SignClientFactory {
 
         let approveSessionAuthenticateUtil = ApproveSessionAuthenticateUtil(logger: logger, kms: kms, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, messageFormatter: messageFormatter, sessionStore: sessionStore, sessionNamespaceBuilder: sessionNameSpaceBuilder)
 
-        let authResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil)
+
         let pendingRequestsProvider = PendingRequestsProvider(rpcHistory: rpcHistory, verifyContextStore: verifyContextStore)
         let authResponseTopicResubscriptionService = AuthResponseTopicResubscriptionService(networkingInteractor: networkingClient, logger: logger, authResponseTopicRecordsStore: authResponseTopicRecordsStore)
 
@@ -119,6 +119,13 @@ public struct SignClientFactory {
         let linkEnvelopesDispatcher = LinkEnvelopesDispatcher(serializer: serializer, logger: logger, rpcHistory: rpcHistory)
         let linkAuthRequester = LinkAuthRequester(kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher)
         let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: linkEnvelopesDispatcher)
+
+        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil)
+
+        let linkSessionAuthenticateResponder = LinkSessionAuthenticateResponder(linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger, kms: kms, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil)
+
+        let approveSessionAuthenticateDispatcher = ApproveSessionAuthenticateDispatcher(relaySessionAuthenticateResponder: relaySessionAuthenticateResponder, logger: logger, rpcHistory: rpcHistory, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, linkSessionAuthenticateResponder: linkSessionAuthenticateResponder)
+
         let client = SignClient(
             logger: logger,
             networkingClient: networkingClient,
@@ -139,7 +146,7 @@ public struct SignClientFactory {
             appRequestService: appRequestService,
             appRespondSubscriber: appRespondSubscriber,
             authRequestSubscriber: authRequestSubscriber,
-            authResponder: authResponder,
+            approveSessionAuthenticateDispatcher: approveSessionAuthenticateDispatcher,
             pendingRequestsProvider: pendingRequestsProvider,
             proposalExpiryWatcher: proposalExpiryWatcher,
             pendingProposalsProvider: pendingProposalsProvider,

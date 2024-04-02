@@ -20,16 +20,29 @@ actor ApproveSessionAuthenticateDispatcher {
         self.linkSessionAuthenticateResponder = linkSessionAuthenticateResponder
     }
 
-    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
+    public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String?) {
 
         let transportType = try util.getHistoryRecord(requestId: requestId).transportType
 
         switch transportType {
 
         case .relay, .none:
-            return try await relaySessionAuthenticateResponder.respond(requestId: requestId, auths: auths)
+            let session = try await relaySessionAuthenticateResponder.respond(requestId: requestId, auths: auths)
+            return (session, nil)
         case .linkMode:
             return try await linkSessionAuthenticateResponder.respond(requestId: requestId, auths: auths)
+        }
+    }
+
+    func respondError(requestId: RPCID) async throws {
+        let transportType = try util.getHistoryRecord(requestId: requestId).transportType
+
+        switch transportType {
+
+        case .relay, .none:
+            return try await relaySessionAuthenticateResponder.respondError(requestId: requestId)
+        case .linkMode:
+            return try await linkSessionAuthenticateResponder.respondError(requestId: requestId)
         }
     }
 }

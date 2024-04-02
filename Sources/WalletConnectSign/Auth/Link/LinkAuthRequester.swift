@@ -28,8 +28,6 @@ actor LinkAuthRequester {
 
     func request(params: AuthRequestParams, walletUniversalLink: String) async throws -> String {
 
-
-        print("LinkAuthRequester: creating request")
         var params = params
         let pubKey = try kms.createX25519KeyPair()
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()

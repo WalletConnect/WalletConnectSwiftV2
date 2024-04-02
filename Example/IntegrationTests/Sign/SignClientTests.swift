@@ -46,7 +46,7 @@ final class SignClientTests: XCTestCase {
             networkingClient: networkingClient
         )
         let client = SignClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: nil)),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: UUID().uuidString)),
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
@@ -1107,7 +1107,8 @@ final class SignClientTests: XCTestCase {
 
                 let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
 
-                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+                let (_, approveEnvelope) = try! await wallet.approveSessionAuthenticateLinkMode(requestId: request.id, auths: [auth])
+                dapp.dispatchEnvelope(approveEnvelope, topic: <#T##String#>)
             }
         }
         .store(in: &publishers)
