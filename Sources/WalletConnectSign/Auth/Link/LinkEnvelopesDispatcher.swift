@@ -17,13 +17,13 @@ class LinkEnvelopesDispatcher {
 
 
     private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest), Never>()
-    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
+    private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse), Never>()
 
     public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
-    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never> {
+    private var responsePublisher: AnyPublisher<(topic: String, request: RPCRequest, response: RPCResponse), Never> {
         responsePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -119,7 +119,7 @@ class LinkEnvelopesDispatcher {
         if let (deserializedJsonRpcRequest, _, _): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest)
         } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-//            handleResponse(topic: topic, response: response, publishedAt: publishedAt, derivedTopic: derivedTopic)
+            handleResponse(topic: topic, response: response)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")
         }
@@ -131,6 +131,15 @@ class LinkEnvelopesDispatcher {
             requestPublisherSubject.send((topic, request))
         } catch {
             logger.debug(error)
+        }
+    }
+
+    private func handleResponse(topic: String, response: RPCResponse) {
+        do {
+            let record = try rpcHistory.resolve(response)
+            responsePublisherSubject.send((topic, record.request, response))
+        } catch {
+            logger.debug("Handle json rpc response error: \(error)")
         }
     }
 }

@@ -3,6 +3,7 @@ import Combine
 
 class AuthResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
+    private let 
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageVerifier
