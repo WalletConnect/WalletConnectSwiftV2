@@ -115,10 +115,25 @@ class LinkEnvelopesDispatcher {
             .eraseToAnyPublisher()
     }
 
+    public func responseSubscription<Request: Codable, Response: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionPayload<Request, Response>, Never> {
+        return responsePublisher
+            .filter { rpcRequest in
+                return rpcRequest.request.method == request.method
+            }
+            .compactMap { topic, rpcRequest, rpcResponse  in
+                guard
+                    let id = rpcRequest.id,
+                    let request = try? rpcRequest.params?.get(Request.self),
+                    let response = try? rpcResponse.result?.get(Response.self) else { return nil }
+                return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response, publishedAt: Date(), derivedTopic: nil)
+            }
+            .eraseToAnyPublisher()
+    }
+
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         if let (deserializedJsonRpcRequest, _, _): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
+        } else if let (response, _, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleResponse(topic: topic, response: response)
         } else {
             logger.debug("Networking Interactor - Received unknown object type from networking relay")

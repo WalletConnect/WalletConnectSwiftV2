@@ -3,7 +3,7 @@ import Combine
 
 class AuthResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
-    private let 
+    private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageVerifier
@@ -28,7 +28,8 @@ class AuthResponseSubscriber {
          sessionStore: WCSessionStorage,
          messageFormatter: SIWEFromCacaoFormatting,
          sessionNamespaceBuilder: SessionNamespaceBuilder,
-         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>) {
+         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -39,7 +40,9 @@ class AuthResponseSubscriber {
         self.pairingRegisterer = pairingRegisterer
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
+        self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         subscribeForResponse()
+        subscribeForLinkResonse()
     }
 
     private func subscribeForResponse() {
@@ -50,6 +53,32 @@ class AuthResponseSubscriber {
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
+
+                let pairingTopic = payload.topic
+                pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
+                removeResponseTopicRecord(responseTopic: payload.topic)
+
+                let requestId = payload.id
+                let cacaos = payload.response.cacaos
+
+                Task {
+                    do {
+                        try await recoverAndVerifySignature(cacaos: cacaos)
+                    } catch {
+                        authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
+                        return
+                    }
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
+
+                    authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
+                }
+
+            }.store(in: &publishers)
+    }
+
+    private func subscribeForLinkResonse() {
+        linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
                 let pairingTopic = payload.topic
