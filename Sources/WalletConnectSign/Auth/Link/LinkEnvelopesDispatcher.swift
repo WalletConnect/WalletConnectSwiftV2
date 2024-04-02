@@ -7,6 +7,7 @@ import Combine
 class LinkEnvelopesDispatcher {
     enum Errors: Error {
         case invalidURL
+        case envelopeNotFound
     }
     private let serializer: Serializing
     private let logger: ConsoleLogging
@@ -35,16 +36,16 @@ class LinkEnvelopesDispatcher {
         self.rpcHistory = rpcHistory
     }
 
-    func dispatchEnvelope(_ envelope: String, topic: String) throws {
-        guard let envelopeURL = URL(string: envelope) else {
+    func dispatchEnvelope(_ envelope: String) throws {
+        guard let envelopeURL = URL(string: envelope),
+        let components = URLComponents(url: envelopeURL, resolvingAgainstBaseURL: true) else {
             throw Errors.invalidURL
         }
 
-        // Use URLComponents to parse the URL for query items
-        guard let components = URLComponents(url: envelopeURL, resolvingAgainstBaseURL: true),
-              let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_envelope" })?.value else {
-            throw Errors.invalidURL
+        guard let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_envelope" })?.value else {
+            throw Errors.envelopeNotFound
         }
+        let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value
         manageSubscription(topic, wcEnvelope)
     }
 
@@ -78,12 +79,12 @@ class LinkEnvelopesDispatcher {
         return envelopeUrl.absoluteString
     }
 
-    private func serializeAndCreateUrl(peerUniversalLink: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType, topic: String?) throws -> URL {
+    private func serializeAndCreateUrl(peerUniversalLink: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType, topic: String) throws -> URL {
         let envelope = try serializer.serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
 
         guard var components = URLComponents(string: peerUniversalLink) else { throw URLError(.badURL) }
 
-        components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope)]
+        components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope), URLQueryItem(name: "topic", value: topic)]
 
         guard let finalURL = components.url else { throw URLError(.badURL) }
         return finalURL
@@ -111,7 +112,7 @@ class LinkEnvelopesDispatcher {
             .eraseToAnyPublisher()
     }
 
-    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
+    private func manageSubscription(_ topic: String?, _ encodedEnvelope: String) {
         if let (deserializedJsonRpcRequest, _, _): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleRequest(topic: topic, request: deserializedJsonRpcRequest)
         } else if let (response, derivedTopic, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {

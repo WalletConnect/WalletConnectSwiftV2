@@ -1108,7 +1108,7 @@ final class SignClientTests: XCTestCase {
                 let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
 
                 let (_, approveEnvelope) = try! await wallet.approveSessionAuthenticateLinkMode(requestId: request.id, auths: [auth])
-                dapp.dispatchEnvelope(approveEnvelope, topic: <#T##String#>)
+                try dapp.dispatchEnvelope(approveEnvelope)
             }
         }
         .store(in: &publishers)
@@ -1120,7 +1120,7 @@ final class SignClientTests: XCTestCase {
 
 
         let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: "")
-        try await wallet.dispatchEnvelope(requestEnvelope, topic: "")
+        try wallet.dispatchEnvelope(requestEnvelope)
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 

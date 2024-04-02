@@ -12,7 +12,7 @@ public final class RPCHistory {
             case linkMode
         }
         public let id: RPCID
-        public let topic: String
+        public let topic: String?
         let origin: Origin
         public let request: RPCRequest
         public let response: RPCResponse?
@@ -89,7 +89,8 @@ public final class RPCHistory {
 
     public func deleteAll(forTopics topics: [String]){
         storage.getAll().forEach { record in
-            if topics.contains(record.topic) {
+            guard let topic = record.topic else { return }
+            if topics.contains(topic) {
                 storage.delete(forKey: "\(record.id)")
             }
         }

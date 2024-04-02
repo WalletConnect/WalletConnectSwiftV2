@@ -357,8 +357,8 @@ public final class SignClient: SignClientProtocol {
         return try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
     }
 
-    public func dispatchEnvelope(_ envelope: String, topic: String) throws {
-        try linkEnvelopesDispatcher.dispatchEnvelope(envelope, topic: topic)
+    public func dispatchEnvelope(_ envelope: String) throws {
+        try linkEnvelopesDispatcher.dispatchEnvelope(envelope)
     }
 
 
@@ -373,8 +373,9 @@ public final class SignClient: SignClientProtocol {
     }
 
     #if DEBUG
-    func approveSessionAuthenticateLinkMode(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String?) {
-        return try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
+    func approveSessionAuthenticateLinkMode(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String) {
+        let (session, envelope) = try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
+        return (session, envelope!)
     }
     #endif
 
