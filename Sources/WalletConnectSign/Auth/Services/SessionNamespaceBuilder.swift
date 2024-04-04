@@ -33,17 +33,40 @@ class SessionNamespaceBuilder {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
         }
 
-        let accounts = cacaos.compactMap { try? DIDPKH(did: $0.p.iss).account }
-        let accountsSet = accounts
-        let methods = firstRecapResource.methods
         let chains = firstRecapResource.chains
-        let events: Set<String> = ["chainChanged", "accountsChanged"]
-
         guard !chains.isEmpty else {
             throw Errors.cannotCreateSessionNamespaceFromTheRecap
         }
 
-        let sessionNamespace = SessionNamespace(chains: chains, accounts: accountsSet, methods: methods, events: events)
+        let addresses = getUniqueAddresses(from: cacaos)
+        var accounts = [Account]()
+
+        for address in addresses {
+            for chain in chains {
+                if let account = Account(blockchain: chain, address: address) {
+                    accounts.append(account)
+                }
+            }
+        }
+
+        let methods = firstRecapResource.methods
+        let events: Set<String> = ["chainChanged", "accountsChanged"]
+
+        let sessionNamespace = SessionNamespace(chains: chains, accounts: accounts, methods: methods, events: events)
         return [chainsNamespace: sessionNamespace]
     }
+
+    func getUniqueAddresses(from cacaos: [Cacao]) -> [String] {
+        var seenAddresses = Set<String>()
+        var uniqueAddresses = [String]()
+
+        for cacao in cacaos {
+            if let address = try? DIDPKH(did: cacao.p.iss).account.address, !seenAddresses.contains(address) {
+                uniqueAddresses.append(address)
+                seenAddresses.insert(address)
+            }
+        }
+        return uniqueAddresses
+    }
+
 }

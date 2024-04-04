@@ -37,6 +37,58 @@ class SessionNamespaceBuilderTests: XCTestCase {
         super.tearDown()
     }
 
+    func testBuildSessionNamespaces_ValidOneCacao_ReturnsExpectedNamespaceWithMultipleAccounts() {
+        let expectedSessionNamespace = SessionNamespace(
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
+            accounts: [
+                Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
+                Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
+            ],
+            methods: Set(["personal_sign", "eth_signTypedData", "eth_sign"]),
+            events: Set(["chainChanged", "accountsChanged"])
+        )
+
+        let cacaos = [
+            Cacao.stub(account: Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!, resources: [recapUrn]),
+        ]
+
+        do {
+            let namespaces = try sessionNamespaceBuilder.buildSessionNamespaces(cacaos: cacaos)
+            XCTAssertTrue(namespaces.first!.value.events.isSuperset(of: ["chainChanged", "accountsChanged"]), "Contains required events")
+            XCTAssertEqual(namespaces.count, 1, "There should be one namespace")
+            XCTAssertEqual(expectedSessionNamespace, namespaces.first!.value, "The namespace is equal to the expected one")
+        } catch {
+            XCTFail("Expected successful namespace creation, but received error: \(error)")
+        }
+    }
+
+    func testBuildSessionNamespaces_ValidOneCacaos_ReturnsExpectedNamespaceWithMultipleAccountsForDifferentAddresses() {
+        let expectedSessionNamespace = SessionNamespace(
+            chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
+            accounts: [
+                Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
+                Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
+                Account("eip155:1:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!,
+                Account("eip155:137:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!
+            ],
+            methods: Set(["personal_sign", "eth_signTypedData", "eth_sign"]),
+            events: Set(["chainChanged", "accountsChanged"])
+        )
+
+        let cacaos = [
+            Cacao.stub(account: Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!, resources: [recapUrn]),
+            Cacao.stub(account: Account("eip155:1:0x990a10343Bcdebe21283c7172d67a9a113E819X5")!, resources: [recapUrn])
+        ]
+
+        do {
+            let namespaces = try sessionNamespaceBuilder.buildSessionNamespaces(cacaos: cacaos)
+            XCTAssertTrue(namespaces.first!.value.events.isSuperset(of: ["chainChanged", "accountsChanged"]), "Contains required events")
+            XCTAssertEqual(namespaces.count, 1, "There should be one namespace")
+            XCTAssertEqual(expectedSessionNamespace, namespaces.first!.value, "The namespace is equal to the expected one")
+        } catch {
+            XCTFail("Expected successful namespace creation, but received error: \(error)")
+        }
+    }
 
     func testBuildSessionNamespaces_ValidCacaos_ReturnsExpectedNamespace() {
         let expectedSessionNamespace = SessionNamespace(
@@ -69,7 +121,8 @@ class SessionNamespaceBuilderTests: XCTestCase {
         let expectedSessionNamespace = SessionNamespace(
             chains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!],
             accounts: [
-                Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
+                Account("eip155:1:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!,
+                Account("eip155:137:0x000a10343Bcdebe21283c7172d67a9a113E819C5")!
             ],
             methods: ["personal_sign", "eth_signTypedData", "eth_sign"],
             events: ["chainChanged", "accountsChanged"]

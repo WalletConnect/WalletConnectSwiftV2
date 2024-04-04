@@ -1036,6 +1036,75 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
+
+    func testSessionRequestOnAuthenticatedSessionForAChainNotIncludedInCacao() async throws {
+        let requestExpectation = expectation(description: "Wallet expects to receive a request")
+        let responseExpectation = expectation(description: "Dapp expects to receive a response")
+
+        let requestMethod = "eth_sendTransaction"
+        let requestParams = [EthSendTransaction.stub()]
+        let responseParams = "0xdeadbeef"
+        let chain = Blockchain("eip155:1")!
+        // sleep is needed as emitRequestIfPending() will be called on client init and then on request itself, second request would be debouced
+        sleep(1)
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_sendTransaction", "personal_sign"])
+
+                let signingAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: signingAccount)
+
+                let signature = try! signer.sign(
+                    message: siweMessage,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let cacao = try! wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [cacao])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { [unowned self] (_, result) in
+            guard case .success(let (session, _)) = result,
+                let session = session else { XCTFail(); return }
+            Task(priority: .high) {
+                let request = try Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: Blockchain("eip155:137")!)
+                try await dapp.request(params: request)
+            }
+        }
+        .store(in: &publishers)
+
+        wallet.sessionRequestPublisher.sink { [unowned self] (sessionRequest, _) in
+            let receivedParams = try! sessionRequest.params.get([EthSendTransaction].self)
+            XCTAssertEqual(receivedParams, requestParams)
+            XCTAssertEqual(sessionRequest.method, requestMethod)
+            requestExpectation.fulfill()
+            Task(priority: .high) {
+                try await wallet.respond(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .response(AnyCodable(responseParams)))
+            }
+        }.store(in: &publishers)
+
+        dapp.sessionResponsePublisher.sink { response in
+            switch response.result {
+            case .response(let response):
+                XCTAssertEqual(try! response.get(String.self), responseParams)
+            case .error:
+                XCTFail()
+            }
+            responseExpectation.fulfill()
+        }.store(in: &publishers)
+
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub(chains: ["eip155:1", "eip155:137"]))
+
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
     func testFalbackForm_2_5_DappToSessionProposeOnWallet() async throws {
 
         let fallbackExpectation = expectation(description: "fallback to wc_sessionPropose")
