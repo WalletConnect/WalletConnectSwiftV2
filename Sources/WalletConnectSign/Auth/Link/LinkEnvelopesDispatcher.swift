@@ -56,11 +56,13 @@ class LinkEnvelopesDispatcher {
 
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local, transportType: .relay)
 
-        var envelopeUrl: URL!
+        let envelopeUrl: URL
         do {
             envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: request, envelopeType: envelopeType, topic: topic)
 
-            //        await UIApplication.shared.open(finalURL)
+            DispatchQueue.main.async {
+                UIApplication.shared.open(envelopeUrl)
+            }
         } catch {
             if let id = request.id {
                 rpcHistory.delete(id: id)
@@ -68,15 +70,15 @@ class LinkEnvelopesDispatcher {
             throw error
         }
 
-
         return envelopeUrl.absoluteString
     }
 
     func respond(topic: String, response: RPCResponse, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
         try rpcHistory.validate(response)
         let envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: response, envelopeType: envelopeType, topic: topic)
-
-        //        await UIApplication.shared.open(finalURL)
+        DispatchQueue.main.async {
+            UIApplication.shared.open(envelopeUrl)
+        }
         try rpcHistory.resolve(response)
 
         return envelopeUrl.absoluteString
@@ -136,7 +138,7 @@ class LinkEnvelopesDispatcher {
         } else if let (response, _, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
             handleResponse(topic: topic, response: response)
         } else {
-            logger.debug("Networking Interactor - Received unknown object type from networking relay")
+            logger.debug("Link Dispatcher - Received unknown object type from networking relay")
         }
     }
 

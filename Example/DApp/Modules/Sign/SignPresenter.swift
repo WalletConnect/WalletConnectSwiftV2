@@ -108,6 +108,18 @@ final class SignPresenter: ObservableObject {
         }
     }
 
+    @MainActor
+    func connectWalletWithSessionAuthenticateLinkMode() {
+
+        Task {
+            do {
+                try await Sign.instance.authenticateLinkMode(.stub(methods: ["personal_sign"]), walletUniversalLink: "https://walletconnect.com")
+            } catch {
+                AlertPresenter.present(message: error.localizedDescription, type: .error)
+            }
+        }
+    }
+
     func disconnect() {
         if let session {
             Task { @MainActor in

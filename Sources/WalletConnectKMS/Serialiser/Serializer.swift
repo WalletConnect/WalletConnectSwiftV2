@@ -111,7 +111,8 @@ public class Serializer: Serializing {
     /// Serializes envelope type 2
     private func serializeEnvelopeType2(encodable: Encodable) throws -> String {
         let messageData = try JSONEncoder().encode(encodable)
-        return Envelope(type: .type2, sealbox: messageData).serialised()
+        let envelope = Envelope(type: .type2, sealbox: messageData)
+        return envelope.serialised()
     }
 
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, Data) {

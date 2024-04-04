@@ -19,9 +19,10 @@ public struct Envelope: Equatable {
     /// type0: tp + sealbox
     /// type1: tp + pk + sealbox
     init(_ base64encoded: String) throws {
-        guard let envelopeData = Data(base64Encoded: base64encoded) else {
+        guard let envelopeData = Data(base64Encoded: base64encoded) ?? Data(base64url: base64encoded) else {
             throw Errors.malformedEnvelope
         }
+
         let envelopeTypeByte = envelopeData.subdata(in: 0..<1).first
         if envelopeTypeByte == 0 {
             self.type = .type0
@@ -52,7 +53,7 @@ public struct Envelope: Equatable {
         case .type1(let pubKey):
             return (type.representingByte.data + pubKey + sealbox).base64EncodedString()
         case .type2:
-            return (type.representingByte.data + sealbox).base64EncodedString()
+            return (type.representingByte.data + sealbox).base64urlEncodedString()
         }
     }
 

@@ -12,6 +12,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private let app = Application()
 
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard let url = userActivity.webpageURL,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            return
+        }
+        try! Sign.instance.dispatchEnvelope(url.absoluteString)
+
+    }
+
+
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Networking.configure(
             groupIdentifier: "group.com.walletconnect.dapp",
@@ -25,7 +36,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             description: "WalletConnect DApp sample",
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: nil)
+            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: "www.walletconnect.com/dapp")
         )
         
         Web3Modal.configure(

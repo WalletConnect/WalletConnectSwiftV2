@@ -1,6 +1,7 @@
 import SafariServices
 import UIKit
 import Web3Wallet
+import WalletConnectSign
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificationCenterDelegate {
     var window: UIWindow?
@@ -14,6 +15,15 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
             ApplicationConfigurator(app: app),
             AppearanceConfigurator()
         ]
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard let url = userActivity.webpageURL,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            return
+        }
+        try! Sign.instance.dispatchEnvelope(url.absoluteString)
+
     }
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
