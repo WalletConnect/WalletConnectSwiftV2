@@ -21,7 +21,7 @@ final class ConfigurationService {
             description: "wallet description",
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"], 
-            redirect: AppMetadata.Redirect(native: "walletapp://", universal: nil)
+            redirect: AppMetadata.Redirect(native: "walletapp://", universal: "www.walletconnect.com/wallet")
         )
 
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
@@ -81,7 +81,7 @@ final class ConfigurationService {
             do {
                 let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")
                 let signature = importAccount.onSign(message: params.message)
-                try await Notify.instance.register(params: params, signature: signature)
+//                try await Notify.instance.register(params: params, signature: signature)
             } catch {
                 DispatchQueue.main.async {
                     let logMessage = LogMessage(message: "Push Server registration failed with: \(error.localizedDescription)")

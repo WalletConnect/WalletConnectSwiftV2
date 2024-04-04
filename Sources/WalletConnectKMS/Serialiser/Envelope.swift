@@ -49,9 +49,9 @@ public struct Envelope: Equatable {
     func serialised() -> String {
         switch type {
         case .type0:
-            return (type.representingByte.data + sealbox).base64EncodedString()
+            return (type.representingByte.data + sealbox).base64urlEncodedString()
         case .type1(let pubKey):
-            return (type.representingByte.data + pubKey + sealbox).base64EncodedString()
+            return (type.representingByte.data + pubKey + sealbox).base64urlEncodedString()
         case .type2:
             return (type.representingByte.data + sealbox).base64urlEncodedString()
         }

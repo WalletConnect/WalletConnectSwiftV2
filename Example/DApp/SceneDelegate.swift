@@ -18,7 +18,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return
         }
-        try! Sign.instance.dispatchEnvelope(url.absoluteString)
+        do {
+            try Sign.instance.dispatchEnvelope(url.absoluteString)
+        } catch {
+            print("🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+        }
 
     }
 

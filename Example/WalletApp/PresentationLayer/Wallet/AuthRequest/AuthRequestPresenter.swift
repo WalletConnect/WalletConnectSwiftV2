@@ -60,12 +60,12 @@ final class AuthRequestPresenter: ObservableObject {
             ActivityIndicatorManager.shared.stop()
 
             /* Redirect */
-            if let uri = request.requester.redirect?.native {
-                WalletConnectRouter.goBack(uri: uri)
-                router.dismiss()
-            } else {
-                showSignedSheet.toggle()
-            }
+//            if let uri = request.requester.redirect?.native {
+//                WalletConnectRouter.goBack(uri: uri)
+//                router.dismiss()
+//            } else {
+//                showSignedSheet.toggle()
+//            }
 
         } catch {
             ActivityIndicatorManager.shared.stop()

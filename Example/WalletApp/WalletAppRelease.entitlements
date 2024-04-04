@@ -7,8 +7,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:walletconnect.com</string>
-		<string>applinks:https://walletconnect.com</string>
-		<string>applinks:www.walletconnect.com</string>
 	</array>
 	<key>com.apple.developer.usernotifications.communication</key>
 	<true/>
