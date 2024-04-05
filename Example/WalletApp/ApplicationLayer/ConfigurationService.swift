@@ -79,8 +79,8 @@ final class ConfigurationService {
 
         Task {
             do {
-                let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")
-                let signature = importAccount.onSign(message: params.message)
+               // let params = try await Notify.instance.prepareRegistration(account: importAccount.account, domain: "com.walletconnect")
+               // let signature = importAccount.onSign(message: params.message)
 //                try await Notify.instance.register(params: params, signature: signature)
             } catch {
                 DispatchQueue.main.async {
