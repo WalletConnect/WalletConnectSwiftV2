@@ -25,7 +25,7 @@ public class Serializer: Serializing {
 
     private let kms: KeyManagementServiceProtocol
     private let codec: Codec
-    private let logger: ConsoleLogging
+    public let logger: ConsoleLogging
     public var logsPublisher: AnyPublisher<Log, Never> {
         logger.logsPublisher.eraseToAnyPublisher()
     }
@@ -149,8 +149,7 @@ public class Serializer: Serializing {
             return (decodedType, decryptedData)
         } catch {
             let str = String(decoding: decryptedData, as: UTF8.self)
-            print(str)
-            logger.error("Failed to decode with error: \(error)")
+            logger.debug(str)
             throw error
         }
     }

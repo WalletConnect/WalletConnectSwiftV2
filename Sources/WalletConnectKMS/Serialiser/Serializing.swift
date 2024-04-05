@@ -3,7 +3,8 @@ import Combine
 
 public protocol Serializing {
     var logsPublisher: AnyPublisher<Log, Never> {get}
-    func setLogging(level: LoggingLevel) 
+    var logger: ConsoleLogging {get}
+    func setLogging(level: LoggingLevel)
     func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String
     /// - derivedTopic: topic derived from symmetric key as a result of key exchange if peers has sent envelope(type1) prefixed with it's public key
     func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?, decryptedPayload: Data)
@@ -18,4 +19,21 @@ public extension Serializing {
     func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType = .type0) throws -> String {
         try serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
     }
+
+    func tryDeserializeRequestOrResponse(topic: String, encodedEnvelope: String) -> Either<RPCRequest, RPCResponse>? {
+        // Attempt to deserialize RPCRequest
+        if let result = try? deserialize(topic: topic, encodedEnvelope: encodedEnvelope) as (RPCRequest, derivedTopic: String?, decryptedPayload: Data) {
+            return .left(result.0)
+        }
+
+        // Attempt to deserialize RPCResponse
+        if let result = try? deserialize(topic: topic, encodedEnvelope: encodedEnvelope) as (RPCResponse, derivedTopic: String?, decryptedPayload: Data) {
+            return .right(result.0)
+        }
+
+        // If both attempts fail, log an error and return nil
+        logger.error("Failed to deserialize both request and response for topic: \(topic)")
+        return nil
+    }
+
 }

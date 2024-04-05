@@ -62,4 +62,61 @@ final class SerializerTests: XCTestCase {
         XCTAssertEqual(messageToSerialize, deserializedMessage)
     }
 
+    func testDeserializeRequestSuccessfully() {
+        // Using a dictionary as params to adhere to the non-primitive requirement
+        struct TestType: Codable {
+            let string: String
+        }
+        let testType = TestType(string: "")
+        let anyCodableParams = AnyCodable(testType)
+
+        let request = RPCRequest(method: "testMethod", params: anyCodableParams, id: 123)
+        let topic = TopicGenerator().topic
+        _ = try! myKms.createSymmetricKey(topic)
+        let serialized = try! mySerializer.serialize(topic: topic, encodable: request, envelopeType: .type0)
+
+        if let result = mySerializer.tryDeserializeRequestOrResponse(topic: topic, encodedEnvelope: serialized) {
+            switch result {
+            case .left(let deserializedRequest):
+                XCTAssertEqual(deserializedRequest.method, request.method)
+                XCTAssertEqual(deserializedRequest.id, request.id)
+                // You'll need to compare the params more thoroughly in practice.
+            default:
+                XCTFail("Deserialization should have succeeded with RPCRequest")
+            }
+        } else {
+            XCTFail("Deserialization failed")
+        }
+    }
+
+
+    func testDeserializeResponseSuccessfully() {
+        let response = RPCResponse(id: 123, result: "testResult")
+        let topic = TopicGenerator().topic
+        _ = try! myKms.createSymmetricKey(topic)
+        let serialized = try! mySerializer.serialize(topic: topic, encodable: response, envelopeType: .type0)
+
+        if let result = mySerializer.tryDeserializeRequestOrResponse(topic: topic, encodedEnvelope: serialized) {
+            switch result {
+            case .right(let deserializedResponse):
+                XCTAssertEqual(deserializedResponse, response)
+            default:
+                XCTFail("Deserialization should have succeeded with RPCResponse")
+            }
+        } else {
+            XCTFail("Deserialization failed")
+        }
+    }
+
+    func testDeserializeFailure() {
+        let invalidData = "invalidData"
+        let topic = TopicGenerator().topic
+        _ = try! myKms.createSymmetricKey(topic)
+        // Assuming serialize can accept invalidData for the purpose of this test
+        let serialized = try! mySerializer.serialize(topic: topic, encodable: invalidData, envelopeType: .type0)
+
+        let result = mySerializer.tryDeserializeRequestOrResponse(topic: topic, encodedEnvelope: serialized)
+        XCTAssertNil(result, "Deserialization should fail for invalid data")
+    }
+
 }
