@@ -61,7 +61,7 @@ final class AuthRequestPresenter: ObservableObject {
 
             _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
             ActivityIndicatorManager.shared.stop()
-
+            router.dismiss()
             /* Redirect */
 //            if let uri = request.requester.redirect?.native {
 //                WalletConnectRouter.goBack(uri: uri)
