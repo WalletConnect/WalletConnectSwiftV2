@@ -133,10 +133,13 @@ class LinkEnvelopesDispatcher {
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
-        if let (deserializedJsonRpcRequest, _, _): (RPCRequest, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleRequest(topic: topic, request: deserializedJsonRpcRequest)
-        } else if let (response, _, _): (RPCResponse, String?, Data) = serializer.tryDeserialize(topic: topic, encodedEnvelope: encodedEnvelope) {
-            handleResponse(topic: topic, response: response)
+        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, encodedEnvelope: encodedEnvelope) {
+            switch result {
+            case .left(let request):
+                handleRequest(topic: topic, request: request)
+            case .right(let response):
+                handleResponse(topic: topic, response: response)
+            }
         } else {
             logger.debug("Link Dispatcher - Received unknown object type from networking relay")
         }
