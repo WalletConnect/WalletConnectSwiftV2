@@ -22,8 +22,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return
         }
-        try! Sign.instance.dispatchEnvelope(url.absoluteString)
-
+        do {
+            try Sign.instance.dispatchEnvelope(url.absoluteString)
+        } catch {
+            print("🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+        }
     }
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
