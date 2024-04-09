@@ -36,7 +36,7 @@ extension Cacao {
             resources: resources
         )
         let signature = CacaoSignature(
-            t: WalletConnectUtils.CacaoSignatureType.eip191,
+            t: CacaoSignatureType.eip191,
             s: "invalid_signature",
             m: nil
         )
