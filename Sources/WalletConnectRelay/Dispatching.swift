@@ -16,16 +16,14 @@ final class Dispatcher: NSObject, Dispatching {
     var onMessage: ((String) -> Void)?
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
-    
+    var socketUrlFallbackHandler: SocketUrlFallbackHandler
+
     private let relayUrlFactory: RelayUrlFactory
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
 
     private let defaultTimeout: Int = 5
-    /// The property is used to determine whether relay.walletconnect.org will be used
-    /// in case relay.walletconnect.com doesn't respond for some reason (most likely due to being blocked in the user's location).
-    private var fallback = false
-    
+
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -42,25 +40,19 @@ final class Dispatcher: NSObject, Dispatching {
         socketFactory: WebSocketFactory,
         relayUrlFactory: RelayUrlFactory,
         networkMonitor: NetworkMonitoring,
-        socketConnectionType: SocketConnectionType,
-        logger: ConsoleLogging
+        socket: WebSocketConnecting,
+        logger: ConsoleLogging,
+        socketUrlFallbackHandler: SocketUrlFallbackHandler,
+        socketConnectionHandler:SocketConnectionHandler
     ) {
+        self.socketConnectionHandler = socketConnectionHandler
         self.relayUrlFactory = relayUrlFactory
         self.networkMonitor = networkMonitor
         self.logger = logger
-        
-        let socket = socketFactory.create(with: relayUrlFactory.create(fallback: fallback))
-        socket.request.addValue(EnvironmentInfo.userAgent, forHTTPHeaderField: "User-Agent")
-        if let bundleId = Bundle.main.bundleIdentifier {
-            socket.request.addValue(bundleId, forHTTPHeaderField: "Origin")
-        }
+
         self.socket = socket
-        
-        switch socketConnectionType {
-        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
-        case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
-        }
-        
+        self.socketUrlFallbackHandler = socketUrlFallbackHandler
+
         super.init()
         setUpWebSocketSession()
         setUpSocketConnectionObserving()
@@ -91,7 +83,7 @@ final class Dispatcher: NSObject, Dispatching {
                 case .failure(let error):
                     cancellable?.cancel()
                     if !socket.isConnected {
-                        handleFallbackIfNeeded(error: error)
+                        socketUrlFallbackHandler.handleFallbackIfNeeded(error: error)
                     }
                     completion(error)
                 case .finished: break
@@ -101,6 +93,7 @@ final class Dispatcher: NSObject, Dispatching {
                 send(string, completion: completion)
             })
     }
+    
 
     func protectedSend(_ string: String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
@@ -138,19 +131,8 @@ extension Dispatcher {
         socket.onDisconnect = { [unowned self] error in
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
             if error != nil {
-                self.socket.request.url = relayUrlFactory.create(fallback: fallback)
+                self.socket.request.url = relayUrlFactory.create()
             }
-            Task(priority: .high) {
-                await self.socketConnectionHandler.handleDisconnection()
-            }
-        }
-    }
-    
-    private func handleFallbackIfNeeded(error: NetworkError) {
-        if error == .connectionFailed && socket.request.url?.host == NetworkConstants.defaultUrl {
-            logger.debug("[WebSocket] - Fallback to \(NetworkConstants.fallbackUrl)")
-            fallback = true
-            socket.request.url = relayUrlFactory.create(fallback: fallback)
             Task(priority: .high) {
                 await self.socketConnectionHandler.handleDisconnection()
             }

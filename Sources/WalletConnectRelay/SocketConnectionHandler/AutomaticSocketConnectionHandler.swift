@@ -73,6 +73,10 @@ class AutomaticSocketConnectionHandler {
 // MARK: - SocketConnectionHandler
 
 extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
+    func tryReconect() async {
+        guard await appStateObserver.currentState == .foreground else { return }
+        reconnectIfNeeded()
+    }
 
     func handleConnect() throws {
         throw Errors.manualSocketConnectionForbidden

@@ -1,6 +1,7 @@
 import Foundation
 
 class ManualSocketConnectionHandler: SocketConnectionHandler {
+
     var socket: WebSocketConnecting
 
     init(socket: WebSocketConnecting) {
@@ -18,5 +19,11 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     func handleDisconnection() async {
         // No operation
         // ManualSocketConnectionHandler does not support reconnection logic
+    }
+
+    func tryReconect() async {
+        if !socket.isConnected {
+            socket.connect()
+        }
     }
 }
