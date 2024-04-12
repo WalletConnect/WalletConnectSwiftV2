@@ -109,6 +109,7 @@ final class Dispatcher: NSObject, Dispatching {
 
     func connect() throws {
         try socketConnectionHandler.handleConnect()
+        start counting for fallback on first connect attempt
     }
 
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
