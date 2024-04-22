@@ -189,6 +189,7 @@ public final class SignClient: SignClientProtocol {
     private let linkAuthRequester: LinkAuthRequester?
     private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
+    private let sessionRequestDispatcher: SessionRequestDispatcher
 
     private var publishers = Set<AnyCancellable>()
 
@@ -222,7 +223,8 @@ public final class SignClient: SignClientProtocol {
          authRequestSubscribersTracking: AuthRequestSubscribersTracking,
          linkAuthRequester: LinkAuthRequester,
          linkAuthRequestSubscriber: LinkAuthRequestSubscriber,
-         linkEnvelopesDispatcher: LinkEnvelopesDispatcher
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
+         sessionRequestDispatcher: SessionRequestDispatcher
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -253,6 +255,7 @@ public final class SignClient: SignClientProtocol {
         self.linkAuthRequester = linkAuthRequester
         self.linkAuthRequestSubscriber = linkAuthRequestSubscriber
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
+        self.sessionRequestDispatcher = sessionRequestDispatcher
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -445,7 +448,7 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - params: Parameters defining request and related session
     public func request(params: Request) async throws {
-        try await sessionEngine.request(params)
+        try await sessionRequestDispatcher.request(params)
     }
 
     /// For the wallet to respond on pending dApp's JSON-RPC request

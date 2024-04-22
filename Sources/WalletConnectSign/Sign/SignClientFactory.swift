@@ -127,6 +127,10 @@ public struct SignClientFactory {
 
         let approveSessionAuthenticateDispatcher = ApproveSessionAuthenticateDispatcher(relaySessionAuthenticateResponder: relaySessionAuthenticateResponder, logger: logger, rpcHistory: rpcHistory, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, linkSessionAuthenticateResponder: linkSessionAuthenticateResponder)
 
+        let relaySessionRequester = SessionRequester(sessionStore: sessionStore, networkingInteractor: networkingClient, logger: logger)
+
+        let linkSessionRequester = LinkSessionRequester(sessionStore: sessionStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger)
+        let sessionRequestDispatcher = SessionRequestDispatcher(relaySessionRequester: relaySessionRequester, linkSessionRequester: linkSessionRequester, logger: logger, sessionStore: sessionStore)
         let client = SignClient(
             logger: logger,
             networkingClient: networkingClient,
@@ -156,7 +160,8 @@ public struct SignClientFactory {
             authRequestSubscribersTracking: authRequestSubscribersTracking,
             linkAuthRequester: linkAuthRequester,
             linkAuthRequestSubscriber: linkAuthRequestSubscriber,
-            linkEnvelopesDispatcher: linkEnvelopesDispatcher
+            linkEnvelopesDispatcher: linkEnvelopesDispatcher,
+            sessionRequestDispatcher: sessionRequestDispatcher
         )
         return client
     }

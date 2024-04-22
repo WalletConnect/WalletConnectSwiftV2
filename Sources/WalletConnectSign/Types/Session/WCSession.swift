@@ -40,7 +40,9 @@ struct WCSession: SequenceObject, Equatable {
          peerParticipant: Participant,
          settleParams: SessionType.SettleParams,
          requiredNamespaces: [String: ProposalNamespace],
-         acknowledged: Bool) {
+         acknowledged: Bool,
+         transportType: TransportType
+    ) {
         self.topic = topic
         self.pairingTopic = pairingTopic
         self.timestamp = timestamp
@@ -53,6 +55,7 @@ struct WCSession: SequenceObject, Equatable {
         self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
+        self.transportType = transportType
     }
 
 #if DEBUG
@@ -70,7 +73,8 @@ struct WCSession: SequenceObject, Equatable {
         events: Set<String>,
         accounts: Set<Account>,
         acknowledged: Bool,
-        expiryTimestamp: Int64
+        expiryTimestamp: Int64,
+        transportType: TransportType
     ) {
         self.topic = topic
         self.pairingTopic = pairingTopic
@@ -84,6 +88,7 @@ struct WCSession: SequenceObject, Equatable {
         self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiryTimestamp))
+        self.transportType = transportType
     }
 #endif
 
