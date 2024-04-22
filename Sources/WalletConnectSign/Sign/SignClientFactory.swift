@@ -131,6 +131,12 @@ public struct SignClientFactory {
 
         let linkSessionRequester = LinkSessionRequester(sessionStore: sessionStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger)
         let sessionRequestDispatcher = SessionRequestDispatcher(relaySessionRequester: relaySessionRequester, linkSessionRequester: linkSessionRequester, logger: logger, sessionStore: sessionStore)
+        let linkSessionRequestSubscriber = LinkSessionRequestSubscriber(sessionRequestsProvider: sessionRequestsProvider, sessionStore: sessionStore, logger: logger, envelopesDispatcher: linkEnvelopesDispatcher)
+
+        let relaySessionResponder = SessionResponder(logger: logger, sessionStore: sessionStore, networkingInteractor: networkingClient, verifyContextStore: verifyContextStore, sessionRequestsProvider: sessionRequestsProvider, historyService: historyService)
+        let linkSessionResponder = LinkSessionResponder(logger: logger, sessionStore: sessionStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, sessionRequestsProvider: sessionRequestsProvider, historyService: historyService)
+        let sessionResponderDispatcher = SessionResponderDispatcher(relaySessionResponder: relaySessionResponder, linkSessionResponder: linkSessionResponder, logger: logger, sessionStore: sessionStore)
+
         let client = SignClient(
             logger: logger,
             networkingClient: networkingClient,
@@ -161,7 +167,9 @@ public struct SignClientFactory {
             linkAuthRequester: linkAuthRequester,
             linkAuthRequestSubscriber: linkAuthRequestSubscriber,
             linkEnvelopesDispatcher: linkEnvelopesDispatcher,
-            sessionRequestDispatcher: sessionRequestDispatcher
+            sessionRequestDispatcher: sessionRequestDispatcher,
+            linkSessionRequestSubscriber: linkSessionRequestSubscriber,
+            sessionResponderDispatcher: sessionResponderDispatcher
         )
         return client
     }

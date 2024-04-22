@@ -63,54 +63,6 @@ final class SessionEngine {
         sessionStore.getAll().map { $0.publicRepresentation() }
     }
 
-    func request(_ request: Request) async throws {
-        logger.debug("will request on session topic: \(request.topic)")
-        guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {
-            logger.debug("Could not find session for topic \(request.topic)")
-            return
-        }
-        guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
-            logger.debug("Invalid namespaces")
-            throw WalletConnectError.invalidPermissions
-        }
-        let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiryTimestamp: request.expiryTimestamp)
-        let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
-        let ttl = try request.calculateTtl()
-        let protocolMethod = SessionRequestProtocolMethod(ttl: ttl)
-        let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id)
-        try await networkingInteractor.request(rpcRequest, topic: request.topic, protocolMethod: SessionRequestProtocolMethod())
-    }
-
-    func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws {
-        guard sessionStore.hasSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
-        }
-
-        let protocolMethod = SessionRequestProtocolMethod()
-
-        guard sessionRequestNotExpired(requestId: requestId) else {
-            try await networkingInteractor.respondError(
-                topic: topic,
-                requestId: requestId,
-                protocolMethod: protocolMethod,
-                reason: SignReasonCode.sessionRequestExpired
-            )
-            verifyContextStore.delete(forKey: requestId.string)
-            throw Errors.sessionRequestExpired
-        }
-
-        try await networkingInteractor.respond(
-            topic: topic,
-            response: RPCResponse(id: requestId, outcome: response),
-            protocolMethod: protocolMethod
-        )
-        verifyContextStore.delete(forKey: requestId.string)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            guard let self = self else {return}
-            sessionRequestsProvider.emitRequestIfPending()
-        }
-    }
-
     func emit(topic: String, event: SessionType.EventParams.Event, chainId: Blockchain) async throws {
         let protocolMethod = SessionEventProtocolMethod()
         guard let session = sessionStore.getSession(forTopic: topic) else {
@@ -201,13 +153,6 @@ private extension SessionEngine {
             guard let self else { return }
             self.onSessionsUpdate?(self.getSessions())
         }
-    }
-
-    func sessionRequestNotExpired(requestId: RPCID) -> Bool {
-        guard let request = historyService.getSessionRequest(id: requestId)?.request
-        else { return false }
-
-        return !request.isExpired()
     }
 
     func respondError(payload: SubscriptionPayload, reason: SignReasonCode, protocolMethod: ProtocolMethod) {

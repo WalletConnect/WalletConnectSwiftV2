@@ -190,6 +190,8 @@ public final class SignClient: SignClientProtocol {
     private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let sessionRequestDispatcher: SessionRequestDispatcher
+    private let linkSessionRequestSubscriber: LinkSessionRequestSubscriber
+    private let sessionResponderDispatcher: SessionResponderDispatcher
 
     private var publishers = Set<AnyCancellable>()
 
@@ -224,7 +226,9 @@ public final class SignClient: SignClientProtocol {
          linkAuthRequester: LinkAuthRequester,
          linkAuthRequestSubscriber: LinkAuthRequestSubscriber,
          linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
-         sessionRequestDispatcher: SessionRequestDispatcher
+         sessionRequestDispatcher: SessionRequestDispatcher,
+         linkSessionRequestSubscriber: LinkSessionRequestSubscriber,
+         sessionResponderDispatcher: SessionResponderDispatcher
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -256,6 +260,8 @@ public final class SignClient: SignClientProtocol {
         self.linkAuthRequestSubscriber = linkAuthRequestSubscriber
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.sessionRequestDispatcher = sessionRequestDispatcher
+        self.linkSessionRequestSubscriber = linkSessionRequestSubscriber
+        self.sessionResponderDispatcher = sessionResponderDispatcher
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -457,7 +463,7 @@ public final class SignClient: SignClientProtocol {
     ///   - requestId: RPC request ID
     ///   - response: Your JSON RPC response or an error.
     public func respond(topic: String, requestId: RPCID, response: RPCResult) async throws {
-        try await sessionEngine.respondSessionRequest(topic: topic, requestId: requestId, response: response)
+        try await sessionResponderDispatcher.respondSessionRequest(topic: topic, requestId: requestId, response: response)
     }
 
     /// Ping method allows to check if peer client is online and is subscribing for given topic

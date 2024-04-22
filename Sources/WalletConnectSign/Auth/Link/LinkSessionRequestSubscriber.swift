@@ -19,13 +19,14 @@ class LinkSessionRequestSubscriber {
         self.sessionStore = sessionStore
         self.logger = logger
         self.envelopesDispatcher = envelopesDispatcher
+        setupRequestSubscription()
     }
 
     var sessionRequestPublisher: AnyPublisher<(request: Request, context: VerifyContext?), Never> {
         return sessionRequestsProvider.sessionRequestPublisher
     }
 
-    func setupRequestSubscriptions() {
+    func setupRequestSubscription() {
         envelopesDispatcher.requestSubscription(on: SessionRequestProtocolMethod().method)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.RequestParams>) in
                 Task(priority: .high) {
@@ -36,7 +37,6 @@ class LinkSessionRequestSubscriber {
 
     func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) {
         logger.debug("Received session request")
-        let protocolMethod = SessionRequestProtocolMethod()
         let topic = payload.topic
         let request = Request(
             id: payload.id,
