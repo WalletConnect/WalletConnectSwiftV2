@@ -136,6 +136,7 @@ public struct SignClientFactory {
         let relaySessionResponder = SessionResponder(logger: logger, sessionStore: sessionStore, networkingInteractor: networkingClient, verifyContextStore: verifyContextStore, sessionRequestsProvider: sessionRequestsProvider, historyService: historyService)
         let linkSessionResponder = LinkSessionResponder(logger: logger, sessionStore: sessionStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, sessionRequestsProvider: sessionRequestsProvider, historyService: historyService)
         let sessionResponderDispatcher = SessionResponderDispatcher(relaySessionResponder: relaySessionResponder, linkSessionResponder: linkSessionResponder, logger: logger, sessionStore: sessionStore)
+        let linkSessionRequestResponseSubscriber = LinkSessionRequestResponseSubscriber(envelopesDispatcher: linkEnvelopesDispatcher)
 
         let client = SignClient(
             logger: logger,
@@ -169,7 +170,8 @@ public struct SignClientFactory {
             linkEnvelopesDispatcher: linkEnvelopesDispatcher,
             sessionRequestDispatcher: sessionRequestDispatcher,
             linkSessionRequestSubscriber: linkSessionRequestSubscriber,
-            sessionResponderDispatcher: sessionResponderDispatcher
+            sessionResponderDispatcher: sessionResponderDispatcher,
+            linkSessionRequestResponseSubscriber: linkSessionRequestResponseSubscriber
         )
         return client
     }

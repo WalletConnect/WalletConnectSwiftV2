@@ -192,6 +192,7 @@ public final class SignClient: SignClientProtocol {
     private let sessionRequestDispatcher: SessionRequestDispatcher
     private let linkSessionRequestSubscriber: LinkSessionRequestSubscriber
     private let sessionResponderDispatcher: SessionResponderDispatcher
+    private let linkSessionRequestResponseSubscriber: LinkSessionRequestResponseSubscriber
 
     private var publishers = Set<AnyCancellable>()
 
@@ -228,7 +229,8 @@ public final class SignClient: SignClientProtocol {
          linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
          sessionRequestDispatcher: SessionRequestDispatcher,
          linkSessionRequestSubscriber: LinkSessionRequestSubscriber,
-         sessionResponderDispatcher: SessionResponderDispatcher
+         sessionResponderDispatcher: SessionResponderDispatcher,
+         linkSessionRequestResponseSubscriber: LinkSessionRequestResponseSubscriber
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -262,7 +264,8 @@ public final class SignClient: SignClientProtocol {
         self.sessionRequestDispatcher = sessionRequestDispatcher
         self.linkSessionRequestSubscriber = linkSessionRequestSubscriber
         self.sessionResponderDispatcher = sessionResponderDispatcher
-
+        self.linkSessionRequestResponseSubscriber = linkSessionRequestResponseSubscriber
+        
         setUpConnectionObserving()
         setUpEnginesCallbacks()
     }
@@ -587,6 +590,9 @@ public final class SignClient: SignClientProtocol {
         }
         linkAuthRequestSubscriber.onRequest = { [unowned self] request in
             authRequestPublisherSubject.send(request)
+        }
+        linkSessionRequestResponseSubscriber.onSessionResponse = { [unowned self] response in
+            sessionResponsePublisherSubject.send(response)
         }
     }
 
