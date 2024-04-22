@@ -10,19 +10,22 @@ actor LinkSessionAuthenticateResponder {
     private let logger: ConsoleLogging
     private let metadata: AppMetadata
     private let util: ApproveSessionAuthenticateUtil
+    private let walletErrorResponder: WalletErrorResponder
 
     init(
         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
         logger: ConsoleLogging,
         kms: KeyManagementService,
         metadata: AppMetadata,
-        approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil
+        approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil,
+        walletErrorResponder: WalletErrorResponder
     ) {
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.logger = logger
         self.kms = kms
         self.metadata = metadata
         self.util = approveSessionAuthenticateUtil
+        self.walletErrorResponder = walletErrorResponder
     }
 
     func respond(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String) {
@@ -67,8 +70,7 @@ actor LinkSessionAuthenticateResponder {
     }
 
     func respondError(requestId: RPCID) async throws {
-        
-        //TODO
+        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
     }
 
 }

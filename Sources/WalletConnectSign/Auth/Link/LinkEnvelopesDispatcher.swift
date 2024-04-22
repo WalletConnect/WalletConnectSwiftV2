@@ -84,10 +84,10 @@ class LinkEnvelopesDispatcher {
         return envelopeUrl.absoluteString
     }
 
-    public func respondError(topic: String, requestId: RPCID, peerUniversalLink: String, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
+    public func respondError(topic: String, requestId: RPCID, peerUniversalLink: String, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws -> String {
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
-        try await respond(topic: topic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: envelopeType)
+        return try await respond(topic: topic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: envelopeType)
     }
 
     private func serializeAndCreateUrl(peerUniversalLink: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType, topic: String) throws -> URL {
@@ -100,8 +100,6 @@ class LinkEnvelopesDispatcher {
         guard let finalURL = components.url else { throw URLError(.badURL) }
         return finalURL
     }
-
-
 
     public func requestSubscription<RequestParams: Codable>(on method: String) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         return requestPublisher
@@ -134,6 +132,16 @@ class LinkEnvelopesDispatcher {
                     let request = try? rpcRequest.params?.get(Request.self),
                     let response = try? rpcResponse.result?.get(Response.self) else { return nil }
                 return ResponseSubscriptionPayload(id: id, topic: topic, request: request, response: response, publishedAt: Date(), derivedTopic: nil)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    public func responseErrorSubscription<Request: Codable>(on request: ProtocolMethod) -> AnyPublisher<ResponseSubscriptionErrorPayload<Request>, Never> {
+        return responsePublisher
+            .filter { $0.request.method == request.method }
+            .compactMap { topic, rpcRequest, rpcResponse in
+                guard let id = rpcResponse.id, let request = try? rpcRequest.params?.get(Request.self), let error = rpcResponse.error else { return nil }
+                return ResponseSubscriptionErrorPayload(id: id, topic: topic, request: request, error: error)
             }
             .eraseToAnyPublisher()
     }

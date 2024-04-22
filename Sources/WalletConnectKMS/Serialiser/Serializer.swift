@@ -135,7 +135,7 @@ public class Serializer: Serializing {
             let deserialised = try JSONDecoder().decode(T.self, from: envelope.sealbox)
             return deserialised
         } catch {
-            print(error)
+            logger.error(error)
             throw error
         }
     }

@@ -110,7 +110,7 @@ public struct SignClientFactory {
 
         let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher)
 
-        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory)
+        let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, linkEnvelopesDispatcher: linkEnvelopesDispatcher)
         let authRequestSubscriber = AuthRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, verifyClient: verifyClient, verifyContextStore: verifyContextStore, pairingStore: pairingStore)
 
         let approveSessionAuthenticateUtil = ApproveSessionAuthenticateUtil(logger: logger, kms: kms, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, messageFormatter: messageFormatter, sessionStore: sessionStore, sessionNamespaceBuilder: sessionNameSpaceBuilder)
@@ -123,7 +123,7 @@ public struct SignClientFactory {
 
         let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil)
 
-        let linkSessionAuthenticateResponder = LinkSessionAuthenticateResponder(linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger, kms: kms, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil)
+        let linkSessionAuthenticateResponder = LinkSessionAuthenticateResponder(linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger, kms: kms, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, walletErrorResponder: walletErrorResponder)
 
         let approveSessionAuthenticateDispatcher = ApproveSessionAuthenticateDispatcher(relaySessionAuthenticateResponder: relaySessionAuthenticateResponder, logger: logger, rpcHistory: rpcHistory, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, linkSessionAuthenticateResponder: linkSessionAuthenticateResponder)
 

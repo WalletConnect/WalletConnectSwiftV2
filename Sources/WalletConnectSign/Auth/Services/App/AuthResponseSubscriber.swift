@@ -78,6 +78,12 @@ class AuthResponseSubscriber {
     }
 
     private func subscribeForLinkResonse() {
+        linkEnvelopesDispatcher.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
+                guard let error = AuthError(code: payload.error.code) else { return }
+                authResponsePublisherSubject.send((payload.id, .failure(error)))
+            }.store(in: &publishers)
+
         linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
