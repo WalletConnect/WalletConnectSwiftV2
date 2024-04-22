@@ -84,6 +84,12 @@ class LinkEnvelopesDispatcher {
         return envelopeUrl.absoluteString
     }
 
+    public func respondError(topic: String, requestId: RPCID, peerUniversalLink: String, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws {
+        let error = JSONRPCError(code: reason.code, message: reason.message)
+        let response = RPCResponse(id: requestId, error: error)
+        try await respond(topic: topic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: envelopeType)
+    }
+
     private func serializeAndCreateUrl(peerUniversalLink: String, encodable: Encodable, envelopeType: Envelope.EnvelopeType, topic: String) throws -> URL {
         let envelope = try serializer.serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
 

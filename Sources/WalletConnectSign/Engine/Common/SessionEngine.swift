@@ -8,7 +8,6 @@ final class SessionEngine {
 
     var onSessionsUpdate: (([Session]) -> Void)?
     var onSessionResponse: ((Response) -> Void)?
-    var onSessionRejected: ((String, SessionType.Reason) -> Void)?
     var onSessionDelete: ((String, SessionType.Reason) -> Void)?
     var onEventReceived: ((String, Session.Event, Blockchain?) -> Void)?
 
