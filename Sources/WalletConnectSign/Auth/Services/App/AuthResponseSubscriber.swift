@@ -69,7 +69,7 @@ class AuthResponseSubscriber {
                         authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
                     }
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, transportType: .relay)
 
                     authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
                 }
@@ -95,7 +95,7 @@ class AuthResponseSubscriber {
                         authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
                     }
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, transportType: .linkMode)
 
                     authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
                 }
@@ -127,7 +127,8 @@ class AuthResponseSubscriber {
     private func createSession(
         from response: SessionAuthenticateResponseParams,
         selfParticipant: Participant,
-        pairingTopic: String
+        pairingTopic: String,
+        transportType: WCSession.TransportType
     ) throws -> Session? {
 
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
@@ -165,7 +166,8 @@ class AuthResponseSubscriber {
             peerParticipant: response.responder,
             settleParams: settleParams,
             requiredNamespaces: [:],
-            acknowledged: true
+            acknowledged: true,
+            transportType: transportType
         )
 
         sessionStore.setSession(session)

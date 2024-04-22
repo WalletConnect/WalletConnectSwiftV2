@@ -62,7 +62,8 @@ class ApproveSessionAuthenticateUtil {
         response: SessionAuthenticateResponseParams,
         pairingTopic: String,
         request: SessionAuthenticateRequestParams,
-        sessionTopic: String
+        sessionTopic: String,
+        transportType: WCSession.TransportType
     ) throws -> Session? {
 
 
@@ -96,7 +97,8 @@ class ApproveSessionAuthenticateUtil {
             peerParticipant: peerParticipant,
             settleParams: settleParams,
             requiredNamespaces: [:],
-            acknowledged: true
+            acknowledged: true,
+            transportType: transportType
         )
 
         sessionStore.setSession(session)

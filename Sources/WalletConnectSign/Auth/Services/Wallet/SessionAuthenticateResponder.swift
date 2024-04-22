@@ -60,7 +60,8 @@ actor SessionAuthenticateResponder {
             response: responseParams,
             pairingTopic: pairingTopic,
             request: sessionAuthenticateRequestParams,
-            sessionTopic: sessionTopic
+            sessionTopic: sessionTopic,
+            transportType: .relay
         )
 
         Task {

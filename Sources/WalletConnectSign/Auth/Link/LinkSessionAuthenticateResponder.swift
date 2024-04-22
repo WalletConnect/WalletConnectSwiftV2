@@ -59,7 +59,8 @@ actor LinkSessionAuthenticateResponder {
             response: responseParams,
             pairingTopic: pairingTopic,
             request: sessionAuthenticateRequestParams,
-            sessionTopic: sessionTopic
+            sessionTopic: sessionTopic,
+            transportType: .linkMode
         )
 
         return (session, url)
