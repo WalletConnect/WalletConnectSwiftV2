@@ -98,7 +98,7 @@ public class Serializer: Serializing {
                 return decoded
             }
             catch {
-                logger.error("\(error)")
+                logger.debug("\(error)")
                 throw error
             }
         } else {
