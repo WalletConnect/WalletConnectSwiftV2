@@ -20,15 +20,15 @@ public extension Serializing {
         try serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
     }
 
-    func tryDeserializeRequestOrResponse(topic: String, codingType: Envelope.CodingType) -> Either<RPCRequest, RPCResponse>? {
+    func tryDeserializeRequestOrResponse(topic: String, codingType: Envelope.CodingType) -> Either<(request: RPCRequest, derivedTopic: String?, decryptedPayload: Data), (response: RPCResponse, derivedTopic: String?, decryptedPayload: Data)>? {
         // Attempt to deserialize RPCRequest
         if let result = try? deserialize(topic: topic, codingType: codingType) as (RPCRequest, derivedTopic: String?, decryptedPayload: Data) {
-            return .left(result.0)
+            return .left(result)
         }
 
         // Attempt to deserialize RPCResponse
         if let result = try? deserialize(topic: topic, codingType: codingType) as (RPCResponse, derivedTopic: String?, decryptedPayload: Data) {
-            return .right(result.0)
+            return .right(result)
         }
 
         // If both attempts fail, log an error and return nil

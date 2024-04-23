@@ -149,13 +149,13 @@ class LinkEnvelopesDispatcher {
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
         if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, codingType: .base64UrlEncoded(encodedEnvelope)) {
             switch result {
-            case .left(let request):
-                handleRequest(topic: topic, request: request)
-            case .right(let response):
-                handleResponse(topic: topic, response: response)
+            case .left(let result):
+                handleRequest(topic: topic, request: result.request)
+            case .right(let result):
+                handleResponse(topic: topic, response: result.response)
             }
         } else {
-            logger.debug("Link Dispatcher - Received unknown object type from networking relay")
+            logger.debug("Link Dispatcher - Received unknown object type to dispatch")
         }
     }
 
