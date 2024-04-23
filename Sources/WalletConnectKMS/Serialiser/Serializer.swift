@@ -76,13 +76,13 @@ public class Serializer: Serializing {
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - encodedEnvelope: Envelope to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func deserialize<T: Codable>(topic: String, encodedEnvelope: String) throws -> (T, derivedTopic: String?, decryptedPayload: Data) {
-        let envelope = try Envelope(encodedEnvelope)
+    public func deserialize<T: Codable>(topic: String, codingType: Envelope.CodingType) throws -> (T, derivedTopic: String?, decryptedPayload: Data) {
+        let envelope = try Envelope(codingType)
         switch envelope.type {
-        case .type0:
+        case .type0, .type3:
             let deserialisedType: (object: T, data: Data) = try handleType0Envelope(topic, envelope)
             return (deserialisedType.object, nil, deserialisedType.data)
-        case .type1(let peerPubKey):
+        case .type1(let peerPubKey), .type4(let peerPubKey):
             return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
         case .type2:
             let decodedType: T = try handleType2Envelope(envelope: envelope)

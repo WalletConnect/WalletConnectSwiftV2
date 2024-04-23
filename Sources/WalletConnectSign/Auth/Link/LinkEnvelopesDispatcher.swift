@@ -147,7 +147,7 @@ class LinkEnvelopesDispatcher {
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
-        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, encodedEnvelope: encodedEnvelope) {
+        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, codingType: .base64UrlEncoded(encodedEnvelope)) {
             switch result {
             case .left(let request):
                 handleRequest(topic: topic, request: request)
