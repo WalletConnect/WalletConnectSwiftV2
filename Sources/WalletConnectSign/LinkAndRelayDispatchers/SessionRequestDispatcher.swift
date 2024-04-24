@@ -19,7 +19,7 @@ class SessionRequestDispatcher {
         self.sessionStore = sessionStore
     }
 
-    public func request(_ request: Request) async throws -> (String?) {
+    public func request(_ request: Request) async throws -> String? {
 
         guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {
             logger.debug("Could not find session for topic \(request.topic)")

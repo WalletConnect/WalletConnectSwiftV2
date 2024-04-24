@@ -1193,4 +1193,80 @@ final class SignClientTests: XCTestCase {
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
 
+    func testLinkSessionRequest() async throws {
+        let requestExpectation = expectation(description: "Wallet expects to receive a request")
+        let responseExpectation = expectation(description: "Dapp expects to receive a response")
+
+        let requestMethod = "personal_sign"
+        let requestParams = [EthSendTransaction.stub()]
+        let responseParams = "0xdeadbeef"
+
+        let semaphore = DispatchSemaphore(value: 0)
+
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
+            semaphore.wait()
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+
+                let signature = try signer.sign(
+                    message: siweMessage,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+
+                let (_, approveEnvelope) = try! await wallet.approveSessionAuthenticateLinkMode(requestId: request.id, auths: [auth])
+                try dapp.dispatchEnvelope(approveEnvelope)
+                semaphore.signal()
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { [unowned self] (_, result) in
+            semaphore.wait()
+            guard case .success(let (session, _)) = result,
+                let session = session else { XCTFail(); return }
+            Task(priority: .high) {
+                let request = try! Request(id: RPCID(0), topic: session.topic, method: requestMethod, params: requestParams, chainId: Blockchain("eip155:1")!)
+                let requestEnvelope = try! await dapp.requestLinkMode(params: request)!
+                try! wallet.dispatchEnvelope(requestEnvelope)
+                semaphore.signal()
+            }
+        }
+        .store(in: &publishers)
+
+        wallet.sessionRequestPublisher.sink { [unowned self] (sessionRequest, _) in
+            semaphore.wait()
+            let receivedParams = try! sessionRequest.params.get([EthSendTransaction].self)
+            XCTAssertEqual(receivedParams, requestParams)
+            XCTAssertEqual(sessionRequest.method, requestMethod)
+            requestExpectation.fulfill()
+            Task(priority: .high) {
+                let envelope = try! await wallet.respondLinkMode(topic: sessionRequest.topic, requestId: sessionRequest.id, response: .response(AnyCodable(responseParams)))!
+                try! dapp.dispatchEnvelope(envelope)
+            }
+            semaphore.signal()
+        }.store(in: &publishers)
+
+        dapp.sessionResponsePublisher.sink { response in
+            semaphore.wait()
+            switch response.result {
+            case .response(let response):
+                XCTAssertEqual(try! response.get(String.self), responseParams)
+            case .error:
+                XCTFail()
+            }
+            responseExpectation.fulfill()
+        }.store(in: &publishers)
+        semaphore.signal()
+
+        let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: "")
+        try wallet.dispatchEnvelope(requestEnvelope)
+        
+        await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
 }

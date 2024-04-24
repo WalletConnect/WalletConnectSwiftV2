@@ -380,10 +380,11 @@ public final class SignClient: SignClientProtocol {
     ///   - requestId: authentication request id
     ///   - signature: CACAO signature of requested message
     public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
-        let (session, universalLink) = try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
+        let (session, _) = try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
         return session
     }
 
+    /// the function returns envelope for link mode testing
     #if DEBUG
     func approveSessionAuthenticateLinkMode(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String) {
         let (session, envelope) = try await approveSessionAuthenticateDispatcher.approveSessionAuthenticate(requestId: requestId, auths: auths)
@@ -457,8 +458,15 @@ public final class SignClient: SignClientProtocol {
     /// - Parameters:
     ///   - params: Parameters defining request and related session
     public func request(params: Request) async throws {
-        try await sessionRequestDispatcher.request(params)
+        _ = try await sessionRequestDispatcher.request(params)
     }
+
+    /// the function returns envelope for link mode testing
+#if DEBUG
+    public func requestLinkMode(params: Request) async throws -> String? {
+        return try await sessionRequestDispatcher.request(params)
+    }
+#endif
 
     /// For the wallet to respond on pending dApp's JSON-RPC request
     /// - Parameters:
@@ -466,8 +474,15 @@ public final class SignClient: SignClientProtocol {
     ///   - requestId: RPC request ID
     ///   - response: Your JSON RPC response or an error.
     public func respond(topic: String, requestId: RPCID, response: RPCResult) async throws {
-        try await sessionResponderDispatcher.respondSessionRequest(topic: topic, requestId: requestId, response: response)
+        _ = try await sessionResponderDispatcher.respondSessionRequest(topic: topic, requestId: requestId, response: response)
     }
+    /// the function returns envelope for link mode testing
+
+#if DEBUG
+    public func respondLinkMode(topic: String, requestId: RPCID, response: RPCResult) async throws -> String? {
+        return try await sessionResponderDispatcher.respondSessionRequest(topic: topic, requestId: requestId, response: response)
+    }
+#endif
 
     /// Ping method allows to check if peer client is online and is subscribing for given topic
     ///
