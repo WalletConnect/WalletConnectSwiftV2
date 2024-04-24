@@ -64,11 +64,6 @@ actor SessionAuthenticateResponder {
             transportType: .relay
         )
 
-        Task {
-            logger.debug("subscribing to session topic: \(sessionTopic)")
-            try await networkingInteractor.subscribe(topic: sessionTopic)
-        }
-
         pairingRegisterer.activate(
             pairingTopic: pairingTopic,
             peerMetadata: sessionAuthenticateRequestParams.requester.metadata

@@ -32,6 +32,7 @@ final class ConfigurationService {
         )
 
         Notify.instance.setLogging(level: .debug)
+        Sign.instance.setLogging(level: .debug)
 
         if let clientId = try? Networking.interactor.getClientId() {
             LoggingService.instance.setUpUser(account: importAccount.account.absoluteString, clientId: clientId)

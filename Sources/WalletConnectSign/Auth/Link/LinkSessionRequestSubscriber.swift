@@ -55,15 +55,19 @@ class LinkSessionRequestSubscriber {
             return
         }
         guard session.hasNamespace(for: request.chainId) else {
+            logger.debug("Session does not have namespace for chainId")
             return respondError(payload: payload, reason: .unauthorizedChain, peerUniversalLink: peerUniversalLink)
         }
         guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
+            logger.debug("Session does not have permission for method")
             return respondError(payload: payload, reason: .unauthorizedMethod(request.method), peerUniversalLink: peerUniversalLink)
         }
         guard !request.isExpired() else {
+            logger.debug("Request is expired")
             return respondError(payload: payload, reason: .sessionRequestExpired, peerUniversalLink: peerUniversalLink)
         }
 
+        logger.debug("will emit request")
         sessionRequestsProvider.emitRequestIfPending()
     }
 

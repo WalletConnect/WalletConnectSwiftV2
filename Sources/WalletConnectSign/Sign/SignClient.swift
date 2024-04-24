@@ -558,6 +558,10 @@ public final class SignClient: SignClientProtocol {
     }
 #endif
 
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+    }
+
     // MARK: - Private
 
     private func setUpEnginesCallbacks() {

@@ -9,6 +9,7 @@ class ApproveSessionAuthenticateUtil {
     private let kms: KeyManagementService
     private let messageFormatter: SIWEFromCacaoFormatting
     private let signatureVerifier: MessageVerifier
+    private let networkingInteractor: NetworkInteracting
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
     private let sessionStore: WCSessionStorage
@@ -21,7 +22,8 @@ class ApproveSessionAuthenticateUtil {
         signatureVerifier: MessageVerifier,
         messageFormatter: SIWEFromCacaoFormatting,
         sessionStore: WCSessionStorage,
-        sessionNamespaceBuilder: SessionNamespaceBuilder
+        sessionNamespaceBuilder: SessionNamespaceBuilder,
+        networkingInteractor: NetworkInteracting
     ) {
         self.logger = logger
         self.kms = kms
@@ -30,6 +32,7 @@ class ApproveSessionAuthenticateUtil {
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
+        self.networkingInteractor = networkingInteractor
     }
 
     func getsessionAuthenticateRequestParams(requestId: RPCID) throws -> (request: SessionAuthenticateRequestParams, topic: String) {
@@ -102,6 +105,10 @@ class ApproveSessionAuthenticateUtil {
         )
 
         sessionStore.setSession(session)
+        Task {
+            logger.debug("subscribing to session topic: \(sessionTopic)")
+            try await networkingInteractor.subscribe(topic: sessionTopic)
+        }
 
         return session.publicRepresentation()
     }

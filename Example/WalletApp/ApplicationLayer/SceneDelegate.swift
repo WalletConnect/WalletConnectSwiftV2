@@ -23,6 +23,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
             return
         }
         do {
+            print("🔵🔵🔵🔵🔵🔵🔵\(url.absoluteString)")
             try Sign.instance.dispatchEnvelope(url.absoluteString)
         } catch {
             print("🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
