@@ -140,15 +140,6 @@ final class AuthRequestPresenter: ObservableObject {
     }
 
     private func buildAuthObjects() throws -> [AuthObject] {
-        guard let chain = getCommonAndRequestedChainsIntersection().first else {
-            throw Errors.noCommonChains
-        }
-
-        let auth = try createAuthObjectForChain(chain: chain)
-        return [auth]
-    }
-
-    private func buildOneAuthObject() throws -> [AuthObject] {
         var auths = [AuthObject]()
 
         try getCommonAndRequestedChainsIntersection().forEach { chain in
@@ -156,6 +147,15 @@ final class AuthRequestPresenter: ObservableObject {
             auths.append(auth)
         }
         return auths
+    }
+
+    private func buildOneAuthObject() throws -> [AuthObject] {
+        guard let chain = getCommonAndRequestedChainsIntersection().first else {
+            throw Errors.noCommonChains
+        }
+
+        let auth = try createAuthObjectForChain(chain: chain)
+        return [auth]
     }
 
 

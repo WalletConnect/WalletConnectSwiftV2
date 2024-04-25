@@ -49,7 +49,7 @@ public class RecapUrnMergingService {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         guard let jsonData = try? encoder.encode(RecapData(att: sortedMergedAtt, prf: nil)),
-              let jsonBase64 = jsonData.base64EncodedString().addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+              let jsonBase64 = jsonData.base64urlEncodedString().addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
             throw Errors.encodingFailed
         }
 
