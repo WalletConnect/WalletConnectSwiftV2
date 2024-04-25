@@ -17,27 +17,24 @@ struct SignRecapBuilder {
             throw BuilderError.nonEVMChainNamespace
         }
 
-        // Convert supportedEVMChains to string array for intersection
         let supportedChainStrings = supportedEVMChains.map { $0.absoluteString }
-
-        // Find intersection of requestedChains and supportedEVMChains strings
         let commonChains = requestedChains.filter(supportedChainStrings.contains)
         guard !commonChains.isEmpty else {
             throw BuilderError.noCommonChains
         }
 
         let requestedRecap = try SignRecap(urn: urn)
+        var filteredActions = requestedRecap.recapData.att ?? [:]
 
-        var filteredActions: [String: [String: [AnyCodable]]] = [:]
-
-        if let eip155Actions = requestedRecap.recapData.att?["eip155"] {
+        if let eip155Actions = filteredActions["eip155"] {
+            var newEip155Actions: [String: [AnyCodable]] = [:]
             for method in supportedMethods {
                 let actionKey = "request/\(method)"
-                if eip155Actions.keys.contains(actionKey) {
-                    // Use only common chains for each supported method
-                    filteredActions["eip155", default: [:]][actionKey] = [AnyCodable(["chains": commonChains])]
+                if let actions = eip155Actions[actionKey] {
+                    newEip155Actions[actionKey] = [AnyCodable(["chains": commonChains])]
                 }
             }
+            filteredActions["eip155"] = newEip155Actions
         }
 
         let modifiedRecapData = SignRecap.RecapData(att: filteredActions, prf: requestedRecap.recapData.prf)
@@ -45,9 +42,10 @@ struct SignRecapBuilder {
         guard let jsonData = try? encoder.encode(modifiedRecapData) else {
             throw SignRecap.Errors.invalidRecapStructure
         }
-        let jsonBase64String = jsonData.base64EncodedString()
+        let jsonBase64urlString = jsonData.base64urlEncodedString()
 
-        let modifiedUrn = "urn:recap:\(jsonBase64String)"
+        let modifiedUrn = "urn:recap:\(jsonBase64urlString)"
         return try SignRecap(urn: modifiedUrn)
     }
+
 }

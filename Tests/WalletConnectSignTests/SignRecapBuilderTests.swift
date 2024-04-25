@@ -91,4 +91,31 @@ class SignRecapBuilderTests: XCTestCase {
         XCTAssertFalse(result.recapData.att?["eip155"]?.keys.contains("request/extraUnsupportedMethod") ?? true, "Result should not contain 'extraUnsupportedMethod'")
     }
 
+    func testSessionRecapBuilder_RetainsAdditionalAttributes() throws {
+        // Given
+        let requestedRecap: [String: [String: [String: [[String: [String]]]]]] = [
+            "att": [
+                "eip155": [
+                    "request/eth_sendTransaction": [[:]],
+                    "request/personal_sign": [[:]]
+                ],
+                "https://notify.walletconnect.com": [
+                    "manage/all-apps-notifications": [[:]]
+                ]
+            ]
+        ]
+        let encoded = try! JSONEncoder().encode(requestedRecap).base64EncodedString()
+        let urn = "urn:recap:\(encoded)"
+
+        let supportedChains = [Blockchain("eip155:1")!, Blockchain("eip155:137")!]
+        let supportedMethods = ["eth_sendTransaction", "personal_sign"]
+        let requestedChains = ["eip155:1", "eip155:137"]
+
+        // When
+        let result = try SignRecapBuilder.build(requestedSessionRecap: urn, requestedChains: requestedChains, supportedEVMChains: supportedChains, supportedMethods: supportedMethods)
+
+        // Then
+        XCTAssertNotNil(result.recapData.att?["eip155"], "EIP155 namespace should be present")
+        XCTAssertNotNil(result.recapData.att?["https://notify.walletconnect.com"], "https://notify.walletconnect.com namespace should be retained")
+    }
 }
