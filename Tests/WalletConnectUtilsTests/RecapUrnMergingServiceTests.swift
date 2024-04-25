@@ -25,8 +25,8 @@ class RecapUrnMergingTests: XCTestCase {
         }
         """
 
-        guard let notifyBase64 = notifyRecapJson.data(using: .utf8)?.base64EncodedString(),
-              let signBase64 = signRecapJson.data(using: .utf8)?.base64EncodedString() else {
+        guard let notifyBase64 = notifyRecapJson.data(using: .utf8)?.base64urlEncodedString(),
+              let signBase64 = signRecapJson.data(using: .utf8)?.base64urlEncodedString() else {
             XCTFail("Failed to encode JSON strings to Base64")
             return
         }
