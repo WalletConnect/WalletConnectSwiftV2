@@ -7,7 +7,7 @@ class AuthenticatedSessionRecapUrnFactory {
         let jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .withoutEscapingSlashes
         let jsonData = try jsonEncoder.encode(recap)
-        let base64Encoded = jsonData.base64EncodedString()
+        let base64Encoded = jsonData.base64urlEncodedString()
         let urn = "urn:recap:\(base64Encoded)"
         return urn
     }
