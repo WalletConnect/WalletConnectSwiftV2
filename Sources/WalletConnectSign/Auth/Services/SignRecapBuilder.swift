@@ -45,7 +45,7 @@ struct SignRecapBuilder {
         guard let jsonData = try? encoder.encode(modifiedRecapData) else {
             throw SignRecap.Errors.invalidRecapStructure
         }
-        let jsonBase64String = jsonData.base64EncodedString()
+        let jsonBase64String = jsonData.base64urlEncodedString()
 
         let modifiedUrn = "urn:recap:\(jsonBase64String)"
         return try SignRecap(urn: modifiedUrn)
