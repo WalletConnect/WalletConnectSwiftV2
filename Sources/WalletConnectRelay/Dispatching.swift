@@ -108,9 +108,22 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func connect() throws {
+        // Attempt to handle connection
         try socketConnectionHandler.handleConnect()
-        start counting for fallback on first connect attempt
+
+        // Start a timer for the fallback mechanism
+        let timer = DispatchSource.makeTimerSource(queue: concurrentQueue)
+        timer.schedule(deadline: .now() + .seconds(defaultTimeout))
+        timer.setEventHandler { [unowned self] in
+            if !self.socket.isConnected {
+                self.logger.debug("Connection timed out, initiating fallback...")
+                self.socketUrlFallbackHandler.handleFallbackIfNeeded(error: .connectionFailed)
+            }
+            timer.cancel()
+        }
+        timer.resume()
     }
+
 
     func disconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         try socketConnectionHandler.handleDisconnect(closeCode: closeCode)
