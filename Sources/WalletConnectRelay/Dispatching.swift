@@ -76,6 +76,7 @@ final class Dispatcher: NSObject, Dispatching {
         var cancellable: AnyCancellable?
         cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
             .filter { $0.0 == .connected && $0.1 == .connected }
+            .first()
             .setFailureType(to: NetworkError.self)
             .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
             .sink(receiveCompletion: { [unowned self] result in
@@ -96,12 +97,16 @@ final class Dispatcher: NSObject, Dispatching {
     
 
     func protectedSend(_ string: String) async throws {
+        var isResumed = false
         return try await withCheckedThrowingContinuation { continuation in
             protectedSend(string) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
+                if !isResumed {
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: ())
+                    }
+                    isResumed = true
                 }
             }
         }
