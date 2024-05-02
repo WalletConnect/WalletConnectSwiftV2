@@ -8,7 +8,6 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     private var socketUrlFallbackHandler: SocketUrlFallbackHandler
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.manual_socket_connection", attributes: .concurrent)
 
-
     init(
         socket: WebSocketConnecting,
         logger: ConsoleLogging,
@@ -16,6 +15,12 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
             self.socket = socket
             self.logger = logger
             self.socketUrlFallbackHandler = socketUrlFallbackHandler
+
+            socketUrlFallbackHandler.onTryReconnect = { [unowned self] in
+                Task(priority: .high) {
+                    await tryReconect()
+                }
+            }
         }
 
     func handleConnect() throws {
