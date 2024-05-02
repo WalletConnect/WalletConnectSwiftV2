@@ -61,19 +61,17 @@ public struct RelayClientFactory {
         if let bundleId = Bundle.main.bundleIdentifier {
             socket.request.addValue(bundleId, forHTTPHeaderField: "Origin")
         }
-        var socketConnectionHandler: SocketConnectionHandler!
-        switch socketConnectionType {
-        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket)
-        case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket)
-        }
-
         let socketFallbackHandler = SocketUrlFallbackHandler(
             relayUrlFactory: relayUrlFactory,
             logger: logger,
-            socketConnectionHandler: socketConnectionHandler,
             socket: socket,
             networkMonitor: networkMonitor
         )
+        var socketConnectionHandler: SocketConnectionHandler!
+        switch socketConnectionType {
+        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, logger: logger, socketUrlFallbackHandler: socketFallbackHandler)
+        case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket, logger: logger, socketUrlFallbackHandler: socketFallbackHandler)
+        }
 
         let dispatcher = Dispatcher(
             socketFactory: socketFactory,
@@ -81,7 +79,6 @@ public struct RelayClientFactory {
             networkMonitor: networkMonitor,
             socket: socket,
             logger: logger,
-            socketUrlFallbackHandler: socketFallbackHandler,
             socketConnectionHandler: socketConnectionHandler
         )
 

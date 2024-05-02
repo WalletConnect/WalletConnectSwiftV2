@@ -2,14 +2,35 @@ import Foundation
 
 class ManualSocketConnectionHandler: SocketConnectionHandler {
 
-    var socket: WebSocketConnecting
+    private let socket: WebSocketConnecting
+    private let logger: ConsoleLogging
+    private let defaultTimeout: Int = 5
+    private var socketUrlFallbackHandler: SocketUrlFallbackHandler
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.manual_socket_connection", attributes: .concurrent)
 
-    init(socket: WebSocketConnecting) {
-        self.socket = socket
-    }
+
+    init(
+        socket: WebSocketConnecting,
+        logger: ConsoleLogging,
+        socketUrlFallbackHandler: SocketUrlFallbackHandler) {
+            self.socket = socket
+            self.logger = logger
+            self.socketUrlFallbackHandler = socketUrlFallbackHandler
+        }
 
     func handleConnect() throws {
         socket.connect()
+        // Start a timer for the fallback mechanism
+        let timer = DispatchSource.makeTimerSource(queue: concurrentQueue)
+        timer.schedule(deadline: .now() + .seconds(defaultTimeout))
+        timer.setEventHandler { [unowned self] in
+            if !self.socket.isConnected {
+                self.logger.debug("Connection timed out, initiating fallback...")
+                self.socketUrlFallbackHandler.handleFallbackIfNeeded(error: .connectionFailed)
+            }
+            timer.cancel()
+        }
+        timer.resume()
     }
 
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {

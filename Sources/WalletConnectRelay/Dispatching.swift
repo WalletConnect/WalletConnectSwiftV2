@@ -16,13 +16,11 @@ final class Dispatcher: NSObject, Dispatching {
     var onMessage: ((String) -> Void)?
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
-    var socketUrlFallbackHandler: SocketUrlFallbackHandler
 
+    private let defaultTimeout: Int = 5
     private let relayUrlFactory: RelayUrlFactory
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
-
-    private let defaultTimeout: Int = 5
 
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
 
@@ -42,8 +40,7 @@ final class Dispatcher: NSObject, Dispatching {
         networkMonitor: NetworkMonitoring,
         socket: WebSocketConnecting,
         logger: ConsoleLogging,
-        socketUrlFallbackHandler: SocketUrlFallbackHandler,
-        socketConnectionHandler:SocketConnectionHandler
+        socketConnectionHandler: SocketConnectionHandler
     ) {
         self.socketConnectionHandler = socketConnectionHandler
         self.relayUrlFactory = relayUrlFactory
@@ -51,7 +48,6 @@ final class Dispatcher: NSObject, Dispatching {
         self.logger = logger
 
         self.socket = socket
-        self.socketUrlFallbackHandler = socketUrlFallbackHandler
 
         super.init()
         setUpWebSocketSession()
@@ -83,9 +79,6 @@ final class Dispatcher: NSObject, Dispatching {
                 switch result {
                 case .failure(let error):
                     cancellable?.cancel()
-                    if !socket.isConnected {
-                        socketUrlFallbackHandler.handleFallbackIfNeeded(error: error)
-                    }
                     completion(error)
                 case .finished: break
                 }
@@ -115,18 +108,6 @@ final class Dispatcher: NSObject, Dispatching {
     func connect() throws {
         // Attempt to handle connection
         try socketConnectionHandler.handleConnect()
-
-        // Start a timer for the fallback mechanism
-        let timer = DispatchSource.makeTimerSource(queue: concurrentQueue)
-        timer.schedule(deadline: .now() + .seconds(defaultTimeout))
-        timer.setEventHandler { [unowned self] in
-            if !self.socket.isConnected {
-                self.logger.debug("Connection timed out, initiating fallback...")
-                self.socketUrlFallbackHandler.handleFallbackIfNeeded(error: .connectionFailed)
-            }
-            timer.cancel()
-        }
-        timer.resume()
     }
 
 
