@@ -13,12 +13,30 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         webSocketSession = WebSocketMock()
         networkMonitor = NetworkMonitoringMock()
         appStateObserver = AppStateObserverMock()
+        let webSocket = WebSocketMock()
+
+        let defaults = RuntimeKeyValueStorage()
+        let logger = ConsoleLoggerMock()
+        let keychainStorageMock = DispatcherKeychainStorageMock()
+        let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychainStorageMock, logger: logger)
+
+
+        let socketAuthenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage)
+        let relayUrlFactory = RelayUrlFactory(
+            relayHost: "relay.walletconnect.com",
+            projectId: "1012db890cf3cfb0c1cdc929add657ba",
+            socketAuthenticator: socketAuthenticator
+        )
         backgroundTaskRegistrar = BackgroundTaskRegistrarMock()
+        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: ConsoleLoggerMock(), socket: webSocket, networkMonitor: networkMonitor)
         sut = AutomaticSocketConnectionHandler(
             socket: webSocketSession,
             networkMonitor: networkMonitor,
             appStateObserver: appStateObserver,
-        backgroundTaskRegistrar: backgroundTaskRegistrar)
+            backgroundTaskRegistrar: backgroundTaskRegistrar,
+            logger: ConsoleLoggerMock(),
+            socketUrlFallbackHandler: socketUrlFallbackHandler
+        )
     }
 
     func testConnectsOnConnectionSatisfied() {

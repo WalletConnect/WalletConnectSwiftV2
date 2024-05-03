@@ -1,10 +1,13 @@
 import Foundation
 
-struct RelayUrlFactory {
+class RelayUrlFactory {
     private let relayHost: String
     private let projectId: String
     private let socketAuthenticator: ClientIdAuthenticating
-    
+    /// The property is used to determine whether relay.walletconnect.org will be used
+    /// in case relay.walletconnect.com doesn't respond for some reason (most likely due to being blocked in the user's location).
+    private var fallback: Bool = false
+
     init(
         relayHost: String,
         projectId: String,
@@ -15,7 +18,11 @@ struct RelayUrlFactory {
         self.socketAuthenticator = socketAuthenticator
     }
 
-    func create(fallback: Bool) -> URL {
+    func setFallback() {
+        self.fallback = true
+    }
+
+    func create() -> URL {
         var components = URLComponents()
         components.scheme = "wss"
         components.host = fallback ? NetworkConstants.fallbackUrl : relayHost

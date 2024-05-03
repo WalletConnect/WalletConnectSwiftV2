@@ -5,7 +5,7 @@ import Combine
 import TestingUtils
 import Combine
 
-private class DispatcherKeychainStorageMock: KeychainStorageProtocol {
+class DispatcherKeychainStorageMock: KeychainStorageProtocol {
     func add<T>(_ item: T, forKey key: String) throws where T : WalletConnectKMS.GenericPasswordConvertible {}
     func read<T>(key: String) throws -> T where T : WalletConnectKMS.GenericPasswordConvertible {
         return try T(rawRepresentation: Data())
@@ -71,12 +71,15 @@ final class DispatcherTests: XCTestCase {
             projectId: "1012db890cf3cfb0c1cdc929add657ba",
             socketAuthenticator: socketAuthenticator
         )
+        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: logger, socket: webSocket, networkMonitor: networkMonitor)
+        let socketConnectionHandler = ManualSocketConnectionHandler(socket: webSocket, logger: logger, socketUrlFallbackHandler: socketUrlFallbackHandler)
         sut = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: relayUrlFactory, 
             networkMonitor: networkMonitor,
-            socketConnectionType: .manual,
-            logger: ConsoleLoggerMock()
+            socket: webSocket,
+            logger: ConsoleLoggerMock(),
+            socketConnectionHandler: socketConnectionHandler
         )
     }
 
