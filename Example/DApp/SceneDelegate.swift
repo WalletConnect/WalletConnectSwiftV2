@@ -50,6 +50,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         )
         
         Sign.instance.logger.setLogging(level: .debug)
+        Networking.instance.setLogging(level: .debug)
 
         Sign.instance.logsPublisher.sink { log in
             switch log {

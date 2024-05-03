@@ -42,15 +42,26 @@ final class RelayClientEndToEndTests: XCTestCase {
             projectId: InputConfig.projectId,
             socketAuthenticator: socketAuthenticator
         )
-        let socket = WebSocket(url: urlFactory.create(fallback: false))
+        let socket = WebSocket(url: urlFactory.create())
         let webSocketFactory = WebSocketFactoryMock(webSocket: socket)
         let networkMonitor = NetworkMonitor()
+
+        let relayUrlFactory = RelayUrlFactory(
+            relayHost: "relay.walletconnect.com",
+            projectId: "1012db890cf3cfb0c1cdc929add657ba",
+            socketAuthenticator: socketAuthenticator
+        )
+
+        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: logger, socket: socket, networkMonitor: networkMonitor)
+
+        let socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, logger: logger, socketUrlFallbackHandler: socketUrlFallbackHandler)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
             networkMonitor: networkMonitor,
-            socketConnectionType: .manual,
-            logger: logger
+            socket: socket,
+            logger: logger,
+            socketConnectionHandler: socketConnectionHandler
         )
         let keychain = KeychainStorageMock()
         let relayClient = RelayClientFactory.create(
