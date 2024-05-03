@@ -72,7 +72,6 @@ final class Dispatcher: NSObject, Dispatching {
         var cancellable: AnyCancellable?
         cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
             .filter { $0.0 == .connected && $0.1 == .connected }
-            .first()
             .setFailureType(to: NetworkError.self)
             .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
             .sink(receiveCompletion: { [unowned self] result in

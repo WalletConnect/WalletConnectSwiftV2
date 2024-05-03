@@ -28,7 +28,11 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
         // Start a timer for the fallback mechanism
         let timer = DispatchSource.makeTimerSource(queue: concurrentQueue)
         timer.schedule(deadline: .now() + .seconds(defaultTimeout))
-        timer.setEventHandler { [unowned self] in
+        timer.setEventHandler { [weak self] in
+            guard let self = self else {
+                timer.cancel()
+                return
+            }
             if !self.socket.isConnected {
                 self.logger.debug("Connection timed out, initiating fallback...")
                 self.socketUrlFallbackHandler.handleFallbackIfNeeded(error: .connectionFailed)
