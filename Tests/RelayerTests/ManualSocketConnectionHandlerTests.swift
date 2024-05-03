@@ -8,7 +8,23 @@ final class ManualSocketConnectionHandlerTests: XCTestCase {
     var networkMonitor: NetworkMonitoringMock!
     override func setUp() {
         socket = WebSocketMock()
-        sut = ManualSocketConnectionHandler(socket: socket)
+
+        let defaults = RuntimeKeyValueStorage()
+        let logger = ConsoleLoggerMock()
+        let networkMonitor = NetworkMonitoringMock()
+        let keychainStorageMock = DispatcherKeychainStorageMock()
+        let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychainStorageMock, logger: logger)
+
+
+        let socketAuthenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage)
+        let relayUrlFactory = RelayUrlFactory(
+            relayHost: "relay.walletconnect.com",
+            projectId: "1012db890cf3cfb0c1cdc929add657ba",
+            socketAuthenticator: socketAuthenticator
+        )
+        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: ConsoleLoggerMock(), socket: socket, networkMonitor: networkMonitor)
+
+        sut = ManualSocketConnectionHandler(socket: socket, logger: ConsoleLoggerMock(), socketUrlFallbackHandler: socketUrlFallbackHandler)
     }
 
     func testHandleDisconnect() {
