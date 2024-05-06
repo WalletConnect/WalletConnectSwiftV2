@@ -3,7 +3,6 @@ import Commons
 import Web3
 
 struct ETHSigner {
-
     private let importAccount: ImportAccount
 
     init(importAccount: ImportAccount) {
@@ -21,8 +20,21 @@ struct ETHSigner {
     func personalSign(_ params: AnyCodable) -> AnyCodable {
         let params = try! params.get([String].self)
         let messageToSign = params[0]
-        let dataToHash = dataToHash(messageToSign)
-        let (v, r, s) = try! privateKey.sign(message: .init(hex: dataToHash.toHexString()))
+
+        // Determine if the message is hex-encoded or plain text
+        let dataToSign: Bytes
+        if messageToSign.hasPrefix("0x") {
+            // Hex-encoded message, remove "0x" and convert
+            let messageData = Data(hex: String(messageToSign.dropFirst(2)))
+            dataToSign = dataToHash(messageData)
+        } else {
+            // Plain text message, convert directly to data
+            let messageData = Data(messageToSign.utf8)
+            dataToSign = dataToHash(messageData)
+        }
+
+        // Sign the data
+        let (v, r, s) = try! privateKey.sign(message: .init(Data(dataToSign)))
         let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
         return AnyCodable(result)
     }
@@ -45,12 +57,10 @@ struct ETHSigner {
         return AnyCodable(result)
     }
 
-    private func dataToHash(_ message: String) -> Bytes {
+    private func dataToHash(_ data: Data) -> Bytes {
         let prefix = "\u{19}Ethereum Signed Message:\n"
-        let messageData = Data(hex: message)
-        let prefixData = (prefix + String(messageData.count)).data(using: .utf8)!
-        let prefixedMessageData = prefixData + messageData
-        let dataToHash: Bytes = .init(hex: prefixedMessageData.toHexString())
-        return dataToHash
+        let prefixData = (prefix + String(data.count)).data(using: .utf8)!
+        let prefixedMessageData = prefixData + data
+        return .init(hex: prefixedMessageData.toHexString())
     }
 }
