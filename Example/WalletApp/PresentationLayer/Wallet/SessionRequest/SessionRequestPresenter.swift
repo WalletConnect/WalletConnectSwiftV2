@@ -11,13 +11,21 @@ final class SessionRequestPresenter: ObservableObject {
     let sessionRequest: Request
     let session: Session?
     let validationStatus: VerifyContext.ValidationStatus?
-    
+
     var message: String {
-        let message = try? sessionRequest.params.get([String].self)
-        let decryptedMessage = message.map { String(data: Data(hex: $0.first ?? ""), encoding: .utf8) }
-        return (decryptedMessage ?? String(describing: sessionRequest.params.value)) ?? String(describing: sessionRequest.params.value)
+        guard let messages = try? sessionRequest.params.get([String].self),
+              let firstMessage = messages.first else {
+            return String(describing: sessionRequest.params.value)
+        }
+
+        if isValidHexadecimal(firstMessage) {
+            let data = Data(hex: firstMessage)
+            return String(data: data, encoding: .utf8) ?? firstMessage
+        } else {
+            return firstMessage
+        }
     }
-    
+
     @Published var showError = false
     @Published var errorMessage = "Error"
     @Published var showSignedSheet = false
@@ -40,6 +48,10 @@ final class SessionRequestPresenter: ObservableObject {
         self.validationStatus = context?.validation
     }
 
+    private func isValidHexadecimal(_ string: String) -> Bool {
+        return string.range(of: "^[0-9a-fA-F]+$", options: .regularExpression) != nil
+    }
+    
     @MainActor
     func onApprove() async throws {
         do {
