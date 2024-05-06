@@ -19,7 +19,7 @@ final class Dispatcher: NSObject, Dispatching {
     private let relayUrlFactory: RelayUrlFactory
     private let logger: ConsoleLogging
     
-    private let defaultTimeout: Int = 5
+    private let defaultTimeout: Int = 10
     /// The property is used to determine whether relay.walletconnect.org will be used
     /// in case relay.walletconnect.com doesn't respond for some reason (most likely due to being blocked in the user's location).
     private var fallback = false

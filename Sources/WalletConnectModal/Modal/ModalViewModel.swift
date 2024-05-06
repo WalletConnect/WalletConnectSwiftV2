@@ -326,7 +326,7 @@ private extension ModalViewModel {
             case .noWalletLinkFound:
                 return NSLocalizedString("No valid link for opening given wallet found", comment: "")
             case .uriNotCreated:
-                return NSLocalizedString("Couldn't generate link due to missing connection URI", comment: "")
+                return NSLocalizedString("Couldn't generate link due to missing connection URI, Please close the pop-up page and try again later", comment: "")
             case .failedToOpen:
                 return NSLocalizedString("Given link couldn't be opened", comment: "")
             }

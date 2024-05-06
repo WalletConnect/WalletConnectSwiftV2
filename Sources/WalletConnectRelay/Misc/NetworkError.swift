@@ -23,7 +23,7 @@ extension NetworkError: LocalizedError {
     var localizedDescription: String {
         switch self {
         case .webSocketNotConnected:
-            return "Web socket is not connected to any URL."
+            return "Web socket is not connected to any URL, Please close the pop-up page and try again later"
         case .sendMessageFailed(let error):
             return "Failed to send a message through the web socket: \(error)"
         case .receiveMessageFailure(let error):
