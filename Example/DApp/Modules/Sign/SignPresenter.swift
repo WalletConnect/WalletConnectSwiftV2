@@ -113,7 +113,7 @@ final class SignPresenter: ObservableObject {
 
         Task {
             do {
-                try await Sign.instance.authenticateLinkMode(.stub(methods: ["personal_sign"]), walletUniversalLink: "https://walletconnect.com/wallet")
+                try await Sign.instance.authenticateLinkMode(.stub(methods: ["personal_sign"]), walletUniversalLink: "https://lab.web3modal.com/wallet")
             } catch {
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
             }

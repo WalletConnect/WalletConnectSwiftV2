@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:walletconnect.com</string>
+		<string>applinks:lab.web3modal.com</string>
 	</array>
 	<key>com.apple.developer.usernotifications.communication</key>
 	<true/>
