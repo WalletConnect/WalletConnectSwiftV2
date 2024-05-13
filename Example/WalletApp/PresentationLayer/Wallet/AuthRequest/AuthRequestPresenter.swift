@@ -57,7 +57,7 @@ final class AuthRequestPresenter: ObservableObject {
         do {
             ActivityIndicatorManager.shared.start()
 
-            let auths = try buildOneAuthObject()
+            let auths = try buildAuthObjects()
 
             _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
             ActivityIndicatorManager.shared.stop()
