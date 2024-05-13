@@ -42,19 +42,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
         window = UIWindow(windowScene: windowScene)
         window?.makeKeyAndVisible()
 
-
-        if let url = connectionOptions.userActivities.first?.webpageURL {
-            print(url)
-            try! Sign.instance.dispatchEnvelope(url.absoluteString)
-        }
         configurators.configure()
+
+
 
         do {
             let uri = try WalletConnectURI(connectionOptions: connectionOptions)
             app.uri = uri
         } catch {
+            if let url = connectionOptions.userActivities.first?.webpageURL {
+                do {
+                    try! Sign.instance.dispatchEnvelope(url.absoluteString)
+                }
+            }
             print("Error initializing WalletConnectURI: \(error.localizedDescription)")
-
         }
 
         app.requestSent = (connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?", with: "") == "requestSent")
