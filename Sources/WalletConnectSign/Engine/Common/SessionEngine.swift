@@ -26,7 +26,7 @@ final class SessionEngine {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let sessionRequestsProvider: SessionRequestsProvider
-    private let invalidRequestsSanitiser: InvalidRequestsSanitiser
+    private let invalidRequestsSanitiser: InvalidRequestsSanitiserProtocol
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -37,7 +37,7 @@ final class SessionEngine {
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging,
         sessionRequestsProvider: SessionRequestsProvider,
-        invalidRequestsSanitiser: InvalidRequestsSanitiser
+        invalidRequestsSanitiser: InvalidRequestsSanitiserProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService

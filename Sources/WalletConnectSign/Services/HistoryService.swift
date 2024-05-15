@@ -1,7 +1,10 @@
 import Foundation
 
 protocol HistoryServiceProtocol {
+    
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)]
+    
+    func getPendingRequests(topic: String) -> [(request: Request, context: VerifyContext?)]
 }
 
 final class HistoryService: HistoryServiceProtocol {
@@ -92,7 +95,11 @@ class MockHistoryService: HistoryServiceProtocol {
     var pendingRequests: [(request: Request, context: VerifyContext?)] = []
 
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
-        return pendingRequests
+        pendingRequests
+    }
+    
+    func getPendingRequests(topic: String) -> [(request: Request, context: VerifyContext?)] {
+        pendingRequests.filter { $0.0.topic == topic }
     }
 }
 #endif

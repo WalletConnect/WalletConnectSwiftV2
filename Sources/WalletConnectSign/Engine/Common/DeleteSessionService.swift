@@ -1,6 +1,11 @@
 import Foundation
 
-class DeleteSessionService {
+protocol DeleteSessionServiceProtocol {
+    
+    func delete(topic: String) async throws
+}
+
+final class DeleteSessionService: DeleteSessionServiceProtocol {
     private let networkingInteractor: NetworkInteracting
     private let kms: KeyManagementServiceProtocol
     private let sessionStore: WCSessionStorage
@@ -29,3 +34,13 @@ class DeleteSessionService {
         networkingInteractor.unsubscribe(topic: topic)
     }
 }
+
+#if DEBUG
+final class MockDeleteSessionService: DeleteSessionServiceProtocol {
+    var deletedTopics: [String] = []
+
+    func delete(topic: String) async throws {
+        deletedTopics.append(topic)
+    }
+}
+#endif

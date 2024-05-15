@@ -2,8 +2,8 @@ import XCTest
 @testable import WalletConnectSign
 @testable import WalletConnectUtils
 
-class InvalidRequestsSanitiserTests: XCTestCase {
-    var sanitiser: InvalidRequestsSanitiser!
+final class InvalidRequestsSanitiserTests: XCTestCase {
+    var sanitiser: InvalidRequestsSanitiserProtocol!
     var mockHistoryService: MockHistoryService!
     var mockRPCHistory: MockRPCHistory!
 
@@ -20,6 +20,8 @@ class InvalidRequestsSanitiserTests: XCTestCase {
         mockRPCHistory = nil
         super.tearDown()
     }
+    
+    // MARK: - removeInvalidSessionRequests
 
     func testRemoveInvalidSessionRequests_noPendingRequests() {
         let validSessionTopics: Set<String> = ["validTopic1", "validTopic2"]
@@ -65,5 +67,75 @@ class InvalidRequestsSanitiserTests: XCTestCase {
         sanitiser.removeInvalidSessionRequests(validSessionTopics: validSessionTopics)
 
         XCTAssertEqual(mockRPCHistory.deletedTopics.sorted(), ["invalidTopic1", "invalidTopic2"])
+    }
+    
+    // MARK: - removeSessionRequests
+    
+    func testRemoveSessionRequestsWith_noPendingRequests() {
+        sanitiser.removeSessionRequestsWith(topic: "staleTopic1")
+        XCTAssertTrue(mockRPCHistory.deletedTopics.isEmpty)
+    }
+
+    func testRemoveSessionRequestsWith_singleStalePendingTopics() {
+        mockHistoryService.pendingRequests = [
+            (
+                request: try! Request(
+                    topic: "staleTopic1",
+                    method: "method1",
+                    params: AnyCodable("params1"),
+                    chainId: Blockchain("eip155:1")!
+                ),
+                context: nil
+            ),
+            (
+                request: try! Request(
+                    topic: "validTopic2",
+                    method: "method2",
+                    params: AnyCodable("params2"),
+                    chainId: Blockchain("eip155:1")!
+                ),
+                context: nil
+            )
+        ]
+        
+        sanitiser.removeSessionRequestsWith(topic: "staleTopic1")
+        
+        XCTAssertEqual(mockRPCHistory.deletedTopics.sorted(), ["staleTopic1"])
+    }
+
+    func testRemoveSessionRequestsWith_noMatchingStaleTopics() {
+        mockHistoryService.pendingRequests = [
+            (
+                request: try! Request(
+                    topic: "validTopic1",
+                    method: "method1",
+                    params: AnyCodable("params1"),
+                    chainId: Blockchain("eip155:1")!
+                ),
+                context: nil
+            ),
+            (
+                request: try! Request(
+                    topic: "validTopic2",
+                    method: "method2",
+                    params: AnyCodable("params2"),
+                    chainId: Blockchain("eip155:1")!
+                ),
+                context: nil
+            ),
+            (
+                request: try! Request(
+                    topic: "validTopic3",
+                    method: "method3",
+                    params: AnyCodable("params3"),
+                    chainId: Blockchain("eip155:1")!
+                ),
+                context: nil
+            )
+        ]
+
+        sanitiser.removeSessionRequestsWith(topic: "staleTopic1")
+
+        XCTAssertTrue(mockRPCHistory.deletedTopics.isEmpty)
     }
 }
