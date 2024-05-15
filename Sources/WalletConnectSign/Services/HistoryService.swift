@@ -1,6 +1,10 @@
 import Foundation
 
-final class HistoryService {
+protocol HistoryServiceProtocol {
+    func getPendingRequests() -> [(request: Request, context: VerifyContext?)]
+}
+
+final class HistoryService: HistoryServiceProtocol {
 
     private let history: RPCHistory
     private let verifyContextStore: CodableStore<VerifyContext>
@@ -24,6 +28,8 @@ final class HistoryService {
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
         getPendingRequestsSortedByTimestamp()
     }
+
+
 
     func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)] {
         let requests = history.getPending()
@@ -80,3 +86,13 @@ private extension HistoryService {
         return (mappedRequest, record.id, record.timestamp)
     }
 }
+
+#if DEBUG
+class MockHistoryService: HistoryServiceProtocol {
+    var pendingRequests: [(request: Request, context: VerifyContext?)] = []
+
+    func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
+        return pendingRequests
+    }
+}
+#endif
