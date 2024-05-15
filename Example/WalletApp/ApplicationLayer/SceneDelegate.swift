@@ -39,31 +39,35 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
+        // Setup the window
         window = UIWindow(windowScene: windowScene)
         window?.makeKeyAndVisible()
 
-        configurators.configure()
-
-
-
-        do {
-            let uri = try WalletConnectURI(connectionOptions: connectionOptions)
-            app.uri = uri
-        } catch {
-            if let url = connectionOptions.userActivities.first?.webpageURL {
-                do {
-                    try! Sign.instance.dispatchEnvelope(url.absoluteString)
-                }
-            }
-            print("Error initializing WalletConnectURI: \(error.localizedDescription)")
-        }
+        // Notification center delegate setup
+        UNUserNotificationCenter.current().delegate = self
 
         app.requestSent = (connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?", with: "") == "requestSent")
 
-
-        UNUserNotificationCenter.current().delegate = self
+        // Process connection options
+        do {
+            // Attempt to initialize WalletConnectURI from connection options
+            let uri = try WalletConnectURI(connectionOptions: connectionOptions)
+            app.uri = uri
+        } catch {
+            print("Error initializing WalletConnectURI: \(error.localizedDescription)")
+            // Try to handle link mode in case where WalletConnectURI initialization fails
+            if let url = connectionOptions.userActivities.first?.webpageURL {
+                configurators.configure() // Ensure configurators are set up before dispatching
+                do {
+                    try Sign.instance.dispatchEnvelope(url.absoluteString)
+                } catch {
+                    print("Error dispatching envelope: \(error.localizedDescription)")
+                }
+                return
+            }
+        }
+        configurators.configure()
     }
-
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
