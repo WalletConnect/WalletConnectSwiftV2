@@ -1,7 +1,7 @@
 
 import Foundation
 
-class InvalidRequestsSanitiser {
+final class InvalidRequestsSanitiser {
     let historyService: HistoryServiceProtocol
     private let history: RPCHistoryProtocol
 
