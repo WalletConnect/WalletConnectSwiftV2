@@ -46,6 +46,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
         // Notification center delegate setup
         UNUserNotificationCenter.current().delegate = self
 
+        configureWeb3WalletClientIfNeeded()
         app.requestSent = (connectionOptions.urlContexts.first?.url.absoluteString.replacingOccurrences(of: "walletapp://wc?", with: "") == "requestSent")
 
         // Process connection options
@@ -109,5 +110,24 @@ private extension SceneDelegate {
             safari.view.tag = popupTag
             window?.rootViewController?.topController.present(safari, animated: true)
         }
+    }
+
+    func configureWeb3WalletClientIfNeeded() {
+        Networking.configure(
+            groupIdentifier: "group.com.walletconnect.sdk",
+            projectId: InputConfig.projectId,
+            socketFactory: DefaultSocketFactory()
+        )
+
+        let metadata = AppMetadata(
+            name: "Example Wallet",
+            description: "wallet description",
+            url: "example.wallet",
+            icons: ["https://avatars.githubusercontent.com/u/37784886"],
+            redirect: AppMetadata.Redirect(native: "walletapp://", universal: "https://www.lab.web3modal.com/wallet")
+        )
+
+        Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
+
     }
 }
