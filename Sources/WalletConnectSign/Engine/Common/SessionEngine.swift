@@ -26,6 +26,7 @@ final class SessionEngine {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let sessionRequestsProvider: SessionRequestsProvider
+    private let invalidRequestsSanitiser: InvalidRequestsSanitiser
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -35,7 +36,8 @@ final class SessionEngine {
         kms: KeyManagementServiceProtocol,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging,
-        sessionRequestsProvider: SessionRequestsProvider
+        sessionRequestsProvider: SessionRequestsProvider,
+        invalidRequestsSanitiser: InvalidRequestsSanitiser
     ) {
         self.networkingInteractor = networkingInteractor
         self.historyService = historyService
@@ -45,6 +47,7 @@ final class SessionEngine {
         self.sessionStore = sessionStore
         self.logger = logger
         self.sessionRequestsProvider = sessionRequestsProvider
+        self.invalidRequestsSanitiser = invalidRequestsSanitiser
 
         setupConnectionSubscriptions()
         setupRequestSubscriptions()
@@ -52,8 +55,15 @@ final class SessionEngine {
         setupUpdateSubscriptions()
         setupExpirationSubscriptions()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            sessionRequestsProvider.emitRequestIfPending()
+            self?.sessionRequestsProvider.emitRequestIfPending()
         }
+
+        removeInvalidSessionRequests()
+    }
+
+    private func removeInvalidSessionRequests() {
+        let sessionTopics = Set(sessionStore.getAll().map(\.topic))
+        invalidRequestsSanitiser.removeInvalidSessionRequests(validSessionTopics: sessionTopics)
     }
 
     func hasSession(for topic: String) -> Bool {

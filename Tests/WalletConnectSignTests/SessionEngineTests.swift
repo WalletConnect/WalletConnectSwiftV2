@@ -13,33 +13,29 @@ final class SessionEngineTests: XCTestCase {
     override func setUp() {
         networkingInteractor = NetworkingInteractorMock()
         sessionStorage = WCSessionStorageMock()
+        let defaults = RuntimeKeyValueStorage()
+        let rpcHistory = RPCHistory(
+            keyValueStore: .init(
+                defaults: defaults,
+                identifier: ""
+            )
+        )
         verifyContextStore = CodableStore<VerifyContext>(defaults: RuntimeKeyValueStorage(), identifier: "")
+        let historyService = HistoryService(
+            history: rpcHistory,
+            verifyContextStore: verifyContextStore
+        )
         engine = SessionEngine(
             networkingInteractor: networkingInteractor,
-            historyService: HistoryService(
-                history: RPCHistory(
-                    keyValueStore: .init(
-                        defaults: RuntimeKeyValueStorage(),
-                        identifier: ""
-                    )
-                ),
-                verifyContextStore: verifyContextStore
-            ),
+            historyService: historyService,
             verifyContextStore: verifyContextStore,
             verifyClient: VerifyClientMock(),
             kms: KeyManagementServiceMock(),
             sessionStore: sessionStorage,
             logger: ConsoleLoggerMock(),
             sessionRequestsProvider: SessionRequestsProvider(
-                historyService: HistoryService(
-                    history: RPCHistory(
-                        keyValueStore: .init(
-                            defaults: RuntimeKeyValueStorage(),
-                            identifier: ""
-                        )
-                    ),
-                    verifyContextStore: verifyContextStore
-                ))
+                historyService: historyService),
+            invalidRequestsSanitiser: InvalidRequestsSanitiser(historyService: historyService, history: rpcHistory)
         )
     }
 
