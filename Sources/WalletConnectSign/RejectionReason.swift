@@ -6,7 +6,7 @@ public enum RejectionReason {
     case unsupportedChains
     case unsupportedMethods
     case unsupportedAccounts
-    case upsupportedEvents
+    case unsupportedEvents
 }
 
 internal extension RejectionReason {
@@ -18,7 +18,7 @@ internal extension RejectionReason {
             return SignReasonCode.unsupportedChains
         case .unsupportedMethods:
             return SignReasonCode.userRejectedMethods
-        case  .upsupportedEvents:
+        case  .unsupportedEvents:
             return SignReasonCode.userRejectedEvents
         case .unsupportedAccounts:
             return SignReasonCode.unsupportedAccounts
@@ -36,7 +36,7 @@ public extension RejectionReason {
         case .requiredMethodsNotSatisfied:
             self = .unsupportedMethods
         case .requiredEventsNotSatisfied:
-            self = .upsupportedEvents
+            self = .unsupportedEvents
         case .emptySessionNamespacesForbidden:
             self = .unsupportedAccounts
         }

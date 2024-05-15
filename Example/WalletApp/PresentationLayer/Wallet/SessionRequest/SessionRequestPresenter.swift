@@ -13,10 +13,18 @@ final class SessionRequestPresenter: ObservableObject {
     let validationStatus: VerifyContext.ValidationStatus?
     
     var message: String {
-        let message = try? sessionRequest.params.get([String].self)
-        let decryptedMessage = message.map { String(data: Data(hex: $0.first ?? ""), encoding: .utf8) }
-        return (decryptedMessage ?? String(describing: sessionRequest.params.value)) ?? String(describing: sessionRequest.params.value)
+        guard let messages = try? sessionRequest.params.get([String].self),
+              let firstMessage = messages.first else {
+            return String(describing: sessionRequest.params.value)
+        }
+
+        // Attempt to decode the message if it's hex-encoded
+        let decodedMessage = String(data: Data(hex: firstMessage), encoding: .utf8)
+
+        // Return the decoded message if available, else return the original message
+        return decodedMessage?.isEmpty == false ? decodedMessage! : firstMessage
     }
+
     
     @Published var showError = false
     @Published var errorMessage = "Error"
