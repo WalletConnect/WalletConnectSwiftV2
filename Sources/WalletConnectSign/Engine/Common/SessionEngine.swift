@@ -62,7 +62,7 @@ final class SessionEngine {
     }
 
     private func removeInvalidSessionRequests() {
-        let sessionTopics = Set(sessionStore.getAll().map {$0.topic})
+        let sessionTopics = Set(sessionStore.getAll().map(\.topic))
         invalidRequestsSanitiser.removeInvalidSessionRequests(validSessionTopics: sessionTopics)
     }
 
