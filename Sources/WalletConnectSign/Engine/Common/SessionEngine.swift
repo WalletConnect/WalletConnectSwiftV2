@@ -19,7 +19,7 @@ final class SessionEngine {
 
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
-    private let historyService: HistoryService
+    private let historyService: HistoryServiceProtocol
     private let verifyContextStore: CodableStore<VerifyContext>
     private let verifyClient: VerifyClientProtocol
     private let kms: KeyManagementServiceProtocol
@@ -30,7 +30,7 @@ final class SessionEngine {
 
     init(
         networkingInteractor: NetworkInteracting,
-        historyService: HistoryService,
+        historyService: HistoryServiceProtocol,
         verifyContextStore: CodableStore<VerifyContext>,
         verifyClient: VerifyClientProtocol,
         kms: KeyManagementServiceProtocol,
@@ -202,6 +202,7 @@ private extension SessionEngine {
 
     func setupExpirationSubscriptions() {
         sessionStore.onSessionExpiration = { [weak self] session in
+            self?.historyService.removePendingRequest(topic: session.topic)
             self?.kms.deletePrivateKey(for: session.selfParticipant.publicKey)
             self?.kms.deleteAgreementSecret(for: session.topic)
         }

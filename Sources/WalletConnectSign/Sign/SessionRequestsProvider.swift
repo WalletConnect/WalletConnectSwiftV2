@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 class SessionRequestsProvider {
-    private let historyService: HistoryService
+    private let historyService: HistoryServiceProtocol
     private var sessionRequestPublisherSubject = PassthroughSubject<(request: Request, context: VerifyContext?), Never>()
     private var lastEmitTime: Date?
     private let debounceInterval: TimeInterval = 1
@@ -11,7 +11,7 @@ class SessionRequestsProvider {
         sessionRequestPublisherSubject.eraseToAnyPublisher()
     }
 
-    init(historyService: HistoryService) {
+    init(historyService: HistoryServiceProtocol) {
         self.historyService = historyService
     }
 
