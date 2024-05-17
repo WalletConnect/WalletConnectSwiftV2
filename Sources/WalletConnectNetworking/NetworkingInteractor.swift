@@ -242,7 +242,7 @@ public class NetworkingInteractor: NetworkInteracting {
     }
 
     private func manageSubscription(_ topic: String, _ encodedEnvelope: String, _ publishedAt: Date) {
-        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, codingType: .base64Encoded(encodedEnvelope)) {
+        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, codingType: .base64Encoded, envelopeString: encodedEnvelope) {
             switch result {
             case .left(let result):
                 handleRequest(topic: topic, request: result.request, decryptedPayload: result.decryptedPayload, publishedAt: publishedAt, derivedTopic: result.derivedTopic)

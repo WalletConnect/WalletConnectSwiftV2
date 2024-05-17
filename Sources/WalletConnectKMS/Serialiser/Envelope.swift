@@ -2,9 +2,9 @@ import Foundation
 
 /// A type representing envelope with it's serialization policy
 public struct Envelope: Equatable {
-    public enum CodingType {
-        case base64Encoded(String)
-        case base64UrlEncoded(String)
+    public enum CodingType: Equatable, Codable {
+        case base64Encoded
+        case base64UrlEncoded
     }
     public enum Errors: String, Error {
         case malformedEnvelope
@@ -22,13 +22,13 @@ public struct Envelope: Equatable {
     /// sealbox: in case of envelope type 0, 1, 3 and 4: = iv + ct + tag, in case of type 2 - raw data representation of a json object
     /// type0: tp + sealbox
     /// type1: tp + pk + sealbox
-    init(_ codingType: CodingType) throws {
+    init(_ codingType: CodingType, envelopeString: String) throws {
         var envelopeData: Data!
         switch codingType {
-        case .base64Encoded(let encodedString):
-            envelopeData = Data(base64Encoded: encodedString)
-        case .base64UrlEncoded(let encodedString):
-            envelopeData = Data(base64url: encodedString)
+        case .base64Encoded:
+            envelopeData = Data(base64Encoded: envelopeString)
+        case .base64UrlEncoded:
+            envelopeData = Data(base64url: envelopeString)
         }
         guard let envelopeData = envelopeData else { throw Errors.malformedEnvelope }
 
@@ -42,7 +42,7 @@ public struct Envelope: Equatable {
     }
 
 
-    init(type: EnvelopeType, sealbox: Data) {
+    init(type: EnvelopeType, sealbox: Data, codingType: CodingType) {
         self.type = type
         self.sealbox = sealbox
     }
@@ -55,10 +55,6 @@ public struct Envelope: Equatable {
             return (type.representingByte.data + pubKey + sealbox).base64EncodedString()
         case .type2:
             return (type.representingByte.data + sealbox).base64urlEncodedString()
-        case .type3:
-            return (type.representingByte.data + sealbox).base64urlEncodedString()
-        case .type4(pubKey: let pubKey):
-            return (type.representingByte.data + pubKey + sealbox).base64urlEncodedString()
         }
     }
 
@@ -66,16 +62,12 @@ public struct Envelope: Equatable {
 
 public extension Envelope {
     enum EnvelopeType: Equatable {
-        /// type 0 = tp + iv + ct + tag - base64encoded
+        /// type 0 = tp + iv + ct + tag
         case type0
         /// type 1 = tp + pk + iv + ct + tag - base64encoded
         case type1(pubKey: Data)
         /// type 2 = tp + base64urlEncoded unencrypted string
         case type2
-        /// type 0 = tp + iv + ct + tag - base64urlEncoded
-        case type3
-        /// type 1 = tp + pk + iv + ct + tag - base64urlEncoded
-        case type4(pubKey: Data)
 
         var representingByte: UInt8 {
             switch self {
@@ -85,10 +77,6 @@ public extension Envelope {
                 return 1
             case .type2:
                 return 2
-            case .type3:
-                return 3
-            case .type4:
-                return 4
             }
         }
 
@@ -103,13 +91,6 @@ public extension Envelope {
                 self = .type1(pubKey: key)
             case 2:
                 self = .type2
-            case 3:
-                self = .type3
-            case 4:
-                guard let key = pubKey, key.count == 32 else {
-                    throw Envelope.Errors.malformedEnvelope
-                }
-                self = .type4(pubKey: key)
             default:
                 throw Envelope.Errors.unsupportedEnvelopeType
             }

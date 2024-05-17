@@ -52,9 +52,9 @@ public class Serializer: Serializing {
     ///   - encodable: Object to encrypt and serialize
     ///   - envelopeType: type of envelope
     /// - Returns: Serialized String
-    public func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String {
+    public func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType, codingType: Envelope.CodingType) throws -> String {
         if envelopeType == .type2 {
-            return try serializeEnvelopeType2(encodable: encodable)
+            return try serializeEnvelopeType2(encodable: encodable, codingType: codingType)
         }
         guard let topic = topic else {
             let error = Errors.topicNotFound
@@ -68,7 +68,7 @@ public class Serializer: Serializing {
             throw error
         }
         let sealbox = try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
-        return Envelope(type: envelopeType, sealbox: sealbox).serialised()
+        return Envelope(type: envelopeType, sealbox: sealbox, codingType: codingType).serialised()
     }
 
     /// Deserializes and decrypts an object
@@ -76,13 +76,13 @@ public class Serializer: Serializing {
     ///   - topic: Topic that is associated with a symetric key for decrypting particular codable object
     ///   - encodedEnvelope: Envelope to deserialize and decrypt
     /// - Returns: Deserialized object
-    public func deserialize<T: Codable>(topic: String, codingType: Envelope.CodingType) throws -> (T, derivedTopic: String?, decryptedPayload: Data) {
-        let envelope = try Envelope(codingType)
+    public func deserialize<T: Codable>(topic: String, codingType: Envelope.CodingType, envelopeString: String) throws -> (T, derivedTopic: String?, decryptedPayload: Data) {
+        let envelope = try Envelope(codingType, envelopeString: envelopeString)
         switch envelope.type {
-        case .type0, .type3:
+        case .type0:
             let deserialisedType: (object: T, data: Data) = try handleType0Envelope(topic, envelope)
             return (deserialisedType.object, nil, deserialisedType.data)
-        case .type1(let peerPubKey), .type4(let peerPubKey):
+        case .type1(let peerPubKey):
             return try handleType1Envelope(topic, peerPubKey: peerPubKey, sealbox: envelope.sealbox)
         case .type2:
             let decodedType: T = try handleType2Envelope(envelope: envelope)
@@ -109,9 +109,9 @@ public class Serializer: Serializing {
     }
 
     /// Serializes envelope type 2
-    private func serializeEnvelopeType2(encodable: Encodable) throws -> String {
+    private func serializeEnvelopeType2(encodable: Encodable, codingType: Envelope.CodingType) throws -> String {
         let messageData = try JSONEncoder().encode(encodable)
-        let envelope = Envelope(type: .type2, sealbox: messageData)
+        let envelope = Envelope(type: .type2, sealbox: messageData, codingType: codingType)
         return envelope.serialised()
     }
 

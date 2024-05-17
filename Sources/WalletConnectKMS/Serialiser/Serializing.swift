@@ -5,29 +5,29 @@ public protocol Serializing {
     var logsPublisher: AnyPublisher<Log, Never> {get}
     var logger: ConsoleLogging {get}
     func setLogging(level: LoggingLevel)
-    func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType) throws -> String
+    func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType, codingType: Envelope.CodingType) throws -> String
     /// - derivedTopic: topic derived from symmetric key as a result of key exchange if peers has sent envelope(type1) prefixed with it's public key
-    func deserialize<T: Codable>(topic: String, codingType: Envelope.CodingType) throws -> (T, derivedTopic: String?, decryptedPayload: Data)
+    func deserialize<T: Codable>(topic: String, codingType: Envelope.CodingType, envelopeString: String) throws -> (T, derivedTopic: String?, decryptedPayload: Data)
 }
 
 public extension Serializing {
     /// - derivedTopic: topic derived from symmetric key as a result of key exchange if peers has sent envelope(type1) prefixed with it's public key
-    func tryDeserialize<T: Codable>(topic: String, codingType: Envelope.CodingType) -> (T, derivedTopic: String?, decryptedPayload: Data)? {
-        return try? deserialize(topic: topic, codingType: codingType)
+    func tryDeserialize<T: Codable>(topic: String, codingType: Envelope.CodingType, envelopeString: String) -> (T, derivedTopic: String?, decryptedPayload: Data)? {
+        return try? deserialize(topic: topic, codingType: codingType, envelopeString: envelopeString)
     }
 
-    func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType = .type0) throws -> String {
-        try serialize(topic: topic, encodable: encodable, envelopeType: envelopeType)
+    func serialize(topic: String?, encodable: Encodable, envelopeType: Envelope.EnvelopeType = .type0, codingType: Envelope.CodingType = .base64Encoded) throws -> String {
+        try serialize(topic: topic, encodable: encodable, envelopeType: envelopeType, codingType: codingType)
     }
 
-    func tryDeserializeRequestOrResponse(topic: String, codingType: Envelope.CodingType) -> Either<(request: RPCRequest, derivedTopic: String?, decryptedPayload: Data), (response: RPCResponse, derivedTopic: String?, decryptedPayload: Data)>? {
+    func tryDeserializeRequestOrResponse(topic: String, codingType: Envelope.CodingType, envelopeString: String) -> Either<(request: RPCRequest, derivedTopic: String?, decryptedPayload: Data), (response: RPCResponse, derivedTopic: String?, decryptedPayload: Data)>? {
         // Attempt to deserialize RPCRequest
-        if let result = try? deserialize(topic: topic, codingType: codingType) as (RPCRequest, derivedTopic: String?, decryptedPayload: Data) {
+        if let result = try? deserialize(topic: topic, codingType: codingType, envelopeString: envelopeString) as (RPCRequest, derivedTopic: String?, decryptedPayload: Data) {
             return .left(result)
         }
 
         // Attempt to deserialize RPCResponse
-        if let result = try? deserialize(topic: topic, codingType: codingType) as (RPCResponse, derivedTopic: String?, decryptedPayload: Data) {
+        if let result = try? deserialize(topic: topic, codingType: codingType, envelopeString: envelopeString) as (RPCResponse, derivedTopic: String?, decryptedPayload: Data) {
             return .right(result)
         }
 

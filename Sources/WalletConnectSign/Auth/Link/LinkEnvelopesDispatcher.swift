@@ -49,7 +49,7 @@ class LinkEnvelopesDispatcher {
         guard let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value else {
             throw Errors.topicNotFound
         }
-        manageSubscription(topic, wcEnvelope)
+        manageEnvelope(topic, wcEnvelope)
     }
 
     func request(topic: String, request: RPCRequest, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
@@ -146,8 +146,8 @@ class LinkEnvelopesDispatcher {
             .eraseToAnyPublisher()
     }
 
-    private func manageSubscription(_ topic: String, _ encodedEnvelope: String) {
-        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, codingType: .base64UrlEncoded(encodedEnvelope)) {
+    private func manageEnvelope(_ topic: String, _ encodedEnvelope: String) {
+        if let result = serializer.tryDeserializeRequestOrResponse(topic: topic, codingType: .base64UrlEncoded, envelopeString: encodedEnvelope) {
             switch result {
             case .left(let result):
                 handleRequest(topic: topic, request: result.request)
