@@ -1,6 +1,13 @@
 import Foundation
 
-public final class RPCHistory {
+public protocol RPCHistoryProtocol {
+    
+    func deleteAll(forTopic topic: String)
+    
+    func deleteAll(forTopics topics: [String])
+}
+
+public final class RPCHistory: RPCHistoryProtocol {
 
     public struct Record: Codable {
         public enum Origin: String, Codable {
@@ -144,3 +151,17 @@ extension RPCHistory {
         }
     }
 }
+
+#if DEBUG
+class MockRPCHistory: RPCHistoryProtocol {
+    var deletedTopics: [String] = []
+    
+    func deleteAll(forTopic topic: String) {
+        deletedTopics.append(topic)
+    }
+
+    func deleteAll(forTopics topics: [String]) {
+        deletedTopics.append(contentsOf: topics)
+    }
+}
+#endif

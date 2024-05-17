@@ -103,9 +103,12 @@ public class NotifyClient {
     }
 
     public func unregister(account: Account) async throws {
-        try await identityClient.unregister(account: account)
+        if identityClient.isIdentityRegistered(account: account) {
+            try await identityClient.unregister(account: account)
+        }
         notifyWatcherAgreementKeysProvider.removeAgreement(account: account)
         try notifyStorage.clearDatabase(account: account)
+        try await pushClient.unregister()
         notifyAccountProvider.logout()
         subscriptionWatcher.stop()
     }

@@ -1,6 +1,17 @@
 import Foundation
 
-final class HistoryService {
+protocol HistoryServiceProtocol {
+    
+    func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)?
+    
+    func removePendingRequest(topic: String)
+    
+    func getPendingRequests() -> [(request: Request, context: VerifyContext?)]
+    
+    func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)]
+}
+
+final class HistoryService: HistoryServiceProtocol {
 
     private let history: RPCHistory
     private let verifyContextStore: CodableStore<VerifyContext>
@@ -12,13 +23,19 @@ final class HistoryService {
         self.history = history
         self.verifyContextStore = verifyContextStore
     }
-
-    public func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
+    
+    func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         guard let record = history.get(recordId: id) else { return nil }
         guard let (request, recordId, _) = mapRequestRecord(record) else {
             return nil
         }
         return (request, try? verifyContextStore.get(key: recordId.string))
+    }
+    
+    func removePendingRequest(topic: String) {
+        DispatchQueue.global(qos: .background).async { [unowned self] in
+            history.deleteAll(forTopic: topic)
+        }
     }
 
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
@@ -80,3 +97,29 @@ private extension HistoryService {
         return (mappedRequest, record.id, record.timestamp)
     }
 }
+
+#if DEBUG
+final class MockHistoryService: HistoryServiceProtocol {
+    
+    var removePendingRequestCalled: (String) -> Void = { _ in }
+    
+    var pendingRequests: [(request: Request, context: VerifyContext?)] = []
+
+    func removePendingRequest(topic: String) {
+        pendingRequests.removeAll(where: { $0.request.topic == topic })
+        removePendingRequestCalled(topic)
+    }
+    
+    func getSessionRequest(id: JSONRPC.RPCID) -> (request: Request, context: VerifyContext?)? {
+        fatalError("Unimplemented")
+    }
+    
+    func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
+        pendingRequests
+    }
+    
+    func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)] {
+        fatalError("Unimplemented")
+    }
+}
+#endif
