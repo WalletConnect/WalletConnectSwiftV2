@@ -1,7 +1,14 @@
 import Foundation
 
 protocol HistoryServiceProtocol {
+    
+    func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)?
+    
+    func removePendingRequest(topic: String)
+    
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)]
+    
+    func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)]
 }
 
 final class HistoryService: HistoryServiceProtocol {
@@ -16,20 +23,24 @@ final class HistoryService: HistoryServiceProtocol {
         self.history = history
         self.verifyContextStore = verifyContextStore
     }
-
-    public func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
+    
+    func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         guard let record = history.get(recordId: id) else { return nil }
         guard let (request, recordId, _) = mapRequestRecord(record) else {
             return nil
         }
         return (request, try? verifyContextStore.get(key: recordId.string))
     }
+    
+    func removePendingRequest(topic: String) {
+        DispatchQueue.global(qos: .background).async { [unowned self] in
+            history.deleteAll(forTopic: topic)
+        }
+    }
 
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
         getPendingRequestsSortedByTimestamp()
     }
-
-
 
     func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)] {
         let requests = history.getPending()
@@ -88,11 +99,27 @@ private extension HistoryService {
 }
 
 #if DEBUG
-class MockHistoryService: HistoryServiceProtocol {
+final class MockHistoryService: HistoryServiceProtocol {
+    
+    var removePendingRequestCalled: (String) -> Void = { _ in }
+    
     var pendingRequests: [(request: Request, context: VerifyContext?)] = []
 
+    func removePendingRequest(topic: String) {
+        pendingRequests.removeAll(where: { $0.request.topic == topic })
+        removePendingRequestCalled(topic)
+    }
+    
+    func getSessionRequest(id: JSONRPC.RPCID) -> (request: Request, context: VerifyContext?)? {
+        fatalError("Unimplemented")
+    }
+    
     func getPendingRequests() -> [(request: Request, context: VerifyContext?)] {
-        return pendingRequests
+        pendingRequests
+    }
+    
+    func getPendingRequestsSortedByTimestamp() -> [(request: Request, context: VerifyContext?)] {
+        fatalError("Unimplemented")
     }
 }
 #endif
