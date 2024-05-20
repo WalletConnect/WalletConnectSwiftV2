@@ -24,7 +24,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
         }
         do {
             print("🔵🔵🔵🔵🔵🔵🔵\(url.absoluteString)")
-            try Sign.instance.dispatchEnvelope(url.absoluteString)
+            try Web3Wallet.instance.dispatchEnvelope(url.absoluteString)
         } catch {
             print("🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
         }
@@ -60,7 +60,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
             if let url = connectionOptions.userActivities.first?.webpageURL {
                 configurators.configure() // Ensure configurators are set up before dispatching
                 do {
-                    try Sign.instance.dispatchEnvelope(url.absoluteString)
+                    try Web3Wallet.instance.dispatchEnvelope(url.absoluteString)
                 } catch {
                     print("Error dispatching envelope: \(error.localizedDescription)")
                 }
@@ -85,7 +85,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
             } else {
                 do {
-                    try Sign.instance.dispatchEnvelope(url.absoluteString)
+                    try Web3Wallet.instance.dispatchEnvelope(url.absoluteString)
                 } catch {
                     print(error)
                 }

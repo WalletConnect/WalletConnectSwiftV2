@@ -77,7 +77,7 @@ class LinkEnvelopesDispatcher {
         try rpcHistory.validate(response)
         let envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: response, envelopeType: envelopeType, topic: topic)
         DispatchQueue.main.async {
-            UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true)
+            UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
         }
         try rpcHistory.resolve(response)
 

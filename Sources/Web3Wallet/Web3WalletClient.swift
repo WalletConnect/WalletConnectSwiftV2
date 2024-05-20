@@ -244,6 +244,10 @@ public class Web3WalletClient {
         try signClient.buildAuthPayload(payload: payload, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
     }
 
+    public func dispatchEnvelope(_ envelope: String) throws {
+        try signClient.dispatchEnvelope(envelope)
+    }
+
     public func register(deviceToken: Data, enableEncrypted: Bool = false) async throws {
         try await pushClient.register(deviceToken: deviceToken, enableEncrypted: enableEncrypted)
     }
