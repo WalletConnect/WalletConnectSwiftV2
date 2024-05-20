@@ -72,6 +72,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let context = URLContexts.first else { return }
+        
+        let url = context.url
 
         do {
             let uri = try WalletConnectURI(urlContext: context)
@@ -82,7 +84,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
             if case WalletConnectURI.Errors.expired = error {
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
             } else {
-                print("Error initializing WalletConnectURI: \(error.localizedDescription)")
+                do {
+                    try Sign.instance.dispatchEnvelope(url.absoluteString)
+                } catch {
+                    print(error)
+                }
             }
         }
     }
@@ -124,7 +130,7 @@ private extension SceneDelegate {
             description: "wallet description",
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "walletapp://", universal: "https://www.lab.web3modal.com/wallet")
+            redirect: AppMetadata.Redirect(native: "walletapp://", universal: "https://lab.web3modal.com/wallet")
         )
 
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)
