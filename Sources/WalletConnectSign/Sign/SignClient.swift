@@ -182,6 +182,7 @@ public final class SignClient: SignClientProtocol {
     private let sessionsPublisherSubject = PassthroughSubject<[Session], Never>()
     private var authRequestPublisherSubject = PassthroughSubject<(request: AuthenticationRequest, context: VerifyContext?), Never>()
     private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
+    private let authenticateTransportTypeSwitcher: AuthenticateTransportTypeSwitcher
 
 
     // Link Mode
@@ -229,7 +230,8 @@ public final class SignClient: SignClientProtocol {
          sessionRequestDispatcher: SessionRequestDispatcher,
          linkSessionRequestSubscriber: LinkSessionRequestSubscriber,
          sessionResponderDispatcher: SessionResponderDispatcher,
-         linkSessionRequestResponseSubscriber: LinkSessionRequestResponseSubscriber
+         linkSessionRequestResponseSubscriber: LinkSessionRequestResponseSubscriber,
+         authenticateTransportTypeSwitcher: AuthenticateTransportTypeSwitcher
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -264,7 +266,8 @@ public final class SignClient: SignClientProtocol {
         self.linkSessionRequestSubscriber = linkSessionRequestSubscriber
         self.sessionResponderDispatcher = sessionResponderDispatcher
         self.linkSessionRequestResponseSubscriber = linkSessionRequestResponseSubscriber
-        
+        self.authenticateTransportTypeSwitcher = authenticateTransportTypeSwitcher
+
         setUpConnectionObserving()
         setUpEnginesCallbacks()
     }
@@ -343,26 +346,7 @@ public final class SignClient: SignClientProtocol {
         _ params: AuthRequestParams,
         walletUniversalLink: String? = nil
     ) async throws -> WalletConnectURI? {
-
-        return authenticateTransportTypeSwitcher.authenticate(params, walletUniversalLink)
-
-        if walletUniversalLink != nil && walletLinkSupportNotProven {
-            linkModeTransportTypeUpgradeStore che
-        }
-
-        let pairingURI = try await pairingClient.create(methods: [SessionAuthenticatedProtocolMethod().method])
-        logger.debug("Requesting Authentication on existing pairing")
-        try await appRequestService.request(params: params, topic: pairingURI.topic)
-
-        let namespaces = try ProposalNamespaceBuilder.buildNamespace(from: params)
-        try await appProposeService.propose(
-            pairingTopic: pairingURI.topic,
-            namespaces: [:],
-            optionalNamespaces: namespaces,
-            sessionProperties: nil,
-            relay: RelayProtocolOptions(protocol: "irn", data: nil)
-        )
-        return pairingURI
+        return try await authenticateTransportTypeSwitcher.authenticate(params, walletUniversalLink: walletUniversalLink)
     }
 
 

@@ -85,7 +85,7 @@ public extension AppMetadata {
             description: "A protocol to connect blockchain wallets to dapps.",
             url: "https://walletconnect.com/",
             icons: [],
-            redirect: try! AppMetadata.Redirect(native: "", universal: nil, linkMode: nil)
+            redirect: AppMetadata.Redirect(native: "", universal: nil, linkMode: nil)
         )
     }
 }

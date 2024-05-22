@@ -7,4 +7,5 @@ enum SignStorageIdentifiers: String {
     case sessionTopicToProposal = "com.walletconnect.sdk.sessionTopicToProposal"
     case authResponseTopicRecord = "com.walletconnect.sdk.authResponseTopicRecord"
     case linkModeLinks = "com.walletconnect.sdk.linkModeLinks"
+    case linkModeTransportTypeUpgradeStore = "com.walletconnect.sdk.linkModeTransportTypeUpgradeStore"
 }
