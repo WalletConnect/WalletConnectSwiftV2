@@ -1339,6 +1339,7 @@ final class SignClientTests: XCTestCase {
     }
 
     func testUpgradeSessionToLinkModeAndSendRequestOverLinkMode() async throws {
-        
+        fatalError()
+        add walidation for linkmode property in metadata
     }
 }

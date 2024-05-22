@@ -19,6 +19,7 @@ class AuthResponseSubscriber {
     }
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
     private let linkModeLinksStore: CodableStore<Bool>
+    private let linkModeTransportTypeUpgradeStore: CodableStore<Bool>
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -31,7 +32,8 @@ class AuthResponseSubscriber {
          sessionNamespaceBuilder: SessionNamespaceBuilder,
          authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
          linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
-         linkModeLinksStore: CodableStore<Bool>) {
+         linkModeLinksStore: CodableStore<Bool>,
+         linkModeTransportTypeUpgradeStore: CodableStore<Bool>) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -44,6 +46,7 @@ class AuthResponseSubscriber {
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.linkModeLinksStore = linkModeLinksStore
+        self.linkModeTransportTypeUpgradeStore = linkModeTransportTypeUpgradeStore
         subscribeForResponse()
         subscribeForLinkResonse()
     }
@@ -51,6 +54,7 @@ class AuthResponseSubscriber {
     private func subscribeForResponse() {
         networkingInteractor.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
+                linkModeTransportTypeUpgradeStore.delete(forKey: payload.id.string)
                 guard let error = AuthError(code: payload.error.code) else { return }
                 authResponsePublisherSubject.send((payload.id, .failure(error)))                
             }.store(in: &publishers)
@@ -58,10 +62,10 @@ class AuthResponseSubscriber {
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
-                if let linkModeLink = payload.response.responder.metadata.redirect?.linkMode {
-                    linkModeLinksStore.set(true, forKey: linkModeLink)
-                }
-                
+                let transportType = getTransportTypeUpgradeIfPossible(metadata: payload.response.responder.metadata, requestId: payload.id)
+
+                linkModeTransportTypeUpgradeStore.delete(forKey: payload.id.string)
+
                 let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
                 removeResponseTopicRecord(responseTopic: payload.topic)
@@ -76,7 +80,7 @@ class AuthResponseSubscriber {
                         authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
                     }
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, transportType: .relay)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, transportType: transportType)
 
                     authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
                 }
@@ -134,6 +138,19 @@ class AuthResponseSubscriber {
                 logger.error("Signature verification failed with: \(error.localizedDescription)")
                 throw AuthError.signatureVerificationFailed
             }
+        }
+    }
+
+    private func getTransportTypeUpgradeIfPossible(metadata: AppMetadata, requestId: RPCID) -> WCSession.TransportType {
+//        upgrade to link mode only if dapp requested universallink because dapp may not be prepared for handling a response - add this to doc]
+        // remove record
+
+        if let linkModeLink = metadata.redirect?.linkMode,
+           let _ = try? linkModeTransportTypeUpgradeStore.get(key: requestId.string) {
+            linkModeLinksStore.set(true, forKey: linkModeLink)
+            return .linkMode
+        } else {
+            return .relay
         }
     }
 

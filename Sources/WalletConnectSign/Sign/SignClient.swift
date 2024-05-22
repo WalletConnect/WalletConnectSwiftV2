@@ -342,8 +342,13 @@ public final class SignClient: SignClientProtocol {
     public func authenticate(
         _ params: AuthRequestParams,
         walletUniversalLink: String? = nil
-    ) async throws -> WalletConnectURI {
+    ) async throws -> WalletConnectURI? {
 
+        return authenticateTransportTypeSwitcher.authenticate(params, walletUniversalLink)
+
+        if walletUniversalLink != nil && walletLinkSupportNotProven {
+            linkModeTransportTypeUpgradeStore che
+        }
 
         let pairingURI = try await pairingClient.create(methods: [SessionAuthenticatedProtocolMethod().method])
         logger.debug("Requesting Authentication on existing pairing")
@@ -359,6 +364,7 @@ public final class SignClient: SignClientProtocol {
         )
         return pairingURI
     }
+
 
     // Link mode
     @discardableResult public func authenticateLinkMode(
