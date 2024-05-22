@@ -2,8 +2,9 @@
 import Foundation
 
 actor LinkAuthRequester {
-    enum Errors: Error {
+    public enum Errors: Error {
         case invalidChain
+        case walletLinkSupportNotProven
     }
     private let appMetadata: AppMetadata
     private let kms: KeyManagementService
@@ -11,22 +12,27 @@ actor LinkAuthRequester {
     private let iatProvader: IATProvider
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
+    private let linkModeLinksStore: CodableStore<Bool>
 
     init(kms: KeyManagementService,
          appMetadata: AppMetadata,
          logger: ConsoleLogging,
          iatProvader: IATProvider,
          authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
-         linkEnvelopesDispatcher: LinkEnvelopesDispatcher) {
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
+         linkModeLinksStore: CodableStore<Bool>) {
         self.kms = kms
         self.appMetadata = appMetadata
         self.logger = logger
         self.iatProvader = iatProvader
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
+        self.linkModeLinksStore = linkModeLinksStore
     }
 
     func request(params: AuthRequestParams, walletUniversalLink: String) async throws -> String {
+
+        guard try linkModeLinksStore.get(key: walletUniversalLink) != nil else { throw Errors.walletLinkSupportNotProven }
 
         var params = params
         let pubKey = try kms.createX25519KeyPair()
@@ -53,12 +59,7 @@ actor LinkAuthRequester {
         let request = RPCRequest(method: protocolMethod.method, params: sessionAuthenticateRequestParams)
         try kms.setPublicKey(publicKey: pubKey, for: responseTopic)
 
-
-
-
-        logger.debug("LinkAuthRequester: sending request")
-
-        
+        logger.debug("LinkAuthRequester: sending request")        
 
         return try await linkEnvelopesDispatcher.request(topic: UUID().uuidString,request: request, peerUniversalLink: walletUniversalLink, envelopeType: .type2)
 

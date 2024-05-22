@@ -10,7 +10,6 @@ public final class SignClient: SignClientProtocol {
 
     enum Errors: Error {
         case sessionForTopicNotFound
-        case linkModeUnsupported
     }
 
     // MARK: - Public Properties
@@ -186,7 +185,7 @@ public final class SignClient: SignClientProtocol {
 
 
     // Link Mode
-    private let linkAuthRequester: LinkAuthRequester?
+    private let linkAuthRequester: LinkAuthRequester
     private let linkAuthRequestSubscriber: LinkAuthRequestSubscriber
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let sessionRequestDispatcher: SessionRequestDispatcher
@@ -341,8 +340,11 @@ public final class SignClient: SignClientProtocol {
 
     /// For a dApp to propose an authenticated session to a wallet.
     public func authenticate(
-        _ params: AuthRequestParams
+        _ params: AuthRequestParams,
+        walletUniversalLink: String? = nil
     ) async throws -> WalletConnectURI {
+
+
         let pairingURI = try await pairingClient.create(methods: [SessionAuthenticatedProtocolMethod().method])
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: pairingURI.topic)
@@ -363,9 +365,6 @@ public final class SignClient: SignClientProtocol {
         _ params: AuthRequestParams,
         walletUniversalLink: String
     ) async throws -> String {
-        guard let linkAuthRequester = linkAuthRequester else {
-            throw Errors.linkModeUnsupported
-        }
         return try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
     }
 

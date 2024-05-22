@@ -18,6 +18,7 @@ class AuthResponseSubscriber {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
+    private let linkModeLinksStore: CodableStore<Bool>
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -29,7 +30,8 @@ class AuthResponseSubscriber {
          messageFormatter: SIWEFromCacaoFormatting,
          sessionNamespaceBuilder: SessionNamespaceBuilder,
          authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
-         linkEnvelopesDispatcher: LinkEnvelopesDispatcher) {
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
+         linkModeLinksStore: CodableStore<Bool>) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -41,6 +43,7 @@ class AuthResponseSubscriber {
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
+        self.linkModeLinksStore = linkModeLinksStore
         subscribeForResponse()
         subscribeForLinkResonse()
     }
@@ -55,6 +58,10 @@ class AuthResponseSubscriber {
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
+                if let linkModeLink = payload.response.responder.metadata.redirect?.linkMode {
+                    linkModeLinksStore.set(true, forKey: linkModeLink)
+                }
+                
                 let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
                 removeResponseTopicRecord(responseTopic: payload.topic)

@@ -14,12 +14,15 @@ final class SignClientTests: XCTestCase {
     var dappPairingClient: PairingClient!
     var wallet: SignClient!
     var walletPairingClient: PairingClient!
+    var dappKeyValueStorage: RuntimeKeyValueStorage!
     private var publishers = Set<AnyCancellable>()
     let walletAccount = Account(chainIdentifier: "eip155:1", address: "0x724d0D2DaD3fbB0C168f947B87Fa5DBe36F1A8bf")!
     let prvKey = Data(hex: "462c1dad6832d7d96ccf87bd6a686a4110e114aaaebd5512e552c0e3a87b480f")
     let eip1271Signature = "0xdeaddeaddead4095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c"
+    let walletLinkModeUniversalLink = "https://test"
 
-    static private func makeClients(name: String) -> (PairingClient, SignClient) {
+
+    static private func makeClients(name: String, linkModeUniversalLink: String? = nil) -> (PairingClient, SignClient, RuntimeKeyValueStorage) {
         let logger = ConsoleLogger(prefix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
@@ -45,8 +48,10 @@ final class SignClientTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient
         )
+        let metadata = AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: UUID().uuidString, linkMode: linkModeUniversalLink))
+        
         let client = SignClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: UUID().uuidString)),
+            metadata: metadata,
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
@@ -60,12 +65,12 @@ final class SignClientTests: XCTestCase {
         let clientId = try! networkingClient.getClientId()
         logger.debug("My client id is: \(clientId)")
         
-        return (pairingClient, client)
+        return (pairingClient, client, keyValueStorage)
     }
 
     override func setUp() async throws {
-        (dappPairingClient, dapp) = Self.makeClients(name: "🍏Dapp")
-        (walletPairingClient, wallet) = Self.makeClients(name: "🍎Wallet")
+        (dappPairingClient, dapp, dappKeyValueStorage) = Self.makeClients(name: "🍏Dapp")
+        (walletPairingClient, wallet, _) = Self.makeClients(name: "🍎Wallet", linkModeUniversalLink: walletLinkModeUniversalLink)
     }
 
     override func tearDown() {
@@ -1160,6 +1165,11 @@ final class SignClientTests: XCTestCase {
     func testLinkAuthRequest() async throws {
         let responseExpectation = expectation(description: "successful response delivered")
 
+        // Set Wallet's universal link in dapp storage to mock wallet proof on link mode support
+        let walletUniversalLink = "https://test"
+        let dappLinkModeLinksStore = CodableStore<Bool>(defaults: dappKeyValueStorage, identifier: SignStorageIdentifiers.linkModeLinks.rawValue)
+        dappLinkModeLinksStore.set(true, forKey: walletUniversalLink)
+
         wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
@@ -1188,7 +1198,7 @@ final class SignClientTests: XCTestCase {
         .store(in: &publishers)
 
 
-        let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: "")
+        let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: walletUniversalLink)
         try wallet.dispatchEnvelope(requestEnvelope)
         await fulfillment(of: [responseExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -1202,6 +1212,11 @@ final class SignClientTests: XCTestCase {
         let responseParams = "0xdeadbeef"
 
         let semaphore = DispatchSemaphore(value: 0)
+
+        // Set Wallet's universal link in dapp storage to mock wallet proof on link mode support
+        let walletUniversalLink = "https://test"
+        let dappLinkModeLinksStore = CodableStore<Bool>(defaults: dappKeyValueStorage, identifier: SignStorageIdentifiers.linkModeLinks.rawValue)
+        dappLinkModeLinksStore.set(true, forKey: walletUniversalLink)
 
         wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
             semaphore.wait()
@@ -1264,9 +1279,66 @@ final class SignClientTests: XCTestCase {
         }.store(in: &publishers)
         semaphore.signal()
 
-        let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: "")
+        let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: walletUniversalLink)
         try wallet.dispatchEnvelope(requestEnvelope)
         
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testLinkModeFailsWhenDappDoesNotHaveProofThatWalletSupportsLinkMode() async throws {
+        // ensure link mode fails before the upgrade
+        do {
+            try await self.dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: self.walletLinkModeUniversalLink)
+            XCTFail("Expected error but got success.")
+        } catch {
+            if let authError = error as? LinkAuthRequester.Errors, authError == .walletLinkSupportNotProven {
+            } else {
+                XCTFail("Unexpected error: \(error)")
+            }
+        }
+    }
+
+
+    func testUpgradeFromRelayToLinkMode() async throws {
+        let linkModeUpgradeExpectation = expectation(description: "successful upgraded to link mode")
+        wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
+            Task(priority: .high) {
+                let signerFactory = DefaultSignerFactory()
+                let signer = MessageSignerFactory(signerFactory: signerFactory).create()
+
+                let supportedAuthPayload = try! wallet.buildAuthPayload(payload: request.payload, supportedEVMChains: [Blockchain("eip155:1")!, Blockchain("eip155:137")!], supportedMethods: ["eth_signTransaction", "personal_sign"])
+
+                let siweMessage = try! wallet.formatAuthMessage(payload: supportedAuthPayload, account: walletAccount)
+
+                let signature = try signer.sign(
+                    message: siweMessage,
+                    privateKey: prvKey,
+                    type: .eip191)
+
+                let auth = try wallet.buildSignedAuthObject(authPayload: supportedAuthPayload, signature: signature, account: walletAccount)
+
+                _ = try! await wallet.approveSessionAuthenticate(requestId: request.id, auths: [auth])
+            }
+        }
+        .store(in: &publishers)
+        dapp.authResponsePublisher.sink { (_, result) in
+            guard case .success = result else { XCTFail(); return }
+
+
+            Task { [unowned self] in
+                try! await self.dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: self.walletLinkModeUniversalLink)
+                linkModeUpgradeExpectation.fulfill()
+            }
+        }
+        .store(in: &publishers)
+
+
+        let uri = try await dapp.authenticate(AuthRequestParams.stub(), walletUniversalLink: walletLinkModeUniversalLink)
+        try await walletPairingClient.pair(uri: uri)
+        await fulfillment(of: [linkModeUpgradeExpectation], timeout: InputConfig.defaultTimeout)
+    }
+
+    func testUpgradeSessionToLinkModeAndSendRequestOverLinkMode() async throws {
+        
     }
 }

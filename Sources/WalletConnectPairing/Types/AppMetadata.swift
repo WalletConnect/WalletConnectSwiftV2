@@ -12,22 +12,28 @@ import Foundation
 public struct AppMetadata: Codable, Equatable {
 
     public struct Redirect: Codable, Equatable {
+        enum Errors: Error {
+            case invalidLinkModeUniversalLink
+        }
         /// Native deeplink URL string.
         public let native: String?
 
         /// Universal link URL string.
         public let universal: String?
 
+        public let linkMode: String?
+
         /**
          Creates a new Redirect object with the specified information.
 
          - parameters:
-            - native: Native deeplink URL string.
-            - universal: Universal link URL string.
+         - native: Native deeplink URL string.
+         - universal: Universal link URL string.
          */
-        public init(native: String, universal: String?) {
+        public init(native: String, universal: String?, linkMode: String? = nil) {
             self.native = native
             self.universal = universal
+            self.linkMode = linkMode
         }
     }
 
@@ -79,7 +85,7 @@ public extension AppMetadata {
             description: "A protocol to connect blockchain wallets to dapps.",
             url: "https://walletconnect.com/",
             icons: [],
-            redirect: AppMetadata.Redirect(native: "", universal: nil)
+            redirect: try! AppMetadata.Redirect(native: "", universal: nil, linkMode: nil)
         )
     }
 }
