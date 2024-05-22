@@ -50,7 +50,7 @@ class LinkSessionRequestSubscriber {
             logger.debug("Session for topic not found")
             return
         }
-        guard let peerUniversalLink = session.peerParticipant.metadata.redirect?.universal else {
+        guard let peerUniversalLink = session.peerParticipant.metadata.redirect?.linkMode else {
             logger.debug("Peer universal link not found")
             return
         }

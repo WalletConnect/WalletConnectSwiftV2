@@ -53,7 +53,7 @@ actor WalletErrorResponder {
     private func respondErrorLinkMode(_ error: AuthError, requestId: RPCID, topic: String, type1EnvelopeKey: Data) async throws -> String {
         let (sessionAuthenticateRequestParams, _) = try getsessionAuthenticateRequestParams(requestId: requestId)
 
-        guard let peerUniversalLink = sessionAuthenticateRequestParams.requester.metadata.redirect?.universal else {
+        guard let peerUniversalLink = sessionAuthenticateRequestParams.requester.metadata.redirect?.linkMode else {
             throw Errors.peerUniversalLinkNotFound
         }
 

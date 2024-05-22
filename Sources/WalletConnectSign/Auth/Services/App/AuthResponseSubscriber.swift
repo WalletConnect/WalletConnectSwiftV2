@@ -19,7 +19,7 @@ class AuthResponseSubscriber {
     }
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
     private let linkModeLinksStore: CodableStore<Bool>
-    private let linkModeTransportTypeUpgradeStore: CodableStore<Bool>
+    private let supportLinkMode: Bool
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -33,7 +33,7 @@ class AuthResponseSubscriber {
          authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
          linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
          linkModeLinksStore: CodableStore<Bool>,
-         linkModeTransportTypeUpgradeStore: CodableStore<Bool>) {
+         supportLinkMode: Bool) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -46,7 +46,7 @@ class AuthResponseSubscriber {
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.linkModeLinksStore = linkModeLinksStore
-        self.linkModeTransportTypeUpgradeStore = linkModeTransportTypeUpgradeStore
+        self.supportLinkMode = supportLinkMode
         subscribeForResponse()
         subscribeForLinkResonse()
     }
@@ -54,7 +54,6 @@ class AuthResponseSubscriber {
     private func subscribeForResponse() {
         networkingInteractor.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
-                linkModeTransportTypeUpgradeStore.delete(forKey: payload.id.string)
                 guard let error = AuthError(code: payload.error.code) else { return }
                 authResponsePublisherSubject.send((payload.id, .failure(error)))                
             }.store(in: &publishers)
@@ -63,8 +62,6 @@ class AuthResponseSubscriber {
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
                 let transportType = getTransportTypeUpgradeIfPossible(metadata: payload.response.responder.metadata, requestId: payload.id)
-
-                linkModeTransportTypeUpgradeStore.delete(forKey: payload.id.string)
 
                 let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
@@ -146,7 +143,7 @@ class AuthResponseSubscriber {
         // remove record
 
         if let linkModeLink = metadata.redirect?.linkMode,
-           let _ = try? linkModeTransportTypeUpgradeStore.get(key: requestId.string) {
+           supportLinkMode {
             linkModeLinksStore.set(true, forKey: linkModeLink)
             return .linkMode
         } else {

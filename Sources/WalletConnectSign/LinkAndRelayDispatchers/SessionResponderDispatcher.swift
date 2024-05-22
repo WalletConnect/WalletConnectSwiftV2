@@ -124,7 +124,7 @@ class LinkSessionResponder {
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }
 
-        let peerUniversalLink = session.peerParticipant.metadata.redirect!.universal!
+        let peerUniversalLink = session.peerParticipant.metadata.redirect!.linkMode!
 
         guard sessionRequestNotExpired(requestId: requestId) else {
             try await linkEnvelopesDispatcher.respondError(

@@ -98,7 +98,7 @@ class LinkSessionRequester {
             throw WalletConnectError.invalidPermissions
         }
         // it's safe to force unwrap because redirect was used during session creation before
-        let peerUniversalLink = session.peerParticipant.metadata.redirect!.universal!
+        let peerUniversalLink = session.peerParticipant.metadata.redirect!.linkMode!
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiryTimestamp: request.expiryTimestamp)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let ttl = try request.calculateTtl()

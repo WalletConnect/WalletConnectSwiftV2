@@ -29,8 +29,8 @@ public class Sign {
             projectId: Networking.projectId,
             crypto: config.crypto,
             networkingClient: Networking.interactor,
-            groupIdentifier: Networking.groupIdentifier
-
+            groupIdentifier: Networking.groupIdentifier,
+            supportLinkMode: config.supportLinkMode
         )
     }()
 
@@ -41,8 +41,8 @@ public class Sign {
     /// Sign instance config method
     /// - Parameters:
     ///   - metadata: App metadata
-    static public func configure(crypto: CryptoProvider) {
-        Sign.config = Sign.Config(crypto: crypto)
+    static public func configure(crypto: CryptoProvider, supportLinkMode: Bool = false) {
+        Sign.config = Sign.Config(crypto: crypto, supportLinkMode: supportLinkMode)
     }
 }
 

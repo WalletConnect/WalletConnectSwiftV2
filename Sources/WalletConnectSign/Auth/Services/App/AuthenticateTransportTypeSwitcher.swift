@@ -5,20 +5,17 @@ class AuthenticateTransportTypeSwitcher {
         case badUniversalLink
     }
 
-    private let linkModeTransportTypeUpgradeStore: CodableStore<Bool>
     private let linkAuthRequester: LinkAuthRequester
     private let pairingClient: PairingClient
     private let logger: ConsoleLogging
     private let appRequestService: SessionAuthRequestService
     private let appProposeService: AppProposeService
 
-    init(linkModeTransportTypeUpgradeStore: CodableStore<Bool>,
-         linkAuthRequester: LinkAuthRequester,
+    init(linkAuthRequester: LinkAuthRequester,
          pairingClient: PairingClient,
          logger: ConsoleLogging,
          appRequestService: SessionAuthRequestService,
          appProposeService: AppProposeService) {
-        self.linkModeTransportTypeUpgradeStore = linkModeTransportTypeUpgradeStore
         self.linkAuthRequester = linkAuthRequester
         self.pairingClient = pairingClient
         self.logger = logger
@@ -46,10 +43,6 @@ class AuthenticateTransportTypeSwitcher {
                 throw error
             }
             // Continue with relay if the error is walletLinkSupportNotProven
-        }
-
-        if let walletUniversalLink = walletUniversalLink {
-            linkModeTransportTypeUpgradeStore.set(true, forKey: walletUniversalLink)
         }
 
         let pairingURI = try await pairingClient.create(methods: [SessionAuthenticatedProtocolMethod().method])
