@@ -59,6 +59,7 @@
         "ChatTests",
         "ENSResolverTests",
         "HistoryTests",
+        "NotifyTests",
         "SyncDerivationServiceTests",
         "SyncTests"
       ],

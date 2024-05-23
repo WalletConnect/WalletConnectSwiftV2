@@ -4,6 +4,7 @@ import Foundation
 public protocol VerifyClientProtocol {
     func verifyOrigin(assertionId: String) async throws -> VerifyResponse
     func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext
+    func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext
 }
 
 public actor VerifyClient: VerifyClientProtocol {
@@ -40,6 +41,10 @@ public actor VerifyClient: VerifyClientProtocol {
         verifyContextFactory.createVerifyContext(origin: origin, domain: domain, isScam: isScam)
     }
 
+    nonisolated public func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext {
+        verifyContextFactory.createVerifyContextForLinkMode(redirectUniversalLink: redirectUniversalLink, domain: domain)
+    }
+
     public func registerAssertion() async throws {
         try await assertionRegistrer.registerAssertion()
     }
@@ -48,6 +53,7 @@ public actor VerifyClient: VerifyClientProtocol {
 #if DEBUG
 
 public struct VerifyClientMock: VerifyClientProtocol {
+    
     public init() {}
     
     public func verifyOrigin(assertionId: String) async throws -> VerifyResponse {
@@ -56,6 +62,10 @@ public struct VerifyClientMock: VerifyClientProtocol {
     
     public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
         return VerifyContext(origin: "domain.com", validation: .valid)
+    }
+    
+    public func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext {
+        fatalError()
     }
 }
 
