@@ -24,7 +24,7 @@ final class SignClientTests: XCTestCase {
     let walletLinkModeUniversalLink = "https://test"
 
 
-    static private func makeClients(name: String, linkModeUniversalLink: String? = nil, supportLinkMode: Bool = false) -> (PairingClient, SignClient, RuntimeKeyValueStorage, RelayClient) {
+    static private func makeClients(name: String, linkModeUniversalLink: String? = UUID().uuidString, supportLinkMode: Bool = false) -> (PairingClient, SignClient, RuntimeKeyValueStorage, RelayClient) {
         let logger = ConsoleLogger(prefix: name, loggingLevel: .debug)
         let keychain = KeychainStorageMock()
         let keyValueStorage = RuntimeKeyValueStorage()
@@ -50,8 +50,8 @@ final class SignClientTests: XCTestCase {
             keychainStorage: keychain,
             networkingClient: networkingClient
         )
-        let metadata = AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: UUID().uuidString, linkMode: linkModeUniversalLink))
-        
+        let metadata = AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: linkModeUniversalLink, linkMode: supportLinkMode))
+
         let client = SignClientFactory.create(
             metadata: metadata,
             logger: logger,
@@ -79,7 +79,7 @@ final class SignClientTests: XCTestCase {
     func setUpDappForLinkMode() async throws {
         try await tearDown()
         (dappPairingClient, dapp, dappKeyValueStorage, dappRelayClient) = Self.makeClients(name: "🍏Dapp", supportLinkMode: true)
-        (walletPairingClient, wallet, _, walletRelayClient) = Self.makeClients(name: "🍎Wallet", linkModeUniversalLink: walletLinkModeUniversalLink)
+        (walletPairingClient, wallet, _, walletRelayClient) = Self.makeClients(name: "🍎Wallet", linkModeUniversalLink: walletLinkModeUniversalLink, supportLinkMode: true)
     }
 
     override func tearDown() {

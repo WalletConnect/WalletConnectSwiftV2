@@ -5,6 +5,7 @@ actor WalletErrorResponder {
         case recordForIdNotFound
         case malformedAuthRequestParams
         case peerUniversalLinkNotFound
+        case linkModeNotSupported
     }
 
     private let networkingInteractor: NetworkInteracting
@@ -53,7 +54,11 @@ actor WalletErrorResponder {
     private func respondErrorLinkMode(_ error: AuthError, requestId: RPCID, topic: String, type1EnvelopeKey: Data) async throws -> String {
         let (sessionAuthenticateRequestParams, _) = try getsessionAuthenticateRequestParams(requestId: requestId)
 
-        guard let peerUniversalLink = sessionAuthenticateRequestParams.requester.metadata.redirect?.linkMode else {
+        guard let redirect = sessionAuthenticateRequestParams.requester.metadata.redirect,
+              redirect.linkMode else {
+            throw Errors.linkModeNotSupported
+        }
+        guard let peerUniversalLink = redirect.universal else {
             throw Errors.peerUniversalLinkNotFound
         }
 
@@ -106,6 +111,8 @@ extension WalletErrorResponder.Errors: LocalizedError {
             return NSLocalizedString("The authentication request parameters are malformed.", comment: "Malformed Auth Request Params Error")
         case .peerUniversalLinkNotFound:
             return NSLocalizedString("The peer's universal link was not found.", comment: "Peer Universal Link Not Found Error")
+        case .linkModeNotSupported:
+            return NSLocalizedString("Link mode is not supported.", comment: "Link Mode Not Supported Error")
         }
     }
 }

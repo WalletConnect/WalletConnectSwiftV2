@@ -61,7 +61,7 @@ class AuthResponseSubscriber {
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
-                let transportType = getTransportTypeUpgradeIfPossible(metadata: payload.response.responder.metadata, requestId: payload.id)
+                let transportType = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
 
                 let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
@@ -138,13 +138,15 @@ class AuthResponseSubscriber {
         }
     }
 
-    private func getTransportTypeUpgradeIfPossible(metadata: AppMetadata, requestId: RPCID) -> WCSession.TransportType {
+    private func getTransportTypeUpgradeIfPossible(peerMetadata: AppMetadata, requestId: RPCID) -> WCSession.TransportType {
 //        upgrade to link mode only if dapp requested universallink because dapp may not be prepared for handling a response - add this to doc]
         // remove record
 
-        if let linkModeLink = metadata.redirect?.linkMode,
+        if let peerRedirect = peerMetadata.redirect,
+            peerRedirect.linkMode,
+           let universalLink = peerRedirect.universal,
            supportLinkMode {
-            linkModeLinksStore.set(true, forKey: linkModeLink)
+            linkModeLinksStore.set(true, forKey: universalLink)
             return .linkMode
         } else {
             return .relay

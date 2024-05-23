@@ -350,13 +350,14 @@ public final class SignClient: SignClientProtocol {
     }
 
 
-    // Link mode
+    #if DEBUG
     @discardableResult public func authenticateLinkMode(
         _ params: AuthRequestParams,
         walletUniversalLink: String
     ) async throws -> String {
         return try await linkAuthRequester.request(params: params, walletUniversalLink: walletUniversalLink)
     }
+    #endif
 
     public func dispatchEnvelope(_ envelope: String) throws {
         try linkEnvelopesDispatcher.dispatchEnvelope(envelope)
