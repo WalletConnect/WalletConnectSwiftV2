@@ -33,14 +33,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )
-        Sign.configure(crypto: DefaultCryptoProvider())
+        Sign.configure(crypto: DefaultCryptoProvider(), supportLinkMode: true)
 
         let metadata = AppMetadata(
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
             url: "wallet.connect",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp")
+            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: "https://lab.web3modal.com/dapp")
         )
         
         Web3Modal.configure(

@@ -13,6 +13,9 @@ public enum SocketConnectionStatus {
 /// Access via `Relay.instance`
 public final class RelayClient {
 
+    #if DEBUG
+    public var blockPublishing: Bool = false
+    #endif
     enum Errors: Error {
         case subscriptionIdNotFound
     }
@@ -97,6 +100,12 @@ public final class RelayClient {
 
     /// Completes with an acknowledgement from the relay network
     public func publish(topic: String, payload: String, tag: Int, prompt: Bool, ttl: Int) async throws {
+        #if DEBUG
+        if blockPublishing {
+            logger.debug("[Publish] Publishing is blocked")
+            return
+        }
+        #endif
         let request = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag)).asRPCRequest()
         let message = try request.asJSONEncodedString()
         

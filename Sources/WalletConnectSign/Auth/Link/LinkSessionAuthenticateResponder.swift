@@ -35,7 +35,7 @@ actor LinkSessionAuthenticateResponder {
         let (responseTopic, responseKeys) = try util.generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
 
         let peerParticipant = sessionAuthenticateRequestParams.requester
-        guard let peerUniversalLink = peerParticipant.metadata.redirect?.linkMode else {
+        guard let peerUniversalLink = peerParticipant.metadata.redirect?.universal else {
             throw Errors.missingPeerUniversalLink
         }
 

@@ -22,11 +22,12 @@ actor ApproveSessionAuthenticateDispatcher {
 
     public func approveSessionAuthenticate(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String?) {
 
-        let transportType = try util.getHistoryRecord(requestId: requestId).transportType
+        let transportType = try util.getHistoryRecord(requestId: requestId).transportType ?? .relay
 
+        logger.debug("Will approve session authenticate with transport type: \(transportType)")
         switch transportType {
 
-        case .relay, .none:
+        case .relay:
             let session = try await sessionAuthenticateResponder.respond(requestId: requestId, auths: auths)
             return (session, nil)
         case .linkMode:
