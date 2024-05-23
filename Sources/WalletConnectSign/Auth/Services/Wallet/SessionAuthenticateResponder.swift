@@ -53,7 +53,13 @@ actor SessionAuthenticateResponder {
         let responseParams = SessionAuthenticateResponseParams(responder: selfParticipant, cacaos: auths)
 
         let response = RPCResponse(id: requestId, result: responseParams)
-        try await networkingInteractor.respond(topic: responseTopic, response: response, protocolMethod: SessionAuthenticatedProtocolMethod(), envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation))
+        
+        try await networkingInteractor.respond(
+            topic: responseTopic,
+            response: response,
+            protocolMethod: SessionAuthenticatedProtocolMethod.responseApprove(),
+            envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation)
+        )
 
 
         let session = try util.createSession(

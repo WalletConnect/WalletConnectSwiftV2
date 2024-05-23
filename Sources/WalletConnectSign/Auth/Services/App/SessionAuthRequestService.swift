@@ -29,7 +29,7 @@ actor SessionAuthRequestService {
         var params = params
         let pubKey = try kms.createX25519KeyPair()
         let responseTopic = pubKey.rawRepresentation.sha256().toHexString()
-        let protocolMethod = SessionAuthenticatedProtocolMethod(ttl: params.ttl)
+        let protocolMethod = SessionAuthenticatedProtocolMethod.responseApprove(ttl: params.ttl)
         guard let chainNamespace = Blockchain(params.chains.first!)?.namespace,
               chainNamespace == "eip155"
         else {
