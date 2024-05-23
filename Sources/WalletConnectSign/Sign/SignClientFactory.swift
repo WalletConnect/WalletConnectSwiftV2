@@ -17,8 +17,7 @@ public struct SignClientFactory {
         projectId: String,
         crypto: CryptoProvider,
         networkingClient: NetworkingInteractor,
-        groupIdentifier: String,
-        supportLinkMode: Bool
+        groupIdentifier: String
     ) -> SignClient {
         let logger = ConsoleLogger(prefix: "📝", loggingLevel: .off)
 
@@ -38,8 +37,7 @@ public struct SignClientFactory {
             networkingClient: networkingClient,
             iatProvider: iatProvider,
             projectId: projectId,
-            crypto: crypto,
-            supportLinkMode: supportLinkMode
+            crypto: crypto
         )
     }
 
@@ -52,8 +50,7 @@ public struct SignClientFactory {
         networkingClient: NetworkingInteractor,
         iatProvider: IATProvider,
         projectId: String,
-        crypto: CryptoProvider,
-        supportLinkMode:Bool
+        crypto: CryptoProvider
     ) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
@@ -113,6 +110,7 @@ public struct SignClientFactory {
 
         let linkModeLinksStore = CodableStore<Bool>(defaults: keyValueStorage, identifier: SignStorageIdentifiers.linkModeLinks.rawValue)
 
+        let supportLinkMode = metadata.redirect?.linkMode ?? false
         let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, linkModeLinksStore: linkModeLinksStore, supportLinkMode: supportLinkMode)
 
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, linkEnvelopesDispatcher: linkEnvelopesDispatcher)

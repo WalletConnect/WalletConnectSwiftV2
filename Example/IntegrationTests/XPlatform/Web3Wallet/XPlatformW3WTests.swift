@@ -57,8 +57,7 @@ final class XPlatformW3WTests: XCTestCase {
             networkingClient: networkingClient,
             iatProvider: DefaultIATProvider(),
             projectId: InputConfig.projectId,
-            crypto: DefaultCryptoProvider(),
-            supportLinkMode: false
+            crypto: DefaultCryptoProvider()
         )
 
         w3wClient = Web3WalletClientFactory.create(

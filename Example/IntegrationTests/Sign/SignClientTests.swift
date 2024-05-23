@@ -61,8 +61,7 @@ final class SignClientTests: XCTestCase {
             networkingClient: networkingClient,
             iatProvider: IATProviderMock(),
             projectId: InputConfig.projectId,
-            crypto: DefaultCryptoProvider(),
-            supportLinkMode: supportLinkMode
+            crypto: DefaultCryptoProvider()
         )
 
         let clientId = try! networkingClient.getClientId()
