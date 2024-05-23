@@ -16,7 +16,7 @@ struct WCSession: SequenceObject, Equatable {
     let selfParticipant: Participant
     let peerParticipant: Participant
     let controller: AgreementPeer
-    let transportType: TransportType
+    var transportType: TransportType
 
     private(set) var acknowledged: Bool
     private(set) var expiryDate: Date

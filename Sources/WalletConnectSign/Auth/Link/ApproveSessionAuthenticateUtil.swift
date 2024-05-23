@@ -103,6 +103,7 @@ class ApproveSessionAuthenticateUtil {
             acknowledged: true,
             transportType: transportType
         )
+        logger.debug("created a session with topic: \(sessionTopic)")
 
         sessionStore.setSession(session)
         Task {

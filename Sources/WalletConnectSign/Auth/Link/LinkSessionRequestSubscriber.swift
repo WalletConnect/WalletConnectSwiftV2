@@ -26,13 +26,20 @@ class LinkSessionRequestSubscriber {
         return sessionRequestsProvider.sessionRequestPublisher
     }
 
-    func setupRequestSubscription() {
+    private func setupRequestSubscription() {
         envelopesDispatcher.requestSubscription(on: SessionRequestProtocolMethod().method)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.RequestParams>) in
                 Task(priority: .high) {
                     onSessionRequest(payload: payload)
                 }
             }.store(in: &publishers)
+    }
+
+    private func upgradeSessionToLinkModeIfNeeded( _ session: inout WCSession) {
+        guard session.transportType != .linkMode else {return}
+        session.transportType = .linkMode
+        sessionStore.setSession(session)
+        logger.debug("session with topic: \(session.topic) upgraded to link mode")
     }
 
     func onSessionRequest(payload: RequestSubscriptionPayload<SessionType.RequestParams>) {
@@ -46,11 +53,12 @@ class LinkSessionRequestSubscriber {
             chainId: payload.request.chainId,
             expiryTimestamp: payload.request.request.expiryTimestamp
         )
-        guard let session = sessionStore.getSession(forTopic: topic) else {
+        guard var session = sessionStore.getSession(forTopic: topic) else {
             logger.debug("Session for topic not found")
             return
         }
-        guard let peerUniversalLink = session.peerParticipant.metadata.redirect?.linkMode else {
+        upgradeSessionToLinkModeIfNeeded(&session)
+        guard let peerUniversalLink = session.peerParticipant.metadata.redirect?.universal else {
             logger.debug("Peer universal link not found")
             return
         }

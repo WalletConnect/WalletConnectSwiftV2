@@ -26,6 +26,7 @@ class SessionRequestDispatcher {
             throw WalletConnectError.noSessionMatchingTopic(request.topic)
         }
         let transportType = session.transportType
+        logger.debug("Will send session request on transport type: \(transportType)")
 
         switch transportType {
         case .relay:
