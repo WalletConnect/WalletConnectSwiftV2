@@ -25,7 +25,7 @@ struct NotifyConfig: Codable {
             description: description,
             url: appDomain,
             icons: [image_url?.sm, image_url?.md, image_url?.lg].compactMap { $0 }, 
-            redirect: AppMetadata.Redirect(native: "", universal: nil)
+            redirect: try! AppMetadata.Redirect(native: "", universal: nil)
         )
     }
 }

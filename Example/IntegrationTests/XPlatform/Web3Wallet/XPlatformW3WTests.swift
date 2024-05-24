@@ -49,7 +49,7 @@ final class XPlatformW3WTests: XCTestCase {
             networkingClient: networkingClient)
 
         let signClient = SignClientFactory.create(
-            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: AppMetadata.Redirect(native: "", universal: nil)),
+            metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: try! AppMetadata.Redirect(native: "", universal: nil)),
             logger: signLogger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
