@@ -69,3 +69,14 @@ actor LinkAuthRequester {
         try AuthenticatedSessionRecapUrnFactory.createNamespaceRecap(methods: methods)
     }
 }
+
+extension LinkAuthRequester.Errors {
+    var localizedDescription: String {
+        switch self {
+        case .invalidChain:
+            return "The specified blockchain is invalid or unsupported."
+        case .walletLinkSupportNotProven:
+            return "Wallet link support has not been proven for the specified operation."
+        }
+    }
+}
