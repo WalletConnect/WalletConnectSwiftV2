@@ -43,7 +43,7 @@ class LinkEnvelopesDispatcher {
             throw Errors.invalidURL
         }
 
-        guard let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_envelope" })?.value else {
+        guard let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_ev" })?.value else {
             throw Errors.envelopeNotFound
         }
         guard let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value else {
@@ -95,7 +95,7 @@ class LinkEnvelopesDispatcher {
 
         guard var components = URLComponents(string: peerUniversalLink) else { throw URLError(.badURL) }
 
-        components.queryItems = [URLQueryItem(name: "wc_envelope", value: envelope), URLQueryItem(name: "topic", value: topic)]
+        components.queryItems = [URLQueryItem(name: "wc_ev", value: envelope), URLQueryItem(name: "topic", value: topic)]
 
         guard let finalURL = components.url else { throw URLError(.badURL) }
         return finalURL

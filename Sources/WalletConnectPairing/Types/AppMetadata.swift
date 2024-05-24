@@ -14,6 +14,7 @@ public struct AppMetadata: Codable, Equatable {
     public struct Redirect: Codable, Equatable {
         enum Errors: Error {
             case invalidLinkModeUniversalLink
+            case invalidUniversalLinkURL
         }
         /// Native deeplink URL string.
         public let native: String?
@@ -30,10 +31,23 @@ public struct AppMetadata: Codable, Equatable {
          - native: Native deeplink URL string.
          - universal: Universal link URL string.
          */
-        public init(native: String, universal: String?, linkMode: Bool = false) {
+        public init(native: String, universal: String?, linkMode: Bool = false) throws {
+            if linkMode && universal == nil {
+                throw Errors.invalidLinkModeUniversalLink
+            }
+
+            if let universal = universal, !Redirect.isValidURL(universal) {
+                throw Errors.invalidUniversalLinkURL
+            }
+
             self.native = native
             self.universal = universal
             self.linkMode = linkMode
+        }
+
+        private static func isValidURL(_ urlString: String) -> Bool {
+            let regex = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$|^www\\.[^\\s/$.?#].[^\\s]*$"
+            return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: urlString)
         }
     }
 
@@ -85,7 +99,7 @@ public extension AppMetadata {
             description: "A protocol to connect blockchain wallets to dapps.",
             url: "https://walletconnect.com/",
             icons: [],
-            redirect: AppMetadata.Redirect(native: "", universal: nil)
+            redirect: try! AppMetadata.Redirect(native: "", universal: nil)
         )
     }
 }
