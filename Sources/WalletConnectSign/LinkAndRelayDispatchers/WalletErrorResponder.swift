@@ -29,7 +29,7 @@ actor WalletErrorResponder {
 
     func respondError(_ error: AuthError, requestId: RPCID) async throws -> String? {
 
-        let transportType = try getHistoryRecord(requestId: requestId).transportType
+        let transportType = try getHistoryRecord(requestId: requestId).transportType ?? .relay
 
         let authRequestParams = try getAuthRequestParams(requestId: requestId)
         let (topic, keys) = try generateAgreementKeys(requestParams: authRequestParams)
@@ -38,7 +38,7 @@ actor WalletErrorResponder {
 
         let type1EnvelopeKey = keys.publicKey.rawRepresentation
         switch transportType {
-        case .relay, .none:
+        case .relay:
             try await respondErrorRelay(error, requestId: requestId, topic: topic, type1EnvelopeKey: type1EnvelopeKey)
             return nil
         case .linkMode:

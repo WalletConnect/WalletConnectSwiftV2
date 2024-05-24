@@ -36,11 +36,11 @@ actor ApproveSessionAuthenticateDispatcher {
     }
 
     func respondError(requestId: RPCID) async throws {
-        let transportType = try util.getHistoryRecord(requestId: requestId).transportType
+        let transportType = try util.getHistoryRecord(requestId: requestId).transportType ?? .relay
 
         switch transportType {
 
-        case .relay, .none:
+        case .relay:
             return try await sessionAuthenticateResponder.respondError(requestId: requestId)
         case .linkMode:
             return try await linkSessionAuthenticateResponder.respondError(requestId: requestId)
