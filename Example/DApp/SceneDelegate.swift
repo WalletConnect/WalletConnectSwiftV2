@@ -6,6 +6,7 @@ import WalletConnectRelay
 import WalletConnectNetworking
 import Combine
 
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var publishers = Set<AnyCancellable>()
@@ -29,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Networking.configure(
-            groupIdentifier: "group.com.walletconnect.dapp",
+            groupIdentifier: Constants.groupIdentifier.rawValue,
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )

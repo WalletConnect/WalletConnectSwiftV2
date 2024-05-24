@@ -113,16 +113,25 @@ final class SignPresenter: ObservableObject {
 
         Task {
             do {
+                ActivityIndicatorManager.shared.start()
                 if let pairingUri = try await Sign.instance.authenticate(.stub(methods: ["personal_sign"]), walletUniversalLink: "https://lab.web3modal.com/wallet") {
                     walletConnectUri = pairingUri
+                    ActivityIndicatorManager.shared.stop()
                     router.presentNewPairing(walletConnectUri: walletConnectUri!)
                 }
             } catch {
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
+                ActivityIndicatorManager.shared.stop()
             }
         }
     }
 
+    @MainActor
+    func openConfiguration() {
+        router.openConfig()
+    }
+
+    @MainActor
     func disconnect() {
         if let session {
             Task { @MainActor in

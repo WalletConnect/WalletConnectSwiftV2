@@ -34,4 +34,8 @@ final class SignRouter {
     func popToRoot() {
         viewController.popToRoot()
     }
+
+    func openConfig() {
+        ConfigModule.create(app: app).push(from: viewController)
+    }
 }
