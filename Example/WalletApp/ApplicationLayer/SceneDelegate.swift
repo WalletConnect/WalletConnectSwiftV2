@@ -130,7 +130,7 @@ private extension SceneDelegate {
             description: "wallet description",
             url: "example.wallet",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "walletapp://", universal: "https://lab.web3modal.com/wallet", linkMode: true)
+            redirect: try! AppMetadata.Redirect(native: "walletapp://", universal: "https://lab.web3modal.com/wallet", linkMode: true)
         )
 
         Web3Wallet.configure(metadata: metadata, crypto: DefaultCryptoProvider(), environment: BuildConfiguration.shared.apnsEnvironment)

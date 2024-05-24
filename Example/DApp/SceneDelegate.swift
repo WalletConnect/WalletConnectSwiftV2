@@ -41,7 +41,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             description: "WalletConnect DApp sample",
             url: "https://lab.web3modal.com/dapp",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
+            redirect: try! AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
         )
         
         Web3Modal.configure(
