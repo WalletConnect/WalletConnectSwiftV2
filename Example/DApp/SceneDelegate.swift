@@ -38,7 +38,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let metadata = AppMetadata(
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
-            url: "wallet.connect",
+            url: "https://lab.web3modal.com/dapp",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
             redirect: AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
         )
