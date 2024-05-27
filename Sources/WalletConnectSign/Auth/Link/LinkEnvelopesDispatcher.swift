@@ -1,9 +1,7 @@
 
-#if os(iOS)
 import UIKit
-
-
 import Combine
+
 class LinkEnvelopesDispatcher {
     enum Errors: Error {
         case invalidURL
@@ -177,4 +175,3 @@ class LinkEnvelopesDispatcher {
         }
     }
 }
-#endif

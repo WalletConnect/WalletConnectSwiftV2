@@ -23,10 +23,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
             return
         }
         do {
-            print("🔵🔵🔵🔵🔵🔵🔵\(url.absoluteString)")
             try Web3Wallet.instance.dispatchEnvelope(url.absoluteString)
         } catch {
-            print("🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+            print(error)
         }
     }
 

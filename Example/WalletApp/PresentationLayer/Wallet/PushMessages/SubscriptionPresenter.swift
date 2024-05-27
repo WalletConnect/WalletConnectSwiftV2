@@ -38,12 +38,12 @@ final class SubscriptionPresenter: ObservableObject {
     }
 
     private func setUpMessagesRefresh() {
-//        Timer.publish(every: 10.0, on: .main, in: .default)
-//            .autoconnect()
-//            .sink(receiveValue: { [weak self] _ in
-//                guard let self = self else { return }
-//                self.pushMessages = self.interactor.getPushMessages()
-//            }).store(in: &disposeBag)
+        Timer.publish(every: 10.0, on: .main, in: .default)
+            .autoconnect()
+            .sink(receiveValue: { [weak self] _ in
+                guard let self = self else { return }
+                self.pushMessages = self.interactor.getPushMessages()
+            }).store(in: &disposeBag)
     }
 
     func deletePushMessage(at indexSet: IndexSet) {

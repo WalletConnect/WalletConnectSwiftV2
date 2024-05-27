@@ -19,7 +19,7 @@ public struct Envelope: Equatable {
     /// pk = public key (32 bytes)
     /// iv = initialization vector (12 bytes)
     /// ct = ciphertext (N bytes)
-    /// sealbox: in case of envelope type 0, 1, 3 and 4: = iv + ct + tag, in case of type 2 - raw data representation of a json object
+    /// sealbox: in case of envelope type 0, 1: = iv + ct + tag, in case of type 2 - raw data representation of a json object
     /// type0: tp + sealbox
     /// type1: tp + pk + sealbox
     init(_ codingType: CodingType, envelopeString: String) throws {
@@ -34,10 +34,10 @@ public struct Envelope: Equatable {
 
         guard let envelopeTypeByte = envelopeData.subdata(in: 0..<1).first else { throw Errors.malformedEnvelope }
 
-        let pubKey: Data? = (envelopeTypeByte == 1 || envelopeTypeByte == 4) && envelopeData.count >= 33 ? envelopeData.subdata(in: 1..<33) : nil
+        let pubKey: Data? = (envelopeTypeByte == 1) && envelopeData.count >= 33 ? envelopeData.subdata(in: 1..<33) : nil
         self.type = try EnvelopeType(representingByte: envelopeTypeByte, pubKey: pubKey)
 
-        let startIndex = (envelopeTypeByte == 1 || envelopeTypeByte == 4) ? 33 : 1
+        let startIndex = (envelopeTypeByte == 1) ? 33 : 1
         self.sealbox = envelopeData.subdata(in: startIndex..<envelopeData.count)
     }
 

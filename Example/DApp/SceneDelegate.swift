@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         do {
             try Sign.instance.dispatchEnvelope(url.absoluteString)
         } catch {
-            print("🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨")
+            print(error)
         }
 
     }
