@@ -53,9 +53,9 @@ final class SessionAccountPresenter: ObservableObject {
                     lastRequest = request
                     ActivityIndicatorManager.shared.stop()
                     requesting = true
-//                    DispatchQueue.main.async { [weak self] in
-//                        self?.openWallet()
-//                    }
+                    DispatchQueue.main.async { [weak self] in
+                        self?.openWallet()
+                    }
                 } catch {
                     ActivityIndicatorManager.shared.stop()
                     requesting = false
