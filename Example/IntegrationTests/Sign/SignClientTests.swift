@@ -1235,7 +1235,6 @@ final class SignClientTests: XCTestCase {
         dappLinkModeLinksStore.set(true, forKey: walletUniversalLink)
 
         wallet.authenticateRequestPublisher.sink { [unowned self] (request, _) in
-            semaphore.wait()
             Task(priority: .high) {
                 let signerFactory = DefaultSignerFactory()
                 let signer = MessageSignerFactory(signerFactory: signerFactory).create()
@@ -1293,7 +1292,6 @@ final class SignClientTests: XCTestCase {
             }
             responseExpectation.fulfill()
         }.store(in: &publishers)
-        semaphore.signal()
 
         let requestEnvelope = try await dapp.authenticateLinkMode(AuthRequestParams.stub(), walletUniversalLink: walletUniversalLink)
         try wallet.dispatchEnvelope(requestEnvelope)
