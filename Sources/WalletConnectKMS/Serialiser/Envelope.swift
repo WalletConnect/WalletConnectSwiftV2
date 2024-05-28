@@ -47,14 +47,22 @@ public struct Envelope: Equatable {
         self.sealbox = sealbox
     }
 
-    func serialised() -> String {
+    func serialised(codingType: CodingType) -> String {
+        let dataToEncode: Data
         switch type {
         case .type0:
-            return (type.representingByte.data + sealbox).base64EncodedString()
+            dataToEncode = type.representingByte.data + sealbox
         case .type1(let pubKey):
-            return (type.representingByte.data + pubKey + sealbox).base64EncodedString()
+            dataToEncode = type.representingByte.data + pubKey + sealbox
         case .type2:
-            return (type.representingByte.data + sealbox).base64urlEncodedString()
+            dataToEncode = type.representingByte.data + sealbox
+        }
+
+        switch codingType {
+        case .base64Encoded:
+            return dataToEncode.base64EncodedString()
+        case .base64UrlEncoded:
+            return dataToEncode.base64urlEncodedString()
         }
     }
 

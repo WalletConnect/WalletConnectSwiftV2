@@ -68,7 +68,7 @@ public class Serializer: Serializing {
             throw error
         }
         let sealbox = try codec.encode(plaintext: messageJson, symmetricKey: symmetricKey)
-        return Envelope(type: envelopeType, sealbox: sealbox, codingType: codingType).serialised()
+        return Envelope(type: envelopeType, sealbox: sealbox, codingType: codingType).serialised(codingType: codingType)
     }
 
     /// Deserializes and decrypts an object
@@ -112,7 +112,7 @@ public class Serializer: Serializing {
     private func serializeEnvelopeType2(encodable: Encodable, codingType: Envelope.CodingType) throws -> String {
         let messageData = try JSONEncoder().encode(encodable)
         let envelope = Envelope(type: .type2, sealbox: messageData, codingType: codingType)
-        return envelope.serialised()
+        return envelope.serialised(codingType: codingType)
     }
 
     private func handleType1Envelope<T: Codable>(_ topic: String, peerPubKey: Data, sealbox: Data) throws -> (T, String, Data) {
