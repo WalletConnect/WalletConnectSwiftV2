@@ -45,7 +45,7 @@ final class SettingsPresenter: ObservableObject {
 
     func logoutPressed() async throws {
         guard let account = accountStorage.importAccount?.account else { return }
-        try await interactor.notifyUnregister(account: account)
+        try? await interactor.notifyUnregister(account: account)
         accountStorage.importAccount = nil
         try await Web3Wallet.instance.cleanup()
         UserDefaults.standard.set(nil, forKey: "deviceToken")

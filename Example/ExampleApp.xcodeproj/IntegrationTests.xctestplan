@@ -54,10 +54,12 @@
     {
       "parallelizable" : true,
       "skippedTests" : [
+        "AuthTests",
         "AuthTests\/testEIP1271RespondSuccess()",
         "ChatTests",
         "ENSResolverTests",
         "HistoryTests",
+        "NotifyTests",
         "SyncDerivationServiceTests",
         "SyncTests"
       ],

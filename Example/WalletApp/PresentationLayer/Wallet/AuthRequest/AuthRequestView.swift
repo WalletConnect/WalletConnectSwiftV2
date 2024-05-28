@@ -226,7 +226,7 @@ struct AuthRequestView: View {
     private func allowButton() -> some View {
         Button {
             Task(priority: .userInitiated) { await
-                presenter.approve()
+                presenter.signMulti()
             }
         } label: {
             Text(presenter.validationStatus == .scam ? "Proceed anyway" : "Sign Multi")

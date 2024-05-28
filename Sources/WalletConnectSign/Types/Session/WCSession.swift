@@ -1,6 +1,10 @@
 import Foundation
 
 struct WCSession: SequenceObject, Equatable {
+    public enum TransportType: Codable {
+        case relay
+        case linkMode
+    }
     enum Error: Swift.Error {
         case controllerNotSet
         case unsatisfiedUpdateNamespaceRequirement
@@ -12,6 +16,7 @@ struct WCSession: SequenceObject, Equatable {
     let selfParticipant: Participant
     let peerParticipant: Participant
     let controller: AgreementPeer
+    var transportType: TransportType
 
     private(set) var acknowledged: Bool
     private(set) var expiryDate: Date
@@ -35,7 +40,9 @@ struct WCSession: SequenceObject, Equatable {
          peerParticipant: Participant,
          settleParams: SessionType.SettleParams,
          requiredNamespaces: [String: ProposalNamespace],
-         acknowledged: Bool) {
+         acknowledged: Bool,
+         transportType: TransportType
+    ) {
         self.topic = topic
         self.pairingTopic = pairingTopic
         self.timestamp = timestamp
@@ -48,6 +55,7 @@ struct WCSession: SequenceObject, Equatable {
         self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(settleParams.expiry))
+        self.transportType = transportType
     }
 
 #if DEBUG
@@ -65,7 +73,8 @@ struct WCSession: SequenceObject, Equatable {
         events: Set<String>,
         accounts: Set<Account>,
         acknowledged: Bool,
-        expiryTimestamp: Int64
+        expiryTimestamp: Int64,
+        transportType: TransportType
     ) {
         self.topic = topic
         self.pairingTopic = pairingTopic
@@ -79,6 +88,7 @@ struct WCSession: SequenceObject, Equatable {
         self.requiredNamespaces = requiredNamespaces
         self.acknowledged = acknowledged
         self.expiryDate = Date(timeIntervalSince1970: TimeInterval(expiryTimestamp))
+        self.transportType = transportType
     }
 #endif
 
@@ -182,7 +192,7 @@ struct WCSession: SequenceObject, Equatable {
 extension WCSession {
 
     enum CodingKeys: String, CodingKey {
-        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces, sessionProperties
+        case topic, pairingTopic, relay, selfParticipant, peerParticipant, expiryDate, acknowledged, controller, namespaces, timestamp, requiredNamespaces, sessionProperties, transportType
     }
 
     init(from decoder: Decoder) throws {
@@ -199,6 +209,7 @@ extension WCSession {
         self.timestamp = try container.decode(Date.self, forKey: .timestamp)
         self.requiredNamespaces = try container.decode([String: ProposalNamespace].self, forKey: .requiredNamespaces)
         self.pairingTopic = try container.decode(String.self, forKey: .pairingTopic)
+        self.transportType = (try? container.decode(TransportType.self, forKey: .transportType)) ?? .relay
     }
 
     func encode(to encoder: Encoder) throws {
@@ -215,5 +226,6 @@ extension WCSession {
         try container.encode(expiryDate, forKey: .expiryDate)
         try container.encode(timestamp, forKey: .timestamp)
         try container.encode(requiredNamespaces, forKey: .requiredNamespaces)
+        try container.encode(transportType, forKey: .transportType)
     }
 }

@@ -13,6 +13,9 @@ public enum SocketConnectionStatus {
 /// Access via `Relay.instance`
 public final class RelayClient {
 
+    #if DEBUG
+    var blockPublishing: Bool = false
+    #endif
     enum Errors: Error {
         case subscriptionIdNotFound
     }
@@ -49,7 +52,7 @@ public final class RelayClient {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
-    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", attributes: .concurrent)
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", qos: .utility, attributes: .concurrent)
 
     public var logsPublisher: AnyPublisher<Log, Never> {
         logger.logsPublisher
@@ -97,6 +100,12 @@ public final class RelayClient {
 
     /// Completes with an acknowledgement from the relay network
     public func publish(topic: String, payload: String, tag: Int, prompt: Bool, ttl: Int) async throws {
+        #if DEBUG
+        if blockPublishing {
+            logger.debug("[Publish] Publishing is blocked")
+            return
+        }
+        #endif
         let request = Publish(params: .init(topic: topic, message: payload, ttl: ttl, prompt: prompt, tag: tag)).asRPCRequest()
         let message = try request.asJSONEncodedString()
         
@@ -223,7 +232,7 @@ public final class RelayClient {
             if let params = try? request.params?.get(Subscription.Params.self) {
                 do {
                     try acknowledgeRequest(request)
-                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote)
+                    try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote, transportType: .relay)
                     logger.debug("received message: \(params.data.message) on topic: \(params.data.topic)")
                     messagePublisherSubject.send((params.data.topic, params.data.message, params.data.publishedAt))
                 } catch {

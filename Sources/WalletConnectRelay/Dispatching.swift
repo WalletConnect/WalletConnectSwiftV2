@@ -32,7 +32,7 @@ final class Dispatcher: NSObject, Dispatching {
         networkMonitor.networkConnectionStatusPublisher
     }
 
-    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.dispatcher", attributes: .concurrent)
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.dispatcher", qos: .utility, attributes: .concurrent)
 
     init(
         socketFactory: WebSocketFactory,
