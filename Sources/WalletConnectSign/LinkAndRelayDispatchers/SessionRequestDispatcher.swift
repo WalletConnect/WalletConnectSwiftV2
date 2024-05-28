@@ -1,7 +1,7 @@
 
 import Foundation
 
-class SessionRequestDispatcher {
+final class SessionRequestDispatcher {
     private let relaySessionRequester: SessionRequester
     private let linkSessionRequester: LinkSessionRequester
     private let logger: ConsoleLogging

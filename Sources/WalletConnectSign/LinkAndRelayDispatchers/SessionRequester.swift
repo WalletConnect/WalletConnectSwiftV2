@@ -1,7 +1,7 @@
 
 import Foundation
 
-class SessionRequester {
+final class SessionRequester {
     private let sessionStore: WCSessionStorage
     private let networkingInteractor: NetworkInteracting
     private let logger: ConsoleLogging

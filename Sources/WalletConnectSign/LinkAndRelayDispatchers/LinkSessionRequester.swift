@@ -1,7 +1,7 @@
 
 import Foundation
 
-class LinkSessionRequester {
+final class LinkSessionRequester {
     private let sessionStore: WCSessionStorage
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let logger: ConsoleLogging
