@@ -14,7 +14,7 @@ public enum SocketConnectionStatus {
 public final class RelayClient {
 
     #if DEBUG
-    public var blockPublishing: Bool = false
+    var blockPublishing: Bool = false
     #endif
     enum Errors: Error {
         case subscriptionIdNotFound
