@@ -48,7 +48,7 @@ class AuthResponseSubscriber {
         self.linkModeLinksStore = linkModeLinksStore
         self.supportLinkMode = supportLinkMode
         subscribeForResponse()
-        subscribeForLinkResonse()
+        subscribeForLinkResponse()
     }
 
     private func subscribeForResponse() {
