@@ -52,7 +52,7 @@ public final class RelayClient {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
-    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", attributes: .concurrent)
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", qos: .utility, attributes: .concurrent)
 
     public var logsPublisher: AnyPublisher<Log, Never> {
         logger.logsPublisher

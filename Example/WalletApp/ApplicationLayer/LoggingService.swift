@@ -20,7 +20,7 @@ final class LoggingService {
     }
     private var _isLogging = false
 
-    private let queue = DispatchQueue(label: "com.walletApp.loggingService")
+    private let queue = DispatchQueue(label: "com.walletApp.loggingService", qos: .utility)
 
     func setUpUser(account: String, clientId: String) {
         let user = User()

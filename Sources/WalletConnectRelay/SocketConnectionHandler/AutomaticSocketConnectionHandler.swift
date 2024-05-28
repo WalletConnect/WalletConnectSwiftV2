@@ -19,7 +19,7 @@ class AutomaticSocketConnectionHandler {
     private var socketUrlFallbackHandler: SocketUrlFallbackHandler
 
     private var publishers = Set<AnyCancellable>()
-    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.automatic_socket_connection", attributes: .concurrent)
+    private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.automatic_socket_connection", qos: .utility, attributes: .concurrent)
 
     init(
         socket: WebSocketConnecting,

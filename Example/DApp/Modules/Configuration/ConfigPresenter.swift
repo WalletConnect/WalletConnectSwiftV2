@@ -24,7 +24,7 @@ final class ConfigPresenter: ObservableObject, SceneViewModel {
     }
 
     func cleanLinkModeSupportedWalletsCache() {
-        let userDefaults = UserDefaults(suiteName: Constants.groupIdentifier.rawValue)!
+        let userDefaults = UserDefaults(suiteName: Constants.groupIdentifier)!
         let prefix = "com.walletconnect.sdk.linkModeLinks"
         let keys = userDefaults.dictionaryRepresentation().keys
 

@@ -110,7 +110,6 @@ final class SignPresenter: ObservableObject {
 
     @MainActor
     func connectWalletWithSessionAuthenticateLinkMode() {
-
         Task {
             do {
                 ActivityIndicatorManager.shared.start()

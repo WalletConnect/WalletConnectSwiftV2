@@ -30,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Networking.configure(
-            groupIdentifier: Constants.groupIdentifier.rawValue,
+            groupIdentifier: Constants.groupIdentifier,
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )

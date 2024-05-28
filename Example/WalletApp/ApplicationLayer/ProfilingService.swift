@@ -8,7 +8,7 @@ import WalletConnectNotify
 final class ProfilingService {
     public static var instance = ProfilingService()
 
-    private let queue = DispatchQueue(label: "com.walletApp.profilingService")
+    private let queue = DispatchQueue(label: "com.walletApp.profilingService", qos: .utility)
     private var publishers = [AnyCancellable]()
     private var isProfiling: Bool {
         get {
