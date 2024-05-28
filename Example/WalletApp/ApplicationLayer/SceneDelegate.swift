@@ -86,7 +86,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
                 do {
                     try Web3Wallet.instance.dispatchEnvelope(url.absoluteString)
                 } catch {
-                    print(error)
+                    AlertPresenter.present(message: error.localizedDescription, type: .error)
                 }
             }
         }

@@ -19,4 +19,32 @@ final class EnvelopeTests: XCTestCase {
         XCTAssertEqual(deserialised.type, .type2)
     }
 
+    func testInitWithValidBase64EncodedType0() {
+        let envelopeString = "AFdhbGxldENvbm5lY3Q="
+        let envelope = try? Envelope(.base64Encoded, envelopeString: envelopeString)
+
+        XCTAssertNotNil(envelope)
+        XCTAssertEqual(envelope?.type, .type0)
+        XCTAssertEqual(envelope?.sealbox, Data(base64Encoded: "V2FsbGV0Q29ubmVjdA=="))
+    }
+
+    func testInitWithInvalidBase64() {
+        XCTAssertThrowsError(try Envelope(.base64Encoded, envelopeString: "invalid_base64")) { error in
+            XCTAssertEqual(error as? Envelope.Errors, .malformedEnvelope)
+        }
+    }
+
+    func testInitWithInvalidBase64Url() {
+        XCTAssertThrowsError(try Envelope(.base64UrlEncoded, envelopeString: "invalid_base64url")) { error in
+            XCTAssertEqual(error as? Envelope.Errors, .malformedEnvelope)
+        }
+    }
+
+    func testInitWithUnsupportedEnvelopeType() {
+        let envelopeString = "Mw==" // "3" in base64
+        XCTAssertThrowsError(try Envelope(.base64Encoded, envelopeString: envelopeString)) { error in
+            XCTAssertEqual(error as? Envelope.Errors, .unsupportedEnvelopeType)
+        }
+    }
+
 }
