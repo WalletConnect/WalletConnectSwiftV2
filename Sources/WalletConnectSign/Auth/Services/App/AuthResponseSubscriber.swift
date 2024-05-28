@@ -85,7 +85,7 @@ class AuthResponseSubscriber {
             }.store(in: &publishers)
     }
 
-    private func subscribeForLinkResonse() {
+    private func subscribeForLinkResponse() {
         linkEnvelopesDispatcher.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
