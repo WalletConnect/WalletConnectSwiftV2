@@ -106,5 +106,45 @@ final class EnvelopeTests: XCTestCase {
         XCTAssertEqual(deserializedEnvelope.type, .type0)
         XCTAssertEqual(deserializedEnvelope.sealbox, customData)
     }
+
+    // Envelope type tests
+
+    func testEnvelopeTypeInitWithType0() {
+            let envelopeType = try? Envelope.EnvelopeType(representingByte: 0, pubKey: nil)
+            XCTAssertNotNil(envelopeType)
+            XCTAssertEqual(envelopeType, .type0)
+        }
+
+        func testEnvelopeTypeInitWithType1ValidPubKey() {
+            let pubKey = Data(hex: "f82388e76d53632d8c73e4f4dbfe122321affee5d79cb63ee804a4ef251f4219")
+            let envelopeType = try? Envelope.EnvelopeType(representingByte: 1, pubKey: pubKey)
+            XCTAssertNotNil(envelopeType)
+            XCTAssertEqual(envelopeType, .type1(pubKey: pubKey))
+        }
+
+        func testEnvelopeTypeInitWithType1InvalidPubKey() {
+            let invalidPubKey = Data(hex: "f82388e76d53632d8c73e4f4dbfe122321af") // Shorter than 32 bytes
+            XCTAssertThrowsError(try Envelope.EnvelopeType(representingByte: 1, pubKey: invalidPubKey)) { error in
+                XCTAssertEqual(error as? Envelope.Errors, .malformedEnvelope)
+            }
+        }
+
+        func testEnvelopeTypeInitWithType1NilPubKey() {
+            XCTAssertThrowsError(try Envelope.EnvelopeType(representingByte: 1, pubKey: nil)) { error in
+                XCTAssertEqual(error as? Envelope.Errors, .malformedEnvelope)
+            }
+        }
+
+        func testEnvelopeTypeInitWithType2() {
+            let envelopeType = try? Envelope.EnvelopeType(representingByte: 2, pubKey: nil)
+            XCTAssertNotNil(envelopeType)
+            XCTAssertEqual(envelopeType, .type2)
+        }
+
+        func testEnvelopeTypeInitWithUnsupportedType() {
+            XCTAssertThrowsError(try Envelope.EnvelopeType(representingByte: 3, pubKey: nil)) { error in
+                XCTAssertEqual(error as? Envelope.Errors, .unsupportedEnvelopeType)
+            }
+        }
 }
 
