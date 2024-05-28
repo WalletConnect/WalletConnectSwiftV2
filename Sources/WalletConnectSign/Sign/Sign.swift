@@ -30,7 +30,6 @@ public class Sign {
             crypto: config.crypto,
             networkingClient: Networking.interactor,
             groupIdentifier: Networking.groupIdentifier
-
         )
     }()
 

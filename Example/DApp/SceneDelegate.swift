@@ -6,15 +6,29 @@ import WalletConnectRelay
 import WalletConnectNetworking
 import Combine
 
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var publishers = Set<AnyCancellable>()
 
     private let app = Application()
 
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard let url = userActivity.webpageURL,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            return
+        }
+        do {
+            try Sign.instance.dispatchEnvelope(url.absoluteString)
+        } catch {
+            print(error)
+        }
+    }
+
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         Networking.configure(
-            groupIdentifier: "group.com.walletconnect.dapp",
+            groupIdentifier: Constants.groupIdentifier,
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )
@@ -23,9 +37,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let metadata = AppMetadata(
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
-            url: "wallet.connect",
+            url: "https://lab.web3modal.com/dapp",
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: AppMetadata.Redirect(native: "wcdapp://", universal: nil)
+            redirect: try! AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
         )
         
         Web3Modal.configure(

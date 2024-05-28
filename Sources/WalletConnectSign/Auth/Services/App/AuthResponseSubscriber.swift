@@ -3,6 +3,7 @@ import Combine
 
 class AuthResponseSubscriber {
     private let networkingInteractor: NetworkInteracting
+    private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let signatureVerifier: MessageVerifier
@@ -17,6 +18,8 @@ class AuthResponseSubscriber {
         authResponsePublisherSubject.eraseToAnyPublisher()
     }
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
+    private let linkModeLinksStore: CodableStore<Bool>
+    private let supportLinkMode: Bool
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -27,7 +30,10 @@ class AuthResponseSubscriber {
          sessionStore: WCSessionStorage,
          messageFormatter: SIWEFromCacaoFormatting,
          sessionNamespaceBuilder: SessionNamespaceBuilder,
-         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>) {
+         authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
+         linkModeLinksStore: CodableStore<Bool>,
+         supportLinkMode: Bool) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -38,7 +44,11 @@ class AuthResponseSubscriber {
         self.pairingRegisterer = pairingRegisterer
         self.sessionNamespaceBuilder = sessionNamespaceBuilder
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
+        self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
+        self.linkModeLinksStore = linkModeLinksStore
+        self.supportLinkMode = supportLinkMode
         subscribeForResponse()
+        subscribeForLinkResponse()
     }
 
     private func subscribeForResponse() {
@@ -49,6 +59,40 @@ class AuthResponseSubscriber {
             }.store(in: &publishers)
 
         networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
+
+                let transportType = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
+
+                let pairingTopic = payload.topic
+                pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
+                removeResponseTopicRecord(responseTopic: payload.topic)
+
+                let requestId = payload.id
+                let cacaos = payload.response.cacaos
+
+                Task {
+                    do {
+                        try await recoverAndVerifySignature(cacaos: cacaos)
+                    } catch {
+                        authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
+                        return
+                    }
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, transportType: transportType)
+
+                    authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
+                }
+
+            }.store(in: &publishers)
+    }
+
+    private func subscribeForLinkResponse() {
+        linkEnvelopesDispatcher.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
+            .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
+                guard let error = AuthError(code: payload.error.code) else { return }
+                authResponsePublisherSubject.send((payload.id, .failure(error)))
+            }.store(in: &publishers)
+
+        linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
                 let pairingTopic = payload.topic
@@ -65,7 +109,7 @@ class AuthResponseSubscriber {
                         authResponsePublisherSubject.send((requestId, .failure(error as! AuthError)))
                         return
                     }
-                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic)
+                    let session = try createSession(from: payload.response, selfParticipant: payload.request.requester, pairingTopic: pairingTopic, transportType: .linkMode)
 
                     authResponsePublisherSubject.send((requestId, .success((session, cacaos))))
                 }
@@ -94,10 +138,26 @@ class AuthResponseSubscriber {
         }
     }
 
+    private func getTransportTypeUpgradeIfPossible(peerMetadata: AppMetadata, requestId: RPCID) -> WCSession.TransportType {
+//        upgrade to link mode only if dapp requested universallink because dapp may not be prepared for handling a response - add this to doc]
+        // remove record
+
+        if let peerRedirect = peerMetadata.redirect,
+            peerRedirect.linkMode,
+           let universalLink = peerRedirect.universal,
+           supportLinkMode {
+            linkModeLinksStore.set(true, forKey: universalLink)
+            return .linkMode
+        } else {
+            return .relay
+        }
+    }
+
     private func createSession(
         from response: SessionAuthenticateResponseParams,
         selfParticipant: Participant,
-        pairingTopic: String
+        pairingTopic: String,
+        transportType: WCSession.TransportType
     ) throws -> Session? {
 
         let selfPublicKey = try AgreementPublicKey(hex: selfParticipant.publicKey)
@@ -135,7 +195,8 @@ class AuthResponseSubscriber {
             peerParticipant: response.responder,
             settleParams: settleParams,
             requiredNamespaces: [:],
-            acknowledged: true
+            acknowledged: true,
+            transportType: transportType
         )
 
         sessionStore.setSession(session)

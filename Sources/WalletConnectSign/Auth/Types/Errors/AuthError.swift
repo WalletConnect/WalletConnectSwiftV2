@@ -1,7 +1,7 @@
 import Foundation
 
 /// Authentication error
-public enum AuthError: Codable, Equatable, Error {
+public enum AuthError: Codable, Equatable, Error, LocalizedError {
     case methodUnsupported
     case userDisconnected
     case userRejeted
@@ -56,7 +56,7 @@ extension AuthError: Reason {
         case .methodUnsupported:
             return "Method Unsupported"
         case .userRejeted:
-            return "Auth request rejected by user"
+            return "Auth request rejected by the user"
         case .malformedResponseParams:
             return "Response params malformed"
         case .malformedRequestParams:
@@ -68,5 +68,9 @@ extension AuthError: Reason {
         case .userDisconnected:
             return "User Disconnected"
         }
+    }
+
+    public var errorDescription: String? {
+        return message
     }
 }

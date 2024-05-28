@@ -108,6 +108,29 @@ final class SignPresenter: ObservableObject {
         }
     }
 
+    @MainActor
+    func connectWalletWithSessionAuthenticateLinkMode() {
+        Task {
+            do {
+                ActivityIndicatorManager.shared.start()
+                if let pairingUri = try await Sign.instance.authenticate(.stub(methods: ["personal_sign"]), walletUniversalLink: "https://lab.web3modal.com/wallet") {
+                    walletConnectUri = pairingUri
+                    ActivityIndicatorManager.shared.stop()
+                    router.presentNewPairing(walletConnectUri: walletConnectUri!)
+                }
+            } catch {
+                AlertPresenter.present(message: error.localizedDescription, type: .error)
+                ActivityIndicatorManager.shared.stop()
+            }
+        }
+    }
+
+    @MainActor
+    func openConfiguration() {
+        router.openConfig()
+    }
+
+    @MainActor
     func disconnect() {
         if let session {
             Task { @MainActor in
@@ -218,7 +241,7 @@ extension SignPresenter: SceneViewModel {}
 // MARK: - Authenticate request stub
 extension AuthRequestParams {
     static func stub(
-        domain: String = "app.web3inbox",
+        domain: String = "lab.web3modal.com",
         chains: [String] = ["eip155:1", "eip155:137"],
         nonce: String = "32891756",
         uri: String = "https://app.web3inbox.com/login",

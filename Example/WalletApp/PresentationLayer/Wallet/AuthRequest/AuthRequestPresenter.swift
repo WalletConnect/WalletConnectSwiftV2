@@ -53,7 +53,7 @@ final class AuthRequestPresenter: ObservableObject {
     }
 
     @MainActor
-    func approve() async {
+    func signMulti() async {
         do {
             ActivityIndicatorManager.shared.start()
 
@@ -61,7 +61,6 @@ final class AuthRequestPresenter: ObservableObject {
 
             _ = try await Web3Wallet.instance.approveSessionAuthenticate(requestId: request.id, auths: auths)
             ActivityIndicatorManager.shared.stop()
-
             /* Redirect */
             if let uri = request.requester.redirect?.native {
                 WalletConnectRouter.goBack(uri: uri)

@@ -12,7 +12,9 @@ final class TimeTraveler {
         referenceDate = referenceDate.addingTimeInterval(timeInterval)
     }
 
-    static func dateByAdding(days: Int) -> Date {
-        Calendar.current.date(byAdding: .day, value: days, to: Date())!
+    static func dateByAdding(days: Int, to date: Date = Date(), in timeZone: TimeZone = TimeZone(secondsFromGMT: 0)!) -> Date {
+        var calendar = Calendar.current
+        calendar.timeZone = timeZone
+        return calendar.date(byAdding: .day, value: days, to: date)!
     }
 }
