@@ -215,7 +215,7 @@ struct WalletList: View {
                         .stroke(.gray.opacity(0.4), lineWidth: 1)
                 )
             
-            Text(String(wallet.name.split(separator: " ").first!))
+            Text(String(wallet.name.split(separator: " ").first ?? " "))
                 .font(.system(size: 12))
                 .foregroundColor(.foreground1)
                 .multilineTextAlignment(.center)
