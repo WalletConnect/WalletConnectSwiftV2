@@ -54,7 +54,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
                     order: 1,
                     mobileLink: "walletapp://",
-                    linkMode: "https://lab.web3modal.com/dapp"
+                    linkMode: "https://lab.web3modal.com/wallet"
                 )
             ]
         )
