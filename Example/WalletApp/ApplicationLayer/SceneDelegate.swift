@@ -83,6 +83,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, UNUserNotificatio
             if case WalletConnectURI.Errors.expired = error {
                 AlertPresenter.present(message: error.localizedDescription, type: .error)
             } else {
+                guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                      let queryItems = components.queryItems,
+                      queryItems.contains(where: { $0.name == "wc_ev" }) else {
+                    return
+                }
+
                 do {
                     try Web3Wallet.instance.dispatchEnvelope(url.absoluteString)
                 } catch {
