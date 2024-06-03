@@ -22,7 +22,7 @@ public struct AppMetadata: Codable, Equatable {
         /// Universal link URL string.
         public let universal: String?
 
-        public let linkMode: Bool
+        public let linkMode: Bool?
 
         /**
          Creates a new Redirect object with the specified information.

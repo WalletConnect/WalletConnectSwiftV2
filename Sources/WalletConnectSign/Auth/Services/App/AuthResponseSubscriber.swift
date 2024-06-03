@@ -143,7 +143,8 @@ class AuthResponseSubscriber {
         // remove record
 
         if let peerRedirect = peerMetadata.redirect,
-            peerRedirect.linkMode,
+           let peerLinkMode = peerRedirect.linkMode,
+            peerLinkMode == true,
            let universalLink = peerRedirect.universal,
            supportLinkMode {
             linkModeLinksStore.set(true, forKey: universalLink)
