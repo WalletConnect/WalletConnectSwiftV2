@@ -45,7 +45,9 @@ class AuthenticateTransportTypeSwitcher {
             // Continue with relay if the error is walletLinkSupportNotProven
         }
 
-        let pairingURI = try await pairingClient.create(methods: [SessionAuthenticatedProtocolMethod().method])
+        let pairingURI = try await pairingClient.create(
+            methods: [SessionAuthenticatedProtocolMethod.responseApprove().method]
+        )
         logger.debug("Requesting Authentication on existing pairing")
         try await appRequestService.request(params: params, topic: pairingURI.topic)
 

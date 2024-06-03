@@ -29,7 +29,8 @@ class LinkAuthRequestSubscriber {
 
     private func subscribeForRequest() {
 
-        envelopesDispatcher.requestSubscription(on: SessionAuthenticatedProtocolMethod().method)
+        envelopesDispatcher
+            .requestSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove().method)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
 
                 logger.debug("LinkAuthRequestSubscriber: Received request")
