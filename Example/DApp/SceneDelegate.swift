@@ -58,7 +58,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 )
             ]
         )
-        
+
+        Web3Modal.instance.authResponsePublisher.sink { (id, result) in
+            switch result {
+            case .success((_, _)):
+                AlertPresenter.present(message: "User Authenticted with SIWE", type: .success)
+            case .failure(_):
+                break
+            }
+        }.store(in: &publishers)
+
         WalletConnectModal.configure(
             projectId: InputConfig.projectId,
             metadata: metadata
