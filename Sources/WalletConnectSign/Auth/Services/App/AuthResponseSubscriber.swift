@@ -140,7 +140,6 @@ class AuthResponseSubscriber {
 
     private func getTransportTypeUpgradeIfPossible(peerMetadata: AppMetadata, requestId: RPCID) -> WCSession.TransportType {
 //        upgrade to link mode only if dapp requested universallink because dapp may not be prepared for handling a response - add this to doc]
-        // remove record
 
         if let peerRedirect = peerMetadata.redirect,
            let peerLinkMode = peerRedirect.linkMode,
