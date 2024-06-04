@@ -61,7 +61,8 @@ actor WalletErrorResponder {
         let (sessionAuthenticateRequestParams, _) = try getsessionAuthenticateRequestParams(requestId: requestId)
 
         guard let redirect = sessionAuthenticateRequestParams.requester.metadata.redirect,
-              redirect.linkMode else {
+              let linkMode = redirect.linkMode,
+              linkMode == true else {
             throw Errors.linkModeNotSupported
         }
         guard let peerUniversalLink = redirect.universal else {

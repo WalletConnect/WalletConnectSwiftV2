@@ -46,18 +46,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             metadata: metadata,
             crypto: DefaultCryptoProvider(),
-            customWallets: [
+            authRequestParams: .stub(), customWallets: [
                 .init(
                     id: "swift-sample",
                     name: "Swift Sample Wallet",
                     homepage: "https://walletconnect.com/",
                     imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
                     order: 1,
-                    mobileLink: "walletapp://"
+                    mobileLink: "walletapp://",
+                    linkMode: "https://lab.web3modal.com/wallet"
                 )
             ]
         )
-        
+
+        Web3Modal.instance.authResponsePublisher.sink { (id, result) in
+            switch result {
+            case .success((_, _)):
+                AlertPresenter.present(message: "User Authenticted with SIWE", type: .success)
+            case .failure(_):
+                break
+            }
+        }.store(in: &publishers)
+
         WalletConnectModal.configure(
             projectId: InputConfig.projectId,
             metadata: metadata

@@ -244,7 +244,7 @@ extension AuthRequestParams {
         domain: String = "lab.web3modal.com",
         chains: [String] = ["eip155:1", "eip155:137"],
         nonce: String = "32891756",
-        uri: String = "https://app.web3inbox.com/login",
+        uri: String = "https://lab.web3modal.com",
         nbf: String? = nil,
         exp: String? = nil,
         statement: String? = "I accept the ServiceOrg Terms of Service: https://app.web3inbox.com/tos",

@@ -3280,7 +3280,7 @@
 			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
 			requirement = {
 				kind = revision;
-				revision = c73ce390bc249af155b7320346b7045e53b89866;
+				revision = 3baac675811b5fdeb689cef703e3dfc7682704e6;
 			};
 		};
 		A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */ = {

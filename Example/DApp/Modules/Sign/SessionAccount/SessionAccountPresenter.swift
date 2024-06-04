@@ -87,7 +87,7 @@ extension SessionAccountPresenter {
     }
     
     private func getRequest(for method: String) throws -> AnyCodable {
-        let account = session.namespaces.first!.value.accounts.first!.absoluteString
+        let account = session.namespaces.first!.value.accounts.first!.address
         if method == "eth_sendTransaction" {
             let tx = Stub.tx
             return AnyCodable(tx)
