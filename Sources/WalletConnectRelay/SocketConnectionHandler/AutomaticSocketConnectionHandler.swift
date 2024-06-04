@@ -75,7 +75,8 @@ class AutomaticSocketConnectionHandler {
 extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
 
     func handleConnect() throws {
-        throw Errors.manualSocketConnectionForbidden
+        reconnectIfNeeded()
+        //throw Errors.manualSocketConnectionForbidden
     }
 
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
