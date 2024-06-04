@@ -48,14 +48,21 @@ actor WalletErrorResponder {
 
     private func respondErrorRelay(_ error: AuthError, requestId: RPCID, topic: String, type1EnvelopeKey: Data) async throws {
         let envelopeType = Envelope.EnvelopeType.type1(pubKey: type1EnvelopeKey)
-        try await networkingInteractor.respondError(topic: topic, requestId: requestId, protocolMethod: SessionAuthenticatedProtocolMethod(), reason: error, envelopeType: envelopeType)
+        try await networkingInteractor.respondError(
+            topic: topic,
+            requestId: requestId,
+            protocolMethod: SessionAuthenticatedProtocolMethod.responseReject(),
+            reason: error,
+            envelopeType: envelopeType
+        )
     }
 
     private func respondErrorLinkMode(_ error: AuthError, requestId: RPCID, topic: String, type1EnvelopeKey: Data) async throws -> String {
         let (sessionAuthenticateRequestParams, _) = try getsessionAuthenticateRequestParams(requestId: requestId)
 
         guard let redirect = sessionAuthenticateRequestParams.requester.metadata.redirect,
-              redirect.linkMode else {
+              let linkMode = redirect.linkMode,
+              linkMode == true else {
             throw Errors.linkModeNotSupported
         }
         guard let peerUniversalLink = redirect.universal else {

@@ -114,7 +114,7 @@ final class ApproveEngine {
         async let proposeResponseTask: () = networkingInteractor.respond(
             topic: payload.topic,
             response: response,
-            protocolMethod: SessionProposeProtocolMethod()
+            protocolMethod: SessionProposeProtocolMethod.responseApprove()
         )
 
         async let settleRequestTask: WCSession = settle(
@@ -146,8 +146,13 @@ final class ApproveEngine {
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
             throw Errors.proposalNotFound
         }
-
-        try await networkingInteractor.respondError(topic: payload.topic, requestId: payload.id, protocolMethod: SessionProposeProtocolMethod(), reason: reason)
+ 
+        try await networkingInteractor.respondError(
+            topic: payload.topic,
+            requestId: payload.id,
+            protocolMethod: SessionProposeProtocolMethod.responseReject(),
+            reason: reason
+        )
 
         if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
            let pairing = pairingStore.getPairing(forTopic: pairingTopic),
@@ -216,12 +221,14 @@ final class ApproveEngine {
 private extension ApproveEngine {
 
     func setupRequestSubscriptions() {
-        pairingRegisterer.register(method: SessionProposeProtocolMethod())
+        pairingRegisterer.register(method: SessionProposeProtocolMethod.responseAutoReject())
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.ProposeParams>) in
                 guard let pairing = pairingStore.getPairing(forTopic: payload.topic) else { return }
+                let responseApproveMethod = SessionAuthenticatedProtocolMethod.responseApprove().method
                 if let methods = pairing.methods,
-                   methods.flatMap({ $0 })
-                    .contains(SessionAuthenticatedProtocolMethod().method), authRequestSubscribersTracking.hasSubscribers() {
+                   methods.contains(responseApproveMethod),
+                    authRequestSubscribersTracking.hasSubscribers()
+                {
                     logger.debug("Ignoring Session Proposal")
                     // respond with an error?
                     return
@@ -236,7 +243,7 @@ private extension ApproveEngine {
     }
 
     func setupResponseSubscriptions() {
-        networkingInteractor.responseSubscription(on: SessionProposeProtocolMethod())
+        networkingInteractor.responseSubscription(on: SessionProposeProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionType.ProposeParams, SessionType.ProposeResponse>) in
                 handleSessionProposeResponse(payload: payload)
             }.store(in: &publishers)
@@ -248,7 +255,7 @@ private extension ApproveEngine {
     }
 
     func setupResponseErrorSubscriptions() {
-        networkingInteractor.responseErrorSubscription(on: SessionProposeProtocolMethod())
+        networkingInteractor.responseErrorSubscription(on: SessionProposeProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionType.ProposeParams>) in
                 handleSessionProposeResponseError(payload: payload)
             }.store(in: &publishers)
@@ -340,7 +347,7 @@ private extension ApproveEngine {
         logger.debug("Received Session Proposal")
         let proposal = payload.request
         do { try Namespace.validate(proposal.requiredNamespaces) } catch {
-            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod())
+            return respondError(payload: payload, reason: .invalidUpdateRequest, protocolMethod: SessionProposeProtocolMethod.responseAutoReject())
         }
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         

@@ -321,27 +321,6 @@ public final class SignClient: SignClientProtocol {
     //---------------------------------------AUTH-----------------------------------
 
     /// For a dApp to propose an authenticated session to a wallet.
-    /// Function will propose a session on existing pairing.
-    public func authenticate(
-        _ params: AuthRequestParams,
-        topic: String
-    ) async throws {
-        try pairingClient.validatePairingExistance(topic)
-        try pairingClient.validateMethodSupport(topic: topic, method: SessionAuthenticatedProtocolMethod().method)
-        logger.debug("Requesting Authentication on existing pairing")
-        try await appRequestService.request(params: params, topic: topic)
-
-        let namespaces = try ProposalNamespaceBuilder.buildNamespace(from: params)
-        try await appProposeService.propose(
-            pairingTopic: topic,
-            namespaces: [:],
-            optionalNamespaces: namespaces,
-            sessionProperties: nil,
-            relay: RelayProtocolOptions(protocol: "irn", data: nil)
-        )
-    }
-
-    /// For a dApp to propose an authenticated session to a wallet.
     public func authenticate(
         _ params: AuthRequestParams,
         walletUniversalLink: String? = nil

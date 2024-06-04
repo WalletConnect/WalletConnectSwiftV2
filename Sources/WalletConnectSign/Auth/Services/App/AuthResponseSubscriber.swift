@@ -52,13 +52,15 @@ class AuthResponseSubscriber {
     }
 
     private func subscribeForResponse() {
-        networkingInteractor.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
+        networkingInteractor
+            .responseErrorSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
                 authResponsePublisherSubject.send((payload.id, .failure(error)))                
             }.store(in: &publishers)
 
-        networkingInteractor.responseSubscription(on: SessionAuthenticatedProtocolMethod())
+        networkingInteractor
+            .responseSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
                 let transportType = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
@@ -86,13 +88,13 @@ class AuthResponseSubscriber {
     }
 
     private func subscribeForLinkResponse() {
-        linkEnvelopesDispatcher.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod())
+        linkEnvelopesDispatcher.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
                 guard let error = AuthError(code: payload.error.code) else { return }
                 authResponsePublisherSubject.send((payload.id, .failure(error)))
             }.store(in: &publishers)
 
-        linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod())
+        linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
                 let pairingTopic = payload.topic
@@ -140,10 +142,10 @@ class AuthResponseSubscriber {
 
     private func getTransportTypeUpgradeIfPossible(peerMetadata: AppMetadata, requestId: RPCID) -> WCSession.TransportType {
 //        upgrade to link mode only if dapp requested universallink because dapp may not be prepared for handling a response - add this to doc]
-        // remove record
 
         if let peerRedirect = peerMetadata.redirect,
-            peerRedirect.linkMode,
+           let peerLinkMode = peerRedirect.linkMode,
+            peerLinkMode == true,
            let universalLink = peerRedirect.universal,
            supportLinkMode {
             linkModeLinksStore.set(true, forKey: universalLink)
