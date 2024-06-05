@@ -12,6 +12,7 @@ class WebSocketMock: WebSocketConnecting {
     var isConnected: Bool = false
 
     func connect() {}
+    func reconnect() {}
     func disconnect() {}
     func write(string: String, completion: (() -> Void)?) {}
 }

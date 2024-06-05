@@ -68,6 +68,10 @@ class AutomaticSocketConnectionHandler {
             socket.connect()
         }
     }
+    
+    private func resetConnect() {
+        socket.reconnect()
+    }
 }
 
 // MARK: - SocketConnectionHandler
@@ -75,7 +79,7 @@ class AutomaticSocketConnectionHandler {
 extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
 
     func handleConnect() throws {
-        reconnectIfNeeded()
+        resetConnect()
         //throw Errors.manualSocketConnectionForbidden
     }
 

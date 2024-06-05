@@ -7,6 +7,7 @@ public protocol WebSocketConnecting: AnyObject {
     var onText: ((String) -> Void)? { get set }
     var request: URLRequest { get set }
     func connect()
+    func reconnect()
     func disconnect()
     func write(string: String, completion: (() -> Void)?)
 }
