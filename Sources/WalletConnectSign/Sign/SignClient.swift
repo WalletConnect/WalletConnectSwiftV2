@@ -193,6 +193,7 @@ public final class SignClient: SignClientProtocol {
     private let linkSessionRequestSubscriber: LinkSessionRequestSubscriber
     private let sessionResponderDispatcher: SessionResponderDispatcher
     private let linkSessionRequestResponseSubscriber: LinkSessionRequestResponseSubscriber
+    private let messageVerifier: MessageVerifier
 
     private var publishers = Set<AnyCancellable>()
 
@@ -231,7 +232,8 @@ public final class SignClient: SignClientProtocol {
          linkSessionRequestSubscriber: LinkSessionRequestSubscriber,
          sessionResponderDispatcher: SessionResponderDispatcher,
          linkSessionRequestResponseSubscriber: LinkSessionRequestResponseSubscriber,
-         authenticateTransportTypeSwitcher: AuthenticateTransportTypeSwitcher
+         authenticateTransportTypeSwitcher: AuthenticateTransportTypeSwitcher,
+         messageVerifier: MessageVerifier
     ) {
         self.logger = logger
         self.networkingClient = networkingClient
@@ -267,6 +269,7 @@ public final class SignClient: SignClientProtocol {
         self.sessionResponderDispatcher = sessionResponderDispatcher
         self.linkSessionRequestResponseSubscriber = linkSessionRequestResponseSubscriber
         self.authenticateTransportTypeSwitcher = authenticateTransportTypeSwitcher
+        self.messageVerifier = messageVerifier
 
         setUpConnectionObserving()
         setUpEnginesCallbacks()
@@ -374,17 +377,23 @@ public final class SignClient: SignClientProtocol {
         return try pendingRequestsProvider.getPendingRequests()
     }
 
-    public func formatAuthMessage(payload: AuthPayload, account: Account) throws -> String {
-        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(authPayload: payload, account: account)
-        return try SIWEFromCacaoPayloadFormatter().formatMessage(from: cacaoPayload)
-    }
-
     public func buildSignedAuthObject(authPayload: AuthPayload, signature: CacaoSignature, account: Account) throws -> AuthObject {
         try CacaosBuilder.makeCacao(authPayload: authPayload, signature: signature, account: account)
     }
 
     public func buildAuthPayload(payload: AuthPayload, supportedEVMChains: [Blockchain], supportedMethods: [String]) throws -> AuthPayload {
         try AuthPayloadBuilder.build(payload: payload, supportedEVMChains: supportedEVMChains, supportedMethods: supportedMethods)
+    }
+
+    // MARK: - SIWE
+
+    public func formatAuthMessage(payload: AuthPayload, account: Account) throws -> String {
+        let cacaoPayload = try CacaoPayloadBuilder.makeCacaoPayload(authPayload: payload, account: account)
+        return try SIWEFromCacaoPayloadFormatter().formatMessage(from: cacaoPayload)
+    }
+
+    public func verifySIWE(signature: CacaoSignature, message: String, address: String, chainId: String) async throws {
+
     }
 
     //-----------------------------------------------------------------------------------
@@ -590,3 +599,4 @@ public final class SignClient: SignClientProtocol {
         }.store(in: &publishers)
     }
 }
+
