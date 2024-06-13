@@ -55,7 +55,7 @@ public struct MessageVerifier {
         }
     }
 
-    public func verify(signature: Data,
+    public func verify(signature: String,
                        message: String,
                        address: String,
                        chainId: String
@@ -64,19 +64,20 @@ public struct MessageVerifier {
         guard let messageData = message.data(using: .utf8) else {
             throw Errors.utf8EncodingFailed
         }
+        let signatureData = Data(hex: signature)
 
         let prefixedMessage = messageData.prefixed
 
         do {
             try await eip191Verifier.verify(
-                signature: signature,
+                signature: signatureData,
                 message: prefixedMessage,
                 address: address
             )
         } catch {
             // If eip191 verification fails, try eip1271 verification
             try await eip1271Verifier.verify(
-                signature: signature,
+                signature: signatureData,
                 message: prefixedMessage,
                 address: address,
                 chainId: chainId

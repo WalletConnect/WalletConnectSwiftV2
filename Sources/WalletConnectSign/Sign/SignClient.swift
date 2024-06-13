@@ -392,7 +392,7 @@ public final class SignClient: SignClientProtocol {
         return try SIWEFromCacaoPayloadFormatter().formatMessage(from: cacaoPayload)
     }
 
-    public func verifySIWE(signature: Data, message: String, address: String, chainId: String) async throws {
+    public func verifySIWE(signature: String, message: String, address: String, chainId: String) async throws {
         try await messageVerifier.verify(signature: signature, message: message, address: address, chainId: chainId)
     }
 
