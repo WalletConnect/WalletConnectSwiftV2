@@ -34,6 +34,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         )
         Sign.configure(crypto: DefaultCryptoProvider())
 
+        if let clientId = try? Networking.interactor.getClientId() {
+            ProfilingService.instance.setUpProfiling(account: "swift_dapp_\(clientId)", clientId: clientId)
+        }
+
         let metadata = AppMetadata(
             name: "Swift Dapp",
             description: "WalletConnect DApp sample",
