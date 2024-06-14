@@ -178,7 +178,8 @@ public struct SignClientFactory {
             linkSessionRequestSubscriber: linkSessionRequestSubscriber,
             sessionResponderDispatcher: sessionResponderDispatcher,
             linkSessionRequestResponseSubscriber: linkSessionRequestResponseSubscriber,
-            authenticateTransportTypeSwitcher: authenticateTransportTypeSwitcher
+            authenticateTransportTypeSwitcher: authenticateTransportTypeSwitcher,
+            messageVerifier: signatureVerifier
         )
         return client
     }

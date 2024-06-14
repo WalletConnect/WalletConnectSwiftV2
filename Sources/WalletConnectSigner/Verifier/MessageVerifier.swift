@@ -15,8 +15,8 @@ public struct MessageVerifier {
     }
 
     public func verify(signature: CacaoSignature,
-        message: String,
-        account: Account
+                       message: String,
+                       account: Account
     ) async throws {
         try await self.verify(
             signature: signature,
@@ -27,9 +27,9 @@ public struct MessageVerifier {
     }
 
     public func verify(signature: CacaoSignature,
-        message: String,
-        address: String,
-        chainId: String
+                       message: String,
+                       address: String,
+                       chainId: String
     ) async throws {
 
         guard let messageData = message.data(using: .utf8) else {
@@ -49,6 +49,36 @@ public struct MessageVerifier {
             return try await eip1271Verifier.verify(
                 signature: signatureData,
                 message: messageData.prefixed,
+                address: address,
+                chainId: chainId
+            )
+        }
+    }
+
+    public func verify(signature: String,
+                       message: String,
+                       address: String,
+                       chainId: String
+    ) async throws {
+
+        guard let messageData = message.data(using: .utf8) else {
+            throw Errors.utf8EncodingFailed
+        }
+        let signatureData = Data(hex: signature)
+
+        let prefixedMessage = messageData.prefixed
+
+        do {
+            try await eip191Verifier.verify(
+                signature: signatureData,
+                message: prefixedMessage,
+                address: address
+            )
+        } catch {
+            // If eip191 verification fails, try eip1271 verification
+            try await eip1271Verifier.verify(
+                signature: signatureData,
+                message: prefixedMessage,
                 address: address,
                 chainId: chainId
             )
