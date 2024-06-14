@@ -45,6 +45,7 @@ final class SignPresenter: ObservableObject {
     
     func connectWalletWithW3M() {
         Task {
+            Web3Modal.instance.enableAuthenticatedSessions()
             Web3Modal.set(sessionParams: .init(
                 requiredNamespaces: Proposal.requiredNamespaces,
                 optionalNamespaces: Proposal.optionalNamespaces
@@ -52,7 +53,18 @@ final class SignPresenter: ObservableObject {
         }
         Web3Modal.present(from: nil)
     }
-    
+
+    func connectWalletWithW3M_wc_sessionPropose() {
+        Task {
+            Web3Modal.instance.disableAuthenticatedSessions()
+            Web3Modal.set(sessionParams: .init(
+                requiredNamespaces: Proposal.requiredNamespaces,
+                optionalNamespaces: Proposal.optionalNamespaces
+            ))
+        }
+        Web3Modal.present(from: nil)
+    }
+
     func connectWalletWithWCM() {
         WalletConnectModal.set(sessionParams: .init(
             requiredNamespaces: Proposal.requiredNamespaces,
