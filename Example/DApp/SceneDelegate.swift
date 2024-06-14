@@ -32,11 +32,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )
-        Sign.configure(crypto: DefaultCryptoProvider())
-
-        if let clientId = try? Networking.interactor.getClientId() {
-            ProfilingService.instance.setUpProfiling(account: "swift_dapp_\(clientId)", clientId: clientId)
-        }
 
         let metadata = AppMetadata(
             name: "Swift Dapp",
@@ -62,6 +57,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 )
             ]
         )
+        
+        if let clientId = try? Networking.interactor.getClientId() {
+            ProfilingService.instance.setUpProfiling(account: "swift_dapp_\(clientId)", clientId: clientId)
+        }
 
         Web3Modal.instance.authResponsePublisher.sink { (id, result) in
             switch result {

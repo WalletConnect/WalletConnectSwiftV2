@@ -36,15 +36,18 @@ final class LinkEnvelopesDispatcher {
     }
 
     func dispatchEnvelope(_ envelope: String) throws {
+        logger.debug("will dispatch an envelope: \(envelope)")
         guard let envelopeURL = URL(string: envelope),
         let components = URLComponents(url: envelopeURL, resolvingAgainstBaseURL: true) else {
             throw Errors.invalidURL
         }
 
         guard let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_ev" })?.value else {
+            logger.error(Errors.envelopeNotFound.localizedDescription)
             throw Errors.envelopeNotFound
         }
         guard let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value else {
+            logger.error(Errors.topicNotFound.localizedDescription)
             throw Errors.topicNotFound
         }
         manageEnvelope(topic, wcEnvelope)
@@ -159,19 +162,21 @@ final class LinkEnvelopesDispatcher {
 
     private func handleRequest(topic: String, request: RPCRequest) {
         do {
+            logger.debug("handling link mode request")
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote, transportType: .linkMode)
             requestPublisherSubject.send((topic, request))
         } catch {
-            logger.debug(error)
+            logger.debug("Handling link mode request failed: \(error)")
         }
     }
 
     private func handleResponse(topic: String, response: RPCResponse) {
         do {
+            logger.debug("handling link mode response")
             let record = try rpcHistory.resolve(response)
             responsePublisherSubject.send((topic, record.request, response))
         } catch {
-            logger.debug("Handle json rpc response error: \(error)")
+            logger.debug("Handling link mode response failed: \(error)")
         }
     }
 }

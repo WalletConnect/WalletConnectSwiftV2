@@ -33,7 +33,6 @@ final class ProfilingService {
         mixpanel.people.set(properties: ["$name": account, "account": account])
 
         handleLogs(from: Networking.instance.logsPublisher)
-        handleLogs(from: Push.instance.logsPublisher)
         handleLogs(from: Sign.instance.logsPublisher)
     }
 
