@@ -45,18 +45,6 @@ final class SignPresenter: ObservableObject {
     
     func connectWalletWithW3M() {
         Task {
-            Web3Modal.instance.enableAuthenticatedSessions()
-            Web3Modal.set(sessionParams: .init(
-                requiredNamespaces: Proposal.requiredNamespaces,
-                optionalNamespaces: Proposal.optionalNamespaces
-            ))
-        }
-        Web3Modal.present(from: nil)
-    }
-
-    func connectWalletWithW3M_wc_sessionPropose() {
-        Task {
-            Web3Modal.instance.disableAuthenticatedSessions()
             Web3Modal.set(sessionParams: .init(
                 requiredNamespaces: Proposal.requiredNamespaces,
                 optionalNamespaces: Proposal.optionalNamespaces
@@ -170,14 +158,6 @@ final class SignPresenter: ObservableObject {
 // MARK: - Private functions
 extension SignPresenter {
     private func setupInitialState() {
-        Sign.instance.sessionSettlePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] _ in
-                self.router.dismiss()
-                self.getSession()
-            }
-            .store(in: &subscriptions)
-        
         getSession()
         
         Sign.instance.sessionDeletePublisher
@@ -196,6 +176,9 @@ extension SignPresenter {
                 case .success(let (session, _)):
                     if session == nil {
                         AlertPresenter.present(message: "Wallet Succesfully Authenticated", type: .success)
+                    } else {
+                        self.router.dismiss()
+                        self.getSession()
                     }
                     break
                 case .failure(let error):
@@ -212,18 +195,20 @@ extension SignPresenter {
             }
             .store(in: &subscriptions)
 
-        Sign.instance.sessionsPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] _ in
-                self.router.dismiss()
-                self.getSession()
-            }
-            .store(in: &subscriptions)
         Sign.instance.requestExpirationPublisher
             .receive(on: DispatchQueue.main)
             .sink { _ in
                 Task(priority: .high) { ActivityIndicatorManager.shared.stop() }
                 AlertPresenter.present(message: "Session Request has expired", type: .warning)
+            }
+            .store(in: &subscriptions)
+
+        Web3Modal.instance.SIWEAuthenticationPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                AlertPresenter.present(message: "Authenticated with SIWE", type: .success)
+                self.router.dismiss()
+                self.getSession()
             }
             .store(in: &subscriptions)
     }
