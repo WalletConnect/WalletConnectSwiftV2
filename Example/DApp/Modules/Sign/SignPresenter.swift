@@ -205,10 +205,15 @@ extension SignPresenter {
 
         Web3Modal.instance.SIWEAuthenticationPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] _ in
-                AlertPresenter.present(message: "Authenticated with SIWE", type: .success)
-                self.router.dismiss()
-                self.getSession()
+            .sink { [unowned self] result in
+                switch result {
+                case .success((let message, let signature)):
+                    AlertPresenter.present(message: "Authenticated with SIWE", type: .success)
+                    self.router.dismiss()
+                    self.getSession()
+                case .failure(let error):
+                    AlertPresenter.present(message: "\(error)", type: .warning)
+                }
             }
             .store(in: &subscriptions)
     }
