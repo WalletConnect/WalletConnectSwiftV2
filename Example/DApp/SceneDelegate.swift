@@ -28,78 +28,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        configureClientsIfNeeded()
+        setUpProfilingIfNeeded()
         ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: willConnectTo : \(String(describing: connectionOptions.userActivities.first?.webpageURL?.absoluteString))"))
 
-        Networking.configure(
-            groupIdentifier: Constants.groupIdentifier,
-            projectId: InputConfig.projectId,
-            socketFactory: DefaultSocketFactory()
-        )
+        configureClientsIfNeeded()
+        setUpProfilingIfNeeded()
 
-        let metadata = AppMetadata(
-            name: "Swift Dapp",
-            description: "WalletConnect DApp sample",
-            url: "https://lab.web3modal.com/dapp",
-            icons: ["https://avatars.githubusercontent.com/u/37784886"],
-            redirect: try! AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
-        )
-        
-        Web3Modal.configure(
-            projectId: InputConfig.projectId,
-            metadata: metadata,
-            crypto: DefaultCryptoProvider(),
-            authRequestParams: .stub(), customWallets: [
-                .init(
-                    id: "swift-sample",
-                    name: "Swift Sample Wallet",
-                    homepage: "https://walletconnect.com/",
-                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
-                    order: 1,
-                    mobileLink: "walletapp://",
-                    linkMode: "https://lab.web3modal.com/wallet"
-                )
-            ]
-        )
-        
-        if let clientId = try? Networking.interactor.getClientId() {
-            ProfilingService.instance.setUpProfiling(account: "swift_dapp_\(clientId)", clientId: clientId)
-        }
 
-        Web3Modal.instance.authResponsePublisher.sink { (id, result) in
-            switch result {
-            case .success((_, _)):
-                AlertPresenter.present(message: "User Authenticted with SIWE", type: .success)
-            case .failure(_):
-                break
-            }
-        }.store(in: &publishers)
-
-        WalletConnectModal.configure(
-            projectId: InputConfig.projectId,
-            metadata: metadata
-        )
-        
-        Sign.instance.logger.setLogging(level: .debug)
-        Networking.instance.setLogging(level: .debug)
-
-        Sign.instance.logsPublisher.sink { log in
-            switch log {
-            case .error(let logMessage):
-                AlertPresenter.present(message: logMessage.message, type: .error)
-            default: return
-            }
-        }.store(in: &publishers)
-
-        Sign.instance.socketConnectionStatusPublisher.sink { status in
-            switch status {
-            case .connected:
-                AlertPresenter.present(message: "Your web socket has connected", type: .success)
-            case .disconnected:
-                AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
-            }
-        }.store(in: &publishers)
-
-        Web3Modal.instance.disableAnalytics()
         setupWindow(scene: scene)
     }
 
@@ -142,5 +78,83 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: scene did become active"))
         // Additional code to handle becoming active
+    }
+
+    private func setUpProfilingIfNeeded() {
+        if let clientId = try? Networking.interactor.getClientId() {
+            ProfilingService.instance.setUpProfiling(account: "swift_dapp_\(clientId)", clientId: clientId)
+        }
+    }
+
+    var clientsConfigured = false
+    private func configureClientsIfNeeded() {
+        if clientsConfigured {return}
+        else {clientsConfigured = true}
+        Networking.configure(
+            groupIdentifier: Constants.groupIdentifier,
+            projectId: InputConfig.projectId,
+            socketFactory: DefaultSocketFactory()
+        )
+
+        let metadata = AppMetadata(
+            name: "Swift Dapp",
+            description: "WalletConnect DApp sample",
+            url: "https://lab.web3modal.com/dapp",
+            icons: ["https://avatars.githubusercontent.com/u/37784886"],
+            redirect: try! AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
+        )
+
+        Web3Modal.configure(
+            projectId: InputConfig.projectId,
+            metadata: metadata,
+            crypto: DefaultCryptoProvider(),
+            authRequestParams: .stub(), customWallets: [
+                .init(
+                    id: "swift-sample",
+                    name: "Swift Sample Wallet",
+                    homepage: "https://walletconnect.com/",
+                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
+                    order: 1,
+                    mobileLink: "walletapp://",
+                    linkMode: "https://lab.web3modal.com/wallet"
+                )
+            ]
+        )
+
+        Web3Modal.instance.authResponsePublisher.sink { (id, result) in
+            switch result {
+            case .success((_, _)):
+                AlertPresenter.present(message: "User Authenticted with SIWE", type: .success)
+            case .failure(_):
+                break
+            }
+        }.store(in: &publishers)
+
+        WalletConnectModal.configure(
+            projectId: InputConfig.projectId,
+            metadata: metadata
+        )
+
+        Sign.instance.logger.setLogging(level: .debug)
+        Networking.instance.setLogging(level: .debug)
+
+        Sign.instance.logsPublisher.sink { log in
+            switch log {
+            case .error(let logMessage):
+                AlertPresenter.present(message: logMessage.message, type: .error)
+            default: return
+            }
+        }.store(in: &publishers)
+
+        Sign.instance.socketConnectionStatusPublisher.sink { status in
+            switch status {
+            case .connected:
+                AlertPresenter.present(message: "Your web socket has connected", type: .success)
+            case .disconnected:
+                AlertPresenter.present(message: "Your web socket is disconnected", type: .warning)
+            }
+        }.store(in: &publishers)
+
+        Web3Modal.instance.disableAnalytics()
     }
 }
