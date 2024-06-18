@@ -69,7 +69,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             switch result {
             case .success((_, _)):
                 AlertPresenter.present(message: "User Authenticted with SIWE", type: .success)
-            case .failure(let error):
+            case .failure(_):
                 break
             }
         }.store(in: &publishers)
