@@ -17,6 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) async -> Bool {
+        ProfilingService.instance.send(logMessage: .init(message: "AppDelegate: will try to dispatch envelope: \(String(describing: userActivity.webpageURL))"))
         guard let url = userActivity.webpageURL,
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return true

@@ -55,16 +55,21 @@ final class LinkEnvelopesDispatcher {
 
     func request(topic: String, request: RPCRequest, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
 
+        logger.debug("Will send request with link mode")
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local, transportType: .relay)
 
         let envelopeUrl: URL
         do {
             envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: request, envelopeType: envelopeType, topic: topic)
 
-            DispatchQueue.main.async {
+            logger.debug("Will try to open envelopeUrl: \(envelopeUrl)")
+
+            DispatchQueue.main.async { [weak self] in
+                self?.logger.debug("Will open universal link")
                 UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
             }
         } catch {
+            logger.error("Failed to open url, error: \(error) ")
             if let id = request.id {
                 rpcHistory.delete(id: id)
             }
@@ -75,9 +80,12 @@ final class LinkEnvelopesDispatcher {
     }
 
     func respond(topic: String, response: RPCResponse, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
+        logger.debug("will redpond for a request id: \(String(describing: response.id))")
         try rpcHistory.validate(response)
         let envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: response, envelopeType: envelopeType, topic: topic)
-        DispatchQueue.main.async {
+        logger.debug("Prepared envelopeUrl: \(envelopeUrl)")
+        DispatchQueue.main.async { [weak self] in
+            self?.logger.debug("Will open universal link")
             UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
         }
         try rpcHistory.resolve(response)
@@ -86,6 +94,7 @@ final class LinkEnvelopesDispatcher {
     }
 
     public func respondError(topic: String, requestId: RPCID, peerUniversalLink: String, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws -> String {
+        logger.debug("Will respond with error, peerUniversalLink: \(peerUniversalLink)")
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
         return try await respond(topic: topic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: envelopeType)
