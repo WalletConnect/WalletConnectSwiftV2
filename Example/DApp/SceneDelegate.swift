@@ -133,4 +133,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             AlertPresenter.present(message: error.localizedDescription, type: .error)
         }
     }
+
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: scene will enter foreground"))
+        // Additional code to handle entering the foreground
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: scene did become active"))
+        // Additional code to handle becoming active
+    }
 }
