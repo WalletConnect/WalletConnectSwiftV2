@@ -66,6 +66,10 @@ final class LinkEnvelopesDispatcher {
             logger.debug("Will try to open envelopeUrl: \(envelopeUrl)")
 
             try await withCheckedThrowingContinuation { continuation in
+                if isRunningTests() {
+                    continuation.resume(returning: ())
+                    return
+                }
                 DispatchQueue.main.async { [weak self] in
                     self?.logger.debug("Will open universal link")
                     UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true]) { success in
@@ -96,8 +100,12 @@ final class LinkEnvelopesDispatcher {
         logger.debug("Prepared envelopeUrl: \(envelopeUrl)")
 
         try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.main.async { [weak self] in
-                self?.logger.debug("Will open universal link")
+            if isRunningTests() {
+                continuation.resume(returning: ())
+                return
+            }
+            DispatchQueue.main.async { [unowned self] in
+                logger.debug("Will open universal link")
                 UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true]) { success in
                     if success {
                         continuation.resume(returning: ())
@@ -207,5 +215,9 @@ final class LinkEnvelopesDispatcher {
         } catch {
             logger.debug("Handling link mode response failed: \(error)")
         }
+    }
+
+    func isRunningTests() -> Bool {
+        return ProcessInfo.processInfo.arguments.contains("isTesting")
     }
 }
