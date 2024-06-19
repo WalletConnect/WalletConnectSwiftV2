@@ -7,6 +7,7 @@ final class LinkEnvelopesDispatcher {
         case invalidURL
         case envelopeNotFound
         case topicNotFound
+        case failedToOpenUniversalLink(String)
     }
     private let serializer: Serializing
     private let logger: ConsoleLogging
@@ -36,15 +37,18 @@ final class LinkEnvelopesDispatcher {
     }
 
     func dispatchEnvelope(_ envelope: String) throws {
+        logger.debug("will dispatch an envelope: \(envelope)")
         guard let envelopeURL = URL(string: envelope),
         let components = URLComponents(url: envelopeURL, resolvingAgainstBaseURL: true) else {
             throw Errors.invalidURL
         }
 
         guard let wcEnvelope = components.queryItems?.first(where: { $0.name == "wc_ev" })?.value else {
+            logger.error(Errors.envelopeNotFound.localizedDescription)
             throw Errors.envelopeNotFound
         }
         guard let topic = components.queryItems?.first(where: { $0.name == "topic" })?.value else {
+            logger.error(Errors.topicNotFound.localizedDescription)
             throw Errors.topicNotFound
         }
         manageEnvelope(topic, wcEnvelope)
@@ -52,16 +56,34 @@ final class LinkEnvelopesDispatcher {
 
     func request(topic: String, request: RPCRequest, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
 
+        logger.debug("Will send request with link mode")
         try rpcHistory.set(request, forTopic: topic, emmitedBy: .local, transportType: .relay)
 
         let envelopeUrl: URL
         do {
             envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: request, envelopeType: envelopeType, topic: topic)
 
-            DispatchQueue.main.async {
-                UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
+            logger.debug("Will try to open envelopeUrl: \(envelopeUrl)")
+
+            try await withCheckedThrowingContinuation { continuation in
+                if isRunningTests() {
+                    continuation.resume(returning: ())
+                    return
+                }
+                DispatchQueue.main.async { [weak self] in
+                    self?.logger.debug("Will open universal link")
+                    UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true]) { success in
+                        if success {
+                            continuation.resume(returning: ())
+                        } else {
+                            continuation.resume(throwing: Errors.failedToOpenUniversalLink(envelopeUrl.absoluteString))
+                        }
+                    }
+                }
             }
+
         } catch {
+            logger.error("Failed to open url, error: \(error) ")
             if let id = request.id {
                 rpcHistory.delete(id: id)
             }
@@ -72,17 +94,35 @@ final class LinkEnvelopesDispatcher {
     }
 
     func respond(topic: String, response: RPCResponse, peerUniversalLink: String, envelopeType: Envelope.EnvelopeType) async throws -> String {
+        logger.debug("will redpond for a request id: \(String(describing: response.id))")
         try rpcHistory.validate(response)
         let envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: response, envelopeType: envelopeType, topic: topic)
-        DispatchQueue.main.async {
-            UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
+        logger.debug("Prepared envelopeUrl: \(envelopeUrl)")
+
+        try await withCheckedThrowingContinuation { continuation in
+            if isRunningTests() {
+                continuation.resume(returning: ())
+                return
+            }
+            DispatchQueue.main.async { [unowned self] in
+                logger.debug("Will open universal link")
+                UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true]) { success in
+                    if success {
+                        continuation.resume(returning: ())
+                    } else {
+                        continuation.resume(throwing: Errors.failedToOpenUniversalLink(envelopeUrl.absoluteString))
+                    }
+                }
+            }
         }
+
         try rpcHistory.resolve(response)
 
         return envelopeUrl.absoluteString
     }
 
     public func respondError(topic: String, requestId: RPCID, peerUniversalLink: String, reason: Reason, envelopeType: Envelope.EnvelopeType) async throws -> String {
+        logger.debug("Will respond with error, peerUniversalLink: \(peerUniversalLink)")
         let error = JSONRPCError(code: reason.code, message: reason.message)
         let response = RPCResponse(id: requestId, error: error)
         return try await respond(topic: topic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: envelopeType)
@@ -159,19 +199,25 @@ final class LinkEnvelopesDispatcher {
 
     private func handleRequest(topic: String, request: RPCRequest) {
         do {
+            logger.debug("handling link mode request")
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote, transportType: .linkMode)
             requestPublisherSubject.send((topic, request))
         } catch {
-            logger.debug(error)
+            logger.debug("Handling link mode request failed: \(error)")
         }
     }
 
     private func handleResponse(topic: String, response: RPCResponse) {
         do {
+            logger.debug("handling link mode response")
             let record = try rpcHistory.resolve(response)
             responsePublisherSubject.send((topic, record.request, response))
         } catch {
-            logger.debug("Handle json rpc response error: \(error)")
+            logger.debug("Handling link mode response failed: \(error)")
         }
+    }
+
+    func isRunningTests() -> Bool {
+        return ProcessInfo.processInfo.arguments.contains("isTesting")
     }
 }
