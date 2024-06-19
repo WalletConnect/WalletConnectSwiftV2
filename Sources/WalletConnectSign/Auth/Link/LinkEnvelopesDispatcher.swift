@@ -7,6 +7,7 @@ final class LinkEnvelopesDispatcher {
         case invalidURL
         case envelopeNotFound
         case topicNotFound
+        case failedToOpenUniversalLink(String)
     }
     private let serializer: Serializing
     private let logger: ConsoleLogging
@@ -64,10 +65,19 @@ final class LinkEnvelopesDispatcher {
 
             logger.debug("Will try to open envelopeUrl: \(envelopeUrl)")
 
-            DispatchQueue.main.async { [weak self] in
-                self?.logger.debug("Will open universal link")
-                UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
+            try await withCheckedThrowingContinuation { continuation in
+                DispatchQueue.main.async { [weak self] in
+                    self?.logger.debug("Will open universal link")
+                    UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true]) { success in
+                        if success {
+                            continuation.resume(returning: ())
+                        } else {
+                            continuation.resume(throwing: Errors.failedToOpenUniversalLink(envelopeUrl.absoluteString))
+                        }
+                    }
+                }
             }
+
         } catch {
             logger.error("Failed to open url, error: \(error) ")
             if let id = request.id {
@@ -84,10 +94,20 @@ final class LinkEnvelopesDispatcher {
         try rpcHistory.validate(response)
         let envelopeUrl = try serializeAndCreateUrl(peerUniversalLink: peerUniversalLink, encodable: response, envelopeType: envelopeType, topic: topic)
         logger.debug("Prepared envelopeUrl: \(envelopeUrl)")
-        DispatchQueue.main.async { [weak self] in
-            self?.logger.debug("Will open universal link")
-            UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true])
+
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async { [weak self] in
+                self?.logger.debug("Will open universal link")
+                UIApplication.shared.open(envelopeUrl, options: [.universalLinksOnly: true]) { success in
+                    if success {
+                        continuation.resume(returning: ())
+                    } else {
+                        continuation.resume(throwing: Errors.failedToOpenUniversalLink(envelopeUrl.absoluteString))
+                    }
+                }
+            }
         }
+
         try rpcHistory.resolve(response)
 
         return envelopeUrl.absoluteString
