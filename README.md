@@ -1,4 +1,4 @@
-# Wallet Connect v.2 - Swift
+# WalletConnect v.2 - Swift
 
 ![CI main](https://github.com/WalletConnect/WalletConnectSwiftV2/actions/workflows/ci.yml/badge.svg?branch=main)
 ![CI develop](https://github.com/WalletConnect/WalletConnectSwiftV2/actions/workflows/ci.yml/badge.svg?branch=develop)

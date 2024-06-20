@@ -8,6 +8,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        ProfilingService.instance.send(logMessage: .init(message: "AppDelegate: application will enter foreground"))
+        // Additional code to handle entering the foreground
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        ProfilingService.instance.send(logMessage: .init(message: "AppDelegate: application did become active"))
+        // Additional code to handle becoming active
+    }
+
     // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -17,6 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) async -> Bool {
+        ProfilingService.instance.send(logMessage: .init(message: "AppDelegate: will try to dispatch envelope: \(String(describing: userActivity.webpageURL))"))
         guard let url = userActivity.webpageURL,
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return true
@@ -32,4 +43,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        // Log the event of opening the app via URL
+        ProfilingService.instance.send(logMessage: .init(message: "AppDelegate: app opened by URL: \(url.absoluteString)"))
+
+        // Handle the URL appropriately
+        try! Sign.instance.dispatchEnvelope(url.absoluteString)
+
+        return true
+    }
 }
