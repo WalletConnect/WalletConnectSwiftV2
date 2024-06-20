@@ -7,6 +7,10 @@ struct AccountDetails {
     let chain: String
     let methods: [String]
     let account: String
+
+    var id: String {
+        return "\(account)_\(chain)"
+    }
 }
 
 
