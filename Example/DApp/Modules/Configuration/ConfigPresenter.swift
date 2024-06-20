@@ -8,6 +8,11 @@ final class ConfigPresenter: ObservableObject, SceneViewModel {
 
     private let router: ConfigRouter
 
+    var clientId: String {
+        guard let clientId = try? Networking.interactor.getClientId() else { return .empty }
+        return clientId
+    }
+
     init(
         router: ConfigRouter
     ) {

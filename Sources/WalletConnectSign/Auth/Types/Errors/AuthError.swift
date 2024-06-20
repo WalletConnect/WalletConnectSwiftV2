@@ -9,6 +9,7 @@ public enum AuthError: Codable, Equatable, Error, LocalizedError {
     case malformedRequestParams
     case messageCompromised
     case signatureVerificationFailed
+    case userRejectedRequest
 }
 
 extension AuthError: Reason {
@@ -27,6 +28,8 @@ extension AuthError: Reason {
             self = .messageCompromised
         case Self.signatureVerificationFailed.code:
             self = .signatureVerificationFailed
+        case Self.userRejectedRequest.code:
+            self = .userRejectedRequest
         default:
             return nil
         }
@@ -41,13 +44,15 @@ extension AuthError: Reason {
         case .userRejeted:
             return 14001
         case .malformedResponseParams:
-            return 12001
+            return 11001
         case .malformedRequestParams:
-            return 12002
+            return 11002
         case .messageCompromised:
-            return 12003
+            return 11003
         case .signatureVerificationFailed:
-            return 12004
+            return 11004
+        case .userRejectedRequest:
+            return 12001
         }
     }
 
@@ -67,6 +72,8 @@ extension AuthError: Reason {
             return "Message verification failed"
         case .userDisconnected:
             return "User Disconnected"
+        case .userRejectedRequest:
+            return "User Rejected Request"
         }
     }
 

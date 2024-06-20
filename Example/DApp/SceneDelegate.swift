@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: will try to dispatch envelope - userActivity: \(String(describing: userActivity.webpageURL))"))
         guard let url = userActivity.webpageURL,
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             return
@@ -27,12 +28,73 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        configureClientsIfNeeded()
+        setUpProfilingIfNeeded()
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: willConnectTo : \(String(describing: connectionOptions.userActivities.first?.webpageURL?.absoluteString))"))
+
+        configureClientsIfNeeded()
+        setUpProfilingIfNeeded()
+
+
+        setupWindow(scene: scene)
+    }
+
+    private func setupWindow(scene: UIScene) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        window = UIWindow(windowScene: windowScene)
+
+        let viewController = SignModule.create(app: app)
+            .wrapToNavigationController()
+
+        window?.rootViewController = viewController
+        window?.makeKeyAndVisible()
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate:  - openURLContexts : \(String(describing: URLContexts.first?.url))"))
+
+        guard let context = URLContexts.first else { return }
+
+        let url = context.url
+
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let queryItems = components.queryItems,
+              queryItems.contains(where: { $0.name == "wc_ev" }) else {
+            return
+        }
+
+        do {
+            try Sign.instance.dispatchEnvelope(url.absoluteString)
+        } catch {
+            AlertPresenter.present(message: error.localizedDescription, type: .error)
+        }
+    }
+
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: scene will enter foreground"))
+        // Additional code to handle entering the foreground
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        ProfilingService.instance.send(logMessage: .init(message: "SceneDelegate: scene did become active"))
+        // Additional code to handle becoming active
+    }
+
+    private func setUpProfilingIfNeeded() {
+        if let clientId = try? Networking.interactor.getClientId() {
+            ProfilingService.instance.setUpProfiling(account: "swift_dapp_\(clientId)", clientId: clientId)
+        }
+    }
+
+    var clientsConfigured = false
+    private func configureClientsIfNeeded() {
+        if clientsConfigured {return}
+        else {clientsConfigured = true}
         Networking.configure(
             groupIdentifier: Constants.groupIdentifier,
             projectId: InputConfig.projectId,
             socketFactory: DefaultSocketFactory()
         )
-        Sign.configure(crypto: DefaultCryptoProvider())
 
         let metadata = AppMetadata(
             name: "Swift Dapp",
@@ -41,7 +103,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             icons: ["https://avatars.githubusercontent.com/u/37784886"],
             redirect: try! AppMetadata.Redirect(native: "wcdapp://", universal: "https://lab.web3modal.com/dapp", linkMode: true)
         )
-        
+
         Web3Modal.configure(
             projectId: InputConfig.projectId,
             metadata: metadata,
@@ -72,7 +134,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             projectId: InputConfig.projectId,
             metadata: metadata
         )
-        
+
         Sign.instance.logger.setLogging(level: .debug)
         Networking.instance.setLogging(level: .debug)
 
@@ -94,17 +156,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }.store(in: &publishers)
 
         Web3Modal.instance.disableAnalytics()
-        setupWindow(scene: scene)
-    }
-
-    private func setupWindow(scene: UIScene) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
-        window = UIWindow(windowScene: windowScene)
-
-        let viewController = SignModule.create(app: app)
-            .wrapToNavigationController()
-
-        window?.rootViewController = viewController
-        window?.makeKeyAndVisible()
     }
 }

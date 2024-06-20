@@ -33,6 +33,7 @@ class SessionResponderDispatcher {
             try await relaySessionResponder.respondSessionRequest(topic: topic, requestId: requestId, response: response)
             return nil
         case .linkMode:
+            logger.debug("will call linkSessionResponder.respondSessionRequest()")
             return try await linkSessionResponder.respondSessionRequest(topic: topic, requestId: requestId, response: response)
         }
     }

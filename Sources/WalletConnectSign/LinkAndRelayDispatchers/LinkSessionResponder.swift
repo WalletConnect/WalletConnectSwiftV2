@@ -26,15 +26,21 @@ class LinkSessionResponder {
     }
 
     func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws -> String {
+        logger.debug("LinkSessionResponder: responding session request")
         guard let session = sessionStore.getSession(forTopic: topic) else {
-            throw WalletConnectError.noSessionMatchingTopic(topic)
+            let error = WalletConnectError.noSessionMatchingTopic(topic)
+            logger.debug("failed: \(error)")
+            throw error
         }
 
         guard let peerUniversalLink = session.peerParticipant.metadata.redirect!.universal else {
-            throw Errors.missingPeerUniversalLink
+            let error = Errors.missingPeerUniversalLink
+            logger.debug("failed: \(error)")
+            throw error
         }
 
         guard sessionRequestNotExpired(requestId: requestId) else {
+            logger.debug("request expired")
             try await linkEnvelopesDispatcher.respondError(
                 topic: topic,
                 requestId: requestId,
@@ -45,6 +51,7 @@ class LinkSessionResponder {
             throw Errors.sessionRequestExpired
         }
 
+        logger.debug("will call linkEnvelopesDispatcher.respond()")
         let responseEnvelope = try await linkEnvelopesDispatcher.respond(
             topic: topic,
             response: RPCResponse(id: requestId, outcome: response),
@@ -55,6 +62,7 @@ class LinkSessionResponder {
             guard let self = self else {return}
             sessionRequestsProvider.emitRequestIfPending()
         }
+        logger.debug("will return response envelope: \(responseEnvelope)")
         return responseEnvelope
     }
 
