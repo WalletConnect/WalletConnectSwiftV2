@@ -96,7 +96,7 @@ struct SignView: View {
                         .padding(12)
                     } else {
                         VStack {
-                            ForEach(presenter.accountsDetails, id: \.account) { account in
+                            ForEach(presenter.accountsDetails, id: \.id) { account in
                                 Button {
                                     presenter.presentSessionAccount(sessionAccount: account)
                                 } label: {
