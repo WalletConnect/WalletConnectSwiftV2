@@ -173,6 +173,15 @@
         }
       },
       {
+        "package": "WalletConnectAccount",
+        "repositoryURL": "https://github.com/WalletConnect/WalletConnectAccount",
+        "state": {
+          "branch": "swift-package-fix",
+          "revision": "e25e06d63070c82aac878d351582f7c496c5630b",
+          "version": null
+        }
+      },
+      {
         "package": "Web3",
         "repositoryURL": "https://github.com/WalletConnect/Web3.swift",
         "state": {
