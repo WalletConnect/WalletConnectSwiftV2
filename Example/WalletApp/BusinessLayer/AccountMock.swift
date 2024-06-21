@@ -36,7 +36,7 @@ class AccountClientMock: AccountClientProtocol {
 
 }
 
-class Account {
+class SmartAccount {
     static var instance: AccountClientMock = {
         fatalError("Error - you must call Account.initialize(entryPoint:chainId:) before accessing the shared instance.")
     }()
