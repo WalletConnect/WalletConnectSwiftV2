@@ -16,6 +16,7 @@ struct SettingsView: View {
                 Group {
                     header(title: "Account")
                     row(title: "CAIP-10", subtitle: viewModel.account)
+                    row(title: "Smart Account", subtitle: viewModel.smartAccount)
                     row(title: "Private key", subtitle: viewModel.privateKey)
                 }
                 .padding(.horizontal, 20)

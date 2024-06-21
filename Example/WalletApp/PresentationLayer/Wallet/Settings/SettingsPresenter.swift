@@ -24,6 +24,10 @@ final class SettingsPresenter: ObservableObject {
         return importAccount.account.absoluteString
     }
 
+    var smartAccount: String {
+        SmartAccount.instance.getAddress()
+    }
+
     var privateKey: String {
         guard let importAccount = accountStorage.importAccount else { return .empty }
         return importAccount.privateKey

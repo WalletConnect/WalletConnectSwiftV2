@@ -32,19 +32,33 @@ class AccountClientMock: AccountClientProtocol {
         }
         return onSign(message)
     }
-    
-
 }
 
 class SmartAccount {
     static var instance: AccountClientMock = {
-        fatalError("Error - you must call Account.initialize(entryPoint:chainId:) before accessing the shared instance.")
+        guard let config = SmartAccount.config else {
+            fatalError("Error - you must call SmartAccount.configure(entryPoint:chainId:onSign:) before accessing the shared instance.")
+        }
+        return AccountClientMock(entryPoint: config.entryPoint, chainId: config.chainId, onSign: config.onSign)
     }()
+
+    private static var config: Config?
 
     private init() {}
 
-    static func initialize(entryPoint: String, chainId: Int) {
-        instance = AccountClientMock(entryPoint: entryPoint, chainId: chainId, onSign: nil)
+    struct Config {
+        let entryPoint: String
+        let chainId: Int
+        var onSign: OnSign?
+    }
+
+    /// SmartAccount instance config method
+    /// - Parameters:
+    ///   - entryPoint: Entry point
+    ///   - chainId: Chain ID
+    ///   - onSign: Closure for signing messages (optional)
+    static public func configure(entryPoint: String, chainId: Int, onSign: OnSign? = nil) {
+        SmartAccount.config = Config(entryPoint: entryPoint, chainId: chainId, onSign: onSign)
     }
 
     static func setOnSign(_ onSign: @escaping OnSign) {
