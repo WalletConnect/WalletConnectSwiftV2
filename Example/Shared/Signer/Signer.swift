@@ -1,6 +1,7 @@
 import Foundation
 import Commons
 import WalletConnectSign
+import WalletConnectAccount
 
 final class Signer {
     enum Errors: Error {
@@ -9,7 +10,36 @@ final class Signer {
     
     private init() {}
 
-    static func sign(request: Request, importAccount: ImportAccount) throws -> AnyCodable {
+    static func sign(request: Request, importAccount: ImportAccount) async throws -> AnyCodable {
+        if didRequestSmartAccount(request) {
+            return try await signWithSmartAccount(request: request)
+        } else {
+            return try signWithEOA(request: request, importAccount: importAccount)
+        }
+    }
+
+    private static func didRequestSmartAccount(_ request: Request) -> Bool {
+        // Attempt to decode params for transaction requests
+        if let params = try? request.params.get([String: AnyCodable].self),
+           let account = params["from"]?.value as? String {
+            return account.lowercased() == SmartAccount.instance.getAddress().lowercased()
+        }
+
+        // Attempt to decode params for signing message requests
+        if let paramsArray = try? request.params.get([AnyCodable].self) {
+            if request.method == "personal_sign" || request.method == "eth_signTypedData" {
+                // Typically, the account address is the second parameter for personal_sign and eth_signTypedData
+                if paramsArray.count > 1,
+                   let account = paramsArray[1].value as? String {
+                    return account.lowercased() == SmartAccount.instance.getAddress().lowercased()
+                }
+            }
+        }
+
+        return false
+    }
+
+    private static func signWithEOA(request: Request, importAccount: ImportAccount) throws -> AnyCodable {
         let signer = ETHSigner(importAccount: importAccount)
 
         switch request.method {
@@ -24,11 +54,39 @@ final class Signer {
 
         case "solana_signTransaction":
             return SOLSigner.signTransaction(request.params)
-            
+
         default:
             throw Signer.Errors.notImplemented
         }
     }
+
+
+    private static func signWithSmartAccount(request: Request) async throws -> AnyCodable {
+            switch request.method {
+            case "personal_sign":
+                let params = try request.params.get([String].self)
+                let message = params[0]
+                return AnyCodable(SmartAccount.instance.signMessage(message))
+
+            case "eth_signTypedData":
+                let params = try request.params.get([String].self)
+                let message = params[0]
+                return AnyCodable(SmartAccount.instance.signMessage(message))
+
+            case "eth_sendTransaction":
+                let params = try request.params.get([WalletConnectAccount.Transaction].self)
+                let transaction = params[0]
+                let result = try await SmartAccount.instance.sendTransaction(transaction)
+                return AnyCodable(result)
+
+                //        case "wallet_sendCalls":
+                //            let transactions =
+                //            return SmartAccount.instance.sendBatchTransaction(<#T##batch: [Transaction]##[Transaction]#>)
+
+            default:
+                throw Signer.Errors.notImplemented
+            }
+        }
 }
 
 extension Signer.Errors: LocalizedError {
@@ -38,3 +96,4 @@ extension Signer.Errors: LocalizedError {
         }
     }
 }
+
