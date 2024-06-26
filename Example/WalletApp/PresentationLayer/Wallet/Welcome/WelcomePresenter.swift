@@ -18,19 +18,13 @@ final class WelcomePresenter: ObservableObject {
     }
     
     func onGetStarted() {
-        initSmartAccount()
         importAccount(ImportAccount.new())
     }
 
     func onImport() {
         guard let account = ImportAccount(input: input)
         else { return input = .empty }
-        initSmartAccount()
         importAccount(account)
-    }
-
-    func initSmartAccount() {
-        SmartAccount.configure(entryPoint: "", chainId: 137)
     }
 }
 

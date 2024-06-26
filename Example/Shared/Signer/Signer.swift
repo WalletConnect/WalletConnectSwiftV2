@@ -11,18 +11,19 @@ final class Signer {
     private init() {}
 
     static func sign(request: Request, importAccount: ImportAccount) async throws -> AnyCodable {
-        if didRequestSmartAccount(request) {
+        if try await didRequestSmartAccount(request) {
             return try await signWithSmartAccount(request: request)
         } else {
             return try signWithEOA(request: request, importAccount: importAccount)
         }
     }
 
-    private static func didRequestSmartAccount(_ request: Request) -> Bool {
+    private static func didRequestSmartAccount(_ request: Request) async throws -> Bool {
         // Attempt to decode params for transaction requests
         if let params = try? request.params.get([String: AnyCodable].self),
            let account = params["from"]?.value as? String {
-            return account.lowercased() == SmartAccount.instance.getAddress().lowercased()
+            let smartAccountAddress = try await SmartAccount.instance.getAddress()
+            return account.lowercased() == smartAccountAddress.lowercased()
         }
 
         // Attempt to decode params for signing message requests
@@ -31,7 +32,8 @@ final class Signer {
                 // Typically, the account address is the second parameter for personal_sign and eth_signTypedData
                 if paramsArray.count > 1,
                    let account = paramsArray[1].value as? String {
-                    return account.lowercased() == SmartAccount.instance.getAddress().lowercased()
+                    let smartAccountAddress = try await SmartAccount.instance.getAddress()
+                    return account.lowercased() == smartAccountAddress.lowercased()
                 }
             }
         }
