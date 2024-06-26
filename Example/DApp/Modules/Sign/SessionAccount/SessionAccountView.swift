@@ -16,7 +16,7 @@ struct SessionAccountView: View {
                 ScrollView {
                     VStack(spacing: 12) {
                         networkView(title: String(presenter.sessionAccount.chain.split(separator: ":").first ?? ""))
-                        accountView(address: presenter.sessionAccount.account)
+                        accountView(address: presenter.sessionAccount.address)
                         methodsView(methods: presenter.sessionAccount.methods)
                         
                         Spacer()

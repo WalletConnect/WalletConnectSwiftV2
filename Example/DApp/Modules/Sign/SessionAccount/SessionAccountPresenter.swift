@@ -70,7 +70,7 @@ final class SessionAccountPresenter: ObservableObject {
     }
     
     func copyUri() {
-        UIPasteboard.general.string = sessionAccount.account
+        UIPasteboard.general.string = sessionAccount.address
     }
 }
 
