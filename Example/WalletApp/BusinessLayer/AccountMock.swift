@@ -15,15 +15,19 @@ class AccountClientMock: AccountClientProtocol {
 
     // prepares UserOp
     func sendTransaction(_ transaction: WalletConnectAccount.Transaction) async throws -> String {
-        return "userOpHash"
+        guard let onSign = onSign else {
+            fatalError("Error - onSign closure must be set before calling signMessage")
+        }
+        let _ = onSign("UserOp")
+        return "txHash"
     }
     
     func sendBatchTransaction(_ batch: [WalletConnectAccount.Transaction]) async throws -> String {
-        return "receipt"
+        return "userOpReceipt"
     }
     
     func getAddress() async throws -> String {
-        return "0x123"
+        return "0xF4D7560648F1252FD7501863355AEaBfb9d3b7c3"
     }
 
     func getAccount() async throws -> Account {

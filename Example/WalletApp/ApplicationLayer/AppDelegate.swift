@@ -8,7 +8,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        SmartAccount.configure(entryPoint: "", chainId: 137)
+        SmartAccount.configure(entryPoint: "", chainId: 11155111)
         return true
     }
 

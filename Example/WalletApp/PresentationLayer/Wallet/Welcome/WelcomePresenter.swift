@@ -26,6 +26,7 @@ final class WelcomePresenter: ObservableObject {
         else { return input = .empty }
         importAccount(account)
     }
+
 }
 
 // MARK: Private functions

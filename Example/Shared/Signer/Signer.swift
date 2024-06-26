@@ -18,10 +18,12 @@ final class Signer {
         }
     }
 
+
     private static func didRequestSmartAccount(_ request: Request) async throws -> Bool {
-        // Attempt to decode params for transaction requests
-        if let params = try? request.params.get([String: AnyCodable].self),
-           let account = params["from"]?.value as? String {
+        // Attempt to decode params for transaction requests encapsulated in an array of dictionaries
+        if let paramsArray = try? request.params.get([AnyCodable].self),
+           let firstParam = paramsArray.first?.value as? [String: Any],
+           let account = firstParam["from"] as? String {
             let smartAccountAddress = try await SmartAccount.instance.getAddress()
             return account.lowercased() == smartAccountAddress.lowercased()
         }
@@ -40,7 +42,6 @@ final class Signer {
 
         return false
     }
-
     private static func signWithEOA(request: Request, importAccount: ImportAccount) throws -> AnyCodable {
         let signer = ETHSigner(importAccount: importAccount)
 
