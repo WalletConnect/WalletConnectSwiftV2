@@ -22,10 +22,16 @@ class AccountClientMock: AccountClientProtocol {
         return "receipt"
     }
     
-    func getAddress() -> String {
+    func getAddress() async throws -> String {
         return "0x123"
     }
-    
+
+    func getAccount() async throws -> Account {
+        let chain = try Blockchain(namespace: "eip155", reference: chainId)
+        let address = try await getAddress()
+        return try Account(blockchain: chain, accountAddress: address)
+    }
+
     func signMessage(_ message: String) -> String {
         guard let onSign = onSign else {
             fatalError("Error - onSign closure must be set before calling signMessage")
