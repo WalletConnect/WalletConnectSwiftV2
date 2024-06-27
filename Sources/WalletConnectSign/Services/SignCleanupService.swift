@@ -35,7 +35,7 @@ private extension SignCleanupService {
         let pairing = pairingStore.getAll().map { $0.topic }
         let session = sessionStore.getAll().map { $0.topic }
 
-        try await networkInteractor.batchUnsubscribe(topics: pairing + session)
+        try? await networkInteractor.batchUnsubscribe(topics: pairing + session)
     }
 
     func cleanupStorages() throws {
@@ -43,6 +43,6 @@ private extension SignCleanupService {
         sessionStore.deleteAll()
         sessionTopicToProposal.deleteAll()
         rpcHistory.deleteAll()
-        try kms.deleteAll()
+        try? kms.deleteAll()
     }
 }

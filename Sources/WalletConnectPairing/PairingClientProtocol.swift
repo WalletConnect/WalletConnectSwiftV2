@@ -6,6 +6,6 @@ public protocol PairingClientProtocol {
     var pairingStatePublisher: AnyPublisher<Bool, Never> {get}
     var pairingExpirationPublisher: AnyPublisher<Pairing, Never> {get}
     func pair(uri: WalletConnectURI) async throws
-    func disconnect(topic: String) async throws
+    func disconnect(topic: String) async 
     func getPairings() -> [Pairing]
 }

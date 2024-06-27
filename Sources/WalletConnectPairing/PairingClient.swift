@@ -128,8 +128,8 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         try await pingService.ping(topic: topic)
     }
 
-    public func disconnect(topic: String) async throws {
-        try await pairingDeleteRequester.delete(topic: topic)
+    public func disconnect(topic: String) async {
+        await pairingDeleteRequester.delete(topic: topic)
     }
 
     public func validatePairingExistance(_ topic: String) throws {
