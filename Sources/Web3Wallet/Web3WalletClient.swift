@@ -177,8 +177,8 @@ public class Web3WalletClient {
         try await pairingClient.pair(uri: uri)
     }
 
-    public func disconnectPairing(topic: String) async throws {
-        try await pairingClient.disconnect(topic: topic)
+    public func disconnectPairing(topic: String) async {
+        await pairingClient.disconnect(topic: topic)
     }
     
     /// For a wallet and a dApp to terminate a session
