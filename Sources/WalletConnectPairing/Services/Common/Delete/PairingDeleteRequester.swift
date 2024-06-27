@@ -16,7 +16,7 @@ class PairingDeleteRequester {
         self.logger = logger
     }
 
-    func delete(topic: String) async throws {
+    func delete(topic: String) async {
         let reason = PairingReasonCode.userDisconnected
         let protocolMethod = PairingProtocolMethod.delete
         let pairingDeleteParams = PairingDeleteParams(code: reason.code, message: reason.message)
