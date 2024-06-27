@@ -22,7 +22,7 @@ class PairingDeleteRequester {
         let pairingDeleteParams = PairingDeleteParams(code: reason.code, message: reason.message)
         logger.debug("Will delete pairing for reason: message: \(reason.message) code: \(reason.code)")
         let request = RPCRequest(method: protocolMethod.method, params: pairingDeleteParams)
-        try await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
+        try? await networkingInteractor.request(request, topic: topic, protocolMethod: protocolMethod)
         pairingStorage.delete(topic: topic)
         kms.deleteSymmetricKey(for: topic)
         networkingInteractor.unsubscribe(topic: topic)
