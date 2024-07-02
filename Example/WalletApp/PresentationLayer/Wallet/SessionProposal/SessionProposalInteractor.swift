@@ -4,7 +4,7 @@ import Web3Wallet
 import WalletConnectRouter
 
 final class SessionProposalInteractor {
-    func approve(proposal: Session.Proposal, account: Account) async throws -> Bool {
+    func approve(proposal: Session.Proposal, EOAAccount: Account, smartAccount: Account) async throws -> Bool {
         // Following properties are used to support all the required and optional namespaces for the testing purposes
         let supportedMethods = Set(proposal.requiredNamespaces.flatMap { $0.value.methods } + (proposal.optionalNamespaces?.flatMap { $0.value.methods } ?? []))
         let supportedEvents = Set(proposal.requiredNamespaces.flatMap { $0.value.events } + (proposal.optionalNamespaces?.flatMap { $0.value.events } ?? []))
@@ -13,7 +13,9 @@ final class SessionProposalInteractor {
         let supportedOptionalChains = proposal.optionalNamespaces?["eip155"]?.chains ?? []
         var supportedChains = supportedRequiredChains + supportedOptionalChains 
 
-        let supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: account.address)! }
+        var supportedAccounts = Array(supportedChains).map { Account(blockchain: $0, address: EOAAccount.address)! }
+
+        supportedAccounts.append(smartAccount)
 
         /* Use only supported values for production. I.e:
         let supportedMethods = ["eth_signTransaction", "personal_sign", "eth_signTypedData", "eth_sendTransaction", "eth_sign"]

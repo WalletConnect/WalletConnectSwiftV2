@@ -36,7 +36,8 @@ final class SessionProposalPresenter: ObservableObject {
     func onApprove() async throws {
         do {
             ActivityIndicatorManager.shared.start()
-            let showConnected = try await interactor.approve(proposal: sessionProposal, account: importAccount.account)
+            let smartAccount = try await SmartAccount.instance.getAccount()
+            let showConnected = try await interactor.approve(proposal: sessionProposal, EOAAccount: importAccount.account, smartAccount: smartAccount)
             showConnected ? showConnectedSheet.toggle() : router.dismiss()
             ActivityIndicatorManager.shared.stop()
         } catch {
