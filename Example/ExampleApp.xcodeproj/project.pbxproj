@@ -3261,8 +3261,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WalletConnect/WalletConnectAccount";
 			requirement = {
-				kind = revision;
-				revision = fcdb6dbe805bc230af2ab9fa84c58caa05f11f73;
+				branch = main;
+				kind = branch;
 			};
 		};
 		8487A9422A836C2A0003D5AF /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {

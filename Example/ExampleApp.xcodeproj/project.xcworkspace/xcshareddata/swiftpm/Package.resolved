@@ -176,8 +176,8 @@
         "package": "WalletConnectAccount",
         "repositoryURL": "https://github.com/WalletConnect/WalletConnectAccount",
         "state": {
-          "branch": null,
-          "revision": "fcdb6dbe805bc230af2ab9fa84c58caa05f11f73",
+          "branch": "main",
+          "revision": "008401d973cb74e9bfc988e2653d8c3368cc0429",
           "version": null
         }
       },
