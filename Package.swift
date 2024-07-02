@@ -127,6 +127,9 @@ let package = Package(
             name: "Database",
             dependencies: ["WalletConnectUtils"]),
         .target(
+            name: "Events",
+            dependencies: []),
+        .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],
             exclude: ["Secrets/secrets.json.sample"],
