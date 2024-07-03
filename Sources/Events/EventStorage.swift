@@ -1,9 +1,6 @@
-//     
 
 import Foundation
 
-
-// Protocol for EventStorage
 protocol EventStorage {
     func saveErrorEvent(_ event: Event)
     func fetchErrorEvents() -> [Event]
@@ -34,3 +31,23 @@ class UserDefaultsEventStorage: EventStorage {
         UserDefaults.standard.removeObject(forKey: errorEventsKey)
     }
 }
+
+
+#if DEBUG
+class MockEventStorage: EventStorage {
+    private(set) var savedEvents: [Event] = []
+
+    func saveErrorEvent(_ event: Event) {
+        savedEvents.append(event)
+    }
+
+    func fetchErrorEvents() -> [Event] {
+        return savedEvents
+    }
+
+    func clearErrorEvents() {
+        savedEvents.removeAll()
+    }
+}
+#endif
+

@@ -1,6 +1,5 @@
 import Foundation
 
-
 struct Event: Codable {
     let eventId: String
     let bundleId: String

@@ -47,13 +47,4 @@ class EventsCollectorTests: XCTestCase {
         XCTAssertNil(eventsCollector.topic)
         XCTAssertEqual(eventsCollector.trace.count, 0)
     }
-
-    func testEndTrace() {
-        eventsCollector.startTrace(topic: "test_topic")
-        eventsCollector.saveEvent(NewPairingExecutionTraceEvents.pairingStarted)
-        eventsCollector.endTrace()
-
-        XCTAssertNil(eventsCollector.topic)
-        XCTAssertEqual(eventsCollector.trace.count, 0)
-    }
 }
