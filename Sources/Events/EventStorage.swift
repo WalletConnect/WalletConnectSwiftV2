@@ -5,32 +5,32 @@ import Foundation
 
 // Protocol for EventStorage
 protocol EventStorage {
-    func saveErrorTrace(_ trace: [String])
-    func fetchErrorTraces() -> [[String]]
-    func clearErrorTraces()
+    func saveErrorEvent(_ event: Event)
+    func fetchErrorEvents() -> [Event]
+    func clearErrorEvents()
 }
 
 // Default implementation using UserDefaults
 class UserDefaultsEventStorage: EventStorage {
-    private let errorTracesKey = "errorTraces"
+    private let errorEventsKey = "com.walletconnect.sdk.errorEvents"
 
-    func saveErrorTrace(_ trace: [String]) {
-        var existingTraces = fetchErrorTraces()
-        existingTraces.append(trace)
-        if let encoded = try? JSONEncoder().encode(existingTraces) {
-            UserDefaults.standard.set(encoded, forKey: errorTracesKey)
+    func saveErrorEvent(_ event: Event) {
+        var existingEvents = fetchErrorEvents()
+        existingEvents.append(event)
+        if let encoded = try? JSONEncoder().encode(existingEvents) {
+            UserDefaults.standard.set(encoded, forKey: errorEventsKey)
         }
     }
 
-    func fetchErrorTraces() -> [[String]] {
-        if let data = UserDefaults.standard.data(forKey: errorTracesKey),
-           let traces = try? JSONDecoder().decode([[String]].self, from: data) {
-            return traces
+    func fetchErrorEvents() -> [Event] {
+        if let data = UserDefaults.standard.data(forKey: errorEventsKey),
+           let events = try? JSONDecoder().decode([Event].self, from: data) {
+            return events
         }
         return []
     }
 
-    func clearErrorTraces() {
-        UserDefaults.standard.removeObject(forKey: errorTracesKey)
+    func clearErrorEvents() {
+        UserDefaults.standard.removeObject(forKey: errorEventsKey)
     }
 }
