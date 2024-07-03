@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import Events
 
 final class ApproveEngine {
     enum Errors: Error {
