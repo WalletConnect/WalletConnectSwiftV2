@@ -1,14 +1,18 @@
 import Foundation
 
-
 class EventsClient {
     private let eventsCollector: EventsCollector
     private let eventsDispatcher: EventsDispatcher
+    private let logger: ConsoleLogging
 
-    init(storage: EventStorage, bundleId: String, networkingService: NetworkingServiceProtocol) {
-        self.eventsCollector = EventsCollector(storage: storage, bundleId: bundleId)
-        let retryPolicy = RetryPolicy(maxAttempts: 3, initialDelay: 5, multiplier: 2)
-        self.eventsDispatcher = EventsDispatcher(networkingService: networkingService, retryPolicy: retryPolicy)
+    init(
+        eventsCollector: EventsCollector,
+        eventsDispatcher: EventsDispatcher,
+        logger: ConsoleLogging
+    ) {
+        self.eventsCollector = eventsCollector
+        self.eventsDispatcher = eventsDispatcher
+        self.logger = logger
         Task { await sendStoredEvents() }
     }
 
@@ -23,7 +27,7 @@ class EventsClient {
     }
 
     // Public method to send stored events
-    private func sendStoredEvents() async {
+    public func sendStoredEvents() async {
         let events = eventsCollector.storage.fetchErrorEvents()
         guard !events.isEmpty else { return }
 
@@ -33,8 +37,7 @@ class EventsClient {
                 self.eventsCollector.storage.clearErrorEvents()
             }
         } catch {
-            print("Failed to send events after multiple attempts: \(error)")
+            logger.debug("Failed to send events after multiple attempts: \(error)")
         }
     }
 }
-

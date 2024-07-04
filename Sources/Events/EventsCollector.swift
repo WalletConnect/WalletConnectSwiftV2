@@ -13,11 +13,17 @@ class EventsCollector {
     var trace: [String] = []
     var topic: String?
     let storage: EventStorage
+    private let logger: ConsoleLogging
     private let bundleId: String
 
-    init(storage: EventStorage, bundleId: String) {
+    init(
+        storage: EventStorage,
+        bundleId: String,
+        logger: ConsoleLogging
+    ) {
         self.storage = storage
         self.bundleId = bundleId
+        self.logger = logger
     }
 
     // Function to start trace with topic
@@ -57,7 +63,7 @@ class EventsCollector {
             )
         )
         storage.saveErrorEvent(event)
-        print("Error event saved: \(event)")
+        logger.debug("Error event saved: \(event)")
     }
 }
 
