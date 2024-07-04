@@ -9,14 +9,12 @@ protocol NetworkingServiceProtocol {
 class NetworkingService: NetworkingServiceProtocol {
     private let session: URLSession
     private let projectId: String
-    private let sdkType: String
     private let sdkVersion: String
     private let apiURL = URL(string: "https://pulse.walletconnect.com/batch")!
 
-    init(session: URLSession = .shared, projectId: String, sdkType: String, sdkVersion: String) {
+    init(session: URLSession = .shared, projectId: String, sdkVersion: String) {
         self.session = session
         self.projectId = projectId
-        self.sdkType = sdkType
         self.sdkVersion = sdkVersion
     }
 
@@ -25,7 +23,7 @@ class NetworkingService: NetworkingServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(projectId, forHTTPHeaderField: "x-project-id")
-        request.setValue(sdkType, forHTTPHeaderField: "x-sdk-type")
+        request.setValue("events_sdk", forHTTPHeaderField: "x-sdk-type")
         request.setValue(sdkVersion, forHTTPHeaderField: "x-sdk-version")
 
         request.httpBody = try JSONEncoder().encode(events)

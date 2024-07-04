@@ -1,6 +1,6 @@
 import Foundation
 
-class EventsClient {
+public class EventsClient {
     private let eventsCollector: EventsCollector
     private let eventsDispatcher: EventsDispatcher
     private let logger: ConsoleLogging

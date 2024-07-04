@@ -8,6 +8,7 @@ actor WalletPairService {
 
     let networkingInteractor: NetworkInteracting
     let kms: KeyManagementServiceProtocol
+    private let eventsClient: EventsClient
     private let pairingStorage: WCPairingStorage
     private let history: RPCHistory
     private let logger: ConsoleLogging
@@ -17,13 +18,15 @@ actor WalletPairService {
         kms: KeyManagementServiceProtocol,
         pairingStorage: WCPairingStorage,
         history: RPCHistory,
-        logger: ConsoleLogging
+        logger: ConsoleLogging,
+        eventsClient: EventsClient
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
         self.pairingStorage = pairingStorage
         self.history = history
         self.logger = logger
+        self.eventsClient = eventsClient
     }
 
     func pair(_ uri: WalletConnectURI) async throws {

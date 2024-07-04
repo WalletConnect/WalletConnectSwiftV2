@@ -84,7 +84,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectNetworking"],
+            dependencies: ["WalletConnectNetworking", "Events"],
             resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectSigner",
@@ -128,7 +128,7 @@ let package = Package(
             dependencies: ["WalletConnectUtils"]),
         .target(
             name: "Events",
-            dependencies: ["WalletConnectUtils"]),
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],

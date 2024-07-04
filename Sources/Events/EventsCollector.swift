@@ -1,7 +1,7 @@
 import Foundation
 
 // Protocol for TraceEvent
-protocol TraceEvent: CustomStringConvertible {
+public protocol TraceEvent: CustomStringConvertible {
     var description: String { get }
 }
 
@@ -14,15 +14,12 @@ class EventsCollector {
     var topic: String?
     let storage: EventStorage
     private let logger: ConsoleLogging
-    private let bundleId: String
 
     init(
         storage: EventStorage,
-        bundleId: String,
         logger: ConsoleLogging
     ) {
         self.storage = storage
-        self.bundleId = bundleId
         self.logger = logger
     }
 
@@ -49,6 +46,7 @@ class EventsCollector {
 
     // Private function to save error event
     private func saveErrorEvent(_ errorEvent: ErrorEvent) {
+        let bundleId = Bundle.main.bundleIdentifier ?? "Unknown"
         let event = Event(
             eventId: UUID().uuidString,
             bundleId: bundleId,
