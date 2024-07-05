@@ -22,7 +22,7 @@ public struct PairingClientFactory {
         keyValueStorage: KeyValueStorage,
         keychainStorage: KeychainStorageProtocol,
         networkingClient: NetworkingInteractor,
-        eventsClient: EventsClient
+        eventsClient: EventsClientProtocol
     ) -> PairingClient {
         let pairingStore = PairingStorage(storage: SequenceStore<WCPairing>(store: .init(defaults: keyValueStorage, identifier: PairStorageIdentifiers.pairings.rawValue)))
         let kms = KeyManagementService(keychain: keychainStorage)

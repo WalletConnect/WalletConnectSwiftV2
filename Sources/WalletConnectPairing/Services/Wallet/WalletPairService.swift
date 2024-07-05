@@ -8,7 +8,7 @@ actor WalletPairService {
 
     let networkingInteractor: NetworkInteracting
     let kms: KeyManagementServiceProtocol
-    private let eventsClient: EventsClient
+    private let eventsClient: EventsClientProtocol
     private let pairingStorage: WCPairingStorage
     private let history: RPCHistory
     private let logger: ConsoleLogging
@@ -19,7 +19,7 @@ actor WalletPairService {
         pairingStorage: WCPairingStorage,
         history: RPCHistory,
         logger: ConsoleLogging,
-        eventsClient: EventsClient
+        eventsClient: EventsClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.kms = kms
@@ -30,6 +30,8 @@ actor WalletPairService {
     }
 
     func pair(_ uri: WalletConnectURI) async throws {
+        eventsClient.startTrace(topic: uri.topic)
+        eventsClient.saveEvent(NewPairingExecutionTraceEvents.pairingStarted)
         logger.debug("Pairing with uri: \(uri)")
         guard try !pairingHasPendingRequest(for: uri.topic) else {
             logger.debug("Pairing with topic (\(uri.topic)) has pending request")
@@ -40,14 +42,22 @@ actor WalletPairService {
         let symKey = try SymmetricKey(hex: uri.symKey)
         try kms.setSymmetricKey(symKey, for: pairing.topic)
         pairingStorage.setPairing(pairing)
-        
+        eventsClient.saveEvent(NewPairingExecutionTraceEvents.storeNewPairing)
+
         let networkConnectionStatus = await resolveNetworkConnectionStatus()
         guard networkConnectionStatus == .connected else {
             logger.debug("Pairing failed - Network is not connected")
+            eventsClient.saveEvent(TraceErrorEvents.noInternetConnection)
             throw Errors.networkNotConnected
         }
         
-        try await networkingInteractor.subscribe(topic: pairing.topic)
+        do {
+            try await networkingInteractor.subscribe(topic: pairing.topic)
+        } catch {
+            logger.debug("Failed to subscribe to topic: \(pairing.topic)")
+            eventsClient.saveEvent(TraceErrorEvents.subscribePairingTopicFailure)
+            throw error
+        }
     }
 }
 
@@ -59,6 +69,7 @@ extension WalletPairService {
         }
         
         if pairing.active {
+            eventsClient.saveEvent(TraceErrorEvents.activePairingAlreadyExists)
             throw Errors.pairingAlreadyExist(topic: topic)
         }
         

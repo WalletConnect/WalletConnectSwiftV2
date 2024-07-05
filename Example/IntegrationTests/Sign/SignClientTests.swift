@@ -48,7 +48,8 @@ final class SignClientTests: XCTestCase {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient
+            networkingClient: networkingClient,
+            eventsClient: MockEventsClient()
         )
         let metadata = AppMetadata(name: name, description: "", url: "", icons: [""], redirect: try! AppMetadata.Redirect(native: "", universal: linkModeUniversalLink, linkMode: supportLinkMode))
 

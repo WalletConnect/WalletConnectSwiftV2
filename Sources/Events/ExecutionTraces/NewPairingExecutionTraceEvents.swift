@@ -1,7 +1,7 @@
 
 import Foundation
 
-enum NewPairingExecutionTraceEvents: String, TraceEvent {
+public enum NewPairingExecutionTraceEvents: String, TraceEvent {
     case pairingStarted = "pairing_started"
     case pairingUriValidationSuccess = "pairing_uri_validation_success"
     case pairingUriNotExpired = "pairing_uri_not_expired"
@@ -9,13 +9,13 @@ enum NewPairingExecutionTraceEvents: String, TraceEvent {
     case subscribingPairingTopic = "subscribing_pairing_topic"
     case subscribePairingTopicSuccess = "subscribe_pairing_topic_success"
 
-    var description: String {
+    public var description: String {
         return self.rawValue
     }
 }
 
 // Enum for TraceErrorEvents
-enum TraceErrorEvents: String, ErrorEvent {
+public enum TraceErrorEvents: String, ErrorEvent {
     case noWssConnection = "no_wss_connection"
     case noInternetConnection = "no_internet_connection"
     case malformedPairingUri = "malformed_pairing_uri"
@@ -24,7 +24,7 @@ enum TraceErrorEvents: String, ErrorEvent {
     case pairingExpired = "pairing_expired"
     case proposalExpired = "proposal_expired"
 
-    var description: String {
+    public var description: String {
         return self.rawValue
     }
 }

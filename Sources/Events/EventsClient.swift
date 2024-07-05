@@ -1,6 +1,12 @@
 import Foundation
 
-public class EventsClient {
+public protocol EventsClientProtocol {
+    func startTrace(topic: String)
+    func saveEvent(_ event: TraceEvent)
+    func sendStoredEvents() async
+}
+
+public class EventsClient: EventsClientProtocol {
     private let eventsCollector: EventsCollector
     private let eventsDispatcher: EventsDispatcher
     private let logger: ConsoleLogging
@@ -41,3 +47,25 @@ public class EventsClient {
         }
     }
 }
+
+#if DEBUG
+public class MockEventsClient: EventsClientProtocol {
+    var startTraceCalled = false
+    var saveEventCalled = false
+    var sendStoredEventsCalled = false
+
+    public init() {}
+
+    public func startTrace(topic: String) {
+        startTraceCalled = true
+    }
+
+    public func saveEvent(_ event: TraceEvent) {
+        saveEventCalled = true
+    }
+
+    public func sendStoredEvents() async {
+        sendStoredEventsCalled = true
+    }
+}
+#endif
