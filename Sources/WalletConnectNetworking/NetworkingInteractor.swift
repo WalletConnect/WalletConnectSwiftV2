@@ -27,6 +27,10 @@ public class NetworkingInteractor: NetworkInteracting {
             .eraseToAnyPublisher()
     }
 
+    public var isSocketConnected: Bool {
+        return relayClient.isSocketConnected
+    }
+
     public var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never>
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>
 
