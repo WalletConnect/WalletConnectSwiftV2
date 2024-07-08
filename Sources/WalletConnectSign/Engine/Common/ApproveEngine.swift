@@ -84,6 +84,9 @@ final class ApproveEngine {
             eventsClient.saveEvent(ApproveSessionTraceErrorEvents.proposalNotFound)
             throw Errors.proposalNotFound
         }
+        let pairingTopic = payload.topic
+
+        eventsClient.setTopic(pairingTopic)
 
         let proposal = payload.request
 
@@ -99,8 +102,6 @@ final class ApproveEngine {
             eventsClient.saveEvent(ApproveSessionTraceErrorEvents.networkNotConnected)
             throw Errors.networkNotConnected
         }
-
-        let pairingTopic = payload.topic
 
         do {
             eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionNamespacesValidationStarted)

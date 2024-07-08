@@ -29,6 +29,10 @@ class EventsCollector {
         self.trace = []
     }
 
+    func setTopic(_ topic: String) {
+        self.topic = topic
+    }
+
     // Function to save event
     func saveEvent(_ event: TraceEvent) {
         trace.append(event.description)

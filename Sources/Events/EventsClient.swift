@@ -27,6 +27,10 @@ public class EventsClient: EventsClientProtocol {
         eventsCollector.startTrace(topic: topic)
     }
 
+    public func setTopic(_ topic: String) {
+        eventsCollector.setTopic(topic)
+    }
+
     // Public method to save event
     public func saveEvent(_ event: TraceEvent) {
         eventsCollector.saveEvent(event)
