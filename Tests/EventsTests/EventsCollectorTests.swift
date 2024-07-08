@@ -36,7 +36,7 @@ class EventsCollectorTests: XCTestCase {
     func testSaveErrorEvent() {
         eventsCollector.startTrace(topic: "test_topic")
         eventsCollector.saveEvent(PairingExecutionTraceEvents.pairingStarted)
-        eventsCollector.saveEvent(TraceErrorEvents.noInternetConnection)
+        eventsCollector.saveEvent(PairingTraceErrorEvents.noInternetConnection)
 
         XCTAssertEqual(mockStorage.savedEvents.count, 1)
         let savedEvent = mockStorage.savedEvents.first

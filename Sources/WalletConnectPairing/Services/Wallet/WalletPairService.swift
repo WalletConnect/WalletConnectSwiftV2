@@ -51,7 +51,7 @@ actor WalletPairService {
         let networkConnectionStatus = await resolveNetworkConnectionStatus()
         guard networkConnectionStatus == .connected else {
             logger.debug("Pairing failed - Network is not connected")
-            eventsClient.saveEvent(TraceErrorEvents.noInternetConnection)
+            eventsClient.saveEvent(PairingTraceErrorEvents.noInternetConnection)
             throw Errors.networkNotConnected
         }
         eventsClient.saveEvent(PairingExecutionTraceEvents.subscribingPairingTopic)
@@ -59,7 +59,7 @@ actor WalletPairService {
             try await networkingInteractor.subscribe(topic: pairing.topic)
         } catch {
             logger.debug("Failed to subscribe to topic: \(pairing.topic)")
-            eventsClient.saveEvent(TraceErrorEvents.subscribePairingTopicFailure)
+            eventsClient.saveEvent(PairingTraceErrorEvents.subscribePairingTopicFailure)
             throw error
         }
     }
@@ -73,7 +73,7 @@ extension WalletPairService {
         }
         
         if pairing.active {
-            eventsClient.saveEvent(TraceErrorEvents.activePairingAlreadyExists)
+            eventsClient.saveEvent(PairingTraceErrorEvents.activePairingAlreadyExists)
             throw Errors.pairingAlreadyExist(topic: topic)
         }
         

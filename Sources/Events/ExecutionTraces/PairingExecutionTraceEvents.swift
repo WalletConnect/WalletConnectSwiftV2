@@ -17,7 +17,7 @@ public enum PairingExecutionTraceEvents: String, TraceEvent {
 }
 
 // Enum for TraceErrorEvents
-public enum TraceErrorEvents: String, ErrorEvent {
+public enum PairingTraceErrorEvents: String, ErrorEvent {
     case noInternetConnection = "no_internet_connection"
     case malformedPairingUri = "malformed_pairing_uri"
     case activePairingAlreadyExists = "active_pairing_already_exists"
