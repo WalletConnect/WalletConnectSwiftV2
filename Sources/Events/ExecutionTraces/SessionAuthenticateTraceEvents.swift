@@ -1,4 +1,3 @@
-//     
 
 import Foundation
 
@@ -25,9 +24,8 @@ public enum SessionAuthenticateErrorEvents: String, ErrorEvent {
     case agreementSecretSetFailed = "agreement_secret_set_failed"
     case sessionKeysGenerationFailed = "session_keys_generation_failed"
     case sessionSecretSetFailed = "session_secret_set_failed"
-    case responseParamsCreationFailed = "response_params_creation_failed"
     case sessionCreationFailed = "session_creation_failed"
-    case pairingActivationFailed = "pairing_activation_failed"
+    case responseSendFailed = "response_send_failed"
 
     public var description: String {
         return self.rawValue

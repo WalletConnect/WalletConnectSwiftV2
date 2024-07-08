@@ -12,7 +12,6 @@ public class EventsClient: EventsClientProtocol {
     private let eventsDispatcher: EventsDispatcher
     private let logger: ConsoleLogging
     private var stateStorage: TelemetryStateStorage
-    private var telemetryEnabled: Bool
 
     init(
         eventsCollector: EventsCollector,
@@ -24,35 +23,39 @@ public class EventsClient: EventsClientProtocol {
         self.eventsDispatcher = eventsDispatcher
         self.logger = logger
         self.stateStorage = stateStorage
-        self.telemetryEnabled = stateStorage.telemetryEnabled
 
-        if telemetryEnabled {
+        if stateStorage.telemetryEnabled {
             Task { await sendStoredEvents() }
         } else {
             self.eventsCollector.storage.clearErrorEvents()
         }
     }
 
+    public func setLogging(level: LoggingLevel) {
+        logger.setLogging(level: level)
+    }
+
     // Public method to start trace
     public func startTrace(topic: String) {
-        guard telemetryEnabled else { return }
+        guard stateStorage.telemetryEnabled else { return }
+        logger.debug("Will start trace with topic: \(topic)")
         eventsCollector.startTrace(topic: topic)
     }
 
     public func setTopic(_ topic: String) {
-        guard telemetryEnabled else { return }
+        guard stateStorage.telemetryEnabled else { return }
         eventsCollector.setTopic(topic)
     }
 
     // Public method to save event
     public func saveEvent(_ event: TraceEvent) {
-        guard telemetryEnabled else { return }
+        guard stateStorage.telemetryEnabled else { return }
+        logger.debug("Will store an event: \(event)")
         eventsCollector.saveEvent(event)
     }
 
     // Public method to set telemetry enabled or disabled
     public func setTelemetryEnabled(_ enabled: Bool) {
-        telemetryEnabled = enabled
         stateStorage.telemetryEnabled = enabled
         if enabled {
             Task { await sendStoredEvents() }
@@ -62,13 +65,15 @@ public class EventsClient: EventsClientProtocol {
     }
 
     private func sendStoredEvents() async {
-        guard telemetryEnabled else { return }
+        guard stateStorage.telemetryEnabled else { return }
         let events = eventsCollector.storage.fetchErrorEvents()
         guard !events.isEmpty else { return }
 
+        logger.debug("Will send events")
         do {
             let success: Bool = try await eventsDispatcher.executeWithRetry(events: events)
             if success {
+                logger.debug("Events sent successfully")
                 self.eventsCollector.storage.clearErrorEvents()
             }
         } catch {

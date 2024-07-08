@@ -45,16 +45,22 @@ actor SessionAuthenticateResponder {
             throw error
         }
 
+        let sessionAuthenticateRequestParams: SessionAuthenticateRequestParams
+        let pairingTopic: String
+
         do {
-            let (sessionAuthenticateRequestParams, pairingTopic) = try util.getsessionAuthenticateRequestParams(requestId: requestId)
+            (sessionAuthenticateRequestParams, pairingTopic) = try util.getsessionAuthenticateRequestParams(requestId: requestId)
             eventsClient.saveEvent(SessionAuthenticateTraceEvents.requestParamsRetrieved)
         } catch {
             eventsClient.saveEvent(SessionAuthenticateErrorEvents.requestParamsRetrievalFailed)
             throw error
         }
 
+        let responseTopic: String
+        let responseKeys: AgreementKeys
+
         do {
-            let (responseTopic, responseKeys) = try util.generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
+            (responseTopic, responseKeys) = try util.generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
             eventsClient.saveEvent(SessionAuthenticateTraceEvents.agreementKeysGenerated)
         } catch {
             eventsClient.saveEvent(SessionAuthenticateErrorEvents.agreementKeysGenerationFailed)
@@ -71,10 +77,14 @@ actor SessionAuthenticateResponder {
 
         let peerParticipant = sessionAuthenticateRequestParams.requester
 
+        let sessionSelfPubKey: AgreementPublicKey
+        let sessionSelfPubKeyHex: String
+        let sessionKeys: AgreementKeys
+
         do {
-            let sessionSelfPubKey = try kms.createX25519KeyPair()
-            let sessionSelfPubKeyHex = sessionSelfPubKey.hexRepresentation
-            let sessionKeys = try kms.performKeyAgreement(selfPublicKey: sessionSelfPubKey, peerPublicKey: peerParticipant.publicKey)
+            sessionSelfPubKey = try kms.createX25519KeyPair()
+            sessionSelfPubKeyHex = sessionSelfPubKey.hexRepresentation
+            sessionKeys = try kms.performKeyAgreement(selfPublicKey: sessionSelfPubKey, peerPublicKey: peerParticipant.publicKey)
             eventsClient.saveEvent(SessionAuthenticateTraceEvents.sessionKeysGenerated)
         } catch {
             eventsClient.saveEvent(SessionAuthenticateErrorEvents.sessionKeysGenerationFailed)
@@ -130,9 +140,11 @@ actor SessionAuthenticateResponder {
     }
 
     func respondError(requestId: RPCID) async throws {
-        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        do {
+            try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        } catch {
+            throw error
+        }
         verifyContextStore.delete(forKey: requestId.string)
     }
 }
-
-

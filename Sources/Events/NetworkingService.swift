@@ -1,10 +1,8 @@
-
 import Foundation
 
 protocol NetworkingServiceProtocol {
     func sendEvents(_ events: [Event]) async throws -> Bool
 }
-
 
 class NetworkingService: NetworkingServiceProtocol {
     private let session: URLSession
@@ -35,12 +33,11 @@ class NetworkingService: NetworkingServiceProtocol {
                     return
                 }
 
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                if let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) {
+                    continuation.resume(returning: true)
+                } else {
                     continuation.resume(returning: false)
-                    return
                 }
-
-                continuation.resume(returning: true)
             }
 
             task.priority = URLSessionTask.lowPriority

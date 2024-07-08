@@ -22,16 +22,19 @@ class EventsDispatcher {
         var delay = retryPolicy.initialDelay
 
         while attempts < retryPolicy.maxAttempts {
-            attempts += 1
-            do {
-                return try await networkingService.sendEvents(events)
-            } catch {
-                if attempts >= retryPolicy.maxAttempts {
-                    throw error
-                }
+            if attempts > 0 || retryPolicy.initialDelay > 0 {
                 let actualDelay = retryPolicy.delayOverride ?? delay
                 try await Task.sleep(nanoseconds: UInt64(actualDelay * Double(NSEC_PER_SEC)))
                 delay *= retryPolicy.multiplier
+            }
+
+            do {
+                return try await networkingService.sendEvents(events)
+            } catch {
+                attempts += 1
+                if attempts >= retryPolicy.maxAttempts {
+                    throw error
+                }
             }
         }
         throw NSError(domain: "EventsDispatcherError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Max retry attempts reached"])
