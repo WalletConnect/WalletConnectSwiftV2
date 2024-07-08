@@ -72,6 +72,7 @@ final class ApproveEngine {
 
 
     func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws -> Session {
+        eventsClient.startTrace(topic: "")
         logger.debug("Approving session proposal")
         eventsClient.saveEvent(SessionApproveExecutionTraceEvents.approvingSessionProposal)
 
