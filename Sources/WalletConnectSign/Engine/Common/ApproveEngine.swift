@@ -1,6 +1,5 @@
 import Foundation
 import Combine
-import Events
 
 final class ApproveEngine {
     enum Errors: Error {
@@ -31,6 +30,7 @@ final class ApproveEngine {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
+    private let eventsClient: EventsClient
 
     private var publishers = Set<AnyCancellable>()
 
@@ -47,7 +47,8 @@ final class ApproveEngine {
         sessionStore: WCSessionStorage,
         verifyClient: VerifyClientProtocol,
         rpcHistory: RPCHistory,
-        authRequestSubscribersTracking: AuthRequestSubscribersTracking
+        authRequestSubscribersTracking: AuthRequestSubscribersTracking,
+        eventsClient: EventsClient
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -62,6 +63,7 @@ final class ApproveEngine {
         self.verifyClient = verifyClient
         self.rpcHistory = rpcHistory
         self.authRequestSubscribersTracking = authRequestSubscribersTracking
+        self.eventsClient = eventsClient
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
