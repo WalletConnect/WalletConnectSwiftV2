@@ -30,7 +30,7 @@ final class ApproveEngine {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
-    private let eventsClient: EventsClient
+    private let eventsClient: EventsClientProtocol
 
     private var publishers = Set<AnyCancellable>()
 
@@ -48,7 +48,7 @@ final class ApproveEngine {
         verifyClient: VerifyClientProtocol,
         rpcHistory: RPCHistory,
         authRequestSubscribersTracking: AuthRequestSubscribersTracking,
-        eventsClient: EventsClient
+        eventsClient: EventsClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore

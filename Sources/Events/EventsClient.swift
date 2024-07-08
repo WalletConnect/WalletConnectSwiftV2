@@ -3,6 +3,7 @@ import Foundation
 public protocol EventsClientProtocol {
     func startTrace(topic: String)
     func saveEvent(_ event: TraceEvent)
+    func setTopic(_ topic: String)
     func sendStoredEvents() async
 }
 
@@ -62,6 +63,10 @@ public class MockEventsClient: EventsClientProtocol {
 
     public func startTrace(topic: String) {
         startTraceCalled = true
+    }
+    
+    public func setTopic(_ topic: String) {
+
     }
 
     public func saveEvent(_ event: TraceEvent) {
