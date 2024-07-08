@@ -10,7 +10,7 @@ class EventsCollectorTests: XCTestCase {
     override func setUp() {
         super.setUp()
         mockStorage = MockEventStorage()
-        eventsCollector = EventsCollector(storage: mockStorage, bundleId: "com.wallet.example")
+        eventsCollector = EventsCollector(storage: mockStorage, logger: ConsoleLoggerMock())
     }
 
     override func tearDown() {

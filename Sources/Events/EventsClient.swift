@@ -4,7 +4,6 @@ public protocol EventsClientProtocol {
     func startTrace(topic: String)
     func saveEvent(_ event: TraceEvent)
     func setTopic(_ topic: String)
-    func sendStoredEvents() async
 }
 
 public class EventsClient: EventsClientProtocol {
@@ -37,8 +36,7 @@ public class EventsClient: EventsClientProtocol {
         eventsCollector.saveEvent(event)
     }
 
-    // Public method to send stored events
-    public func sendStoredEvents() async {
+    private func sendStoredEvents() async {
         let events = eventsCollector.storage.fetchErrorEvents()
         guard !events.isEmpty else { return }
 
@@ -57,24 +55,19 @@ public class EventsClient: EventsClientProtocol {
 public class MockEventsClient: EventsClientProtocol {
     var startTraceCalled = false
     var saveEventCalled = false
-    var sendStoredEventsCalled = false
 
     public init() {}
 
     public func startTrace(topic: String) {
         startTraceCalled = true
     }
-    
+
     public func setTopic(_ topic: String) {
 
     }
 
     public func saveEvent(_ event: TraceEvent) {
         saveEventCalled = true
-    }
-
-    public func sendStoredEvents() async {
-        sendStoredEventsCalled = true
     }
 }
 #endif
