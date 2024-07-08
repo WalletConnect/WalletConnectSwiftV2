@@ -17,7 +17,8 @@ public class EventsClientFactory {
         return EventsClient(
             eventsCollector: eventsCollector,
             eventsDispatcher: eventsDispatcher,
-            logger: logger
+            logger: logger,
+            stateStorage: UserDefaultsTelemetryStateStorage()
         )
     }
 }
