@@ -18,19 +18,15 @@ class RelayUrlFactory {
         self.socketAuthenticator = socketAuthenticator
     }
 
-    func setFallback() {
-        self.fallback = true
-    }
-
     func create() -> URL {
         var components = URLComponents()
         components.scheme = "wss"
-        components.host = fallback ? NetworkConstants.fallbackUrl : relayHost
+        components.host = relayHost
         components.queryItems = [
             URLQueryItem(name: "projectId", value: projectId)
         ]
         do {
-            let authToken = try socketAuthenticator.createAuthToken(url: fallback ? "wss://" + NetworkConstants.fallbackUrl : "wss://" + relayHost)
+            let authToken = try socketAuthenticator.createAuthToken(url: "wss://" + relayHost)
             components.queryItems?.append(URLQueryItem(name: "auth", value: authToken))
         } catch {
             // TODO: Handle token creation errors
