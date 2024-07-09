@@ -4,6 +4,8 @@ import Combine
 @testable import WalletConnectRelay
 
 class DispatcherMock: Dispatching {
+    var isSocketConnected: Bool = true
+    
 
     private var publishers = Set<AnyCancellable>()
     private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
