@@ -29,7 +29,8 @@ public class Sign {
             projectId: Networking.projectId,
             crypto: config.crypto,
             networkingClient: Networking.interactor,
-            groupIdentifier: Networking.groupIdentifier
+            groupIdentifier: Networking.groupIdentifier,
+            eventsClient: Events.instance
         )
     }()
 

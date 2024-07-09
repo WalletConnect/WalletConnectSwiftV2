@@ -22,6 +22,10 @@ public final class RelayClient {
 
     var subscriptions: [String: String] = [:]
 
+    public var isSocketConnected: Bool {
+        return dispatcher.isSocketConnected
+    }
+
     public var messagePublisher: AnyPublisher<(topic: String, message: String, publishedAt: Date), Never> {
         messagePublisherSubject.eraseToAnyPublisher()
     }

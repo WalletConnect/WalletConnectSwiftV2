@@ -17,7 +17,8 @@ public struct SignClientFactory {
         projectId: String,
         crypto: CryptoProvider,
         networkingClient: NetworkingInteractor,
-        groupIdentifier: String
+        groupIdentifier: String,
+        eventsClient: EventsClientProtocol
     ) -> SignClient {
         let logger = ConsoleLogger(prefix: "📝", loggingLevel: .off)
 
@@ -37,7 +38,8 @@ public struct SignClientFactory {
             networkingClient: networkingClient,
             iatProvider: iatProvider,
             projectId: projectId,
-            crypto: crypto
+            crypto: crypto,
+            eventsClient: eventsClient
         )
     }
 
@@ -50,7 +52,8 @@ public struct SignClientFactory {
         networkingClient: NetworkingInteractor,
         iatProvider: IATProvider,
         projectId: String,
-        crypto: CryptoProvider
+        crypto: CryptoProvider,
+        eventsClient: EventsClientProtocol
     ) -> SignClient {
         let kms = KeyManagementService(keychain: keychainStorage)
         let rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: keyValueStorage)
@@ -83,7 +86,8 @@ public struct SignClientFactory {
             sessionStore: sessionStore,
             verifyClient: verifyClient,
             rpcHistory: rpcHistory,
-            authRequestSubscribersTracking: authRequestSubscribersTracking
+            authRequestSubscribersTracking: authRequestSubscribersTracking,
+            eventsClient: eventsClient
         )
         let cleanupService = SignCleanupService(pairingStore: pairingStore, sessionStore: sessionStore, kms: kms, sessionTopicToProposal: sessionTopicToProposal, networkInteractor: networkingClient, rpcHistory: rpcHistory)
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
@@ -125,7 +129,7 @@ public struct SignClientFactory {
         let linkAuthRequester = LinkAuthRequester(kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, linkModeLinksStore: linkModeLinksStore)
         let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: linkEnvelopesDispatcher, verifyClient: verifyClient, verifyContextStore: verifyContextStore)
 
-        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil)
+        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, eventsClient: eventsClient)
 
         let linkSessionAuthenticateResponder = LinkSessionAuthenticateResponder(linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger, kms: kms, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, walletErrorResponder: walletErrorResponder)
 

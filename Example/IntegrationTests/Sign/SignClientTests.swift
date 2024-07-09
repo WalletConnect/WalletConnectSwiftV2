@@ -48,7 +48,8 @@ final class SignClientTests: XCTestCase {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient
+            networkingClient: networkingClient,
+            eventsClient: MockEventsClient()
         )
         let metadata = AppMetadata(name: name, description: "", url: "", icons: [""], redirect: try! AppMetadata.Redirect(native: "", universal: linkModeUniversalLink, linkMode: supportLinkMode))
 
@@ -61,7 +62,8 @@ final class SignClientTests: XCTestCase {
             networkingClient: networkingClient,
             iatProvider: IATProviderMock(),
             projectId: InputConfig.projectId,
-            crypto: DefaultCryptoProvider()
+            crypto: DefaultCryptoProvider(),
+            eventsClient: MockEventsClient()
         )
 
         let clientId = try! networkingClient.getClientId()

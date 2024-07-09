@@ -46,7 +46,8 @@ final class XPlatformW3WTests: XCTestCase {
             logger: pairingLogger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient)
+            networkingClient: networkingClient,
+            eventsClient: MockEventsClient())
 
         let signClient = SignClientFactory.create(
             metadata: AppMetadata(name: name, description: "", url: "", icons: [""], redirect: try! AppMetadata.Redirect(native: "", universal: nil)),
@@ -57,7 +58,8 @@ final class XPlatformW3WTests: XCTestCase {
             networkingClient: networkingClient,
             iatProvider: DefaultIATProvider(),
             projectId: InputConfig.projectId,
-            crypto: DefaultCryptoProvider()
+            crypto: DefaultCryptoProvider(),
+            eventsClient: MockEventsClient()
         )
 
         w3wClient = Web3WalletClientFactory.create(

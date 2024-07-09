@@ -37,6 +37,10 @@ private extension Pair {
         guard let config = Pair.config else {
             fatalError("Error - you must call Pair.configure(_:) before accessing the shared instance.")
         }
-        return PairingClientFactory.create(networkingClient: Networking.interactor, groupIdentifier: Networking.groupIdentifier)
+        return PairingClientFactory.create(
+            networkingClient: Networking.interactor,
+            eventsClient: Events.instance,
+            groupIdentifier: Networking.groupIdentifier
+        )
     }()
 }

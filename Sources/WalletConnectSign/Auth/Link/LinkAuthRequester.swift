@@ -31,7 +31,6 @@ actor LinkAuthRequester {
     }
 
     func request(params: AuthRequestParams, walletUniversalLink: String) async throws -> String {
-
         guard try linkModeLinksStore.get(key: walletUniversalLink) != nil else { throw Errors.walletLinkSupportNotProven }
 
         var params = params

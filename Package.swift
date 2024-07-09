@@ -51,7 +51,7 @@ let package = Package(
     targets: [
         .target(
             name: "WalletConnectSign",
-            dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner"],
+            dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner", "Events"],
             path: "Sources/WalletConnectSign",
             resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
@@ -84,7 +84,7 @@ let package = Package(
             path: "Sources/WalletConnectKMS"),
         .target(
             name: "WalletConnectPairing",
-            dependencies: ["WalletConnectNetworking"],
+            dependencies: ["WalletConnectNetworking", "Events"],
             resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "WalletConnectSigner",
@@ -126,6 +126,9 @@ let package = Package(
         .target(
             name: "Database",
             dependencies: ["WalletConnectUtils"]),
+        .target(
+            name: "Events",
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"]),
         .target(
             name: "WalletConnectModal",
             dependencies: ["QRCode", "WalletConnectSign"],
@@ -169,7 +172,10 @@ let package = Package(
             dependencies: ["Commons", "TestingUtils"]),
         .testTarget(
             name: "WalletConnectModalTests",
-            dependencies: ["WalletConnectModal", "TestingUtils"])
+            dependencies: ["WalletConnectModal", "TestingUtils"]),
+        .testTarget(
+            name: "EventsTests",
+            dependencies: ["Events"]),
     ],
     swiftLanguageVersions: [.v5]
 )

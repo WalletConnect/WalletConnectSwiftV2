@@ -3,6 +3,7 @@ import Combine
 
 protocol Dispatching {
     var onMessage: ((String) -> Void)? { get set }
+    var isSocketConnected: Bool { get }
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> { get }
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
     func send(_ string: String, completion: @escaping (Error?) -> Void)
@@ -30,6 +31,10 @@ final class Dispatcher: NSObject, Dispatching {
 
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
         networkMonitor.networkConnectionStatusPublisher
+    }
+
+    var isSocketConnected: Bool {
+        return networkMonitor.isConnected
     }
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.dispatcher", qos: .utility, attributes: .concurrent)
