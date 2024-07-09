@@ -5,7 +5,7 @@ import XCTest
 import WalletConnectUtils
 import WalletConnectNetworking
 
-final class WalletPairServiceTestsTests: XCTestCase {
+final class WalletPairServiceTests: XCTestCase {
 
     var service: WalletPairService!
     var networkingInteractor: NetworkingInteractorMock!
