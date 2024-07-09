@@ -18,7 +18,7 @@ final class WalletPairServiceTestsTests: XCTestCase {
         storageMock = WCPairingStorageMock()
         cryptoMock = KeyManagementServiceMock()
         rpcHistory = RPCHistoryFactory.createForNetwork(keyValueStorage: RuntimeKeyValueStorage())
-        service = WalletPairService(networkingInteractor: networkingInteractor, kms: cryptoMock, pairingStorage: storageMock, history: rpcHistory, logger: ConsoleLoggerMock())
+        service = WalletPairService(networkingInteractor: networkingInteractor, kms: cryptoMock, pairingStorage: storageMock, history: rpcHistory, logger: ConsoleLoggerMock(), eventsClient: MockEventsClient())
     }
     
     func testPairWhenNetworkNotConnectedThrows() async {
