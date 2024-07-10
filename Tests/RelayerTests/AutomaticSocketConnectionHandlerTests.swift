@@ -28,14 +28,12 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
             socketAuthenticator: socketAuthenticator
         )
         backgroundTaskRegistrar = BackgroundTaskRegistrarMock()
-        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: ConsoleLoggerMock(), socket: webSocket, networkMonitor: networkMonitor)
         sut = AutomaticSocketConnectionHandler(
             socket: webSocketSession,
             networkMonitor: networkMonitor,
             appStateObserver: appStateObserver,
             backgroundTaskRegistrar: backgroundTaskRegistrar,
-            logger: ConsoleLoggerMock(),
-            socketUrlFallbackHandler: socketUrlFallbackHandler
+            logger: ConsoleLoggerMock()
         )
     }
 
