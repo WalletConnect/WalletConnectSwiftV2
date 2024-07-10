@@ -14,9 +14,8 @@ class AutomaticSocketConnectionHandler {
     private let appStateObserver: AppStateObserving
     private let networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
-    private let defaultTimeout: Int = 5
+    private let defaultTimeout: Int = 60
     private let logger: ConsoleLogging
-    private var socketUrlFallbackHandler: SocketUrlFallbackHandler
 
     private var publishers = Set<AnyCancellable>()
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.automatic_socket_connection", qos: .utility, attributes: .concurrent)
@@ -26,24 +25,16 @@ class AutomaticSocketConnectionHandler {
         networkMonitor: NetworkMonitoring = NetworkMonitor(),
         appStateObserver: AppStateObserving = AppStateObserver(),
         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar(),
-        logger: ConsoleLogging,
-        socketUrlFallbackHandler: SocketUrlFallbackHandler
+        logger: ConsoleLogging
     ) {
         self.appStateObserver = appStateObserver
         self.socket = socket
         self.networkMonitor = networkMonitor
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
         self.logger = logger
-        self.socketUrlFallbackHandler = socketUrlFallbackHandler
 
         setUpStateObserving()
         setUpNetworkMonitoring()
-
-        socketUrlFallbackHandler.onTryReconnect = { [unowned self] in
-            Task(priority: .high) {
-                await tryReconect()
-            }
-        }
 
         connect()
 
@@ -62,8 +53,8 @@ class AutomaticSocketConnectionHandler {
                 return
             }
             if !self.socket.isConnected {
-                self.logger.debug("Connection timed out, initiating fallback...")
-                self.socketUrlFallbackHandler.handleFallbackIfNeeded(error: .connectionFailed)
+                self.logger.debug("Connection timed out, will rety to connect...")
+                retryToConnect()
             }
             timer.cancel()
         }
@@ -99,6 +90,12 @@ class AutomaticSocketConnectionHandler {
         socket.disconnect()
     }
 
+    private func retryToConnect() {
+        if !socket.isConnected {
+            connect()
+        }
+    }
+
     private func reconnectIfNeeded() {
         if !socket.isConnected {
             socket.connect()
@@ -109,11 +106,6 @@ class AutomaticSocketConnectionHandler {
 // MARK: - SocketConnectionHandler
 
 extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
-    func tryReconect() async {
-        guard await appStateObserver.currentState == .foreground else { return }
-        reconnectIfNeeded()
-    }
-
     func handleConnect() throws {
         throw Errors.manualSocketConnectionForbidden
     }

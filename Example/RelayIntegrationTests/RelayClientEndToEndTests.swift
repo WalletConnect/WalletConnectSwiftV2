@@ -52,9 +52,7 @@ final class RelayClientEndToEndTests: XCTestCase {
             socketAuthenticator: socketAuthenticator
         )
 
-        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: logger, socket: socket, networkMonitor: networkMonitor)
-
-        let socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, logger: logger, socketUrlFallbackHandler: socketUrlFallbackHandler)
+        let socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, logger: logger)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
