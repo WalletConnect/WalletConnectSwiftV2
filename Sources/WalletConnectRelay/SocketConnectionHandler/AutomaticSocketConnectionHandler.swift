@@ -14,7 +14,7 @@ class AutomaticSocketConnectionHandler {
     private let appStateObserver: AppStateObserving
     private let networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
-    private let defaultTimeout: Int = 30
+    private let defaultTimeout: Int = 60
     private let logger: ConsoleLogging
 
     private var publishers = Set<AnyCancellable>()
@@ -25,7 +25,7 @@ class AutomaticSocketConnectionHandler {
         networkMonitor: NetworkMonitoring = NetworkMonitor(),
         appStateObserver: AppStateObserving = AppStateObserver(),
         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar(),
-        logger: ConsoleLogging,
+        logger: ConsoleLogging
     ) {
         self.appStateObserver = appStateObserver
         self.socket = socket
@@ -53,7 +53,7 @@ class AutomaticSocketConnectionHandler {
                 return
             }
             if !self.socket.isConnected {
-                self.logger.debug("Connection timed out, initiating fallback...")
+                self.logger.debug("Connection timed out, will rety to connect...")
                 retryToConnect()
             }
             timer.cancel()
@@ -92,7 +92,7 @@ class AutomaticSocketConnectionHandler {
 
     private func retryToConnect() {
         if !socket.isConnected {
-            socket.connect()
+            connect()
         }
     }
 

@@ -4,7 +4,7 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
 
     private let socket: WebSocketConnecting
     private let logger: ConsoleLogging
-    private let defaultTimeout: Int = 30
+    private let defaultTimeout: Int = 60
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.manual_socket_connection", attributes: .concurrent)
 
     init(

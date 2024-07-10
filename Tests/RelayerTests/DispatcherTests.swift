@@ -71,8 +71,7 @@ final class DispatcherTests: XCTestCase {
             projectId: "1012db890cf3cfb0c1cdc929add657ba",
             socketAuthenticator: socketAuthenticator
         )
-        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: logger, socket: webSocket, networkMonitor: networkMonitor)
-        let socketConnectionHandler = ManualSocketConnectionHandler(socket: webSocket, logger: logger, socketUrlFallbackHandler: socketUrlFallbackHandler)
+        let socketConnectionHandler = ManualSocketConnectionHandler(socket: webSocket, logger: logger)
         sut = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: relayUrlFactory, 
