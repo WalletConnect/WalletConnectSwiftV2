@@ -42,7 +42,8 @@ final class PairingTests: XCTestCase {
             logger: logger,
             keyValueStorage: keyValueStorage,
             keychainStorage: keychain,
-            networkingClient: networkingClient)
+            networkingClient: networkingClient,
+            eventsClient: MockEventsClient())
 
 
         return pairingClient

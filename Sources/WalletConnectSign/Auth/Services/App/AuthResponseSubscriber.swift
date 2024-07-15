@@ -97,6 +97,8 @@ class AuthResponseSubscriber {
         linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
 
+                _ = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
+
                 let pairingTopic = payload.topic
                 pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
                 removeResponseTopicRecord(responseTopic: payload.topic)

@@ -6,6 +6,8 @@ import WalletConnectKMS
 import WalletConnectNetworking
 
 public class NetworkingInteractorMock: NetworkInteracting {
+    public var isSocketConnected: Bool = true
+
 
     private var publishers = Set<AnyCancellable>()
 

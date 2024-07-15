@@ -30,6 +30,7 @@ final class ApproveEngine {
     private let logger: ConsoleLogging
     private let rpcHistory: RPCHistory
     private let authRequestSubscribersTracking: AuthRequestSubscribersTracking
+    private let eventsClient: EventsClientProtocol
 
     private var publishers = Set<AnyCancellable>()
 
@@ -46,7 +47,8 @@ final class ApproveEngine {
         sessionStore: WCSessionStorage,
         verifyClient: VerifyClientProtocol,
         rpcHistory: RPCHistory,
-        authRequestSubscribersTracking: AuthRequestSubscribersTracking
+        authRequestSubscribersTracking: AuthRequestSubscribersTracking,
+        eventsClient: EventsClientProtocol
     ) {
         self.networkingInteractor = networkingInteractor
         self.proposalPayloadsStore = proposalPayloadsStore
@@ -61,50 +63,72 @@ final class ApproveEngine {
         self.verifyClient = verifyClient
         self.rpcHistory = rpcHistory
         self.authRequestSubscribersTracking = authRequestSubscribersTracking
+        self.eventsClient = eventsClient
 
         setupRequestSubscriptions()
         setupResponseSubscriptions()
         setupResponseErrorSubscriptions()
     }
 
-    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws -> Session {
-        logger.debug("Approving session proposal")
 
-        guard !sessionNamespaces.isEmpty else { throw Errors.emtySessionNamespacesForbidden }
+    func approveProposal(proposerPubKey: String, validating sessionNamespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil) async throws -> Session {
+        eventsClient.startTrace(topic: "")
+        logger.debug("Approving session proposal")
+        eventsClient.saveEvent(SessionApproveExecutionTraceEvents.approvingSessionProposal)
+
+        guard !sessionNamespaces.isEmpty else {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionNamespacesValidationFailure)
+            throw Errors.emtySessionNamespacesForbidden
+        }
 
         guard let payload = try proposalPayloadsStore.get(key: proposerPubKey) else {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.proposalNotFound)
             throw Errors.proposalNotFound
         }
+        let pairingTopic = payload.topic
+
+        eventsClient.setTopic(pairingTopic)
 
         let proposal = payload.request
 
         guard !proposal.isExpired() else {
             logger.debug("Proposal has expired, topic: \(payload.topic)")
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.proposalExpired)
             proposalPayloadsStore.delete(forKey: proposerPubKey)
             throw Errors.proposalExpired
         }
 
         let networkConnectionStatus = await resolveNetworkConnectionStatus()
         guard networkConnectionStatus == .connected else {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.networkNotConnected)
             throw Errors.networkNotConnected
         }
 
-        let pairingTopic = payload.topic
-
-        try Namespace.validate(sessionNamespaces)
-        try Namespace.validateApproved(sessionNamespaces, against: proposal.requiredNamespaces)
+        do {
+            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionNamespacesValidationStarted)
+            try Namespace.validate(sessionNamespaces)
+            try Namespace.validateApproved(sessionNamespaces, against: proposal.requiredNamespaces)
+            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionNamespacesValidationSuccess)
+        } catch {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionNamespacesValidationFailure)
+            throw error
+        }
 
         let selfPublicKey = try kms.createX25519KeyPair()
 
         guard let agreementKey = try? kms.performKeyAgreement(
             selfPublicKey: selfPublicKey,
             peerPublicKey: proposal.proposer.publicKey
-        ) else { throw Errors.agreementMissingOrInvalid }
+        ) else {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.agreementMissingOrInvalid)
+            throw Errors.agreementMissingOrInvalid
+        }
 
         let sessionTopic = agreementKey.derivedTopic()
         try kms.setAgreementSecret(agreementKey, topic: sessionTopic)
 
         guard let relay = proposal.relays.first else {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.relayNotFound)
             throw Errors.relayNotFound
         }
 
@@ -125,21 +149,33 @@ final class ApproveEngine {
             pairingTopic: pairingTopic
         )
 
-        _ = try await proposeResponseTask
-        let session: WCSession = try await settleRequestTask
+        do {
+            _ = try await proposeResponseTask
+            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.responseApproveSent)
+        } catch {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
+            throw error
+        }
 
-        sessionStore.setSession(session)
-        onSessionSettle?(session.publicRepresentation())
-        logger.debug("Session proposal response and settle request have been sent")
+        do {
+            let session: WCSession = try await settleRequestTask
+            sessionStore.setSession(session)
+            onSessionSettle?(session.publicRepresentation())
+            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionSettleSuccess)
+            logger.debug("Session proposal response and settle request have been sent")
 
-        proposalPayloadsStore.delete(forKey: proposerPubKey)
-        verifyContextStore.delete(forKey: proposerPubKey)
+            proposalPayloadsStore.delete(forKey: proposerPubKey)
+            verifyContextStore.delete(forKey: proposerPubKey)
 
-        pairingRegisterer.activate(
-            pairingTopic: payload.topic,
-            peerMetadata: payload.request.proposer.metadata
-        )
-        return session.publicRepresentation()
+            pairingRegisterer.activate(
+                pairingTopic: payload.topic,
+                peerMetadata: payload.request.proposer.metadata
+            )
+            return session.publicRepresentation()
+        } catch {
+            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
+            throw error
+        }
     }
 
     func reject(proposerPubKey: String, reason: SignReasonCode) async throws {

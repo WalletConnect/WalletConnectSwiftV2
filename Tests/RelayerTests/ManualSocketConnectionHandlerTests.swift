@@ -22,9 +22,8 @@ final class ManualSocketConnectionHandlerTests: XCTestCase {
             projectId: "1012db890cf3cfb0c1cdc929add657ba",
             socketAuthenticator: socketAuthenticator
         )
-        let socketUrlFallbackHandler = SocketUrlFallbackHandler(relayUrlFactory: relayUrlFactory, logger: ConsoleLoggerMock(), socket: socket, networkMonitor: networkMonitor)
 
-        sut = ManualSocketConnectionHandler(socket: socket, logger: ConsoleLoggerMock(), socketUrlFallbackHandler: socketUrlFallbackHandler)
+        sut = ManualSocketConnectionHandler(socket: socket, logger: ConsoleLoggerMock())
     }
 
     func testHandleDisconnect() {
