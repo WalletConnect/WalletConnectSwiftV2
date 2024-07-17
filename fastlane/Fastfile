@@ -106,7 +106,8 @@ platform :ios do
       export_options: {
     provisioningProfiles: {
       "com.walletconnect.walletapp" => "match AppStore com.walletconnect.walletapp",
-      "com.walletconnect.walletapp.PNDecryptionService" => "match AppStore com.walletconnect.walletapp.PNDecryptionService"
+      "com.walletconnect.walletapp.PNDecryptionService" => "match AppStore com.walletconnect.walletapp.PNDecryptionService",
+        "com.walletconnect.dapp" => "match AppStore com.walletconnect.dapp" 
     }
   },
       xcargs: "RELAY_HOST='#{options[:relay_host]}' PROJECT_ID='#{options[:project_id]}' WALLETAPP_SENTRY_DSN='#{options[:sentry_dsn]}' MIXPANEL_TOKEN='#{options[:mixpanel_token]}'"
