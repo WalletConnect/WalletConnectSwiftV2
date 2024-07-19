@@ -8,21 +8,24 @@ struct Subscription: RelayRPC {
             let topic: String
             let message: String
             let publishedAt: Date
+            let attestation: String?
 
             enum CodingKeys: String, CodingKey {
-                case topic, message, publishedAt
+                case topic, message, publishedAt, attestation
             }
 
-            internal init(topic: String, message: String, publishedAt: Date) {
+            internal init(topic: String, message: String, publishedAt: Date, attestation: String?) {
                 self.topic = topic
                 self.message = message
                 self.publishedAt = publishedAt
+                self.attestation = attestation
             }
 
             init(from decoder: Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 topic = try container.decode(String.self, forKey: .topic)
                 message = try container.decode(String.self, forKey: .message)
+                attestation = try? container.decode(String.self, forKey: .attestation)
                 let publishedAtMiliseconds = try container.decode(UInt64.self, forKey: .publishedAt)
                 publishedAt = Date(milliseconds: publishedAtMiliseconds)
             }
@@ -45,7 +48,9 @@ struct Subscription: RelayRPC {
         "irn_subscription"
     }
 
-    init(id: String, topic: String, message: String) {
-        self.params = Params(id: id, data: Params.Contents(topic: topic, message: message, publishedAt: Date()))
+    #if DEBUG
+    init(id: String, topic: String, message: String, attestation: String? = nil) {
+        self.params = Params(id: id, data: Params.Contents(topic: topic, message: message, publishedAt: Date(), attestation: attestation))
     }
+    #endif
 }
