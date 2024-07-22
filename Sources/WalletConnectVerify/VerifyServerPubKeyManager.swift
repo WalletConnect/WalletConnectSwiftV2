@@ -10,7 +10,6 @@ class VerifyServerPubKeyManager {
         self.fetcher = fetcher
     }
 
-    // Public async function to get the public key
     func getPublicKey() async throws -> String {
         if let localKey = try getPublicKeyFromLocalStorage(), !isKeyExpired(localKey) {
             return localKey.publicKey
@@ -21,18 +20,21 @@ class VerifyServerPubKeyManager {
         }
     }
 
-    // Private function to get the public key from local storage
+    func refreshKey() async throws -> String {
+        let serverKey = try await fetcher.fetchPublicKey()
+        savePublicKeyToLocalStorage(publicKey: serverKey)
+        return serverKey.publicKey
+    }
+
     private func getPublicKeyFromLocalStorage() throws -> PublicKeyFetcher.VerifyServerPublicKey? {
         return try store.get(key: Self.publicKeyStorageKey)
     }
 
-    // Private function to check if the key is expired
     private func isKeyExpired(_ key: PublicKeyFetcher.VerifyServerPublicKey) -> Bool {
         let currentTime = Date().timeIntervalSince1970
         return currentTime >= key.expiresAt
     }
 
-    // Private function to save the public key to local storage
     private func savePublicKeyToLocalStorage(publicKey: PublicKeyFetcher.VerifyServerPublicKey) {
         store.set(publicKey, forKey: Self.publicKeyStorageKey)
     }

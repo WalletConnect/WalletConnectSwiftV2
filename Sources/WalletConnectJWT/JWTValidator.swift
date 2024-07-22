@@ -1,10 +1,14 @@
 import Foundation
 
-struct JWTValidator {
+public struct JWTValidator {
 
     let jwtString: String
 
-    func isValid(publicKey: SigningPublicKey) throws -> Bool {
+    public init(jwtString: String) {
+        self.jwtString = jwtString
+    }
+
+    public func isValid(publicKey: SigningPublicKey) throws -> Bool {
         var components = jwtString.components(separatedBy: ".")
 
         guard components.count == 3 else { throw JWTError.undefinedFormat }
