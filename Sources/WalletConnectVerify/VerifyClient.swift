@@ -7,6 +7,11 @@ public protocol VerifyClientProtocol {
     func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext
 }
 
+public enum VerificationType {
+    case v1(assertionId: String)
+    case v2(attestationJWT: String, messageId: String)
+}
+
 public actor VerifyClient: VerifyClientProtocol {
     enum Errors: Error {
         case attestationNotSupported
@@ -16,17 +21,20 @@ public actor VerifyClient: VerifyClientProtocol {
     let assertionRegistrer: AssertionRegistrer
     let appAttestationRegistrer: AppAttestationRegistrer
     let verifyContextFactory: VerifyContextFactory
+    let attestationVerifier: AttestationJWTVerifier
 
     init(
         originVerifier: OriginVerifier,
         assertionRegistrer: AssertionRegistrer,
         appAttestationRegistrer: AppAttestationRegistrer,
-        verifyContextFactory: VerifyContextFactory = VerifyContextFactory()
+        verifyContextFactory: VerifyContextFactory = VerifyContextFactory(),
+        attestationVerifier: AttestationJWTVerifier
     ) {
         self.originVerifier = originVerifier
         self.assertionRegistrer = assertionRegistrer
         self.appAttestationRegistrer = appAttestationRegistrer
         self.verifyContextFactory = verifyContextFactory
+        self.attestationVerifier = attestationVerifier
     }
 
     public func registerAttestationIfNeeded() async throws {
@@ -37,8 +45,16 @@ public actor VerifyClient: VerifyClientProtocol {
         return try await originVerifier.verifyOrigin(assertionId: assertionId)
     }
 
-    public func verifyOrigin(attestationJWT: String, messageId: String) async throws -> VerifyResponse {
-
+    /// Verify V2 attestation JWT
+    /// messageId - hash of the encrypted message supplied in the request
+    /// assertionId - hash of decrytped message
+    public func verify(_ verificationType: VerificationType) async throws -> VerifyResponse {
+        switch verificationType {
+        case .v1(let assertionId):
+            return try await verifyOrigin(assertionId: assertionId)
+        case .v2(let attestationJWT, let messageId):
+            return try await attestationVerifier.verify(attestationJWT: attestationJWT, messageId: messageId)
+        }
     }
 
     nonisolated public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
@@ -74,69 +90,3 @@ public struct VerifyClientMock: VerifyClientProtocol {
 }
 
 #endif
-
-class AttestationJWTVerifier {
-
-    enum Errors: Error {
-        case issuerDoesNotMatchVerifyServerPubKey
-        case messageIdMismatch
-        case invalidJWT
-    }
-
-    let verifyServerPubKeyManager: VerifyServerPubKeyManager
-
-    init(verifyServerPubKeyManager: VerifyServerPubKeyManager) {
-        self.verifyServerPubKeyManager = verifyServerPubKeyManager
-    }
-
-    // messageId - hash of the encrypted message supplied in the request
-    func verify(attestationJWT: String, messageId: String) async throws {
-        do {
-            let verifyServerPubKey = try await verifyServerPubKeyManager.getPublicKey()
-            try verifyJWTAgainstPubKey(attestationJWT, pubKey: verifyServerPubKey)
-        } catch {
-            let refreshedVerifyServerPubKey = try await verifyServerPubKeyManager.refreshKey()
-            try verifyJWTAgainstPubKey(attestationJWT, pubKey: refreshedVerifyServerPubKey)
-        }
-
-        let claims = try decodeJWTClaims(jwtString: attestationJWT)
-        guard messageId == claims.id else {
-            throw Errors.messageIdMismatch
-        }
-    }
-
-    func verifyJWTAgainstPubKey(_ jwtString: String, pubKey: String) throws {
-        let signingPubKey = try SigningPublicKey(hex: pubKey)
-
-        let validator = JWTValidator(jwtString: jwtString)
-        guard try validator.isValid(publicKey: signingPubKey) else {
-            throw Errors.invalidJWT
-        }
-    }
-
-    private func decodeJWTClaims(jwtString: String) throws -> AttestationJWTClaims {
-        let components = jwtString.components(separatedBy: ".")
-
-        guard components.count == 3 else { throw Errors.invalidJWT }
-
-        let payload = components[1]
-        guard let payloadData = Data(base64urlEncoded: payload) else {
-            throw Errors.invalidJWT
-        }
-
-        let claims = try JSONDecoder().decode(AttestationJWTClaims.self, from: payloadData)
-        return claims
-    }
-}
-
-struct AttestationJWTClaims: Codable {
-
-    var exp: UInt64
-
-    var isScam: Bool?
-
-    var id: String
-
-    var origin: String
-}
-

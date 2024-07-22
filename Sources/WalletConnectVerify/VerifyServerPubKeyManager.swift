@@ -1,11 +1,11 @@
 import Foundation
 
 class VerifyServerPubKeyManager {
-    static let publicKeyStorageKey = "com.walletconnect.verify.pubKey"
+    static let publicKeyStorageKey = "verify_server_pub_key"
     private let store: CodableStore<PublicKeyFetcher.VerifyServerPublicKey>
-    private let fetcher: PublicKeyFetcher
+    private let fetcher: PublicKeyFetching
 
-    init(store: CodableStore<PublicKeyFetcher.VerifyServerPublicKey>, fetcher: PublicKeyFetcher) {
+    init(store: CodableStore<PublicKeyFetcher.VerifyServerPublicKey>, fetcher: PublicKeyFetching = PublicKeyFetcher()) {
         self.store = store
         self.fetcher = fetcher
     }

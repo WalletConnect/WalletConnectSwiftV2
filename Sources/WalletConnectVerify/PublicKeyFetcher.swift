@@ -1,7 +1,10 @@
 import Foundation
 
 // PublicKeyFetcher class
-class PublicKeyFetcher {
+protocol PublicKeyFetching {
+    func fetchPublicKey() async throws -> PublicKeyFetcher.VerifyServerPublicKey
+}
+class PublicKeyFetcher: PublicKeyFetching {
     struct VerifyServerPublicKey: Codable {
         let publicKey: String
         let expiresAt: TimeInterval
@@ -21,11 +24,11 @@ class PublicKeyFetcher {
 }
 
 #if DEBUG
-class MockPublicKeyFetcher: PublicKeyFetcher {
-    var publicKey: VerifyServerPublicKey?
+class MockPublicKeyFetcher: PublicKeyFetching {
+    var publicKey: PublicKeyFetcher.VerifyServerPublicKey?
     var error: Error?
 
-    override func fetchPublicKey() async throws -> VerifyServerPublicKey {
+    func fetchPublicKey() async throws -> PublicKeyFetcher.VerifyServerPublicKey {
         if let error = error {
             throw error
         }
