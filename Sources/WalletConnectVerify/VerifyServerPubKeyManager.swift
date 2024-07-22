@@ -8,6 +8,21 @@ class VerifyServerPubKeyManager {
     init(store: CodableStore<PublicKeyFetcher.VerifyServerPublicKey>, fetcher: PublicKeyFetching = PublicKeyFetcher()) {
         self.store = store
         self.fetcher = fetcher
+
+        // Check if there is a cached, non-expired key on initialization
+        Task {
+            do {
+                if let localKey = try getPublicKeyFromLocalStorage(), !isKeyExpired(localKey) {
+                    // Key is valid, no action needed
+                } else {
+                    // No valid key, fetch and store a new one
+                    let serverKey = try await fetcher.fetchPublicKey()
+                    savePublicKeyToLocalStorage(publicKey: serverKey)
+                }
+            } catch {
+                print("Failed to initialize public key: \(error)")
+            }
+        }
     }
 
     func getPublicKey() async throws -> String {

@@ -2,7 +2,7 @@ import DeviceCheck
 import Foundation
 
 public protocol VerifyClientProtocol {
-    func verifyOrigin(assertionId: String) async throws -> VerifyResponse
+    func verify(_ verificationType: VerificationType) async throws -> VerifyResponse
     func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext
     func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext
 }
@@ -41,17 +41,13 @@ public actor VerifyClient: VerifyClientProtocol {
         try await appAttestationRegistrer.registerAttestationIfNeeded()
     }
 
-    public func verifyOrigin(assertionId: String) async throws -> VerifyResponse {
-        return try await originVerifier.verifyOrigin(assertionId: assertionId)
-    }
-
     /// Verify V2 attestation JWT
     /// messageId - hash of the encrypted message supplied in the request
     /// assertionId - hash of decrytped message
     public func verify(_ verificationType: VerificationType) async throws -> VerifyResponse {
         switch verificationType {
         case .v1(let assertionId):
-            return try await verifyOrigin(assertionId: assertionId)
+            return try await originVerifier.verifyOrigin(assertionId: assertionId)
         case .v2(let attestationJWT, let messageId):
             return try await attestationVerifier.verify(attestationJWT: attestationJWT, messageId: messageId)
         }
@@ -75,11 +71,11 @@ public actor VerifyClient: VerifyClientProtocol {
 public struct VerifyClientMock: VerifyClientProtocol {
     
     public init() {}
-    
-    public func verifyOrigin(assertionId: String) async throws -> VerifyResponse {
+
+    public func verify(_ verificationType: VerificationType) async throws -> VerifyResponse {
         return VerifyResponse(origin: "domain.com", isScam: nil)
     }
-    
+
     public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
         return VerifyContext(origin: "domain.com", validation: .valid)
     }
