@@ -397,7 +397,14 @@ private extension ApproveEngine {
         Task(priority: .high) {
             let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
-                let response = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let response: VerifyResponse
+                if let attestation = payload.attestation,
+                   let messageId = payload.encryptedMessage.data(using: .utf8)?.sha256().toHexString() {
+                    response = try await verifyClient.verify(.v2(attestationJWT: attestation, messageId: messageId))
+                } else {
+                    let assertionId = payload.decryptedPayload.sha256().toHexString()
+                    response = try await verifyClient.verify(.v1(assertionId: assertionId))
+                }
                 let verifyContext = verifyClient.createVerifyContext(
                     origin: response.origin,
                     domain: payload.request.proposer.metadata.url,
