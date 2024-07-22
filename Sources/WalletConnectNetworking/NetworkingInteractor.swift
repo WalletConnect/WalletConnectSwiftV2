@@ -9,10 +9,10 @@ public class NetworkingInteractor: NetworkInteracting {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
 
-    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String?, attestation: String?), Never>()
+    private let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String, attestation: String?), Never>()
     private let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
 
-    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String?, attestation: String?), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String, attestation: String?), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -269,10 +269,10 @@ public class NetworkingInteractor: NetworkInteracting {
     }
     
     public func handleHistoryRequest(topic: String, request: RPCRequest) {
-        requestPublisherSubject.send((topic, request, Data(), Date(), nil, nil, nil ))
+        requestPublisherSubject.send((topic, request, Data(), Date(), nil, "", nil ))
     }
 
-    private func handleRequest(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String?, attestation: String?) {
+    private func handleRequest(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String, attestation: String?) {
         do {
             try rpcHistory.set(request, forTopic: topic, emmitedBy: .remote, transportType: .relay)
             requestPublisherSubject.send((topic, request, decryptedPayload, publishedAt, derivedTopic, encryptedMessage, attestation))
