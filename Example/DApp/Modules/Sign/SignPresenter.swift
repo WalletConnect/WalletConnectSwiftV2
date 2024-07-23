@@ -223,6 +223,7 @@ extension SignPresenter {
             self.session = session
             session.namespaces.values.forEach { namespace in
                 namespace.accounts.forEach { account in
+                    accountsDetails.removeAll()                
                     accountsDetails.append(
                         AccountDetails(
                             chain: account.blockchainIdentifier,
