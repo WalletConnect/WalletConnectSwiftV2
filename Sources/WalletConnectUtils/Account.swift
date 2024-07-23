@@ -11,7 +11,9 @@
  [CAIP-10]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-10.md
  */
 public struct Account: Equatable, Hashable {
-
+    public enum Errors: Error {
+        case invalidInitFormat
+    }
     /// A blockchain namespace. Usually describes an ecosystem or standard.
     public let namespace: String
 
@@ -70,6 +72,13 @@ public struct Account: Equatable, Hashable {
      */
     public init?(blockchain: Blockchain, address: String) {
         self.init("\(blockchain.absoluteString):\(address)")
+    }
+
+    public init(blockchain: Blockchain, accountAddress: String) throws {
+        guard let instance = Self("\(blockchain.absoluteString):\(accountAddress)") else {
+            throw Errors.invalidInitFormat
+        }
+        self = instance
     }
 }
 

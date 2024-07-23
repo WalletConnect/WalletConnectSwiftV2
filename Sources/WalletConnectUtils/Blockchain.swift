@@ -9,7 +9,9 @@
  [CAIP-2]:https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md
  */
 public struct Blockchain: Equatable, Hashable {
-
+    public enum Errors: Error {
+        case invalidInitFormat
+    }
     /// A blockchain namespace. Usually describes an ecosystem or standard.
     public let namespace: String
 
@@ -42,6 +44,13 @@ public struct Blockchain: Equatable, Hashable {
      */
     public init?(namespace: String, reference: String) {
         self.init("\(namespace):\(reference)")
+    }
+
+    public init(namespace: String, reference: Int) throws {
+        guard let instance = Self("\(namespace):\(reference)") else {
+            throw Errors.invalidInitFormat
+        }
+        self = instance
     }
 }
 
