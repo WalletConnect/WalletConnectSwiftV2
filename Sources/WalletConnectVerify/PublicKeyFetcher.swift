@@ -17,9 +17,19 @@ class PublicKeyFetcher: PublicKeyFetching {
             throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
 
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let publicKeyResponse = try JSONDecoder().decode(VerifyServerPublicKey.self, from: data)
-        return publicKeyResponse
+        let (data, response) = try await URLSession.shared.data(from: url)
+        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+            let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+        }
+
+        do {
+            let publicKeyResponse = try JSONDecoder().decode(VerifyServerPublicKey.self, from: data)
+            return publicKeyResponse
+        } catch {
+            print("Decoding error: \(error)")
+            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to decode JSON"])
+        }
     }
 }
 
