@@ -66,7 +66,8 @@ class ApproveSessionAuthenticateUtil {
         pairingTopic: String,
         request: SessionAuthenticateRequestParams,
         sessionTopic: String,
-        transportType: WCSession.TransportType
+        transportType: WCSession.TransportType,
+        verifyContext: VerifyContext
     ) throws -> Session? {
 
 
@@ -101,7 +102,8 @@ class ApproveSessionAuthenticateUtil {
             settleParams: settleParams,
             requiredNamespaces: [:],
             acknowledged: true,
-            transportType: transportType
+            transportType: transportType,
+            verifyContext: verifyContext
         )
         logger.debug("created a session with topic: \(sessionTopic)")
 

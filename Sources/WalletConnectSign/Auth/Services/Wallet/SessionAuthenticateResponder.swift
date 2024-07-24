@@ -120,12 +120,14 @@ actor SessionAuthenticateResponder {
         }
 
         do {
+            let verifyContext = (try? verifyContextStore.get(key: requestId.string)) ?? VerifyContext(origin: nil, validation: .unknown)
             let session = try util.createSession(
                 response: responseParams,
                 pairingTopic: pairingTopic,
                 request: sessionAuthenticateRequestParams,
                 sessionTopic: sessionTopic,
-                transportType: .relay
+                transportType: .relay,
+                verifyContext: verifyContext
             )
             pairingRegisterer.activate(
                 pairingTopic: pairingTopic,

@@ -214,26 +214,9 @@ private extension SessionEngine {
         guard !request.isExpired() else {
             return respondError(payload: payload, reason: .sessionRequestExpired, protocolMethod: protocolMethod)
         }
-        Task(priority: .high) {
-            do {
-                let response: VerifyResponse
-                if let attestation = payload.attestation,
-                   let messageId = payload.encryptedMessage.data(using: .utf8)?.sha256().toHexString() {
-                    response = try await verifyClient.verify(.v2(attestationJWT: attestation, messageId: messageId))
-                } else {
-                    let assertionId = payload.decryptedPayload.sha256().toHexString()
-                    response = try await verifyClient.verify(.v1(assertionId: assertionId))
-                }
-                let verifyContext = verifyClient.createVerifyContext(origin: response.origin, domain: session.peerParticipant.metadata.url, isScam: response.isScam)
-                verifyContextStore.set(verifyContext, forKey: request.id.string)
-
-                sessionRequestsProvider.emitRequestIfPending()
-            } catch {
-                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: session.peerParticipant.metadata.url, isScam: nil)
-                verifyContextStore.set(verifyContext, forKey: request.id.string)
-                sessionRequestsProvider.emitRequestIfPending()
-            }
-        }
+        let verifyContext = session.verifyContext ?? VerifyContext(origin: nil, validation: .unknown)
+        verifyContextStore.set(verifyContext, forKey: request.id.string)
+        sessionRequestsProvider.emitRequestIfPending()
     }
 
     func onSessionPing(payload: SubscriptionPayload) {

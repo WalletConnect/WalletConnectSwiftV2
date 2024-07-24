@@ -226,6 +226,8 @@ final class ApproveEngine {
             expiry: Int64(expiry)
         )
 
+        let verifyContext = (try? verifyContextStore.get(key: proposal.proposer.publicKey)) ?? VerifyContext(origin: nil, validation: .unknown)
+
         let session = WCSession(
             topic: topic,
             pairingTopic: pairingTopic,
@@ -235,7 +237,8 @@ final class ApproveEngine {
             settleParams: settleParams,
             requiredNamespaces: proposal.requiredNamespaces,
             acknowledged: false,
-            transportType: .relay
+            transportType: .relay,
+            verifyContext: verifyContext
         )
 
         logger.debug("Sending session settle request")
@@ -467,7 +470,8 @@ private extension ApproveEngine {
             settleParams: params,
             requiredNamespaces: proposedNamespaces,
             acknowledged: true,
-            transportType: .relay
+            transportType: .relay,
+            verifyContext: nil
         )
         sessionStore.setSession(session)
 
