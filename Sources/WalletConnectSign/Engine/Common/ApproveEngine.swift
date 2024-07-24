@@ -226,7 +226,8 @@ final class ApproveEngine {
             expiry: Int64(expiry)
         )
 
-        let verifyContext = (try? verifyContextStore.get(key: proposal.proposer.publicKey)) ?? VerifyContext(origin: nil, validation: .unknown)
+        let verifyContext = (try? verifyContextStore.get(key: proposal.proposer.publicKey)) ?? verifyClient.createVerifyContext(origin: nil, domain: proposal.proposer.metadata.url, isScam: false)
+
 
         let session = WCSession(
             topic: topic,

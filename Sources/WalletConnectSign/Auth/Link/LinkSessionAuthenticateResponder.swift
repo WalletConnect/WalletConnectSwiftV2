@@ -60,15 +60,13 @@ actor LinkSessionAuthenticateResponder {
 
         let url = try await linkEnvelopesDispatcher.respond(topic: responseTopic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation))
 
-        let verifyContext = (try? verifyContextStore.get(key: requestId.string)) ?? VerifyContext(origin: nil, validation: .unknown)
-
         let session = try util.createSession(
             response: responseParams,
             pairingTopic: pairingTopic,
             request: sessionAuthenticateRequestParams,
             sessionTopic: sessionTopic,
             transportType: .linkMode,
-            verifyContext: verifyContext
+            verifyContext: util.getVerifyContext(requestId: requestId, domain: sessionAuthenticateRequestParams.requester.metadata.url)
         )
 
         verifyContextStore.delete(forKey: requestId.string)

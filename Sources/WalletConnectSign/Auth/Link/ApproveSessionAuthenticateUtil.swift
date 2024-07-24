@@ -14,6 +14,8 @@ class ApproveSessionAuthenticateUtil {
     private let logger: ConsoleLogging
     private let sessionStore: WCSessionStorage
     private let sessionNamespaceBuilder: SessionNamespaceBuilder
+    private let verifyContextStore: CodableStore<VerifyContext>
+    private let verifyClient: VerifyClientProtocol
 
     init(
         logger: ConsoleLogging,
@@ -23,7 +25,9 @@ class ApproveSessionAuthenticateUtil {
         messageFormatter: SIWEFromCacaoFormatting,
         sessionStore: WCSessionStorage,
         sessionNamespaceBuilder: SessionNamespaceBuilder,
-        networkingInteractor: NetworkInteracting
+        networkingInteractor: NetworkInteracting,
+        verifyContextStore: CodableStore<VerifyContext>,
+        verifyClient: VerifyClientProtocol
     ) {
         self.logger = logger
         self.kms = kms
@@ -33,6 +37,8 @@ class ApproveSessionAuthenticateUtil {
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
         self.networkingInteractor = networkingInteractor
+        self.verifyContextStore = verifyContextStore
+        self.verifyClient = verifyClient
     }
 
     func getsessionAuthenticateRequestParams(requestId: RPCID) throws -> (request: SessionAuthenticateRequestParams, topic: String) {
@@ -59,7 +65,6 @@ class ApproveSessionAuthenticateUtil {
         let keys = try kms.performKeyAgreement(selfPublicKey: selfPubKey, peerPublicKey: peerPubKey.hexRepresentation)
         return (topic, keys)
     }
-
 
     func createSession(
         response: SessionAuthenticateResponseParams,
@@ -115,6 +120,12 @@ class ApproveSessionAuthenticateUtil {
 
         return session.publicRepresentation()
     }
+
+
+    func getVerifyContext(requestId: RPCID, domain: String) -> VerifyContext {
+        (try? verifyContextStore.get(key: requestId.string)) ?? verifyClient.createVerifyContext(origin: nil, domain: domain, isScam: false)
+    }
+
 
     func recoverAndVerifySignature(cacaos: [Cacao]) async throws {
         try await cacaos.asyncForEach { [unowned self] cacao in
