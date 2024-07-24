@@ -2,10 +2,10 @@ import Foundation
 
 class VerifyServerPubKeyManager {
     static let publicKeyStorageKey = "verify_server_pub_key"
-    private let store: CodableStore<PublicKeyFetcher.VerifyServerPublicKey>
+    private let store: CodableStore<VerifyServerPublicKey>
     private let fetcher: PublicKeyFetching
 
-    init(store: CodableStore<PublicKeyFetcher.VerifyServerPublicKey>, fetcher: PublicKeyFetching = PublicKeyFetcher()) {
+    init(store: CodableStore<VerifyServerPublicKey>, fetcher: PublicKeyFetching = PublicKeyFetcher()) {
         self.store = store
         self.fetcher = fetcher
 
@@ -41,16 +41,16 @@ class VerifyServerPubKeyManager {
         return serverKey.publicKey
     }
 
-    private func getPublicKeyFromLocalStorage() throws -> PublicKeyFetcher.VerifyServerPublicKey? {
+    private func getPublicKeyFromLocalStorage() throws -> VerifyServerPublicKey? {
         return try store.get(key: Self.publicKeyStorageKey)
     }
 
-    private func isKeyExpired(_ key: PublicKeyFetcher.VerifyServerPublicKey) -> Bool {
+    private func isKeyExpired(_ key: VerifyServerPublicKey) -> Bool {
         let currentTime = Date().timeIntervalSince1970
         return currentTime >= key.expiresAt
     }
 
-    private func savePublicKeyToLocalStorage(publicKey: PublicKeyFetcher.VerifyServerPublicKey) {
+    private func savePublicKeyToLocalStorage(publicKey: VerifyServerPublicKey) {
         store.set(publicKey, forKey: Self.publicKeyStorageKey)
     }
 }

@@ -2,13 +2,13 @@ import Foundation
 
 // PublicKeyFetcher class
 protocol PublicKeyFetching {
-    func fetchPublicKey() async throws -> PublicKeyFetcher.VerifyServerPublicKey
+    func fetchPublicKey() async throws -> VerifyServerPublicKey
+}
+struct VerifyServerPublicKey: Codable {
+    let publicKey: String
+    let expiresAt: TimeInterval
 }
 class PublicKeyFetcher: PublicKeyFetching {
-    struct VerifyServerPublicKey: Codable {
-        let publicKey: String
-        let expiresAt: TimeInterval
-    }
 
     private let urlString = "https://verify.walletconnect.org/v2/public-key"
 
@@ -25,10 +25,10 @@ class PublicKeyFetcher: PublicKeyFetching {
 
 #if DEBUG
 class MockPublicKeyFetcher: PublicKeyFetching {
-    var publicKey: PublicKeyFetcher.VerifyServerPublicKey?
+    var publicKey: VerifyServerPublicKey?
     var error: Error?
 
-    func fetchPublicKey() async throws -> PublicKeyFetcher.VerifyServerPublicKey {
+    func fetchPublicKey() async throws -> VerifyServerPublicKey {
         if let error = error {
             throw error
         }
