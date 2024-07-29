@@ -1,7 +1,12 @@
 import Foundation
 import CryptoKit
 
-class VerifyServerPubKeyManager {
+protocol VerifyServerPubKeyManagerProtocol {
+    func getPublicKey() async throws -> P256.Signing.PublicKey
+    func refreshKey() async throws -> P256.Signing.PublicKey
+}
+
+class VerifyServerPubKeyManager: VerifyServerPubKeyManagerProtocol {
 
     static let publicKeyStorageKey = "verify_server_pub_key"
     private let store: CodableStore<VerifyServerPublicKey>
@@ -56,3 +61,36 @@ class VerifyServerPubKeyManager {
         store.set(publicKey, forKey: Self.publicKeyStorageKey)
     }
 }
+
+#if DEBUG
+class VerifyServerPubKeyManagerMock: VerifyServerPubKeyManagerProtocol {
+    var mockPublicKey: P256.Signing.PublicKey?
+    var error: Error?
+
+    init() {
+        let jwk = VerifyServerPublicKey.JWK(
+            crv: "P-256",
+            ext: true,
+            keyOps: ["verify"],
+            kty: "EC",
+            x: "NzUWD0z_Sr3corYWb2bfEF68_UvYcxFzslHKRJ_xCHk",
+            y: "gWkzUBt_VKro6rydyWdm-ii9-DHjpxdxVQTyX_ZZohc"
+        )
+        mockPublicKey = try? jwk.P256SigningPublicKey()
+    }
+
+    func getPublicKey() async throws -> P256.Signing.PublicKey {
+        if let error = error {
+            throw error
+        }
+        return mockPublicKey!
+    }
+
+    func refreshKey() async throws -> P256.Signing.PublicKey {
+        if let error = error {
+            throw error
+        }
+        return mockPublicKey!
+    }
+}
+#endif

@@ -21,9 +21,9 @@ class AttestationJWTVerifier {
         case invalidJWT
     }
 
-    let verifyServerPubKeyManager: VerifyServerPubKeyManager
+    let verifyServerPubKeyManager: VerifyServerPubKeyManagerProtocol
 
-    init(verifyServerPubKeyManager: VerifyServerPubKeyManager) {
+    init(verifyServerPubKeyManager: VerifyServerPubKeyManagerProtocol) {
         self.verifyServerPubKeyManager = verifyServerPubKeyManager
     }
 
