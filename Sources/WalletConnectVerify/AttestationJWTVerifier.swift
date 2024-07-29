@@ -1,5 +1,6 @@
 
 import Foundation
+import CryptoKit
 
 struct AttestationJWTClaims: Codable {
 
@@ -30,10 +31,10 @@ class AttestationJWTVerifier {
     func verify(attestationJWT: String, messageId: String) async throws -> VerifyResponse {
         do {
             let verifyServerPubKey = try await verifyServerPubKeyManager.getPublicKey()
-            try verifyJWTAgainstPubKey(attestationJWT, pubKey: verifyServerPubKey)
+            try verifyJWTAgainstPubKey(attestationJWT, signingPubKey: verifyServerPubKey)
         } catch {
             let refreshedVerifyServerPubKey = try await verifyServerPubKeyManager.refreshKey()
-            try verifyJWTAgainstPubKey(attestationJWT, pubKey: refreshedVerifyServerPubKey)
+            try verifyJWTAgainstPubKey(attestationJWT, signingPubKey: refreshedVerifyServerPubKey)
         }
 
         let claims = try decodeJWTClaims(jwtString: attestationJWT)
@@ -44,10 +45,8 @@ class AttestationJWTVerifier {
         return VerifyResponse(origin: claims.origin, isScam: claims.isScam)
     }
 
-    func verifyJWTAgainstPubKey(_ jwtString: String, pubKey: String) throws {
-        let signingPubKey = try SigningPublicKey(hex: pubKey)
-
-        let validator = JWTValidator(jwtString: jwtString)
+    func verifyJWTAgainstPubKey(_ jwtString: String, signingPubKey: P256.Signing.PublicKey) throws {
+        let validator = P256JWTValidator(jwtString: jwtString)
         guard try validator.isValid(publicKey: signingPubKey) else {
             throw Errors.invalidJWT
         }
@@ -67,3 +66,4 @@ class AttestationJWTVerifier {
         return claims
     }
 }
+

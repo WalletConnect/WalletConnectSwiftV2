@@ -1,6 +1,8 @@
 import Foundation
+import CryptoKit
 
 class VerifyServerPubKeyManager {
+
     static let publicKeyStorageKey = "verify_server_pub_key"
     private let store: CodableStore<VerifyServerPublicKey>
     private let fetcher: PublicKeyFetching
@@ -25,20 +27,20 @@ class VerifyServerPubKeyManager {
         }
     }
 
-    func getPublicKey() async throws -> String {
+    func getPublicKey() async throws -> P256.Signing.PublicKey {
         if let localKey = try getPublicKeyFromLocalStorage(), !isKeyExpired(localKey) {
-            return localKey.publicKey
+            return try localKey.publicKey.P256SigningPublicKey()
         } else {
             let serverKey = try await fetcher.fetchPublicKey()
             savePublicKeyToLocalStorage(publicKey: serverKey)
-            return serverKey.publicKey
+            return try serverKey.publicKey.P256SigningPublicKey()
         }
     }
 
-    func refreshKey() async throws -> String {
+    func refreshKey() async throws -> P256.Signing.PublicKey {
         let serverKey = try await fetcher.fetchPublicKey()
         savePublicKeyToLocalStorage(publicKey: serverKey)
-        return serverKey.publicKey
+        return try serverKey.publicKey.P256SigningPublicKey()
     }
 
     private func getPublicKeyFromLocalStorage() throws -> VerifyServerPublicKey? {

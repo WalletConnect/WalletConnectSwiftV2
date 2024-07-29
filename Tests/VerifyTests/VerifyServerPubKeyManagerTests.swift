@@ -1,5 +1,5 @@
-import Foundation
 import XCTest
+import CryptoKit
 @testable import WalletConnectVerify
 
 class VerifyServerPubKeyManagerTests: XCTestCase {
@@ -15,40 +15,65 @@ class VerifyServerPubKeyManagerTests: XCTestCase {
     }
 
     func testGetPublicKeyFromServer() async throws {
-        let expectedPublicKey = "test_public_key"
+        let expectedJWK = VerifyServerPublicKey.JWK.stub()
+        let expectedPublicKey = try expectedJWK.P256SigningPublicKey()
         let expiresAt = Date().timeIntervalSince1970 + 3600 // 1 hour from now
-        fetcher.publicKey = VerifyServerPublicKey(publicKey: expectedPublicKey, expiresAt: expiresAt)
+        fetcher.publicKey = VerifyServerPublicKey(publicKey: expectedJWK, expiresAt: expiresAt)
         manager = VerifyServerPubKeyManager(store: store, fetcher: fetcher)
 
         let publicKey = try await manager.getPublicKey()
 
-        XCTAssertEqual(publicKey, expectedPublicKey)
+        XCTAssertEqual(publicKey.rawRepresentation, expectedPublicKey.rawRepresentation)
     }
 
     func testGetPublicKeyFromLocalStorage() async throws {
-        let expectedPublicKey = "test_public_key"
+        let expectedJWK = VerifyServerPublicKey.JWK.stub()
+        let expectedPublicKey = try expectedJWK.P256SigningPublicKey()
         let expiresAt = Date().timeIntervalSince1970 + 3600 // 1 hour from now
-        let storedKey = VerifyServerPublicKey(publicKey: expectedPublicKey, expiresAt: expiresAt)
+        let storedKey = VerifyServerPublicKey(publicKey: expectedJWK, expiresAt: expiresAt)
         store.set(storedKey, forKey: VerifyServerPubKeyManager.publicKeyStorageKey)
         manager = VerifyServerPubKeyManager(store: store, fetcher: fetcher)
 
         let publicKey = try await manager.getPublicKey()
 
-        XCTAssertEqual(publicKey, expectedPublicKey)
+        XCTAssertEqual(publicKey.rawRepresentation, expectedPublicKey.rawRepresentation)
     }
 
     func testGetExpiredPublicKeyFromLocalStorage() async throws {
-        let expectedPublicKey = "test_public_key"
-        let newTestPubKey = "new_test_public_key"
-        let expiresAt = Date().timeIntervalSince1970 - 3600 // 1 hour ago
-        let storedKey = VerifyServerPublicKey(publicKey: expectedPublicKey, expiresAt: expiresAt)
+        let oldJWK = VerifyServerPublicKey.JWK.stub()
+        let newJWK = VerifyServerPublicKey.JWK(
+            crv: "P-256",
+            ext: true,
+            keyOps: ["verify"],
+            kty: "EC",
+            x: "MKl2ZQXTZsL10tK3nDXJZUJTTkGaxgPtg42lC5VxW9c",
+            y: "IcIsyFf6M5XzUjxwK9ujYB69TUMzIYGTkUyrvjoB3UM"
+        )
+        let oldPublicKey = try oldJWK.P256SigningPublicKey()
+        let newPublicKey = try newJWK.P256SigningPublicKey()
+        let expiredTime = Date().timeIntervalSince1970 - 3600 // 1 hour ago
+        let validTime = Date().timeIntervalSince1970 + 3600 // 1 hour from now
+        let storedKey = VerifyServerPublicKey(publicKey: oldJWK, expiresAt: expiredTime)
         store.set(storedKey, forKey: VerifyServerPubKeyManager.publicKeyStorageKey)
 
-        fetcher.publicKey = VerifyServerPublicKey(publicKey: newTestPubKey, expiresAt: Date().timeIntervalSince1970 + 3600)
+        fetcher.publicKey = VerifyServerPublicKey(publicKey: newJWK, expiresAt: validTime)
         manager = VerifyServerPubKeyManager(store: store, fetcher: fetcher)
 
         let publicKey = try await manager.getPublicKey()
 
-        XCTAssertEqual(publicKey, newTestPubKey)
+        XCTAssertEqual(publicKey.rawRepresentation, newPublicKey.rawRepresentation)
+    }
+}
+
+extension VerifyServerPublicKey.JWK {
+    static func stub() -> VerifyServerPublicKey.JWK {
+        return VerifyServerPublicKey.JWK(
+            crv: "P-256",
+            ext: true,
+            keyOps: ["verify"],
+            kty: "EC",
+            x: "CbL4DOYOb1ntd-8OmExO-oS0DWCMC00DntrymJoB8tk",
+            y: "KTFwjHtQxGTDR91VsOypcdBfvbo6sAMj5p4Wb-9hRA0"
+        )
     }
 }
