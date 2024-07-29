@@ -121,7 +121,7 @@ let package = Package(
             path: "Sources/WalletConnectRouter/Router"),
         .target(
             name: "WalletConnectVerify",
-            dependencies: ["WalletConnectUtils", "WalletConnectNetworking"],
+            dependencies: ["WalletConnectUtils", "WalletConnectNetworking", "WalletConnectJWT"],
             resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
         .target(
             name: "Database",

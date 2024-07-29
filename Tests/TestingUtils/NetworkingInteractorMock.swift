@@ -40,10 +40,10 @@ public class NetworkingInteractorMock: NetworkInteracting {
         networkConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
 
-    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never>()
+    public let requestPublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String, attestation: String?), Never>()
     public let responsePublisherSubject = PassthroughSubject<(topic: String, request: RPCRequest, response: RPCResponse, publishedAt: Date, derivedTopic: String?), Never>()
 
-    public var requestPublisher: AnyPublisher<(topic: String, request: JSONRPC.RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?), Never> {
+    public var requestPublisher: AnyPublisher<(topic: String, request: JSONRPC.RPCRequest, decryptedPayload: Data, publishedAt: Date, derivedTopic: String?, encryptedMessage: String, attestation: String?), Never> {
         requestPublisherSubject.eraseToAnyPublisher()
     }
 
@@ -63,9 +63,9 @@ public class NetworkingInteractorMock: NetworkInteracting {
             .filter { rpcRequest in
                 return rpcRequest.request.method == request.method
             }
-            .compactMap { topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic in
+            .compactMap { topic, rpcRequest, decryptedPayload, publishedAt, derivedTopic, encryptedMessage, attestation in
                 guard let id = rpcRequest.id, let request = try? rpcRequest.params?.get(Request.self) else { return nil }
-                return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic)
+                return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: decryptedPayload, publishedAt: publishedAt, derivedTopic: derivedTopic, encryptedMessage: encryptedMessage, attestation: attestation)
             }
             .eraseToAnyPublisher()
     }

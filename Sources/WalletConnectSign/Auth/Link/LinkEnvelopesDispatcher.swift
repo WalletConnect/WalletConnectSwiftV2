@@ -152,7 +152,7 @@ final class LinkEnvelopesDispatcher {
                     guard let id = rpcRequest.id, let request = try rpcRequest.params?.get(RequestParams.self) else {
                         return nil
                     }
-                    return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil)
+                    return RequestSubscriptionPayload(id: id, topic: topic, request: request, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil, encryptedMessage: "", attestation: nil)
                 } catch {
                     self?.logger.debug(error)
                 }

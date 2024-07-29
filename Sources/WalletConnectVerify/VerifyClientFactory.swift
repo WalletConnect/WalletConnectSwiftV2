@@ -17,10 +17,15 @@ public class VerifyClientFactory {
             attestChallengeProvider: attestChallengeProvider,
             keyAttestationService: keyAttestationService
         )
+        let verifyServerPubKeyManagerStore: CodableStore<VerifyServerPublicKey> = CodableStore(defaults: keyValueStorage, identifier: "com.walletconnect.verify")
+
+        let verifyServerPubKeyManager = VerifyServerPubKeyManager(store: verifyServerPubKeyManagerStore)
+        let attestationVerifier = AttestationJWTVerifier(verifyServerPubKeyManager: verifyServerPubKeyManager)
         return VerifyClient(
             originVerifier: originVerifier,
             assertionRegistrer: assertionRegistrer,
-            appAttestationRegistrer: appAttestationRegistrer
+            appAttestationRegistrer: appAttestationRegistrer,
+            attestationVerifier: attestationVerifier
         )
     }
 }

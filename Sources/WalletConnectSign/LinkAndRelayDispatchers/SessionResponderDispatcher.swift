@@ -21,7 +21,7 @@ class SessionResponderDispatcher {
     
     func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws -> String? {
 
-        guard let session = sessionStore.getSession(forTopic: topic), session.acknowledged else {
+        guard let session = sessionStore.getSession(forTopic: topic) else {
             logger.debug("Could not find session for topic \(topic)")
             throw WalletConnectError.noSessionMatchingTopic(topic)
         }

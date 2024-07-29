@@ -73,8 +73,8 @@ final class ApproveEngineTests: XCTestCase {
         pairingStorageMock.setPairing(pairing)
         let proposerPubKey = AgreementPrivateKey().publicKey.hexRepresentation
         let proposal = SessionProposal.stub(proposerPubKey: proposerPubKey)
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
-        
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil, encryptedMessage: "", attestation: nil))
+
         _ = try await engine.approveProposal(proposerPubKey: proposal.proposer.publicKey, validating: SessionNamespace.stubDictionary())
 
         let topicB = networkingInteractor.subscriptions.last!
@@ -98,7 +98,7 @@ final class ApproveEngineTests: XCTestCase {
             sessionProposed = true
         }
 
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil, encryptedMessage: "", attestation: nil))
         XCTAssertNotNil(try! proposalPayloadsStore.get(key: proposal.proposer.publicKey), "Proposer must store proposal payload")
         XCTAssertTrue(sessionProposed)
     }
@@ -121,7 +121,7 @@ final class ApproveEngineTests: XCTestCase {
             didCallBackOnSessionApproved = true
         }
         sessionTopicToProposal.set(SessionProposal.stub().publicRepresentation(pairingTopic: ""), forKey: sessionTopic)
-        networkingInteractor.requestPublisherSubject.send((sessionTopic, RPCRequest.stubSettle(), Data(), Date(), ""))
+        networkingInteractor.requestPublisherSubject.send((sessionTopic, RPCRequest.stubSettle(), Data(), Date(), "", "", nil))
 
         usleep(100)
 
@@ -172,7 +172,7 @@ final class ApproveEngineTests: XCTestCase {
         engine.onSessionProposal = { _, _ in
             proposalReceivedExpectation.fulfill()
         }
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil, encryptedMessage: "", attestation: nil))
 
         wait(for: [proposalReceivedExpectation], timeout: 0.1)
         
@@ -191,8 +191,8 @@ final class ApproveEngineTests: XCTestCase {
         engine.onSessionProposal = { _, _ in
             proposalReceivedExpectation.fulfill()
         }
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
-        
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil, encryptedMessage: "", attestation: nil))
+
         wait(for: [proposalReceivedExpectation], timeout: 0.1)
         
         XCTAssertTrue(verifyContextStore.getAll().count == 1)
@@ -214,7 +214,7 @@ final class ApproveEngineTests: XCTestCase {
         engine.onSessionProposal = { _, _ in
             proposalReceivedExpectation.fulfill()
         }
-        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil))
+        pairingRegisterer.subject.send(RequestSubscriptionPayload(id: RPCID("id"), topic: topicA, request: proposal, decryptedPayload: Data(), publishedAt: Date(), derivedTopic: nil, encryptedMessage: "", attestation: nil))
         
         wait(for: [proposalReceivedExpectation], timeout: 0.1)
         
