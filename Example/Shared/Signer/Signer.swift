@@ -1,7 +1,7 @@
 import Foundation
 import Commons
 import WalletConnectSign
-import WalletConnectAccount
+import YttriumWrapper
 
 final class Signer {
     enum Errors: Error {
@@ -69,15 +69,17 @@ final class Signer {
             case "personal_sign":
                 let params = try request.params.get([String].self)
                 let message = params[0]
-                return AnyCodable(SmartAccount.instance.signMessage(message))
+                let signed = try SmartAccount.instance.signMessage(message)
+                return AnyCodable(signed)
 
             case "eth_signTypedData":
                 let params = try request.params.get([String].self)
                 let message = params[0]
-                return AnyCodable(SmartAccount.instance.signMessage(message))
+                let signed = try SmartAccount.instance.signMessage(message)
+                return AnyCodable(signed)
 
             case "eth_sendTransaction":
-                let params = try request.params.get([WalletConnectAccount.Transaction].self)
+                let params = try request.params.get([YttriumWrapper.Transaction].self)
                 let transaction = params[0]
                 let result = try await SmartAccount.instance.sendTransaction(transaction)
                 return AnyCodable(result)

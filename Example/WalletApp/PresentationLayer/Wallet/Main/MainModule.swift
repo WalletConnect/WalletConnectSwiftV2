@@ -41,7 +41,7 @@ final class MainModule {
             // Sign the data
             let (v, r, s) = try! prvKey.sign(message: .init(Data(dataToSign)))
             let result = "0x" + r.toHexString() + s.toHexString() + String(v + 27, radix: 16)
-            return result
+            return .success(result)
         }
     }
 }
