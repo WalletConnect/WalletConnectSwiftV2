@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61DAC4AB2C65897800BAF3F8 /* YttriumWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 61DAC4AA2C65897800BAF3F8 /* YttriumWrapper */; };
 		767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767DC83428997F8E00080FA9 /* EthSendTransaction.swift */; };
 		84310D05298BC980000C15B6 /* MainInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84310D04298BC980000C15B6 /* MainInteractor.swift */; };
 		8439CB89293F658E00F2F2E2 /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8439CB88293F658E00F2F2E2 /* PushMessage.swift */; };
@@ -27,7 +28,6 @@
 		84733CD32C1C2A4B001B2850 /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AEC2502B4D42C100E27A5B /* AlertPresenter.swift */; };
 		84733CD42C1C2C24001B2850 /* ProfilingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B6A372B06697B00162B01 /* ProfilingService.swift */; };
 		84733CD52C1C2CEB001B2850 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE25D293F56D6004840D1 /* InputConfig.swift */; };
-		84733CD82C245718001B2850 /* WalletConnectAccount in Frameworks */ = {isa = PBXBuildFile; productRef = 84733CD72C245718001B2850 /* WalletConnectAccount */; };
 		84733CDA2C258BDB001B2850 /* AccountMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84733CD92C258BDB001B2850 /* AccountMock.swift */; };
 		847BD1D62989492500076C90 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D12989492500076C90 /* MainViewController.swift */; };
 		847BD1D82989492500076C90 /* MainModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D32989492500076C90 /* MainModule.swift */; };
@@ -763,10 +763,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				A573C53D29EC366500E3CBFD /* HDWalletKit in Frameworks */,
-				84733CD82C245718001B2850 /* WalletConnectAccount in Frameworks */,
 				A59D25EE2AB3672700D7EA3A /* AsyncButton in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
 				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
+				61DAC4AB2C65897800BAF3F8 /* YttriumWrapper in Frameworks */,
 				8487A9462A836C3F0003D5AF /* Sentry in Frameworks */,
 				C55D349929630D440004314A /* Web3Wallet in Frameworks */,
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
@@ -2073,7 +2073,7 @@
 				C54C248F2AEB1B5600DA4BF6 /* WalletConnectRouter */,
 				84AEC2532B4D43CD00E27A5B /* SwiftMessages */,
 				84F391F92BA87CEB00FDC20A /* Web3ModalUI */,
-				84733CD72C245718001B2850 /* WalletConnectAccount */,
+				61DAC4AA2C65897800BAF3F8 /* YttriumWrapper */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -2153,7 +2153,6 @@
 				84943C792A9BA206007EBAC2 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 				84AEC2522B4D43CD00E27A5B /* XCRemoteSwiftPackageReference "SwiftMessages" */,
 				84F3EFC32BA87C09005FCFAE /* XCRemoteSwiftPackageReference "web3modal-swift" */,
-				84733CD62C245718001B2850 /* XCRemoteSwiftPackageReference "WalletConnectAccount" */,
 			);
 			productRefGroup = 764E1D3D26F8D3FC00A1FB15 /* Products */;
 			projectDirPath = "";
@@ -3257,14 +3256,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		84733CD62C245718001B2850 /* XCRemoteSwiftPackageReference "WalletConnectAccount" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/WalletConnect/WalletConnectAccount";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		8487A9422A836C2A0003D5AF /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
@@ -3340,6 +3331,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		61DAC4AA2C65897800BAF3F8 /* YttriumWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = YttriumWrapper;
+		};
 		844749FC29B9E6B2005F520B /* WalletConnectNetworking */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectNetworking;
@@ -3356,11 +3351,6 @@
 		844AD55E2B1497270062E123 /* Web3Wallet */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Web3Wallet;
-		};
-		84733CD72C245718001B2850 /* WalletConnectAccount */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 84733CD62C245718001B2850 /* XCRemoteSwiftPackageReference "WalletConnectAccount" */;
-			productName = WalletConnectAccount;
 		};
 		8486EDD22B4F2EA6008E53C3 /* SwiftMessages */ = {
 			isa = XCSwiftPackageProductDependency;
