@@ -1,20 +1,20 @@
-
 import Foundation
-import WalletConnectAccount
+import YttriumWrapper
 import WalletConnectUtils
 
-class AccountClientMock: AccountClientProtocol {
-    var onSign: WalletConnectAccount.OnSign?
+class AccountClientMock: YttriumWrapper.AccountClientProtocol {
+    
+    var onSign: OnSign?
     
     var chainId: Int
 
-    required init(entryPoint: String, chainId: Int, onSign: WalletConnectAccount.OnSign?) {
+    required init(entryPoint: String, chainId: Int, onSign: OnSign?) {
         self.chainId = chainId
         self.onSign = onSign
     }
 
     // prepares UserOp
-    func sendTransaction(_ transaction: WalletConnectAccount.Transaction) async throws -> String {
+    func sendTransaction(_ transaction: YttriumWrapper.Transaction) async throws -> String {
         guard let onSign = onSign else {
             fatalError("Error - onSign closure must be set before calling signMessage")
         }
@@ -22,7 +22,7 @@ class AccountClientMock: AccountClientProtocol {
         return "txHash"
     }
     
-    func sendBatchTransaction(_ batch: [WalletConnectAccount.Transaction]) async throws -> String {
+    func sendBatchTransaction(_ batch: [YttriumWrapper.Transaction]) async throws -> String {
         return "userOpReceipt"
     }
     
@@ -36,20 +36,44 @@ class AccountClientMock: AccountClientProtocol {
         return try Account(blockchain: chain, accountAddress: address)
     }
 
-    func signMessage(_ message: String) -> String {
+    func signMessage(_ message: String) throws -> String {
         guard let onSign = onSign else {
             fatalError("Error - onSign closure must be set before calling signMessage")
         }
-        return onSign(message)
+        return try! onSign(message).get()
+    }
+}
+
+extension YttriumWrapper.AccountClient {
+    
+    func getAccount() async throws -> Account {
+        let chain = try Blockchain(namespace: "eip155", reference: chainId)
+        let address = try await getAddress()
+        return try Account(blockchain: chain, accountAddress: address)
     }
 }
 
 class SmartAccount {
-    static var instance: AccountClientMock = {
+    static var mockInstance: AccountClientMock = {
         guard let config = SmartAccount.config else {
             fatalError("Error - you must call SmartAccount.configure(entryPoint:chainId:onSign:) before accessing the shared instance.")
         }
-        return AccountClientMock(entryPoint: config.entryPoint, chainId: config.chainId, onSign: config.onSign)
+        return AccountClientMock(
+            entryPoint: config.entryPoint,
+            chainId: config.chainId,
+            onSign: config.onSign
+        )
+    }()
+    
+    static var instance: AccountClient = {
+        guard let config = SmartAccount.config else {
+            fatalError("Error - you must call SmartAccount.configure(entryPoint:chainId:onSign:) before accessing the shared instance.")
+        }
+        return AccountClient(
+            entryPoint: config.entryPoint,
+            chainId: config.chainId,
+            onSign: config.onSign
+        )
     }()
 
     private static var config: Config?
@@ -67,11 +91,11 @@ class SmartAccount {
     ///   - entryPoint: Entry point
     ///   - chainId: Chain ID
     ///   - onSign: Closure for signing messages (optional)
-    static public func configure(entryPoint: String, chainId: Int, onSign: OnSign? = nil) {
+    static public func configure(
+        entryPoint: String,
+        chainId: Int,
+        onSign: OnSign? = nil
+    ) {
         SmartAccount.config = Config(entryPoint: entryPoint, chainId: chainId, onSign: onSign)
-    }
-
-    static func setOnSign(_ onSign: @escaping OnSign) {
-        instance.onSign = onSign
     }
 }
