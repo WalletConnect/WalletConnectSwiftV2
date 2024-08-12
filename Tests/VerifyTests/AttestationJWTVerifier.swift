@@ -13,16 +13,15 @@ class AttestationJWTVerifierTests: XCTestCase {
     }
 
     func testVerifyValidJWT() async throws {
-        let jwt = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjIyMjMyOTYsImlkIjoiQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSIsIm9yaWdpbiI6Imh0dHBzOi8vd2ViM21vZGFsLmNvbSIsImlzU2NhbSI6ZmFsc2V9.IyIDRId-8Yv6ZkrnHh4BdL7AClNM5brOyGpYbUw9V_SHJqxgEd9UzMlwcOsVoFHxIqgyoYA-ulvANHW0kv_KdA"
-        let messageId = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        let jwt = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjM0NzE3MjMsImlkIjoiYjNmYmZhMDUxZDJhNjdkNGRmNTYzM2IyMjc0NDAyNTUxMTg1NzQwZGQwMjA3YWM0OWI1M2RiYTcxOTc0YTgzNCIsIm9yaWdpbiI6Imh0dHBzOi8vcmVhY3QtZGFwcC12Mi1naXQtY2hvcmUtdmVyaWZ5LXYyLXNhbXBsZXMtd2FsbGV0Y29ubmVjdDEudmVyY2VsLmFwcCIsImlzU2NhbSI6bnVsbCwiaXNWZXJpZmllZCI6dHJ1ZX0.8RQwiEEfTGn8p3INRdHpi88dpzetKCp3nscfLtWG2cVE2dU0dWgV2ncqnh_RWmygqEnWCPUlH1RMwS1nWbZzrQ"
+        let messageId = "b3fbfa051d2a67d4df5633b2274402551185740dd0207ac49b53dba71974a834"
 
         let response = try await verifier.verify(attestationJWT: jwt, messageId: messageId)
-        XCTAssertEqual(response.origin, "https://web3modal.com")
-        XCTAssertEqual(response.isScam, false)
+        XCTAssertEqual(response.origin, "https://react-dapp-v2-git-chore-verify-v2-samples-walletconnect1.vercel.app")
     }
 
     func testVerifyJWTWithInvalidMessageId() async throws {
-        let jwt = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjIyMjMyOTYsImlkIjoiQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSIsIm9yaWdpbiI6Imh0dHBzOi8vd2ViM21vZGFsLmNvbSIsImlzU2NhbSI6ZmFsc2V9.IyIDRId-8Yv6ZkrnHh4BdL7AClNM5brOyGpYbUw9V_SHJqxgEd9UzMlwcOsVoFHxIqgyoYA-ulvANHW0kv_KdA"
+        let jwt = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjM0NzE3MjMsImlkIjoiYjNmYmZhMDUxZDJhNjdkNGRmNTYzM2IyMjc0NDAyNTUxMTg1NzQwZGQwMjA3YWM0OWI1M2RiYTcxOTc0YTgzNCIsIm9yaWdpbiI6Imh0dHBzOi8vcmVhY3QtZGFwcC12Mi1naXQtY2hvcmUtdmVyaWZ5LXYyLXNhbXBsZXMtd2FsbGV0Y29ubmVjdDEudmVyY2VsLmFwcCIsImlzU2NhbSI6bnVsbCwiaXNWZXJpZmllZCI6dHJ1ZX0.8RQwiEEfTGn8p3INRdHpi88dpzetKCp3nscfLtWG2cVE2dU0dWgV2ncqnh_RWmygqEnWCPUlH1RMwS1nWbZzrQ"
         let invalidMessageId = "InvalidMessageId"
 
         do {

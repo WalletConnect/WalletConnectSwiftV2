@@ -73,8 +73,8 @@ class VerifyServerPubKeyManagerMock: VerifyServerPubKeyManagerProtocol {
             ext: true,
             keyOps: ["verify"],
             kty: "EC",
-            x: "NzUWD0z_Sr3corYWb2bfEF68_UvYcxFzslHKRJ_xCHk",
-            y: "gWkzUBt_VKro6rydyWdm-ii9-DHjpxdxVQTyX_ZZohc"
+            x: "CbL4DOYOb1ntd-8OmExO-oS0DWCMC00DntrymJoB8tk",
+            y: "KTFwjHtQxGTDR91VsOypcdBfvbo6sAMj5p4Wb-9hRA0"
         )
         mockPublicKey = try? jwk.P256SigningPublicKey()
     }
