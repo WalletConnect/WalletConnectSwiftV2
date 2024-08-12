@@ -3,7 +3,7 @@ import Foundation
 
 public protocol VerifyClientProtocol {
     func verify(_ verificationType: VerificationType) async throws -> VerifyResponse
-    func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext
+    func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool?) -> VerifyContext
     func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext
 }
 
@@ -53,8 +53,8 @@ public actor VerifyClient: VerifyClientProtocol {
         }
     }
 
-    nonisolated public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
-        verifyContextFactory.createVerifyContext(origin: origin, domain: domain, isScam: isScam)
+    nonisolated public func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool?) -> VerifyContext {
+        verifyContextFactory.createVerifyContext(origin: origin, domain: domain, isScam: isScam, isVerified: isVerified)
     }
 
     nonisolated public func createVerifyContextForLinkMode(redirectUniversalLink: String, domain: String) -> VerifyContext {
@@ -69,14 +69,13 @@ public actor VerifyClient: VerifyClientProtocol {
 #if DEBUG
 
 public struct VerifyClientMock: VerifyClientProtocol {
-    
     public init() {}
 
     public func verify(_ verificationType: VerificationType) async throws -> VerifyResponse {
-        return VerifyResponse(origin: "domain.com", isScam: nil)
+        return VerifyResponse(origin: "domain.com", isScam: nil, isVerified: nil)
     }
 
-    public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
+    public func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool?) -> VerifyContext {
         return VerifyContext(origin: "domain.com", validation: .valid)
     }
     

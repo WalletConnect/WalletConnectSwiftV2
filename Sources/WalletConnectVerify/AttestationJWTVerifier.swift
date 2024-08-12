@@ -44,7 +44,7 @@ class AttestationJWTVerifier {
             throw Errors.messageIdMismatch
         }
 
-        return VerifyResponse(origin: claims.origin, isScam: claims.isScam)
+        return VerifyResponse(origin: claims.origin, isScam: claims.isScam, isVerified: claims.isVerified)
     }
 
     func verifyJWTAgainstPubKey(_ jwtString: String, signingPubKey: P256.Signing.PublicKey) throws {

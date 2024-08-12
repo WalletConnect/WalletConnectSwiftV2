@@ -123,7 +123,7 @@ class ApproveSessionAuthenticateUtil {
 
 
     func getVerifyContext(requestId: RPCID, domain: String) -> VerifyContext {
-        (try? verifyContextStore.get(key: requestId.string)) ?? verifyClient.createVerifyContext(origin: nil, domain: domain, isScam: false)
+        (try? verifyContextStore.get(key: requestId.string)) ?? verifyClient.createVerifyContext(origin: nil, domain: domain, isScam: false, isVerified: nil)
     }
 
 

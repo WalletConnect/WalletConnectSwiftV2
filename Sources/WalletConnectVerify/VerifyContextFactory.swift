@@ -2,7 +2,7 @@
 import Foundation
 
 class VerifyContextFactory {
-    public func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool? = nil) -> VerifyContext {
+    public func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool?) -> VerifyContext {
 
         guard isScam != true else {
             return VerifyContext(

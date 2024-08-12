@@ -226,7 +226,7 @@ final class ApproveEngine {
             expiry: Int64(expiry)
         )
 
-        let verifyContext = (try? verifyContextStore.get(key: proposal.proposer.publicKey)) ?? verifyClient.createVerifyContext(origin: nil, domain: proposal.proposer.metadata.url, isScam: false)
+        let verifyContext = (try? verifyContextStore.get(key: proposal.proposer.publicKey)) ?? verifyClient.createVerifyContext(origin: nil, domain: proposal.proposer.metadata.url, isScam: false, isVerified: nil)
 
 
         let session = WCSession(
@@ -411,12 +411,13 @@ private extension ApproveEngine {
                 let verifyContext = verifyClient.createVerifyContext(
                     origin: response.origin,
                     domain: payload.request.proposer.metadata.url,
-                    isScam: response.isScam
+                    isScam: response.isScam,
+                    isVerified: response.isVerified
                 )
                 verifyContextStore.set(verifyContext, forKey: proposal.proposer.publicKey)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
             } catch {
-                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url, isScam: nil)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url, isScam: nil, isVerified: nil)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
                 return
             }

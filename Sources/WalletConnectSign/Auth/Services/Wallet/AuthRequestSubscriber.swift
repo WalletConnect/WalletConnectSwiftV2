@@ -64,11 +64,11 @@ class AuthRequestSubscriber {
                             let assertionId = payload.decryptedPayload.sha256().toHexString()
                             response = try await verifyClient.verify(.v1(assertionId: assertionId))
                         }
-                        let verifyContext = verifyClient.createVerifyContext(origin: response.origin, domain: payload.request.authPayload.domain, isScam: response.isScam)
+                        let verifyContext = verifyClient.createVerifyContext(origin: response.origin, domain: payload.request.authPayload.domain, isScam: response.isScam, isVerified: response.isVerified)
                         verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                     } catch {
-                        let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.authPayload.domain, isScam: nil)
+                        let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.authPayload.domain, isScam: nil, isVerified: nil)
                         verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                         return
