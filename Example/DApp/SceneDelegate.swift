@@ -126,7 +126,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     order: 1,
                     mobileLink: "rn-web3wallet://",
                     linkMode: "https://lab.web3modal.com/walletkit_rn"
-                )
+                ),
                 .init(
                     id: "flutter-sample",
                     name: "Flutter Sample Wallet",
@@ -135,7 +135,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     order: 1,
                     mobileLink: "wcflutterwallet://",
                     linkMode: "https://lab.web3modal.com/walletkit_flutter"
-                )
+                ),
                 .init(
                     id: "flutter-sample-internal",
                     name: "Flutter Sample Wallet Internal",
@@ -144,7 +144,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     order: 1,
                     mobileLink: "wcflutterwallet-internal://",
                     linkMode: "https://lab.web3modal.com/walletkit_flutter_internal"
-                )
+                ),
             ]
         )
 
