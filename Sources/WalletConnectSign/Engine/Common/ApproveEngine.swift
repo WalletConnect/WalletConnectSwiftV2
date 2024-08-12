@@ -399,7 +399,6 @@ private extension ApproveEngine {
         }
         
         Task(priority: .high) {
-            let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
                 let response: VerifyResponse
                 if let attestation = payload.attestation,

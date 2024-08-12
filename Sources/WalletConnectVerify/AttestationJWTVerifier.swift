@@ -11,6 +11,8 @@ struct AttestationJWTClaims: Codable {
     var id: String
 
     var origin: String
+
+    var isVerified: Bool
 }
 
 class AttestationJWTVerifier {
@@ -47,7 +49,8 @@ class AttestationJWTVerifier {
 
     func verifyJWTAgainstPubKey(_ jwtString: String, signingPubKey: P256.Signing.PublicKey) throws {
         let validator = P256JWTValidator(jwtString: jwtString)
-        guard try validator.isValid(publicKey: signingPubKey) else {
+        guard let isValid = try? validator.isValid(publicKey: signingPubKey),
+                 isValid else {
             throw Errors.invalidJWT
         }
     }

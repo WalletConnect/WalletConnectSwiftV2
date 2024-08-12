@@ -65,7 +65,7 @@ public struct SignClientFactory {
         let verifyClient = VerifyClientFactory.create()
         let sessionRequestsProvider = SessionRequestsProvider(historyService: historyService)
         let invalidRequestsSanitiser = InvalidRequestsSanitiser(historyService: historyService, history: rpcHistory)
-        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyContextStore: verifyContextStore, verifyClient: verifyClient, kms: kms, sessionStore: sessionStore, logger: logger, sessionRequestsProvider: sessionRequestsProvider, invalidRequestsSanitiser: invalidRequestsSanitiser)
+        let sessionEngine = SessionEngine(networkingInteractor: networkingClient, historyService: historyService, verifyContextStore: verifyContextStore, kms: kms, sessionStore: sessionStore, logger: logger, sessionRequestsProvider: sessionRequestsProvider, invalidRequestsSanitiser: invalidRequestsSanitiser)
         let nonControllerSessionStateMachine = NonControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let controllerSessionStateMachine = ControllerSessionStateMachine(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let sessionExtendRequester = SessionExtendRequester(sessionStore: sessionStore, networkingInteractor: networkingClient)
