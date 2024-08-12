@@ -2,13 +2,21 @@
 import Foundation
 
 class VerifyContextFactory {
-    public func createVerifyContext(origin: String?, domain: String, isScam: Bool?) -> VerifyContext {
+    public func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool? = nil) -> VerifyContext {
+        if let isVerified = isVerified, !isVerified {
+            return VerifyContext(
+                origin: origin,
+                validation: .unknown
+            )
+        }
+
         guard isScam != true else {
             return VerifyContext(
                 origin: origin,
                 validation: .scam
             )
         }
+
         if let origin, let originUrl = URL(string: origin), let domainUrl = URL(string: domain) {
             return VerifyContext(
                 origin: origin,

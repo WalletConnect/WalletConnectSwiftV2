@@ -36,6 +36,19 @@ class VerifyContextFactoryTests: XCTestCase {
         XCTAssertEqual(context.validation, .unknown)
     }
 
+    func testVerifyContextIsMarkedAsUnknownWhenIsVerifiedIsFalse() {
+        let context = factory.createVerifyContext(origin: "http://example.com", domain: "http://example.com", isScam: false, isVerified: false)
+        XCTAssertEqual(context.validation, .unknown)
+    }
+
+    func testVerifyContextIsMarkedAsScamWhenIsScamIsTrueRegardlessOfIsVerified() {
+        let context = factory.createVerifyContext(origin: "http://example.com", domain: "http://example.com", isScam: true, isVerified: true)
+        XCTAssertEqual(context.validation, .scam)
+
+        let contextWithFalseVerification = factory.createVerifyContext(origin: "http://example.com", domain: "http://example.com", isScam: true, isVerified: false)
+        XCTAssertEqual(contextWithFalseVerification.validation, .scam)
+    }
+
     // tests for createVerifyContextForLinkMode
 
     func testValidUniversalLink() {
