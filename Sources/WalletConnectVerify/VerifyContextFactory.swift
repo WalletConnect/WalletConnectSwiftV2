@@ -3,12 +3,6 @@ import Foundation
 
 class VerifyContextFactory {
     public func createVerifyContext(origin: String?, domain: String, isScam: Bool?, isVerified: Bool? = nil) -> VerifyContext {
-        if let isVerified = isVerified, !isVerified {
-            return VerifyContext(
-                origin: origin,
-                validation: .unknown
-            )
-        }
 
         guard isScam != true else {
             return VerifyContext(
@@ -17,6 +11,15 @@ class VerifyContextFactory {
             )
         }
 
+        // If isVerified is provided and is false, return unknown
+        if let isVerified = isVerified, !isVerified {
+            return VerifyContext(
+                origin: origin,
+                validation: .unknown
+            )
+        }
+
+        // Existing behavior for origin and domain validation
         if let origin, let originUrl = URL(string: origin), let domainUrl = URL(string: domain) {
             return VerifyContext(
                 origin: origin,
