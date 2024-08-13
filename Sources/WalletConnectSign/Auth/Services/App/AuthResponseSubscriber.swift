@@ -200,7 +200,8 @@ class AuthResponseSubscriber {
             settleParams: settleParams,
             requiredNamespaces: [:],
             acknowledged: true,
-            transportType: transportType
+            transportType: transportType,
+            verifyContext: nil
         )
 
         sessionStore.setSession(session)

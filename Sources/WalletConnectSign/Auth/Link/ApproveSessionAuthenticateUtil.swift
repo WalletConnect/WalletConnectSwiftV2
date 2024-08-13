@@ -14,6 +14,8 @@ class ApproveSessionAuthenticateUtil {
     private let logger: ConsoleLogging
     private let sessionStore: WCSessionStorage
     private let sessionNamespaceBuilder: SessionNamespaceBuilder
+    private let verifyContextStore: CodableStore<VerifyContext>
+    private let verifyClient: VerifyClientProtocol
 
     init(
         logger: ConsoleLogging,
@@ -23,7 +25,9 @@ class ApproveSessionAuthenticateUtil {
         messageFormatter: SIWEFromCacaoFormatting,
         sessionStore: WCSessionStorage,
         sessionNamespaceBuilder: SessionNamespaceBuilder,
-        networkingInteractor: NetworkInteracting
+        networkingInteractor: NetworkInteracting,
+        verifyContextStore: CodableStore<VerifyContext>,
+        verifyClient: VerifyClientProtocol
     ) {
         self.logger = logger
         self.kms = kms
@@ -33,6 +37,8 @@ class ApproveSessionAuthenticateUtil {
         self.signatureVerifier = signatureVerifier
         self.messageFormatter = messageFormatter
         self.networkingInteractor = networkingInteractor
+        self.verifyContextStore = verifyContextStore
+        self.verifyClient = verifyClient
     }
 
     func getsessionAuthenticateRequestParams(requestId: RPCID) throws -> (request: SessionAuthenticateRequestParams, topic: String) {
@@ -60,13 +66,13 @@ class ApproveSessionAuthenticateUtil {
         return (topic, keys)
     }
 
-
     func createSession(
         response: SessionAuthenticateResponseParams,
         pairingTopic: String,
         request: SessionAuthenticateRequestParams,
         sessionTopic: String,
-        transportType: WCSession.TransportType
+        transportType: WCSession.TransportType,
+        verifyContext: VerifyContext
     ) throws -> Session? {
 
 
@@ -101,7 +107,8 @@ class ApproveSessionAuthenticateUtil {
             settleParams: settleParams,
             requiredNamespaces: [:],
             acknowledged: true,
-            transportType: transportType
+            transportType: transportType,
+            verifyContext: verifyContext
         )
         logger.debug("created a session with topic: \(sessionTopic)")
 
@@ -113,6 +120,15 @@ class ApproveSessionAuthenticateUtil {
 
         return session.publicRepresentation()
     }
+
+
+    func getVerifyContext(requestId: RPCID, domain: String) -> VerifyContext {
+        guard let context = try? verifyContextStore.get(key: requestId.string) else {
+            return verifyClient.createVerifyContext(origin: nil, domain: domain, isScam: false, isVerified: nil)
+        }
+        return context
+    }
+
 
     func recoverAndVerifySignature(cacaos: [Cacao]) async throws {
         try await cacaos.asyncForEach { [unowned self] cacao in

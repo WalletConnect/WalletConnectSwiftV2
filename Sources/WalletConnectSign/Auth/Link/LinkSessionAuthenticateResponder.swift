@@ -11,6 +11,7 @@ actor LinkSessionAuthenticateResponder {
     private let metadata: AppMetadata
     private let util: ApproveSessionAuthenticateUtil
     private let walletErrorResponder: WalletErrorResponder
+    private let verifyContextStore: CodableStore<VerifyContext>
 
     init(
         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
@@ -18,10 +19,12 @@ actor LinkSessionAuthenticateResponder {
         kms: KeyManagementService,
         metadata: AppMetadata,
         approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil,
-        walletErrorResponder: WalletErrorResponder
+        walletErrorResponder: WalletErrorResponder,
+        verifyContextStore: CodableStore<VerifyContext>
     ) {
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.logger = logger
+        self.verifyContextStore = verifyContextStore
         self.kms = kms
         self.metadata = metadata
         self.util = approveSessionAuthenticateUtil
@@ -57,20 +60,23 @@ actor LinkSessionAuthenticateResponder {
 
         let url = try await linkEnvelopesDispatcher.respond(topic: responseTopic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation))
 
-
         let session = try util.createSession(
             response: responseParams,
             pairingTopic: pairingTopic,
             request: sessionAuthenticateRequestParams,
             sessionTopic: sessionTopic,
-            transportType: .linkMode
+            transportType: .linkMode,
+            verifyContext: util.getVerifyContext(requestId: requestId, domain: sessionAuthenticateRequestParams.requester.metadata.url)
         )
+
+        verifyContextStore.delete(forKey: requestId.string)
 
         return (session, url)
     }
 
     func respondError(requestId: RPCID) async throws {
-        try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        _ = try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+        verifyContextStore.delete(forKey: requestId.string)
     }
 
 }

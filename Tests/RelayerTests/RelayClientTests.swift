@@ -29,10 +29,10 @@ final class RelayClientTests: XCTestCase {
         let topic = "0987"
         let message = "qwerty"
         let subscriptionId = "sub-id"
-        let subscription = Subscription(id: subscriptionId, topic: topic, message: message)
+        let subscription = Subscription(id: subscriptionId, topic: topic, message: message, attestation: nil)
         let request = subscription.asRPCRequest()
 
-        sut.messagePublisher.sink { (subscriptionTopic, subscriptionMessage, _) in
+        sut.messagePublisher.sink { (subscriptionTopic, subscriptionMessage, _, _) in
             XCTAssertEqual(subscriptionMessage, message)
             XCTAssertEqual(subscriptionTopic, topic)
             expectation.fulfill()
@@ -62,7 +62,7 @@ final class RelayClientTests: XCTestCase {
         let expectation = expectation(description: "Duplicate Subscription requests must notify only the first time")
         let request = Subscription.init(id: "sub_id", topic: "topic", message: "message").asRPCRequest()
         
-        sut.messagePublisher.sink { (_, _, _) in
+        sut.messagePublisher.sink { (_, _, _, _) in
             expectation.fulfill()
         }.store(in: &publishers)
 

@@ -110,7 +110,7 @@ final class MockHistoryService: HistoryServiceProtocol {
         removePendingRequestCalled(topic)
     }
     
-    func getSessionRequest(id: JSONRPC.RPCID) -> (request: Request, context: VerifyContext?)? {
+    func getSessionRequest(id: RPCID) -> (request: Request, context: VerifyContext?)? {
         fatalError("Unimplemented")
     }
     

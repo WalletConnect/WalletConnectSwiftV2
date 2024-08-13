@@ -226,6 +226,9 @@ final class ApproveEngine {
             expiry: Int64(expiry)
         )
 
+        let verifyContext = (try? verifyContextStore.get(key: proposal.proposer.publicKey)) ?? verifyClient.createVerifyContext(origin: nil, domain: proposal.proposer.metadata.url, isScam: false, isVerified: nil)
+
+
         let session = WCSession(
             topic: topic,
             pairingTopic: pairingTopic,
@@ -235,7 +238,8 @@ final class ApproveEngine {
             settleParams: settleParams,
             requiredNamespaces: proposal.requiredNamespaces,
             acknowledged: false,
-            transportType: .relay
+            transportType: .relay,
+            verifyContext: verifyContext
         )
 
         logger.debug("Sending session settle request")
@@ -395,18 +399,25 @@ private extension ApproveEngine {
         }
         
         Task(priority: .high) {
-            let assertionId = payload.decryptedPayload.sha256().toHexString()
             do {
-                let response = try await verifyClient.verifyOrigin(assertionId: assertionId)
+                let response: VerifyResponse
+                if let attestation = payload.attestation,
+                   let messageId = payload.encryptedMessage.data(using: .utf8)?.sha256().toHexString() {
+                    response = try await verifyClient.verify(.v2(attestationJWT: attestation, messageId: messageId))
+                } else {
+                    let assertionId = payload.decryptedPayload.sha256().toHexString()
+                    response = try await verifyClient.verify(.v1(assertionId: assertionId))
+                }
                 let verifyContext = verifyClient.createVerifyContext(
                     origin: response.origin,
                     domain: payload.request.proposer.metadata.url,
-                    isScam: response.isScam
+                    isScam: response.isScam,
+                    isVerified: response.isVerified
                 )
                 verifyContextStore.set(verifyContext, forKey: proposal.proposer.publicKey)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
             } catch {
-                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url, isScam: nil)
+                let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.proposer.metadata.url, isScam: nil, isVerified: nil)
                 onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
                 return
             }
@@ -460,7 +471,8 @@ private extension ApproveEngine {
             settleParams: params,
             requiredNamespaces: proposedNamespaces,
             acknowledged: true,
-            transportType: .relay
+            transportType: .relay,
+            verifyContext: nil
         )
         sessionStore.setSession(session)
 

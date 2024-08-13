@@ -30,7 +30,6 @@ final class SessionEngineTests: XCTestCase {
             networkingInteractor: networkingInteractor,
             historyService: historyService,
             verifyContextStore: verifyContextStore,
-            verifyClient: VerifyClientMock(),
             kms: KeyManagementServiceMock(),
             sessionStore: sessionStorage,
             logger: ConsoleLoggerMock(),
@@ -59,7 +58,7 @@ final class SessionEngineTests: XCTestCase {
             expiry: UInt64(Date().timeIntervalSince1970)
         )
 
-        networkingInteractor.requestPublisherSubject.send(("topic", request, Data(), Date(), ""))
+        networkingInteractor.requestPublisherSubject.send(("topic", request, Data(), Date(), "", "", nil))
 
         wait(for: [expectation], timeout: 0.5)
     }
@@ -75,7 +74,6 @@ final class SessionEngineTests: XCTestCase {
             networkingInteractor: networkingInteractor,
             historyService: historyService,
             verifyContextStore: verifyContextStore,
-            verifyClient: VerifyClientMock(),
             kms: KeyManagementServiceMock(),
             sessionStore: sessionStorage,
             logger: ConsoleLoggerMock(),

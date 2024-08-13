@@ -26,7 +26,7 @@ public final class RelayClient {
         return dispatcher.isSocketConnected
     }
 
-    public var messagePublisher: AnyPublisher<(topic: String, message: String, publishedAt: Date), Never> {
+    public var messagePublisher: AnyPublisher<(topic: String, message: String, publishedAt: Date, attestation: String?), Never> {
         messagePublisherSubject.eraseToAnyPublisher()
     }
 
@@ -38,7 +38,7 @@ public final class RelayClient {
         dispatcher.networkConnectionStatusPublisher
     }
 
-    private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String, publishedAt: Date), Never>()
+    private let messagePublisherSubject = PassthroughSubject<(topic: String, message: String, publishedAt: Date, attestation: String?), Never>()
 
     private let subscriptionResponsePublisherSubject = PassthroughSubject<(RPCID?, [String]), Never>()
     private var subscriptionResponsePublisher: AnyPublisher<(RPCID?, [String]), Never> {
@@ -238,7 +238,7 @@ public final class RelayClient {
                     try acknowledgeRequest(request)
                     try rpcHistory.set(request, forTopic: params.data.topic, emmitedBy: .remote, transportType: .relay)
                     logger.debug("received message: \(params.data.message) on topic: \(params.data.topic)")
-                    messagePublisherSubject.send((params.data.topic, params.data.message, params.data.publishedAt))
+                    messagePublisherSubject.send((params.data.topic, params.data.message, params.data.publishedAt, params.data.attestation))
                 } catch {
                     logger.error("RPC History 'set()' error: \(error)")
                 }
