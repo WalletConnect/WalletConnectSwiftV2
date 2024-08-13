@@ -49,7 +49,7 @@ class WalletRequestSubscriber {
                         verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                     } catch {
-                        let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.payloadParams.domain, isScam: nil)
+                        let verifyContext = verifyClient.createVerifyContext(origin: nil, domain: payload.request.payloadParams.domain, isScam: nil, isVerified: nil)
                         verifyContextStore.set(verifyContext, forKey: request.id.string)
                         onRequest?((request, verifyContext))
                         return
