@@ -126,7 +126,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     order: 1,
                     mobileLink: "rn-web3wallet://",
                     linkMode: "https://lab.web3modal.com/walletkit_rn"
-                )
+                ),
+                .init(
+                    id: "flutter-sample",
+                    name: "Flutter Sample Wallet",
+                    homepage: "https://walletconnect.com/",
+                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
+                    order: 1,
+                    mobileLink: "wcflutterwallet://",
+                    linkMode: "https://lab.web3modal.com/walletkit_flutter"
+                ),
+                .init(
+                    id: "flutter-sample-internal",
+                    name: "Flutter Sample Wallet Internal",
+                    homepage: "https://walletconnect.com/",
+                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
+                    order: 1,
+                    mobileLink: "wcflutterwallet-internal://",
+                    linkMode: "https://lab.web3modal.com/walletkit_flutter_internal"
+                ),
             ]
         )
 
