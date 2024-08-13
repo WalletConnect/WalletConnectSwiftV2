@@ -29,7 +29,7 @@ public struct JWTValidator {
 
 public struct P256JWTValidator {
 
-    let jwtString: String
+    private let jwtString: String
 
     public init(jwtString: String) {
         self.jwtString = jwtString
