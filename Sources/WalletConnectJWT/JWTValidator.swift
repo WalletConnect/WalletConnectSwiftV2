@@ -3,7 +3,7 @@ import CryptoKit
 
 public struct JWTValidator {
 
-    let jwtString: String
+    private let jwtString: String
 
     public init(jwtString: String) {
         self.jwtString = jwtString

@@ -54,7 +54,6 @@ class AuthRequestSubscriber {
                 let request = AuthenticationRequest(id: payload.id, topic: payload.topic, payload: payload.request.authPayload, requester: payload.request.requester.metadata)
 
                 Task(priority: .high) {
-                    let assertionId = payload.decryptedPayload.sha256().toHexString()
                     do {
                         let response: VerifyResponse
                         if let attestation = payload.attestation,

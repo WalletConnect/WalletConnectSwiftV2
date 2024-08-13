@@ -19,7 +19,6 @@ class VerifyContextFactory {
             )
         }
 
-        // Existing behavior for origin and domain validation
         if let origin, let originUrl = URL(string: origin), let domainUrl = URL(string: domain) {
             return VerifyContext(
                 origin: origin,

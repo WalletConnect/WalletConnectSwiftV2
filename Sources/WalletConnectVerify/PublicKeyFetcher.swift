@@ -58,26 +58,44 @@ struct VerifyServerPublicKey: Codable {
 
 
 class PublicKeyFetcher: PublicKeyFetching {
+    enum Errors: Error, LocalizedError {
+        case invalidURL
+        case httpError(statusCode: Int, message: String)
+        case decodingError(Error)
+    }
 
     private let urlString = "https://verify.walletconnect.org/v2/public-key"
 
+
     func fetchPublicKey() async throws -> VerifyServerPublicKey {
         guard let url = URL(string: urlString) else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+            throw Errors.invalidURL
         }
 
         let (data, response) = try await URLSession.shared.data(from: url)
         if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-            throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+            throw Errors.httpError(statusCode: httpResponse.statusCode, message: errorMessage)
         }
 
         do {
             let publicKeyResponse = try JSONDecoder().decode(VerifyServerPublicKey.self, from: data)
             return publicKeyResponse
         } catch {
-            print("Decoding error: \(error)")
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to decode JSON"])
+            throw Errors.decodingError(error)
+        }
+    }
+}
+
+extension PublicKeyFetcher.Errors {
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "The URL provided is invalid."
+        case .httpError(let statusCode, let message):
+            return "HTTP Error \(statusCode): \(message)"
+        case .decodingError:
+            return "Failed to decode the JSON response."
         }
     }
 }
