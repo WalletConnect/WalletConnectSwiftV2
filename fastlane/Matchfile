@@ -1,0 +1,8 @@
+# fastlane/Matchfile
+
+git_url ENV["MATCH_GIT_URL"]
+type "appstore" # The default type, can be: appstore, adhoc, enterprise or development
+
+app_identifier ENV["MATCH_IDENTIFIERS"]
+username ENV["FASTLANE_USER"]
+team_id ENV["TEAM_ID"]

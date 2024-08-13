@@ -125,7 +125,8 @@ actor SessionAuthenticateResponder {
                 pairingTopic: pairingTopic,
                 request: sessionAuthenticateRequestParams,
                 sessionTopic: sessionTopic,
-                transportType: .relay
+                transportType: .relay,
+                verifyContext: util.getVerifyContext(requestId: requestId, domain: sessionAuthenticateRequestParams.requester.metadata.url)
             )
             pairingRegisterer.activate(
                 pairingTopic: pairingTopic,

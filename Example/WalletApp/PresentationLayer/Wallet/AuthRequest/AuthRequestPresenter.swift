@@ -87,7 +87,7 @@ final class AuthRequestPresenter: ObservableObject {
 
             /* Redirect */
             if let uri = request.requester.redirect?.native {
-//                WalletConnectRouter.goBack(uri: uri)
+                WalletConnectRouter.goBack(uri: uri)
                 router.dismiss()
             } else {
                 showSignedSheet.toggle()

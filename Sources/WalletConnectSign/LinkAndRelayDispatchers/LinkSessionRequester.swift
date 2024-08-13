@@ -18,7 +18,7 @@ final class LinkSessionRequester {
 
     func request(_ request: Request) async throws -> String? {
         logger.debug("will request on session topic: \(request.topic)")
-        guard let session = sessionStore.getSession(forTopic: request.topic), session.acknowledged else {
+        guard let session = sessionStore.getSession(forTopic: request.topic) else {
             logger.debug("Could not find session for topic \(request.topic)")
             throw WalletConnectError.noSessionMatchingTopic(request.topic)
         }

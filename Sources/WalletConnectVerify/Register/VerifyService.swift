@@ -20,7 +20,7 @@ enum VerifyAPI: HTTPService {
     }
 
     var queryParameters: [String: String]? {
-        return nil
+        return ["v2Supported": "true"]
     }
 
     var scheme: String {
