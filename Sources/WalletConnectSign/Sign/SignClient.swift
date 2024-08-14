@@ -147,7 +147,6 @@ public final class SignClient: SignClientProtocol {
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let disconnectService: DisconnectService
-    private let pairingPingService: PairingPingService
     private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
@@ -203,7 +202,6 @@ public final class SignClient: SignClientProtocol {
          networkingClient: NetworkingInteractor,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
-         pairingPingService: PairingPingService,
          sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
@@ -239,7 +237,6 @@ public final class SignClient: SignClientProtocol {
         self.networkingClient = networkingClient
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
-        self.pairingPingService = pairingPingService
         self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
@@ -572,9 +569,6 @@ public final class SignClient: SignClientProtocol {
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             sessionResponsePublisherSubject.send(response)
-        }
-        pairingPingService.onResponse = { [unowned self] topic in
-            pingResponsePublisherSubject.send(topic)
         }
         sessionPingService.onResponse = { [unowned self] topic in
             pingResponsePublisherSubject.send(topic)

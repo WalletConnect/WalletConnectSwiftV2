@@ -2,9 +2,6 @@ import Foundation
 import Combine
 
 public class PairingClient: PairingRegisterer, PairingInteracting, PairingClientProtocol {
-    public var pingResponsePublisher: AnyPublisher<(String), Never> {
-        pingResponsePublisherSubject.eraseToAnyPublisher()
-    }
     public var pairingDeletePublisher: AnyPublisher<(code: Int, message: String), Never> {
         pairingDeleteRequestSubscriber.deletePublisherSubject.eraseToAnyPublisher()
     }
@@ -22,7 +19,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
     private let appPairActivateService: AppPairActivationService
-    private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let logger: ConsoleLogging
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
@@ -71,14 +67,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
         self.pairingStateProvider = pairingStateProvider
-        setUpPublishers()
         setUpExpiration()
-    }
-
-    private func setUpPublishers() {
-        pingService.onResponse = { [unowned self] topic in
-            pingResponsePublisherSubject.send(topic)
-        }
     }
 
     private func setUpExpiration() {

@@ -54,19 +54,6 @@ final class PairingTests: XCTestCase {
         walletPairingClient = makeClient(prefix: "🐶 Wallet: ", includeSign: false)
     }
 
-    func testPing() async {
-        let expectation = expectation(description: "expects ping response")
-        let uri = try! await appPairingClient.create()
-        try? await walletPairingClient.pair(uri: uri)
-        try! await walletPairingClient.ping(topic: uri.topic)
-        walletPairingClient.pingResponsePublisher
-            .sink { topic in
-                XCTAssertEqual(topic, uri.topic)
-                expectation.fulfill()
-            }.store(in: &publishers)
-        wait(for: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
     func testDisconnect() async {
 
         let expectation = expectation(description: "wallet disconnected pairing")

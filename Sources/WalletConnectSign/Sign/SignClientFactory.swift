@@ -93,7 +93,6 @@ public struct SignClientFactory {
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deleteSessionService: deleteSessionService, sessionStorage: sessionStore)
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingClient, logger: logger)
-        let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appProposerService = AppProposeService(metadata: metadata, networkingInteractor: networkingClient, kms: kms, logger: logger)
         let proposalExpiryWatcher = ProposalExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, rpcHistory: rpcHistory)
         let pendingProposalsProvider = PendingProposalsProvider(proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
@@ -153,7 +152,6 @@ public struct SignClientFactory {
             networkingClient: networkingClient,
             sessionEngine: sessionEngine,
             approveEngine: approveEngine,
-            pairingPingService: pairingPingService,
             sessionPingService: sessionPingService,
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
             controllerSessionStateMachine: controllerSessionStateMachine,
