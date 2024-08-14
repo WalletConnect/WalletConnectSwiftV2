@@ -24,7 +24,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let appPairActivateService: AppPairActivationService
     private var pingResponsePublisherSubject = PassthroughSubject<String, Never>()
     private let logger: ConsoleLogging
-    private let pingService: PairingPingService
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
@@ -53,7 +52,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         pairingRequestsSubscriber: PairingRequestsSubscriber,
         appPairActivateService: AppPairActivationService,
         cleanupService: PairingCleanupService,
-        pingService: PairingPingService,
         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
         pairingsProvider: PairingsProvider,
         pairingStateProvider: PairingStateProvider
@@ -70,7 +68,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         self.resubscribeService = resubscribeService
         self.expirationService = expirationService
         self.cleanupService = cleanupService
-        self.pingService = pingService
         self.pairingRequestsSubscriber = pairingRequestsSubscriber
         self.pairingsProvider = pairingsProvider
         self.pairingStateProvider = pairingStateProvider
@@ -122,10 +119,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
 
     public func getPairing(for topic: String) throws -> Pairing {
         try pairingsProvider.getPairing(for: topic)
-    }
-
-    public func ping(topic: String) async throws {
-        try await pingService.ping(topic: topic)
     }
 
     public func disconnect(topic: String) async {
