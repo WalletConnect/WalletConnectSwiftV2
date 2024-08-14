@@ -67,7 +67,6 @@ final class ConfigurationService {
         Web3Wallet.instance.pairingExpirationPublisher
             .receive(on: DispatchQueue.main)
             .sink { pairing in
-            guard !pairing.active else { return }
             AlertPresenter.present(message: "Pairing has expired", type: .warning)
         }.store(in: &publishers)
 

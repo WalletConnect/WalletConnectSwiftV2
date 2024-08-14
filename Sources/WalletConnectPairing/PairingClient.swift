@@ -18,12 +18,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     private let pairingStorage: WCPairingStorage
     private let walletPairService: WalletPairService
     private let appPairService: AppPairService
-    private let appPairActivateService: AppPairActivationService
     private let logger: ConsoleLogging
     private let networkingInteractor: NetworkInteracting
     private let pairingRequestsSubscriber: PairingRequestsSubscriber
     private let pairingsProvider: PairingsProvider
-    private let pairingDeleteRequester: PairingDeleteRequester
     private let resubscribeService: PairingResubscribeService
     private let expirationService: ExpirationService
     private let pairingDeleteRequestSubscriber: PairingDeleteRequestSubscriber
@@ -41,12 +39,10 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         networkingInteractor: NetworkInteracting,
         logger: ConsoleLogging,
         walletPairService: WalletPairService,
-        pairingDeleteRequester: PairingDeleteRequester,
         pairingDeleteRequestSubscriber: PairingDeleteRequestSubscriber,
         resubscribeService: PairingResubscribeService,
         expirationService: ExpirationService,
         pairingRequestsSubscriber: PairingRequestsSubscriber,
-        appPairActivateService: AppPairActivationService,
         cleanupService: PairingCleanupService,
         socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never>,
         pairingsProvider: PairingsProvider,
@@ -58,9 +54,7 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         self.networkingInteractor = networkingInteractor
         self.socketConnectionStatusPublisher = socketConnectionStatusPublisher
         self.logger = logger
-        self.pairingDeleteRequester = pairingDeleteRequester
         self.pairingDeleteRequestSubscriber = pairingDeleteRequestSubscriber
-        self.appPairActivateService = appPairActivateService
         self.resubscribeService = resubscribeService
         self.expirationService = expirationService
         self.cleanupService = cleanupService
@@ -89,10 +83,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         return try await appPairService.create(supportedMethods: methods)
     }
 
-    public func activate(pairingTopic: String, peerMetadata: AppMetadata?) {
-        appPairActivateService.activate(for: pairingTopic, peerMetadata: peerMetadata)
-    }
-    
     public func setReceived(pairingTopic: String) {
         guard var pairing = pairingStorage.getPairing(forTopic: pairingTopic) else {
             return logger.error("Pairing not found for topic: \(pairingTopic)")
@@ -110,9 +100,8 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
         try pairingsProvider.getPairing(for: topic)
     }
 
-    public func disconnect(topic: String) async {
-        await pairingDeleteRequester.delete(topic: topic)
-    }
+    @available(*, deprecated, message: "This method is deprecated. Pairing will disconnect automatically")
+    public func disconnect(topic: String) async {}
 
     public func validatePairingExistance(_ topic: String) throws {
         _ = try pairingsProvider.getPairing(for: topic)

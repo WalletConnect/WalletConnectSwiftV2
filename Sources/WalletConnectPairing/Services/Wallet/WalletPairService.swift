@@ -2,7 +2,6 @@ import Foundation
 
 actor WalletPairService {
     enum Errors: Error {
-        case pairingAlreadyExist(topic: String)
         case networkNotConnected
     }
 
@@ -71,17 +70,11 @@ extension WalletPairService {
         guard let pairing = pairingStorage.getPairing(forTopic: topic), pairing.requestReceived else {
             return false
         }
-        
-        if pairing.active {
-            eventsClient.saveEvent(PairingTraceErrorEvents.activePairingAlreadyExists)
-            throw Errors.pairingAlreadyExist(topic: topic)
-        }
-        
+
         let pendingRequests = history.getPending()
             .compactMap { record -> RPCRequest? in
                 (record.topic == pairing.topic) ? record.request : nil
             }
-
 
         guard !pendingRequests.isEmpty else { return false }
         pendingRequests.forEach { request in
@@ -110,7 +103,6 @@ extension WalletPairService {
 extension WalletPairService.Errors: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .pairingAlreadyExist(let topic):   return "Pairing with topic (\(topic)) is already active"
         case .networkNotConnected:              return "Pairing failed. You seem to be offline"
         }
     }

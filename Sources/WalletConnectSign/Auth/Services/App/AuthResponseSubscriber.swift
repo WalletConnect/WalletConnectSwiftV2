@@ -66,7 +66,6 @@ class AuthResponseSubscriber {
                 let transportType = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
 
                 let pairingTopic = payload.topic
-                pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
                 removeResponseTopicRecord(responseTopic: payload.topic)
 
                 let requestId = payload.id
@@ -100,7 +99,6 @@ class AuthResponseSubscriber {
                 _ = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
 
                 let pairingTopic = payload.topic
-                pairingRegisterer.activate(pairingTopic: pairingTopic, peerMetadata: nil)
                 removeResponseTopicRecord(responseTopic: payload.topic)
 
                 let requestId = payload.id

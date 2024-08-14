@@ -177,9 +177,8 @@ public class Web3WalletClient {
         try await pairingClient.pair(uri: uri)
     }
 
-    public func disconnectPairing(topic: String) async {
-        await pairingClient.disconnect(topic: topic)
-    }
+    @available(*, deprecated, message: "This method is deprecated. Pairing will disconnect automatically")
+    public func disconnectPairing(topic: String) async {}
     
     /// For a wallet and a dApp to terminate a session
     ///

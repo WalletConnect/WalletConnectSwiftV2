@@ -18,8 +18,6 @@ public protocol SignClientProtocol {
     var pendingProposalsPublisher: AnyPublisher<[(proposal: Session.Proposal, context: VerifyContext?)], Never> { get }
     var requestExpirationPublisher: AnyPublisher<RPCID, Never> { get }
 
-    func connect(requiredNamespaces: [String: ProposalNamespace], optionalNamespaces: [String: ProposalNamespace]?, sessionProperties: [String: String]?, topic: String) async throws
-
     func request(params: Request) async throws
     func approve(proposalId: String, namespaces: [String: SessionNamespace], sessionProperties: [String: String]?) async throws -> Session
     func authenticate(_ params: AuthRequestParams, walletUniversalLink: String?) async throws -> WalletConnectURI?

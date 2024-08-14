@@ -166,11 +166,6 @@ final class ApproveEngine {
 
             proposalPayloadsStore.delete(forKey: proposerPubKey)
             verifyContextStore.delete(forKey: proposerPubKey)
-
-            pairingRegisterer.activate(
-                pairingTopic: payload.topic,
-                peerMetadata: payload.request.proposer.metadata
-            )
             return session.publicRepresentation()
         } catch {
             eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
@@ -190,11 +185,12 @@ final class ApproveEngine {
             reason: reason
         )
 
-        if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
-           let pairing = pairingStore.getPairing(forTopic: pairingTopic),
-           !pairing.active {
-            pairingStore.delete(topic: pairingTopic)
-        }
+        // todo - delete and unsubscribe
+//        if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
+//           let pairing = pairingStore.getPairing(forTopic: pairingTopic),
+//           !pairing.active {
+//            pairingStore.delete(topic: pairingTopic)
+//        }
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
         verifyContextStore.delete(forKey: proposerPubKey)
@@ -343,11 +339,12 @@ private extension ApproveEngine {
             return logger.debug(Errors.pairingNotFound.localizedDescription)
         }
 
-        if !pairing.active {
-            kms.deleteSymmetricKey(for: pairing.topic)
-            networkingInteractor.unsubscribe(topic: pairing.topic)
-            pairingStore.delete(topic: payload.topic)
-        }
+        // todo - delete nad unsubscribe
+//        if !pairing.active {
+//            kms.deleteSymmetricKey(for: pairing.topic)
+//            networkingInteractor.unsubscribe(topic: pairing.topic)
+//            pairingStore.delete(topic: payload.topic)
+//        }
         logger.debug("Session Proposal has been rejected")
         kms.deletePrivateKey(for: payload.request.proposer.publicKey)
 
@@ -455,11 +452,6 @@ private extension ApproveEngine {
         let selfParticipant = Participant(
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
-        )
-
-        pairingRegisterer.activate(
-            pairingTopic: pairingTopic,
-            peerMetadata: params.controller.metadata
         )
 
         let session = WCSession(

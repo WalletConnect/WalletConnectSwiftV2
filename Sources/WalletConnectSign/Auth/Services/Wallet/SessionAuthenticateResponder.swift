@@ -128,10 +128,6 @@ actor SessionAuthenticateResponder {
                 transportType: .relay,
                 verifyContext: util.getVerifyContext(requestId: requestId, domain: sessionAuthenticateRequestParams.requester.metadata.url)
             )
-            pairingRegisterer.activate(
-                pairingTopic: pairingTopic,
-                peerMetadata: sessionAuthenticateRequestParams.requester.metadata
-            )
             verifyContextStore.delete(forKey: requestId.string)
             return session
         } catch {
