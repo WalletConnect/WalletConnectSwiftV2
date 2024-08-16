@@ -344,9 +344,7 @@ private extension ApproveEngine {
     }
 
     func handleSessionProposeResponseError(payload: ResponseSubscriptionErrorPayload<SessionType.ProposeParams>) {
-        Task {
-            removePairing(pairingTopic: payload.topic)
-        }
+        removePairing(pairingTopic: payload.topic)
         logger.debug("Session Proposal has been rejected")
         kms.deletePrivateKey(for: payload.request.proposer.publicKey)
 

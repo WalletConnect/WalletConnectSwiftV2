@@ -155,6 +155,7 @@ final class AppProposalServiceTests: XCTestCase {
         let response = RPCResponse.stubError(forRequest: request)
         networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date(), nil))
 
+        XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete the pairing.")
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must delete symmetric key if pairing is inactive.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
