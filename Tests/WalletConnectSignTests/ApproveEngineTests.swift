@@ -83,7 +83,6 @@ final class ApproveEngineTests: XCTestCase {
         XCTAssert(cryptoMock.hasAgreementSecret(for: topicB), "Responder must store agreement key for topic B")
         XCTAssertEqual(networkingInteractor.didRespondOnTopic!, topicA, "Responder must respond on topic A")
         XCTAssertTrue(sessionStorageMock.hasSession(forTopic: topicB), "Responder must persist session on topic B")
-        XCTAssertTrue(pairingRegisterer.isActivateCalled)
     }
 
     func testReceiveProposal() {

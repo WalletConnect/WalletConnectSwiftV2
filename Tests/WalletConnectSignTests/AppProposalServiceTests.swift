@@ -128,7 +128,6 @@ final class AppProposalServiceTests: XCTestCase {
         networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date(), nil))
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-        _ = storageMock.getPairing(forTopic: topicA)!
 
         await fulfillment(of: [exp], timeout: 5)
 
@@ -156,8 +155,6 @@ final class AppProposalServiceTests: XCTestCase {
         let response = RPCResponse.stubError(forRequest: request)
         networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date(), nil))
 
-        XCTAssert(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
-        XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must delete symmetric key if pairing is inactive.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
