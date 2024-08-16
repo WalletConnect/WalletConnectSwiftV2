@@ -185,9 +185,9 @@
         "package": "swift-web3modal",
         "repositoryURL": "https://github.com/WalletConnect/web3modal-swift",
         "state": {
-          "branch": null,
-          "revision": "2d94ebc9065d1602ddc7eb60dab34a853afb4186",
-          "version": "1.5.2"
+          "branch": "pairing-expiry",
+          "revision": "3088a08a43c490c24f1dfb1b858a67de089feef6",
+          "version": null
         }
       }
     ]
