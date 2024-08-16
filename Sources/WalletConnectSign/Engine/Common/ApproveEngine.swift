@@ -391,9 +391,6 @@ private extension ApproveEngine {
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
         pairingRegisterer.setReceived(pairingTopic: payload.topic)
-        Task {
-            networkingInteractor.unsubscribe(topic: payload.topic)
-        }
 
         if let verifyContext = try? verifyContextStore.get(key: proposal.proposer.publicKey) {
             onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)

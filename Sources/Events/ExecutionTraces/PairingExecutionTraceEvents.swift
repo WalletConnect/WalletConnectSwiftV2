@@ -20,7 +20,6 @@ public enum PairingExecutionTraceEvents: String, TraceEvent {
 public enum PairingTraceErrorEvents: String, ErrorEvent {
     case noInternetConnection = "no_internet_connection"
     case malformedPairingUri = "malformed_pairing_uri"
-    case activePairingAlreadyExists = "active_pairing_already_exists"
     case subscribePairingTopicFailure = "subscribe_pairing_topic_failure"
     case pairingExpired = "pairing_expired"
     case proposalExpired = "proposal_expired"
