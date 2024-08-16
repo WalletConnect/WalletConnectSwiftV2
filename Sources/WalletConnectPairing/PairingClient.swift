@@ -103,10 +103,6 @@ public class PairingClient: PairingRegisterer, PairingInteracting, PairingClient
     @available(*, deprecated, message: "This method is deprecated. Pairing will disconnect automatically")
     public func disconnect(topic: String) async {}
 
-    public func validatePairingExistance(_ topic: String) throws {
-        _ = try pairingsProvider.getPairing(for: topic)
-    }
-
     public func register<RequestParams>(method: ProtocolMethod) -> AnyPublisher<RequestSubscriptionPayload<RequestParams>, Never> {
         logger.debug("Pairing Client - registering for \(method.method)")
         return pairingRequestsSubscriber.subscribeForRequest(method)

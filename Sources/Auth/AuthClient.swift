@@ -68,16 +68,6 @@ public class AuthClient: AuthClientProtocol {
         setUpPublishers()
     }
 
-    /// For a dapp to send an authentication request to a wallet
-    /// - Parameter params: Set of parameters required to request authentication
-    /// - Parameter topic: Pairing topic that wallet already subscribes for
-    @available(*, deprecated, message: "Use SignClient for sending authentication requests.")
-    public func request(_ params: RequestParams, topic: String) async throws {
-        logger.debug("Requesting Authentication on existing pairing")
-        try pairingRegisterer.validatePairingExistance(topic)
-        try await appRequestService.request(params: params, topic: topic)
-    }
-
     /// For a wallet to respond on authentication request
     /// - Parameters:
     ///   - requestId: authentication request id

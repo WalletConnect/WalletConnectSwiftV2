@@ -128,7 +128,7 @@ public struct SignClientFactory {
         let linkAuthRequester = LinkAuthRequester(kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, linkModeLinksStore: linkModeLinksStore)
         let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: linkEnvelopesDispatcher, verifyClient: verifyClient, verifyContextStore: verifyContextStore)
 
-        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, eventsClient: eventsClient)
+        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, eventsClient: eventsClient, pairingStore: pairingStore)
 
         let linkSessionAuthenticateResponder = LinkSessionAuthenticateResponder(linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger, kms: kms, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, walletErrorResponder: walletErrorResponder, verifyContextStore: verifyContextStore)
 

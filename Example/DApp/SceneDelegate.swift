@@ -136,15 +136,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     mobileLink: "wcflutterwallet://",
                     linkMode: "https://lab.web3modal.com/walletkit_flutter"
                 ),
-                .init(
-                    id: "flutter-sample-internal",
-                    name: "Flutter Sample Wallet Internal",
-                    homepage: "https://walletconnect.com/",
-                    imageUrl: "https://avatars.githubusercontent.com/u/37784886?s=200&v=4",
-                    order: 1,
-                    mobileLink: "wcflutterwallet-internal://",
-                    linkMode: "https://lab.web3modal.com/walletkit_flutter_internal"
-                ),
             ]
         )
 
