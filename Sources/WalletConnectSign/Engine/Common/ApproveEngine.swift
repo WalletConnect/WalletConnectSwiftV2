@@ -199,7 +199,7 @@ final class ApproveEngine {
         verifyContextStore.delete(forKey: proposerPubKey)
     }
 
-    func removePairing(pairingTopic: String) {
+    private func removePairing(pairingTopic: String) {
         pairingStore.delete(topic: pairingTopic)
         networkingInteractor.unsubscribe(topic: pairingTopic)
         kms.deleteSymmetricKey(for: pairingTopic)

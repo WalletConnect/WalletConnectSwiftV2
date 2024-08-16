@@ -157,7 +157,7 @@ actor SessionAuthenticateResponder {
         verifyContextStore.delete(forKey: requestId.string)
     }
 
-    func removePairing(pairingTopic: String) {
+    private func removePairing(pairingTopic: String) {
         pairingStore.delete(topic: pairingTopic)
         networkingInteractor.unsubscribe(topic: pairingTopic)
         kms.deleteSymmetricKey(for: pairingTopic)
