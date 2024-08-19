@@ -150,22 +150,24 @@ final class ApproveEngine {
         )
 
         do {
-            _ = try await proposeResponseTask
-            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.responseApproveSent)
-        } catch {
-            eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
-            throw error
-        }
-
-        do {
             let session: WCSession = try await settleRequestTask
+            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionSettleSuccess)
+            logger.debug("Session settle request has been successfully processed")
+
+            do {
+                _ = try await proposeResponseTask
+                eventsClient.saveEvent(SessionApproveExecutionTraceEvents.responseApproveSent)
+            } catch {
+                eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
+                throw error
+            }
+
             sessionStore.setSession(session)
+
             Task {
                 removePairing(pairingTopic: pairingTopic)
             }
             onSessionSettle?(session.publicRepresentation())
-            eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionSettleSuccess)
-            logger.debug("Session proposal response and settle request have been sent")
 
             proposalPayloadsStore.delete(forKey: proposerPubKey)
             verifyContextStore.delete(forKey: proposerPubKey)
