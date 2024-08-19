@@ -93,7 +93,6 @@ public struct SignClientFactory {
         let deleteSessionService = DeleteSessionService(networkingInteractor: networkingClient, kms: kms, sessionStore: sessionStore, logger: logger)
         let disconnectService = DisconnectService(deleteSessionService: deleteSessionService, sessionStorage: sessionStore)
         let sessionPingService = SessionPingService(sessionStorage: sessionStore, networkingInteractor: networkingClient, logger: logger)
-        let pairingPingService = PairingPingService(pairingStorage: pairingStore, networkingInteractor: networkingClient, logger: logger)
         let appProposerService = AppProposeService(metadata: metadata, networkingInteractor: networkingClient, kms: kms, logger: logger)
         let proposalExpiryWatcher = ProposalExpiryWatcher(proposalPayloadsStore: proposalPayloadsStore, rpcHistory: rpcHistory)
         let pendingProposalsProvider = PendingProposalsProvider(proposalPayloadsStore: proposalPayloadsStore, verifyContextStore: verifyContextStore)
@@ -116,7 +115,7 @@ public struct SignClientFactory {
         let linkModeLinksStore = CodableStore<Bool>(defaults: keyValueStorage, identifier: SignStorageIdentifiers.linkModeLinks.rawValue)
 
         let supportLinkMode = metadata.redirect?.linkMode ?? false
-        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, linkModeLinksStore: linkModeLinksStore, supportLinkMode: supportLinkMode)
+        let appRespondSubscriber = AuthResponseSubscriber(networkingInteractor: networkingClient, logger: logger, rpcHistory: rpcHistory, signatureVerifier: signatureVerifier, pairingRegisterer: pairingClient, kms: kms, sessionStore: sessionStore, messageFormatter: messageFormatter, sessionNamespaceBuilder: sessionNameSpaceBuilder, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, linkModeLinksStore: linkModeLinksStore, pairingStore: pairingStore, supportLinkMode: supportLinkMode)
 
         let walletErrorResponder = WalletErrorResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, rpcHistory: rpcHistory, linkEnvelopesDispatcher: linkEnvelopesDispatcher)
         let authRequestSubscriber = AuthRequestSubscriber(networkingInteractor: networkingClient, logger: logger, kms: kms, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, verifyClient: verifyClient, verifyContextStore: verifyContextStore, pairingStore: pairingStore)
@@ -129,7 +128,7 @@ public struct SignClientFactory {
         let linkAuthRequester = LinkAuthRequester(kms: kms, appMetadata: metadata, logger: logger, iatProvader: iatProvider, authResponseTopicRecordsStore: authResponseTopicRecordsStore, linkEnvelopesDispatcher: linkEnvelopesDispatcher, linkModeLinksStore: linkModeLinksStore)
         let linkAuthRequestSubscriber = LinkAuthRequestSubscriber(logger: logger, kms: kms, envelopesDispatcher: linkEnvelopesDispatcher, verifyClient: verifyClient, verifyContextStore: verifyContextStore)
 
-        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, eventsClient: eventsClient)
+        let relaySessionAuthenticateResponder = SessionAuthenticateResponder(networkingInteractor: networkingClient, logger: logger, kms: kms, verifyContextStore: verifyContextStore, walletErrorResponder: walletErrorResponder, pairingRegisterer: pairingClient, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, eventsClient: eventsClient, pairingStore: pairingStore)
 
         let linkSessionAuthenticateResponder = LinkSessionAuthenticateResponder(linkEnvelopesDispatcher: linkEnvelopesDispatcher, logger: logger, kms: kms, metadata: metadata, approveSessionAuthenticateUtil: approveSessionAuthenticateUtil, walletErrorResponder: walletErrorResponder, verifyContextStore: verifyContextStore)
 
@@ -153,7 +152,6 @@ public struct SignClientFactory {
             networkingClient: networkingClient,
             sessionEngine: sessionEngine,
             approveEngine: approveEngine,
-            pairingPingService: pairingPingService,
             sessionPingService: sessionPingService,
             nonControllerSessionStateMachine: nonControllerSessionStateMachine,
             controllerSessionStateMachine: controllerSessionStateMachine,

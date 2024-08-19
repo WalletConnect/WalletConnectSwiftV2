@@ -12,6 +12,7 @@ actor SessionAuthenticateResponder {
     private let metadata: AppMetadata
     private let util: ApproveSessionAuthenticateUtil
     private let eventsClient: EventsClientProtocol
+    private let pairingStore: WCPairingStorage
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -22,7 +23,8 @@ actor SessionAuthenticateResponder {
         pairingRegisterer: PairingRegisterer,
         metadata: AppMetadata,
         approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil,
-        eventsClient: EventsClientProtocol
+        eventsClient: EventsClientProtocol,
+        pairingStore: WCPairingStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -33,6 +35,7 @@ actor SessionAuthenticateResponder {
         self.metadata = metadata
         self.util = approveSessionAuthenticateUtil
         self.eventsClient = eventsClient
+        self.pairingStore = pairingStore
     }
 
     func respond(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
@@ -113,6 +116,9 @@ actor SessionAuthenticateResponder {
                 protocolMethod: SessionAuthenticatedProtocolMethod.responseApprove(),
                 envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation)
             )
+            Task {
+                removePairing(pairingTopic: pairingTopic)
+            }
             eventsClient.saveEvent(SessionAuthenticateTraceEvents.responseSent)
         } catch {
             eventsClient.saveEvent(SessionAuthenticateErrorEvents.responseSendFailed)
@@ -128,10 +134,6 @@ actor SessionAuthenticateResponder {
                 transportType: .relay,
                 verifyContext: util.getVerifyContext(requestId: requestId, domain: sessionAuthenticateRequestParams.requester.metadata.url)
             )
-            pairingRegisterer.activate(
-                pairingTopic: pairingTopic,
-                peerMetadata: sessionAuthenticateRequestParams.requester.metadata
-            )
             verifyContextStore.delete(forKey: requestId.string)
             return session
         } catch {
@@ -141,11 +143,23 @@ actor SessionAuthenticateResponder {
     }
 
     func respondError(requestId: RPCID) async throws {
+        let pairingTopic = try? util.getHistoryRecord(requestId: requestId).topic
         do {
-            try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+            let _ = try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+            Task {
+                if let pairingTopic = pairingTopic {
+                    removePairing(pairingTopic: pairingTopic)
+                }
+            }
         } catch {
             throw error
         }
         verifyContextStore.delete(forKey: requestId.string)
+    }
+
+    private func removePairing(pairingTopic: String) {
+        pairingStore.delete(topic: pairingTopic)
+        networkingInteractor.unsubscribe(topic: pairingTopic)
+        kms.deleteSymmetricKey(for: pairingTopic)
     }
 }

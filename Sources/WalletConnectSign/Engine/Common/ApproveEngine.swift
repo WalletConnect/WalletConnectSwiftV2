@@ -160,17 +160,15 @@ final class ApproveEngine {
         do {
             let session: WCSession = try await settleRequestTask
             sessionStore.setSession(session)
+            Task {
+                removePairing(pairingTopic: pairingTopic)
+            }
             onSessionSettle?(session.publicRepresentation())
             eventsClient.saveEvent(SessionApproveExecutionTraceEvents.sessionSettleSuccess)
             logger.debug("Session proposal response and settle request have been sent")
 
             proposalPayloadsStore.delete(forKey: proposerPubKey)
             verifyContextStore.delete(forKey: proposerPubKey)
-
-            pairingRegisterer.activate(
-                pairingTopic: payload.topic,
-                peerMetadata: payload.request.proposer.metadata
-            )
             return session.publicRepresentation()
         } catch {
             eventsClient.saveEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
@@ -190,15 +188,20 @@ final class ApproveEngine {
             reason: reason
         )
 
-        if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic,
-           let pairing = pairingStore.getPairing(forTopic: pairingTopic),
-           !pairing.active {
-            pairingStore.delete(topic: pairingTopic)
+        if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic {
+            Task {
+                removePairing(pairingTopic: pairingTopic)
+            }
         }
 
         proposalPayloadsStore.delete(forKey: proposerPubKey)
         verifyContextStore.delete(forKey: proposerPubKey)
+    }
 
+    private func removePairing(pairingTopic: String) {
+        pairingStore.delete(topic: pairingTopic)
+        networkingInteractor.unsubscribe(topic: pairingTopic)
+        kms.deleteSymmetricKey(for: pairingTopic)
     }
 
     func settle(topic: String, proposal: SessionProposal, namespaces: [String: SessionNamespace], sessionProperties: [String: String]? = nil, pairingTopic: String) async throws -> WCSession {
@@ -332,6 +335,7 @@ private extension ApproveEngine {
             sessionTopicToProposal.set(proposal, forKey: sessionTopic)
             Task(priority: .high) {
                 try await networkingInteractor.subscribe(topic: sessionTopic)
+                removePairing(pairingTopic: payload.topic)
             }
         } catch {
             return logger.debug(error.localizedDescription)
@@ -339,15 +343,7 @@ private extension ApproveEngine {
     }
 
     func handleSessionProposeResponseError(payload: ResponseSubscriptionErrorPayload<SessionType.ProposeParams>) {
-        guard let pairing = pairingStore.getPairing(forTopic: payload.topic) else {
-            return logger.debug(Errors.pairingNotFound.localizedDescription)
-        }
-
-        if !pairing.active {
-            kms.deleteSymmetricKey(for: pairing.topic)
-            networkingInteractor.unsubscribe(topic: pairing.topic)
-            pairingStore.delete(topic: payload.topic)
-        }
+        removePairing(pairingTopic: payload.topic)
         logger.debug("Session Proposal has been rejected")
         kms.deletePrivateKey(for: payload.request.proposer.publicKey)
 
@@ -392,7 +388,7 @@ private extension ApproveEngine {
         proposalPayloadsStore.set(payload, forKey: proposal.proposer.publicKey)
         
         pairingRegisterer.setReceived(pairingTopic: payload.topic)
-        
+
         if let verifyContext = try? verifyContextStore.get(key: proposal.proposer.publicKey) {
             onSessionProposal?(proposal.publicRepresentation(pairingTopic: payload.topic), verifyContext)
             return
@@ -455,11 +451,6 @@ private extension ApproveEngine {
         let selfParticipant = Participant(
             publicKey: agreementKeys.publicKey.hexRepresentation,
             metadata: metadata
-        )
-
-        pairingRegisterer.activate(
-            pairingTopic: pairingTopic,
-            peerMetadata: params.controller.metadata
         )
 
         let session = WCSession(

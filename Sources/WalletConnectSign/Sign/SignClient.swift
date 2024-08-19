@@ -147,7 +147,6 @@ public final class SignClient: SignClientProtocol {
     private let sessionEngine: SessionEngine
     private let approveEngine: ApproveEngine
     private let disconnectService: DisconnectService
-    private let pairingPingService: PairingPingService
     private let sessionPingService: SessionPingService
     private let nonControllerSessionStateMachine: NonControllerSessionStateMachine
     private let controllerSessionStateMachine: ControllerSessionStateMachine
@@ -203,7 +202,6 @@ public final class SignClient: SignClientProtocol {
          networkingClient: NetworkingInteractor,
          sessionEngine: SessionEngine,
          approveEngine: ApproveEngine,
-         pairingPingService: PairingPingService,
          sessionPingService: SessionPingService,
          nonControllerSessionStateMachine: NonControllerSessionStateMachine,
          controllerSessionStateMachine: ControllerSessionStateMachine,
@@ -239,7 +237,6 @@ public final class SignClient: SignClientProtocol {
         self.networkingClient = networkingClient
         self.sessionEngine = sessionEngine
         self.approveEngine = approveEngine
-        self.pairingPingService = pairingPingService
         self.sessionPingService = sessionPingService
         self.nonControllerSessionStateMachine = nonControllerSessionStateMachine
         self.controllerSessionStateMachine = controllerSessionStateMachine
@@ -297,28 +294,6 @@ public final class SignClient: SignClientProtocol {
             relay: RelayProtocolOptions(protocol: "irn", data: nil)
         )
         return pairingURI
-    }
-
-    /// For a dApp to propose a session to a wallet.
-    /// Function will propose a session on existing pairing.
-    /// - Parameters:
-    ///   - requiredNamespaces: required namespaces for a session
-    ///   - topic: pairing topic
-    public func connect(
-        requiredNamespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: ProposalNamespace]? = nil,
-        sessionProperties: [String: String]? = nil,
-        topic: String
-    ) async throws {
-        logger.debug("Connecting Application")
-        try pairingClient.validatePairingExistance(topic)
-        try await appProposeService.propose(
-            pairingTopic: topic,
-            namespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: sessionProperties,
-            relay: RelayProtocolOptions(protocol: "irn", data: nil)
-        )
     }
 
     //---------------------------------------AUTH-----------------------------------
@@ -572,9 +547,6 @@ public final class SignClient: SignClientProtocol {
         }
         sessionEngine.onSessionResponse = { [unowned self] response in
             sessionResponsePublisherSubject.send(response)
-        }
-        pairingPingService.onResponse = { [unowned self] topic in
-            pingResponsePublisherSubject.send(topic)
         }
         sessionPingService.onResponse = { [unowned self] topic in
             pingResponsePublisherSubject.send(topic)

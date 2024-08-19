@@ -57,7 +57,6 @@
 		84CE642127981DED00142511 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CE642027981DED00142511 /* SceneDelegate.swift */; };
 		84CE642827981DF000142511 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642727981DF000142511 /* Assets.xcassets */; };
 		84CE642B27981DF000142511 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84CE642927981DF000142511 /* LaunchScreen.storyboard */; };
-		84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CEC64528D89D6B00D081A8 /* PairingTests.swift */; };
 		84D093EB2B4EA6CB005B1925 /* ActivityIndicatorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D093EA2B4EA6CB005B1925 /* ActivityIndicatorManager.swift */; };
 		84DB38F32983CDAE00BFEE37 /* PushRegisterer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DB38F22983CDAE00BFEE37 /* PushRegisterer.swift */; };
 		84E6B84A29787A8000428BAF /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E6B84929787A8000428BAF /* NotificationService.swift */; };
@@ -438,7 +437,6 @@
 		84CE642A27981DF000142511 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84CE642C27981DF000142511 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84CE6453279FFE1100142511 /* Wallet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Wallet.entitlements; sourceTree = "<group>"; };
-		84CEC64528D89D6B00D081A8 /* PairingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingTests.swift; sourceTree = "<group>"; };
 		84D093EA2B4EA6CB005B1925 /* ActivityIndicatorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorManager.swift; sourceTree = "<group>"; };
 		84D72FC62B4692770057EAF3 /* DApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DApp.entitlements; sourceTree = "<group>"; };
 		84DB38F029828A7C00BFEE37 /* WalletApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WalletApp.entitlements; sourceTree = "<group>"; };
@@ -977,14 +975,6 @@
 			path = DApp;
 			sourceTree = "<group>";
 		};
-		84CEC64728D8A98900D081A8 /* Pairing */ = {
-			isa = PBXGroup;
-			children = (
-				84CEC64528D89D6B00D081A8 /* PairingTests.swift */,
-			);
-			path = Pairing;
-			sourceTree = "<group>";
-		};
 		84D2A66728A4F5260088AE09 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
@@ -1457,7 +1447,6 @@
 			children = (
 				847F07FE2A25DBC700B2A5A4 /* XPlatform */,
 				849D7A91292E2115006A2BD4 /* Push */,
-				84CEC64728D8A98900D081A8 /* Pairing */,
 				A5E03E0A28646A8A00888481 /* Stubs */,
 				A5E03E0928646A8100888481 /* Sign */,
 				84D2A66728A4F5260088AE09 /* Auth */,
@@ -2396,7 +2385,6 @@
 			files = (
 				A51606F92A2F47BD00CACB92 /* DefaultBIP44Provider.swift in Sources */,
 				A5A0843E29D2F624000B9B17 /* DefaultCryptoProvider.swift in Sources */,
-				84CEC64628D89D6B00D081A8 /* PairingTests.swift in Sources */,
 				767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */,
 				8439CB89293F658E00F2F2E2 /* PushMessage.swift in Sources */,
 				A518B31428E33A6500A2CE93 /* InputConfig.swift in Sources */,
@@ -3277,8 +3265,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WalletConnect/web3modal-swift";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				branch = "pairing-expiry";
+				kind = branch;
 			};
 		};
 		A5434021291E6A270068F706 /* XCRemoteSwiftPackageReference "solana-swift" */ = {

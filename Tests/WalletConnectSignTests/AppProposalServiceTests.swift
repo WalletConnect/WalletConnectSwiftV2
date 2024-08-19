@@ -128,7 +128,6 @@ final class AppProposalServiceTests: XCTestCase {
         networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date(), nil))
         let privateKey = try! cryptoMock.getPrivateKey(for: proposal.proposer.publicKey)!
         let topicB = deriveTopic(publicKey: responder.publicKey, privateKey: privateKey)
-        _ = storageMock.getPairing(forTopic: topicA)!
 
         await fulfillment(of: [exp], timeout: 5)
 
@@ -156,37 +155,8 @@ final class AppProposalServiceTests: XCTestCase {
         let response = RPCResponse.stubError(forRequest: request)
         networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date(), nil))
 
-        XCTAssert(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must unsubscribe if pairing is inactive.")
-        XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete an inactive pairing.")
+        XCTAssertFalse(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must delete the pairing.")
         XCTAssertFalse(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must delete symmetric key if pairing is inactive.")
-        XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
-    }
-
-    func testSessionProposeErrorOnActivePairing() async {
-        let uri = try! await appPairService.create(supportedMethods: nil)
-        let pairing = storageMock.getPairing(forTopic: uri.topic)!
-        let topicA = pairing.topic
-        let relayOptions = RelayProtocolOptions(protocol: "", data: nil)
-
-        // Client propose session
-        // FIXME: namespace stub
-        try? await service.propose(pairingTopic: pairing.topic, namespaces: ProposalNamespace.stubDictionary(), relay: relayOptions)
-
-        guard let request = networkingInteractor.requests.first?.request,
-              let proposal = try? networkingInteractor.requests.first?.request.params?.get(SessionType.ProposeParams.self) else {
-                  XCTFail("Proposer must publish session proposal request"); return
-              }
-
-        var storedPairing = storageMock.getPairing(forTopic: topicA)!
-        storedPairing.activate()
-        storageMock.setPairing(storedPairing)
-
-        let response = RPCResponse.stubError(forRequest: request)
-        networkingInteractor.responsePublisherSubject.send((topicA, request, response, Date(), nil))
-
-        XCTAssertFalse(networkingInteractor.didUnsubscribe(to: pairing.topic), "Proposer must not unsubscribe if pairing is active.")
-        XCTAssert(storageMock.hasPairing(forTopic: pairing.topic), "Proposer must not delete an active pairing.")
-        XCTAssert(cryptoMock.hasSymmetricKey(for: pairing.topic), "Proposer must not delete symmetric key if pairing is active.")
         XCTAssertFalse(cryptoMock.hasPrivateKey(for: proposal.proposer.publicKey), "Proposer must remove private key for rejected session")
     }
 }
