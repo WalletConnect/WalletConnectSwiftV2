@@ -169,13 +169,6 @@ extension SignPresenter {
             }
             .store(in: &subscriptions)
 
-        Sign.instance.sessionUpdatePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] (topic, namespace) in
-                print(namespace)
-            }
-            .store(in: &subscriptions)
-
         Sign.instance.authResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] response in
