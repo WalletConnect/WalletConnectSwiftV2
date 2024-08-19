@@ -185,6 +185,15 @@ struct ConnectionDetailsView: View {
                     .padding(.top, 30)
                     
                     Button {
+                        presenter.onUpdate()
+                    } label: {
+                        Text("Update")
+                            .foregroundColor(.grey50)
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    }
+                    .padding(.top, 20)
+
+                    Button {
                         presenter.onDelete()
                     } label: {
                         Text("Delete")
