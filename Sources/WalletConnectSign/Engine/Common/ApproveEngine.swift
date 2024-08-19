@@ -188,7 +188,6 @@ final class ApproveEngine {
             reason: reason
         )
 
-        // todo - delete and unsubscribe
         if let pairingTopic = rpcHistory.get(recordId: payload.id)?.topic {
             Task {
                 removePairing(pairingTopic: pairingTopic)
