@@ -6,9 +6,7 @@ final class ConnectionDetailsModule {
     @discardableResult
     static func create(app: Application, session: Session) -> UIViewController {
         let router = ConnectionDetailsRouter(app: app)
-        let interactor = ConnectionDetailsInteractor()
         let presenter = ConnectionDetailsPresenter(
-            interactor: interactor,
             router: router,
             session: session
         )
