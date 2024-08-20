@@ -61,9 +61,9 @@ final class SessionEngine {
             logger.debug("Could not find session for topic \(request.topic)")
             return // TODO: Marked to review on developer facing error cases
         }
-        guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
-            throw WalletConnectError.invalidPermissions
-        }
+//        guard session.hasPermission(forMethod: request.method, onChain: request.chainId) else {
+//            throw WalletConnectError.invalidPermissions
+//        }
         let chainRequest = SessionType.RequestParams.Request(method: request.method, params: request.params, expiry: request.expiry)
         let sessionRequestParams = SessionType.RequestParams(request: chainRequest, chainId: request.chainId)
         let protocolMethod = SessionRequestProtocolMethod(ttl: request.calculateTtl())
