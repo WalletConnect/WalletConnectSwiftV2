@@ -30,35 +30,35 @@ actor WalletPairService {
 
     func pair(_ uri: WalletConnectURI) async throws {
         eventsClient.startTrace(topic: uri.topic)
-        eventsClient.saveEvent(PairingExecutionTraceEvents.pairingStarted)
+        eventsClient.saveTraceEvent(PairingExecutionTraceEvents.pairingStarted)
         logger.debug("Pairing with uri: \(uri)")
         guard try !pairingHasPendingRequest(for: uri.topic) else {
-            eventsClient.saveEvent(PairingExecutionTraceEvents.pairingHasPendingRequest)
+            eventsClient.saveTraceEvent(PairingExecutionTraceEvents.pairingHasPendingRequest)
             logger.debug("Pairing with topic (\(uri.topic)) has pending request")
             return
         }
         if !networkingInteractor.isSocketConnected {
-            eventsClient.saveEvent(PairingExecutionTraceEvents.noWssConnection)
+            eventsClient.saveTraceEvent(PairingExecutionTraceEvents.noWssConnection)
         }
 
         let pairing = WCPairing(uri: uri)
         let symKey = try SymmetricKey(hex: uri.symKey)
         try kms.setSymmetricKey(symKey, for: pairing.topic)
         pairingStorage.setPairing(pairing)
-        eventsClient.saveEvent(PairingExecutionTraceEvents.storeNewPairing)
+        eventsClient.saveTraceEvent(PairingExecutionTraceEvents.storeNewPairing)
 
         let networkConnectionStatus = await resolveNetworkConnectionStatus()
         guard networkConnectionStatus == .connected else {
             logger.debug("Pairing failed - Network is not connected")
-            eventsClient.saveEvent(PairingTraceErrorEvents.noInternetConnection)
+            eventsClient.saveTraceEvent(PairingTraceErrorEvents.noInternetConnection)
             throw Errors.networkNotConnected
         }
-        eventsClient.saveEvent(PairingExecutionTraceEvents.subscribingPairingTopic)
+        eventsClient.saveTraceEvent(PairingExecutionTraceEvents.subscribingPairingTopic)
         do {
             try await networkingInteractor.subscribe(topic: pairing.topic)
         } catch {
             logger.debug("Failed to subscribe to topic: \(pairing.topic)")
-            eventsClient.saveEvent(PairingTraceErrorEvents.subscribePairingTopicFailure)
+            eventsClient.saveTraceEvent(PairingTraceErrorEvents.subscribePairingTopicFailure)
             throw error
         }
     }
@@ -78,7 +78,7 @@ extension WalletPairService {
 
         guard !pendingRequests.isEmpty else { return false }
         pendingRequests.forEach { request in
-            eventsClient.saveEvent(PairingExecutionTraceEvents.emitSessionProposal)
+            eventsClient.saveTraceEvent(PairingExecutionTraceEvents.emitSessionProposal)
             networkingInteractor.handleHistoryRequest(topic: topic, request: request)
         }
         return true
