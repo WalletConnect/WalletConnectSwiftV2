@@ -13,6 +13,7 @@ actor LinkAuthRequester {
     private let authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let linkModeLinksStore: CodableStore<Bool>
+    private let eventsClient: EventsClientProtocol
 
     init(kms: KeyManagementService,
          appMetadata: AppMetadata,
@@ -20,7 +21,8 @@ actor LinkAuthRequester {
          iatProvader: IATProvider,
          authResponseTopicRecordsStore: CodableStore<AuthResponseTopicRecord>,
          linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
-         linkModeLinksStore: CodableStore<Bool>) {
+         linkModeLinksStore: CodableStore<Bool>,
+         eventsClient: EventsClientProtocol) {
         self.kms = kms
         self.appMetadata = appMetadata
         self.logger = logger
@@ -28,6 +30,7 @@ actor LinkAuthRequester {
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.linkModeLinksStore = linkModeLinksStore
+        self.eventsClient = eventsClient
     }
 
     func request(params: AuthRequestParams, walletUniversalLink: String) async throws -> String {
@@ -50,8 +53,6 @@ actor LinkAuthRequester {
         let requester = Participant(publicKey: pubKey.hexRepresentation, metadata: appMetadata)
         let payload = AuthPayload(requestParams: params, iat: iatProvader.iat)
 
-
-
         let sessionAuthenticateRequestParams = SessionAuthenticateRequestParams(requester: requester, authPayload: payload, ttl: params.ttl)
         let authResponseTopicRecord = AuthResponseTopicRecord(topic: responseTopic, unixTimestamp: sessionAuthenticateRequestParams.expiryTimestamp)
         authResponseTopicRecordsStore.set(authResponseTopicRecord, forKey: responseTopic)
@@ -60,8 +61,10 @@ actor LinkAuthRequester {
 
         logger.debug("LinkAuthRequester: sending request")        
 
-        return try await linkEnvelopesDispatcher.request(topic: UUID().uuidString,request: request, peerUniversalLink: walletUniversalLink, envelopeType: .type2)
+        let envelope = try await linkEnvelopesDispatcher.request(topic: UUID().uuidString,request: request, peerUniversalLink: walletUniversalLink, envelopeType: .type2)
 
+        Task { eventsClient.saveMessageEvent(.sessionAuthenticateLinkModeSent(request.id!)) }
+        return envelope
     }
 
     private func createRecapUrn(methods: [String]) throws -> String {

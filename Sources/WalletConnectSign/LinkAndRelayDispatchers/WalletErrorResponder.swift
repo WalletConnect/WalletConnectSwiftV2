@@ -13,19 +13,22 @@ actor WalletErrorResponder {
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
+    private let eventsClient: EventsClientProtocol
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
          kms: KeyManagementServiceProtocol,
          rpcHistory: RPCHistory,
-         linkEnvelopesDispatcher: LinkEnvelopesDispatcher) {
+         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
+         eventsClient: EventsClientProtocol
+    ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.kms = kms
         self.rpcHistory = rpcHistory
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
+        self.eventsClient = eventsClient
     }
-
 
     func respondError(_ error: AuthError, requestId: RPCID) async throws -> String? {
 
@@ -69,7 +72,11 @@ actor WalletErrorResponder {
             throw Errors.peerUniversalLinkNotFound
         }
 
-        return try await linkEnvelopesDispatcher.respondError(topic: topic, requestId: requestId, peerUniversalLink: peerUniversalLink, reason: error, envelopeType: .type1(pubKey: type1EnvelopeKey))
+        let envelope = try await linkEnvelopesDispatcher.respondError(topic: topic, requestId: requestId, peerUniversalLink: peerUniversalLink, reason: error, envelopeType: .type1(pubKey: type1EnvelopeKey))
+
+        Task(priority: .low) { eventsClient.saveMessageEvent(.sessionAuthenticateLinkModeResponseRejectSent(requestId)) }
+
+        return envelope
 
     }
 

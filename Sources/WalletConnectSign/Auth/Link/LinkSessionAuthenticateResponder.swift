@@ -12,6 +12,7 @@ actor LinkSessionAuthenticateResponder {
     private let util: ApproveSessionAuthenticateUtil
     private let walletErrorResponder: WalletErrorResponder
     private let verifyContextStore: CodableStore<VerifyContext>
+    private let eventsClient: EventsClientProtocol
 
     init(
         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
@@ -20,7 +21,8 @@ actor LinkSessionAuthenticateResponder {
         metadata: AppMetadata,
         approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil,
         walletErrorResponder: WalletErrorResponder,
-        verifyContextStore: CodableStore<VerifyContext>
+        verifyContextStore: CodableStore<VerifyContext>,
+        eventsClient: EventsClientProtocol
     ) {
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.logger = logger
@@ -29,6 +31,7 @@ actor LinkSessionAuthenticateResponder {
         self.metadata = metadata
         self.util = approveSessionAuthenticateUtil
         self.walletErrorResponder = walletErrorResponder
+        self.eventsClient = eventsClient
     }
 
     func respond(requestId: RPCID, auths: [Cacao]) async throws -> (Session?, String) {
@@ -59,6 +62,8 @@ actor LinkSessionAuthenticateResponder {
 
 
         let url = try await linkEnvelopesDispatcher.respond(topic: responseTopic, response: response, peerUniversalLink: peerUniversalLink, envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation))
+
+        Task(priority: .low) { eventsClient.saveMessageEvent(.sessionAuthenticateLinkModeResponseApproveSent(requestId)) }
 
         let session = try util.createSession(
             response: responseParams,

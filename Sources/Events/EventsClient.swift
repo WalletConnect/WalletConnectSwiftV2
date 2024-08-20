@@ -5,6 +5,7 @@ public protocol EventsClientProtocol {
     func saveTraceEvent(_ event: TraceEventItem)
     func setTopic(_ topic: String)
     func setTelemetryEnabled(_ enabled: Bool)
+    func saveMessageEvent(_ event: MessageEventType)
 }
 
 public class EventsClient: EventsClientProtocol {
@@ -124,5 +125,10 @@ public class MockEventsClient: EventsClientProtocol {
     public func setTelemetryEnabled(_ enabled: Bool) {
         telemetryEnabled = enabled
     }
+
+    public func saveMessageEvent(_ event: MessageEventType) {
+
+    }
+
 }
 #endif
