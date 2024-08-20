@@ -1,60 +1,20 @@
 
 import Foundation
 
-public struct MessageEventProperties {
-    let tag: Int
-    let rpcId: RPCID
-    let direction: Direction
-}
-
-enum Direction: String, Codable {
-    case send
-    case received
-}
-
-struct MessageEvent: Codable {
-    struct Props: Codable {
-        let event: String = "SUCCESS"
-        let type: String
-        let properties: Properties
-    }
-
-    struct Properties: Codable {
-        let correlationId: Int64
-        let clientId: String
-        let direction: Direction
-
-        // Custom CodingKeys to map Swift property names to JSON keys
-        enum CodingKeys: String, CodingKey {
-            case correlationId = "correlation_id"
-            case clientId = "client_id"
-            case direction
-        }
-    }
-
-    let eventId: String
-    let bundleId: String
-    let timestamp: Int64
-    let props: Props
-}
-
 
 protocol MessageEventsStorage {
-    func saveMessageEvent(_ eventProperties: MessageEventProperties)
-    func fetchMessageEvents() -> [MessageEvent]
-    func clearMessageEvents()
+    func saveMessageEvent(_ eventType: MessageEventType)
+    func fetchMessageEvents() -> [MessageEvent] 
+    func clearMessageEvents() 
 }
 
 class UserDefaultsMessageEventsStorage: MessageEventsStorage {
     private let messageEventsKey = "com.walletconnect.sdk.messageEvents"
     private let maxEvents = 200
 
-    func saveMessageEvent(_ eventProperties: MessageEventProperties) {
-        // Create the correlation_id from rpcId
-        let correlationId = eventProperties.rpcId.integer
-
-        let type = "\(eventProperties.tag)"
-
+    func saveMessageEvent(_ eventType: MessageEventType) {
+        let correlationId = eventType.rpcId.integer
+        let type = "\(eventType.tag)"
         let bundleId = Bundle.main.bundleIdentifier ?? "Unknown"
 
         let props = MessageEvent.Props(
@@ -62,11 +22,11 @@ class UserDefaultsMessageEventsStorage: MessageEventsStorage {
             properties: MessageEvent.Properties(
                 correlationId: correlationId,
                 clientId: bundleId,
-                direction: eventProperties.direction
+                direction: eventType.direction
             )
         )
 
-        let eventObject = MessageEvent(
+        let event = MessageEvent(
             eventId: UUID().uuidString,
             bundleId: bundleId,
             timestamp: Int64(Date().timeIntervalSince1970 * 1000),
@@ -75,7 +35,7 @@ class UserDefaultsMessageEventsStorage: MessageEventsStorage {
 
         // Fetch existing events from UserDefaults
         var existingEvents = fetchMessageEvents()
-        existingEvents.append(eventObject)
+        existingEvents.append(event)
 
         // Ensure we keep only the last 200 events
         if existingEvents.count > maxEvents {
@@ -91,7 +51,8 @@ class UserDefaultsMessageEventsStorage: MessageEventsStorage {
     func fetchMessageEvents() -> [MessageEvent] {
         if let data = UserDefaults.standard.data(forKey: messageEventsKey),
            let events = try? JSONDecoder().decode([MessageEvent].self, from: data) {
-            return events
+            // Return only the last 200 events
+            return Array(events.suffix(maxEvents))
         }
         return []
     }

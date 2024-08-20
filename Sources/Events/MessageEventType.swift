@@ -13,6 +13,22 @@ public enum MessageEventType {
     case sessionRequestLinkModeResponseSent(RPCID)
     case sessionRequestLinkModeResponseReceived(RPCID)
 
+    var rpcId: RPCID {
+        switch self {
+        case .sessionAuthenticateLinkModeSent(let rpcId),
+             .sessionAuthenticateLinkModeReceived(let rpcId),
+             .sessionAuthenticateLinkModeResponseApproveSent(let rpcId),
+             .sessionAuthenticateLinkModeResponseApproveReceived(let rpcId),
+             .sessionAuthenticateLinkModeResponseRejectSent(let rpcId),
+             .sessionAuthenticateLinkModeResponseRejectReceived(let rpcId),
+             .sessionRequestLinkModeSent(let rpcId),
+             .sessionRequestLinkModeReceived(let rpcId),
+             .sessionRequestLinkModeResponseSent(let rpcId),
+             .sessionRequestLinkModeResponseReceived(let rpcId):
+            return rpcId
+        }
+    }
+
     var tag: Int {
         switch self {
         case .sessionAuthenticateLinkModeSent, .sessionAuthenticateLinkModeReceived:
@@ -28,28 +44,20 @@ public enum MessageEventType {
         }
     }
 
-    var direction: Direction {
+    var direction: MessageEvent.Direction {
         switch self {
-        case .sessionAuthenticateLinkModeSent, .sessionAuthenticateLinkModeResponseApproveSent, .sessionAuthenticateLinkModeResponseRejectSent, .sessionRequestLinkModeSent, .sessionRequestLinkModeResponseSent:
+        case .sessionAuthenticateLinkModeSent,
+             .sessionAuthenticateLinkModeResponseApproveSent,
+             .sessionAuthenticateLinkModeResponseRejectSent,
+             .sessionRequestLinkModeSent,
+             .sessionRequestLinkModeResponseSent:
             return .send
-        case .sessionAuthenticateLinkModeReceived, .sessionAuthenticateLinkModeResponseApproveReceived, .sessionAuthenticateLinkModeResponseRejectReceived, .sessionRequestLinkModeReceived, .sessionRequestLinkModeResponseReceived:
+        case .sessionAuthenticateLinkModeReceived,
+             .sessionAuthenticateLinkModeResponseApproveReceived,
+             .sessionAuthenticateLinkModeResponseRejectReceived,
+             .sessionRequestLinkModeReceived,
+             .sessionRequestLinkModeResponseReceived:
             return .received
-        }
-    }
-
-    func toMessageEventProperties() -> MessageEventProperties {
-        switch self {
-        case let .sessionAuthenticateLinkModeSent(rpcId),
-             let .sessionAuthenticateLinkModeReceived(rpcId),
-             let .sessionAuthenticateLinkModeResponseApproveSent(rpcId),
-             let .sessionAuthenticateLinkModeResponseApproveReceived(rpcId),
-             let .sessionAuthenticateLinkModeResponseRejectSent(rpcId),
-             let .sessionAuthenticateLinkModeResponseRejectReceived(rpcId),
-             let .sessionRequestLinkModeSent(rpcId),
-             let .sessionRequestLinkModeReceived(rpcId),
-             let .sessionRequestLinkModeResponseSent(rpcId),
-             let .sessionRequestLinkModeResponseReceived(rpcId):
-            return MessageEventProperties(tag: self.tag, rpcId: rpcId, direction: self.direction)
         }
     }
 }
