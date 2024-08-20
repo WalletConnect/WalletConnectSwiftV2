@@ -4,6 +4,12 @@ import Foundation
 public struct MessageEventProperties {
     let tag: Int
     let rpcId: RPCID
+    let direction: Direction
+}
+
+enum Direction: String, Codable {
+    case send
+    case received
 }
 
 struct MessageEvent: Codable {
@@ -16,11 +22,13 @@ struct MessageEvent: Codable {
     struct Properties: Codable {
         let correlationId: Int64
         let clientId: String
+        let direction: Direction
 
         // Custom CodingKeys to map Swift property names to JSON keys
         enum CodingKeys: String, CodingKey {
             case correlationId = "correlation_id"
             case clientId = "client_id"
+            case direction
         }
     }
 
@@ -31,9 +39,8 @@ struct MessageEvent: Codable {
 }
 
 
-
 protocol MessageEventsStorage {
-    func saveMessageEvent(_ event: MessageEventProperties)
+    func saveMessageEvent(_ eventProperties: MessageEventProperties)
     func fetchMessageEvents() -> [MessageEvent]
     func clearMessageEvents()
 }
@@ -42,11 +49,11 @@ class UserDefaultsMessageEventsStorage: MessageEventsStorage {
     private let messageEventsKey = "com.walletconnect.sdk.messageEvents"
     private let maxEvents = 200
 
-    func saveMessageEvent(_ event: MessageEventProperties) {
+    func saveMessageEvent(_ eventProperties: MessageEventProperties) {
         // Create the correlation_id from rpcId
-        let correlationId = event.rpcId.integer
+        let correlationId = eventProperties.rpcId.integer
 
-        let type = "\(event.tag)"
+        let type = "\(eventProperties.tag)"
 
         let bundleId = Bundle.main.bundleIdentifier ?? "Unknown"
 
@@ -54,7 +61,8 @@ class UserDefaultsMessageEventsStorage: MessageEventsStorage {
             type: type,
             properties: MessageEvent.Properties(
                 correlationId: correlationId,
-                clientId: bundleId
+                clientId: bundleId,
+                direction: eventProperties.direction
             )
         )
 
