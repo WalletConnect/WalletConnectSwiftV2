@@ -57,10 +57,11 @@ public class EventsClient: EventsClientProtocol {
         eventsCollector.saveEvent(event)
     }
 
-    public func saveMessageEvent(_ event: MessageEventProperties) {
+    public func saveMessageEvent(_ event: MessageEventType) {
         guard stateStorage.telemetryEnabled else { return }
-        logger.debug("Will store a message event: \(event)")
-        messageEventsStorage.saveMessageEvent(event)
+        let messageEventProperties = event.toMessageEventProperties()
+        logger.debug("Will store a message event: \(messageEventProperties)")
+        messageEventsStorage.saveMessageEvent(messageEventProperties)
     }
 
     // Public method to set telemetry enabled or disabled
