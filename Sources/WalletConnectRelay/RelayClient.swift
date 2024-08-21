@@ -20,8 +20,6 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
 
-    var subscriptions: [String: String] = [:]
-
     public var isSocketConnected: Bool {
         return dispatcher.isSocketConnected
     }
@@ -55,7 +53,7 @@ public final class RelayClient {
     private var dispatcher: Dispatching
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
-    private let subscriptionsTracker: SubscriptionsTracker
+    private let subscriptionsTracker: SubscriptionsTracking
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", qos: .utility, attributes: .concurrent)
 
@@ -71,7 +69,7 @@ public final class RelayClient {
         logger: ConsoleLogging,
         rpcHistory: RPCHistory,
         clientIdStorage: ClientIdStoring,
-        subscriptionsTracker: SubscriptionsTracker
+        subscriptionsTracker: SubscriptionsTracking
     ) {
         self.logger = logger
         self.dispatcher = dispatcher

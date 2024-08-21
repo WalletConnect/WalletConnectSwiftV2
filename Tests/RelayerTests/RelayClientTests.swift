@@ -10,13 +10,15 @@ final class RelayClientTests: XCTestCase {
     var sut: RelayClient!
     var dispatcher: DispatcherMock!
     var publishers = Set<AnyCancellable>()
+    var subscriptionsTracker: SubscriptionsTrackerMock!
 
     override func setUp() {
         dispatcher = DispatcherMock()
         let logger = ConsoleLogger()
         let clientIdStorage = ClientIdStorageMock()
         let rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: RuntimeKeyValueStorage())
-        sut = RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage)
+        subscriptionsTracker = SubscriptionsTrackerMock()
+        sut = RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage, subscriptionsTracker: subscriptionsTracker)
     }
 
     override func tearDown() {
@@ -50,7 +52,7 @@ final class RelayClientTests: XCTestCase {
 
     func testUnsubscribeRequest() {
         let topic = String.randomTopic()
-        sut.subscriptions[topic] = ""
+        subscriptionsTracker.setSubscription(for: topic, id: "")
         sut.unsubscribe(topic: topic) { error in
             XCTAssertNil(error)
         }
@@ -78,7 +80,7 @@ final class RelayClientTests: XCTestCase {
 
     func testSendOnUnsubscribe() {
         let topic = "123"
-        sut.subscriptions[topic] = ""
+        subscriptionsTracker.setSubscription(for: topic, id: "")
         sut.unsubscribe(topic: topic) {_ in }
         XCTAssertTrue(dispatcher.sent)
     }

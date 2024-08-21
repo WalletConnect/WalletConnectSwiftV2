@@ -16,6 +16,7 @@ class AutomaticSocketConnectionHandler {
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
     private let defaultTimeout: Int = 60
     private let logger: ConsoleLogging
+    private let subscriptionsTracker: SubscriptionsTracking
 
     private var publishers = Set<AnyCancellable>()
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.automatic_socket_connection", qos: .utility, attributes: .concurrent)
@@ -25,6 +26,7 @@ class AutomaticSocketConnectionHandler {
         networkMonitor: NetworkMonitoring = NetworkMonitor(),
         appStateObserver: AppStateObserving = AppStateObserver(),
         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar(),
+        subscriptionsTracker: SubscriptionsTracking,
         logger: ConsoleLogging
     ) {
         self.appStateObserver = appStateObserver
@@ -32,6 +34,7 @@ class AutomaticSocketConnectionHandler {
         self.networkMonitor = networkMonitor
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
         self.logger = logger
+        self.subscriptionsTracker = subscriptionsTracker
 
         setUpStateObserving()
         setUpNetworkMonitoring()
@@ -93,9 +96,9 @@ class AutomaticSocketConnectionHandler {
         }
     }
 
-    private func reconnectIfNeeded() {
-        check if it is subscribed to anything and only then subscribe
-        if !socket.isConnected {
+    func reconnectIfNeeded() {
+        // Check if client has active subscriptions and only then subscribe
+        if !socket.isConnected && subscriptionsTracker.isSubscribed() {
             connect()
         }
     }
