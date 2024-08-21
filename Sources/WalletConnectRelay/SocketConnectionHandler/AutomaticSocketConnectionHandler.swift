@@ -122,8 +122,3 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
     }
 }
 
-
-class SubscriptionsTracker {
-    var subscriptions: [String: String] = [:]
-
-}
