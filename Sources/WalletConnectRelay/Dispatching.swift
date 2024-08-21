@@ -6,7 +6,6 @@ protocol Dispatching {
     var isSocketConnected: Bool { get }
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> { get }
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
-    func send(_ string: String, completion: @escaping (Error?) -> Void)
     func protectedSend(_ string: String, completion: @escaping (Error?) -> Void)
     func protectedSend(_ string: String) async throws
     func connect() throws
@@ -59,7 +58,7 @@ final class Dispatcher: NSObject, Dispatching {
         setUpSocketConnectionObserving()
     }
 
-    func send(_ string: String, completion: @escaping (Error?) -> Void) {
+    private func send(_ string: String, completion: @escaping (Error?) -> Void) {
         guard socket.isConnected else {
             completion(NetworkError.connectionFailed)
             return
@@ -74,12 +73,16 @@ final class Dispatcher: NSObject, Dispatching {
             return send(string, completion: completion)
         }
 
+        if !socket.isConnected {
+            socketConnectionHandler.handleInternalConnect()
+        }
+
         var cancellable: AnyCancellable?
         cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
             .filter { $0.0 == .connected && $0.1 == .connected }
             .setFailureType(to: NetworkError.self)
             .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
-            .sink(receiveCompletion: { [unowned self] result in
+            .sink(receiveCompletion: { result in
                 switch result {
                 case .failure(let error):
                     cancellable?.cancel()

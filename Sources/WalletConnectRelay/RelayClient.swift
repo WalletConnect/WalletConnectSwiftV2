@@ -55,6 +55,7 @@ public final class RelayClient {
     private var dispatcher: Dispatching
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let subscriptionsTracker: SubscriptionsTracker
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", qos: .utility, attributes: .concurrent)
 
@@ -69,14 +70,17 @@ public final class RelayClient {
         dispatcher: Dispatching,
         logger: ConsoleLogging,
         rpcHistory: RPCHistory,
-        clientIdStorage: ClientIdStoring
+        clientIdStorage: ClientIdStoring,
+        subscriptionsTracker: SubscriptionsTracker
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
         self.rpcHistory = rpcHistory
         self.clientIdStorage = clientIdStorage
+        self.subscriptionsTracker = subscriptionsTracker
         setUpBindings()
     }
+
 
     private func setUpBindings() {
         dispatcher.onMessage = { [weak self] payload in

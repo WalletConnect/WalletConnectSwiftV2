@@ -35,9 +35,6 @@ class AutomaticSocketConnectionHandler {
 
         setUpStateObserving()
         setUpNetworkMonitoring()
-
-        connect()
-
     }
 
     func connect() {
@@ -97,8 +94,9 @@ class AutomaticSocketConnectionHandler {
     }
 
     private func reconnectIfNeeded() {
+        check if it is subscribed to anything and only then subscribe
         if !socket.isConnected {
-            socket.connect()
+            connect()
         }
     }
 }
@@ -106,6 +104,10 @@ class AutomaticSocketConnectionHandler {
 // MARK: - SocketConnectionHandler
 
 extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
+    func handleInternalConnect() {
+        connect()
+    }
+    
     func handleConnect() throws {
         throw Errors.manualSocketConnectionForbidden
     }
@@ -118,4 +120,10 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
         guard await appStateObserver.currentState == .foreground else { return }
         reconnectIfNeeded()
     }
+}
+
+
+class SubscriptionsTracker {
+    var subscriptions: [String: String] = [:]
+
 }
