@@ -22,7 +22,7 @@ struct MessageEvent: Codable {
     }
 
     enum Direction: String, Codable {
-        case send
+        case sent
         case received
     }
 

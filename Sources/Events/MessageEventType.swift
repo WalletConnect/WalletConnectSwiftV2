@@ -51,7 +51,7 @@ public enum MessageEventType {
              .sessionAuthenticateLinkModeResponseRejectSent,
              .sessionRequestLinkModeSent,
              .sessionRequestLinkModeResponseSent:
-            return .send
+            return .sent
         case .sessionAuthenticateLinkModeReceived,
              .sessionAuthenticateLinkModeResponseApproveReceived,
              .sessionAuthenticateLinkModeResponseRejectReceived,
