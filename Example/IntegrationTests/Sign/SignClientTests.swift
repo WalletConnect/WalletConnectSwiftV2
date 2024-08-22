@@ -89,7 +89,6 @@ final class SignClientTests: XCTestCase {
     }
 
     func testSessionPropose() async throws {
-        //start measuring here
         let dappSettlementExpectation = expectation(description: "Dapp expects to settle a session")
         let walletSettlementExpectation = expectation(description: "Wallet expects to settle a session")
         let requiredNamespaces = ProposalNamespace.stubRequired()
@@ -105,7 +104,6 @@ final class SignClientTests: XCTestCase {
             }
         }.store(in: &publishers)
         dapp.sessionSettlePublisher.sink { _ in
-            //end measuring here
             dappSettlementExpectation.fulfill()
         }.store(in: &publishers)
         wallet.sessionSettlePublisher.sink { _ in
