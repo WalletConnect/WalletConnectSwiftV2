@@ -5,6 +5,7 @@ protocol SubscriptionsTracking {
     func getSubscription(for topic: String) -> String?
     func removeSubscription(for topic: String)
     func isSubscribed() -> Bool
+    func getTopics() -> [String]
 }
 
 public final class SubscriptionsTracker: SubscriptionsTracking {
@@ -12,31 +13,39 @@ public final class SubscriptionsTracker: SubscriptionsTracking {
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.subscriptions_tracker", attributes: .concurrent)
 
     func setSubscription(for topic: String, id: String) {
-        concurrentQueue.async(flags: .barrier) {
+        concurrentQueue.async(flags: .barrier) { [unowned self] in
             self.subscriptions[topic] = id
         }
     }
 
     func getSubscription(for topic: String) -> String? {
         var result: String?
-        concurrentQueue.sync {
-            result = self.subscriptions[topic]
+        concurrentQueue.sync { [unowned self] in
+            result = subscriptions[topic]
         }
         return result
     }
 
     func removeSubscription(for topic: String) {
-        concurrentQueue.async(flags: .barrier) {
-            self.subscriptions[topic] = nil
+        concurrentQueue.async(flags: .barrier) { [unowned self] in
+            subscriptions[topic] = nil
         }
     }
 
     func isSubscribed() -> Bool {
         var result = false
-        concurrentQueue.sync {
-            result = !self.subscriptions.isEmpty
+        concurrentQueue.sync { [unowned self] in
+            result = !subscriptions.isEmpty
         }
         return result
+    }
+
+    func getTopics() -> [String] {
+        var topics: [String] = []
+        concurrentQueue.sync { [unowned self] in
+            topics = Array(subscriptions.keys)
+        }
+        return topics
     }
 }
 
@@ -64,6 +73,10 @@ final class SubscriptionsTrackerMock: SubscriptionsTracking {
     func reset() {
         subscriptions.removeAll()
         isSubscribedReturnValue = false
+    }
+
+    func getTopics() -> [String] {
+        return Array(subscriptions.keys)
     }
 }
 #endif

@@ -47,6 +47,7 @@ public final class RelayClient {
     private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
+    private var publishers = [AnyCancellable]()
 
     private let clientIdStorage: ClientIdStoring
 
@@ -77,13 +78,25 @@ public final class RelayClient {
         self.clientIdStorage = clientIdStorage
         self.subscriptionsTracker = subscriptionsTracker
         setUpBindings()
+        setupConnectionSubscriptions()
     }
-
 
     private func setUpBindings() {
         dispatcher.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
         }
+    }
+
+    private func setupConnectionSubscriptions() {
+        socketConnectionStatusPublisher
+            .sink { [unowned self] status in
+                guard status == .connected else { return }
+                let topics = subscriptionsTracker.getTopics()
+                Task(priority: .high) {
+                    try await batchSubscribe(topics: topics)
+                }
+            }
+            .store(in: &publishers)
     }
 
     public func setLogging(level: LoggingLevel) {

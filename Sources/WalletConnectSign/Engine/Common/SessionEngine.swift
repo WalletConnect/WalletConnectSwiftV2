@@ -45,7 +45,7 @@ final class SessionEngine {
         self.sessionRequestsProvider = sessionRequestsProvider
         self.invalidRequestsSanitiser = invalidRequestsSanitiser
 
-        setupConnectionSubscriptions()
+        subscribeActiveSessions()
         setupRequestSubscriptions()
         setupResponseSubscriptions()
         setupUpdateSubscriptions()
@@ -88,16 +88,11 @@ final class SessionEngine {
 
 private extension SessionEngine {
 
-    func setupConnectionSubscriptions() {
-        networkingInteractor.socketConnectionStatusPublisher
-            .sink { [unowned self] status in
-                guard status == .connected else { return }
-                let topics = sessionStore.getAll().map{$0.topic}
-                Task(priority: .high) {
-                    try await networkingInteractor.batchSubscribe(topics: topics)
-                }
-            }
-            .store(in: &publishers)
+    func subscribeActiveSessions() {
+        let topics = sessionStore.getAll().map{$0.topic}
+        Task(priority: .background) {
+            try await networkingInteractor.batchSubscribe(topics: topics)
+        }
     }
 
     func setupRequestSubscriptions() {

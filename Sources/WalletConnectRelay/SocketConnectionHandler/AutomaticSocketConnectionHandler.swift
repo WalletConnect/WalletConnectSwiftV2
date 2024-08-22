@@ -96,7 +96,9 @@ class AutomaticSocketConnectionHandler {
         }
     }
 
+
     func reconnectIfNeeded() {
+        
         // Check if client has active subscriptions and only then subscribe
         if !socket.isConnected && subscriptionsTracker.isSubscribed() {
             connect()
