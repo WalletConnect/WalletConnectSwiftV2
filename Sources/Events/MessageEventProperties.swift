@@ -1,6 +1,4 @@
-
 import Foundation
-
 
 protocol MessageEventsStorage {
     func saveMessageEvent(_ eventType: MessageEventType)
@@ -16,12 +14,13 @@ class UserDefaultsMessageEventsStorage: MessageEventsStorage {
         let correlationId = eventType.rpcId.integer
         let type = "\(eventType.tag)"
         let bundleId = Bundle.main.bundleIdentifier ?? "Unknown"
+        let clientId = (try? Networking.interactor.getClientId()) ?? "Unknown"
 
         let props = MessageEvent.Props(
             type: type,
             properties: MessageEvent.Properties(
                 correlationId: correlationId,
-                clientId: bundleId,
+                clientId: clientId,
                 direction: eventType.direction
             )
         )
