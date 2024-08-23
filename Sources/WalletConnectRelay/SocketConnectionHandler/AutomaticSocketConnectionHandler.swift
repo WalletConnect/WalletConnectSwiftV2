@@ -21,11 +21,11 @@ class AutomaticSocketConnectionHandler {
     private var publishers = Set<AnyCancellable>()
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.automatic_socket_connection", qos: .utility, attributes: .concurrent)
 
-    private var reconnectionAttempts = 0
-    private let maxImmediateAttempts = 3
-    private let periodicReconnectionInterval: TimeInterval = 5.0
-    private var reconnectionTimer: DispatchSourceTimer?
-    private var isConnecting = false
+    var reconnectionAttempts = 0
+    let maxImmediateAttempts = 3
+    var periodicReconnectionInterval: TimeInterval = 5.0
+    var reconnectionTimer: DispatchSourceTimer?
+    var isConnecting = false
 
     init(
         socket: WebSocketConnecting,

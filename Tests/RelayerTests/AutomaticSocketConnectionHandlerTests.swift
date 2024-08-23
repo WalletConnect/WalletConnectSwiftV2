@@ -33,7 +33,7 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
             backgroundTaskRegistrar: backgroundTaskRegistrar,
             subscriptionsTracker: subscriptionsTracker,
             logger: logger,
-            socketStatusProvider: socketStatusProviderMock // Use the mock
+            socketStatusProvider: socketStatusProviderMock
         )
     }
 
@@ -179,5 +179,65 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
 
         // Expect the socket to reconnect since there are subscriptions
         XCTAssertTrue(webSocketSession.isConnected)
+    }
+
+    func testSwitchesToPeriodicReconnectionAfterMaxImmediateAttempts() {
+        sut.connect() // Start connection process
+
+        // Simulate immediate reconnection attempts
+        for _ in 0...sut.maxImmediateAttempts {
+            socketStatusProviderMock.simulateConnectionStatus(.disconnected)
+        }
+
+        // Now we should be switching to periodic reconnection attempts
+        // Check reconnectionAttempts is set to maxImmediateAttempts
+        XCTAssertEqual(sut.reconnectionAttempts, sut.maxImmediateAttempts)
+        XCTAssertNotNil(sut.reconnectionTimer) // Periodic reconnection timer should be started
+    }
+
+    func testPeriodicReconnectionStopsAfterSuccessfulConnection() {
+        sut.connect() // Start connection process
+
+        // Simulate immediate reconnection attempts
+        for _ in 0...sut.maxImmediateAttempts {
+            socketStatusProviderMock.simulateConnectionStatus(.disconnected)
+        }
+
+        // Check that periodic reconnection starts
+        XCTAssertNotNil(sut.reconnectionTimer)
+
+        // Now simulate the connection being successful
+        socketStatusProviderMock.simulateConnectionStatus(.connected)
+
+        // Periodic reconnection timer should stop
+        XCTAssertNil(sut.reconnectionTimer)
+        XCTAssertEqual(sut.reconnectionAttempts, 0) // Attempts should be reset
+    }
+
+    func testPeriodicReconnectionAttempts() {
+        subscriptionsTracker.isSubscribedReturnValue = true // Simulate that there are active subscriptions
+        webSocketSession.disconnect()
+        sut.periodicReconnectionInterval = 0.0001
+        sut.connect() // Start connection process
+
+        // Simulate immediate reconnection attempts to switch to periodic
+        for _ in 0...sut.maxImmediateAttempts {
+            socketStatusProviderMock.simulateConnectionStatus(.disconnected)
+        }
+
+        // Ensure we have switched to periodic reconnection
+        XCTAssertNotNil(sut.reconnectionTimer)
+
+        // Simulate the periodic timer firing without waiting for real time
+        let expectation = XCTestExpectation(description: "Periodic reconnection attempt made")
+        sut.reconnectionTimer?.setEventHandler {
+            self.socketStatusProviderMock.simulateConnectionStatus(.connected)
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1)
+
+        // Check that the periodic reconnection attempt was made
+        XCTAssertTrue(webSocketSession.isConnected) // Assume that connection would have been attempted
     }
 }
