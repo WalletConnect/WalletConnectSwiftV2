@@ -14,7 +14,6 @@ class AutomaticSocketConnectionHandler {
     private let appStateObserver: AppStateObserving
     private let networkMonitor: NetworkMonitoring
     private let backgroundTaskRegistrar: BackgroundTaskRegistering
-    private let defaultTimeout: Int = 60
     private let logger: ConsoleLogging
     private let subscriptionsTracker: SubscriptionsTracking
     private let socketStatusProvider: SocketStatusProviding
@@ -47,29 +46,35 @@ class AutomaticSocketConnectionHandler {
 
         setUpStateObserving()
         setUpNetworkMonitoring()
+        setUpSocketStatusObserving() // Set up to observe socket status changes
     }
 
     func connect() {
         // Start the connection process
         isConnecting = true
         socket.connect()
+    }
 
-        // Monitor the onConnect event to reset flags when connected
-        socket.onConnect = { [unowned self] in
-            isConnecting = false
-            reconnectionAttempts = 0 // Reset reconnection attempts on successful connection
-            stopPeriodicReconnectionTimer() // Stop any ongoing periodic reconnection attempts
-        }
-
-        // Monitor the onDisconnect event to handle reconnections
-        socket.onDisconnect = { [unowned self] error in
-            logger.debug("Socket disconnected: \(error?.localizedDescription ?? "Unknown error")")
-
-            if isConnecting {
-                // Handle reconnection logic
-                handleFailedConnectionAndReconnectIfNeeded()
+    private func setUpSocketStatusObserving() {
+        socketStatusProvider.socketConnectionStatusPublisher
+            .sink { [unowned self] status in
+                switch status {
+                case .connected:
+                    isConnecting = false
+                    reconnectionAttempts = 0 // Reset reconnection attempts on successful connection
+                    stopPeriodicReconnectionTimer() // Stop any ongoing periodic reconnection attempts
+                case .disconnected:
+                    if isConnecting {
+                        // Handle reconnection logic
+                        handleFailedConnectionAndReconnectIfNeeded()
+                    } else {
+                        Task(priority: .high) {
+                            await handleDisconnection()
+                        }
+                    }
+                }
             }
-        }
+            .store(in: &publishers)
     }
 
     private func stopPeriodicReconnectionTimer() {
@@ -82,10 +87,9 @@ class AutomaticSocketConnectionHandler {
         reconnectionTimer = DispatchSource.makeTimerSource(queue: concurrentQueue)
         reconnectionTimer?.schedule(deadline: .now(), repeating: periodicReconnectionInterval)
 
-        reconnectionTimer?.setEventHandler { [weak self] in
-            guard let self = self else { return }
-            self.logger.debug("Periodic reconnection attempt...")
-            self.socket.connect() // Attempt to reconnect
+        reconnectionTimer?.setEventHandler { [unowned self] in
+            logger.debug("Periodic reconnection attempt...")
+            socket.connect() // Attempt to reconnect
 
             // The onConnect handler will stop the timer and reset states if connection is successful
         }
@@ -115,9 +119,9 @@ class AutomaticSocketConnectionHandler {
     }
 
     private func setUpNetworkMonitoring() {
-        networkMonitor.networkConnectionStatusPublisher.sink { [weak self] networkConnectionStatus in
+        networkMonitor.networkConnectionStatusPublisher.sink { [unowned self] networkConnectionStatus in
             if networkConnectionStatus == .connected {
-                self?.reconnectIfNeeded()
+                reconnectIfNeeded()
             }
         }
         .store(in: &publishers)
@@ -133,16 +137,8 @@ class AutomaticSocketConnectionHandler {
         socket.disconnect()
     }
 
-    private func retryToConnect() {
-        if !socket.isConnected {
-            connect()
-        }
-    }
-
     func reconnectIfNeeded() {
-
-        // Check if client has active subscriptions and only then subscribe
-
+        // Check if client has active subscriptions and only then attempt to reconnect
         if !socket.isConnected && subscriptionsTracker.isSubscribed() {
             connect()
         }
@@ -155,7 +151,7 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
     func handleInternalConnect() {
         connect()
     }
-    
+
     func handleConnect() throws {
         throw Errors.manualSocketConnectionForbidden
     }
@@ -164,10 +160,8 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
         throw Errors.manualSocketDisconnectionForbidden
     }
 
-    no longer called from dispatcher
     func handleDisconnection() async {
         guard await appStateObserver.currentState == .foreground else { return }
         reconnectIfNeeded()
     }
 }
-

@@ -22,9 +22,10 @@ final class Dispatcher: NSObject, Dispatching {
     private let relayUrlFactory: RelayUrlFactory
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
+    private let socketStatusProvider: SocketStatusProviding
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+        socketStatusProvider.socketConnectionStatusPublisher
     }
 
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
@@ -43,14 +44,15 @@ final class Dispatcher: NSObject, Dispatching {
         networkMonitor: NetworkMonitoring,
         socket: WebSocketConnecting,
         logger: ConsoleLogging,
-        socketConnectionHandler: SocketConnectionHandler
+        socketConnectionHandler: SocketConnectionHandler,
+        socketStatusProvider: SocketStatusProviding
     ) {
         self.socketConnectionHandler = socketConnectionHandler
         self.relayUrlFactory = relayUrlFactory
         self.networkMonitor = networkMonitor
         self.logger = logger
-
         self.socket = socket
+        self.socketStatusProvider = socketStatusProvider
 
         super.init()
         setUpWebSocketSession()
@@ -71,6 +73,7 @@ final class Dispatcher: NSObject, Dispatching {
             return send(string, completion: completion)
         }
 
+        // Always connect when there is a message to be sent
         if !socket.isConnected {
             socketConnectionHandler.handleInternalConnect()
         }
@@ -130,35 +133,4 @@ extension Dispatcher {
     }
 
 
-}
-
-protocol SocketStatusProviding {
-    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
-}
-
-class SocketStatusProvider: SocketStatusProviding {
-    private var socket: WebSocketConnecting
-    private let logger: ConsoleLogging
-    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
-
-    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
-    }
-
-    init(socket: WebSocketConnecting,
-         logger: ConsoleLogging) {
-        self.socket = socket
-        self.logger = logger
-        setUpSocketConnectionObserving()
-    }
-
-    private func setUpSocketConnectionObserving() {
-        socket.onConnect = { [unowned self] in
-            self.socketConnectionStatusPublisherSubject.send(.connected)
-        }
-        socket.onDisconnect = { [unowned self] error in
-            logger.debug("Socket disconnected with error: \(error?.localizedDescription ?? "Unknown error")")
-            self.socketConnectionStatusPublisherSubject.send(.disconnected)
-        }
-    }
 }
