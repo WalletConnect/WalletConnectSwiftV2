@@ -17,9 +17,16 @@ class AutomaticSocketConnectionHandler {
     private let defaultTimeout: Int = 60
     private let logger: ConsoleLogging
     private let subscriptionsTracker: SubscriptionsTracking
+    private let socketStatusProvider: SocketStatusProviding
 
     private var publishers = Set<AnyCancellable>()
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.automatic_socket_connection", qos: .utility, attributes: .concurrent)
+
+    private var reconnectionAttempts = 0
+    private let maxImmediateAttempts = 3
+    private let periodicReconnectionInterval: TimeInterval = 5.0
+    private var reconnectionTimer: DispatchSourceTimer?
+    private var isConnecting = false
 
     init(
         socket: WebSocketConnecting,
@@ -27,7 +34,8 @@ class AutomaticSocketConnectionHandler {
         appStateObserver: AppStateObserving = AppStateObserver(),
         backgroundTaskRegistrar: BackgroundTaskRegistering = BackgroundTaskRegistrar(),
         subscriptionsTracker: SubscriptionsTracking,
-        logger: ConsoleLogging
+        logger: ConsoleLogging,
+        socketStatusProvider: SocketStatusProviding
     ) {
         self.appStateObserver = appStateObserver
         self.socket = socket
@@ -35,30 +43,65 @@ class AutomaticSocketConnectionHandler {
         self.backgroundTaskRegistrar = backgroundTaskRegistrar
         self.logger = logger
         self.subscriptionsTracker = subscriptionsTracker
+        self.socketStatusProvider = socketStatusProvider
 
         setUpStateObserving()
         setUpNetworkMonitoring()
     }
 
     func connect() {
-        // Attempt to handle connection
+        // Start the connection process
+        isConnecting = true
         socket.connect()
 
-        // Start a timer for the fallback mechanism
-        let timer = DispatchSource.makeTimerSource(queue: concurrentQueue)
-        timer.schedule(deadline: .now() + .seconds(defaultTimeout))
-        timer.setEventHandler { [weak self] in
-            guard let self = self else {
-                timer.cancel()
-                return
-            }
-            if !self.socket.isConnected {
-                self.logger.debug("Connection timed out, will rety to connect...")
-                retryToConnect()
-            }
-            timer.cancel()
+        // Monitor the onConnect event to reset flags when connected
+        socket.onConnect = { [unowned self] in
+            isConnecting = false
+            reconnectionAttempts = 0 // Reset reconnection attempts on successful connection
+            stopPeriodicReconnectionTimer() // Stop any ongoing periodic reconnection attempts
         }
-        timer.resume()
+
+        // Monitor the onDisconnect event to handle reconnections
+        socket.onDisconnect = { [unowned self] error in
+            logger.debug("Socket disconnected: \(error?.localizedDescription ?? "Unknown error")")
+
+            if isConnecting {
+                // Handle reconnection logic
+                handleFailedConnectionAndReconnectIfNeeded()
+            }
+        }
+    }
+
+    private func stopPeriodicReconnectionTimer() {
+        reconnectionTimer?.cancel()
+        reconnectionTimer = nil
+    }
+
+    private func startPeriodicReconnectionTimer() {
+        reconnectionTimer?.cancel() // Cancel any existing timer
+        reconnectionTimer = DispatchSource.makeTimerSource(queue: concurrentQueue)
+        reconnectionTimer?.schedule(deadline: .now(), repeating: periodicReconnectionInterval)
+
+        reconnectionTimer?.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            self.logger.debug("Periodic reconnection attempt...")
+            self.socket.connect() // Attempt to reconnect
+
+            // The onConnect handler will stop the timer and reset states if connection is successful
+        }
+
+        reconnectionTimer?.resume()
+    }
+
+    private func handleFailedConnectionAndReconnectIfNeeded() {
+        if reconnectionAttempts < maxImmediateAttempts {
+            reconnectionAttempts += 1
+            logger.debug("Immediate reconnection attempt \(reconnectionAttempts) of \(maxImmediateAttempts)")
+            socket.connect()
+        } else {
+            logger.debug("Max immediate reconnection attempts reached. Switching to periodic reconnection every \(periodicReconnectionInterval) seconds.")
+            startPeriodicReconnectionTimer()
+        }
     }
 
     private func setUpStateObserving() {
@@ -96,10 +139,10 @@ class AutomaticSocketConnectionHandler {
         }
     }
 
-
     func reconnectIfNeeded() {
-        
+
         // Check if client has active subscriptions and only then subscribe
+
         if !socket.isConnected && subscriptionsTracker.isSubscribed() {
             connect()
         }
@@ -121,6 +164,7 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
         throw Errors.manualSocketDisconnectionForbidden
     }
 
+    no longer called from dispatcher
     func handleDisconnection() async {
         guard await appStateObserver.currentState == .foreground else { return }
         reconnectIfNeeded()

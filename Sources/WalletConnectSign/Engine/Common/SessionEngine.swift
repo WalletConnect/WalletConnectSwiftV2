@@ -87,7 +87,6 @@ final class SessionEngine {
 // MARK: - Privates
 
 private extension SessionEngine {
-
     func subscribeActiveSessions() {
         let topics = sessionStore.getAll().map{$0.topic}
         Task(priority: .background) {

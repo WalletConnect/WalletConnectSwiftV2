@@ -23,8 +23,6 @@ final class Dispatcher: NSObject, Dispatching {
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
 
-    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
-
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
     }
@@ -56,7 +54,6 @@ final class Dispatcher: NSObject, Dispatching {
 
         super.init()
         setUpWebSocketSession()
-        setUpSocketConnectionObserving()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -132,18 +129,36 @@ extension Dispatcher {
         }
     }
 
+
+}
+
+protocol SocketStatusProviding {
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> { get }
+}
+
+class SocketStatusProvider: SocketStatusProviding {
+    private var socket: WebSocketConnecting
+    private let logger: ConsoleLogging
+    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
+
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+
+    init(socket: WebSocketConnecting,
+         logger: ConsoleLogging) {
+        self.socket = socket
+        self.logger = logger
+        setUpSocketConnectionObserving()
+    }
+
     private func setUpSocketConnectionObserving() {
         socket.onConnect = { [unowned self] in
             self.socketConnectionStatusPublisherSubject.send(.connected)
         }
         socket.onDisconnect = { [unowned self] error in
+            logger.debug("Socket disconnected with error: \(error?.localizedDescription ?? "Unknown error")")
             self.socketConnectionStatusPublisherSubject.send(.disconnected)
-            if error != nil {
-                self.socket.request.url = relayUrlFactory.create()
-            }
-            Task(priority: .high) {
-                await self.socketConnectionHandler.handleDisconnection()
-            }
         }
     }
 }
