@@ -21,6 +21,7 @@ class AuthResponseSubscriber {
     private let linkModeLinksStore: CodableStore<Bool>
     private let supportLinkMode: Bool
     private let pairingStore: WCPairingStorage
+    private let eventsClient: EventsClientProtocol
 
     init(networkingInteractor: NetworkInteracting,
          logger: ConsoleLogging,
@@ -35,7 +36,9 @@ class AuthResponseSubscriber {
          linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
          linkModeLinksStore: CodableStore<Bool>,
          pairingStore: WCPairingStorage,
-         supportLinkMode: Bool) {
+         supportLinkMode: Bool,
+         eventsClient: EventsClientProtocol
+    ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
         self.rpcHistory = rpcHistory
@@ -50,6 +53,8 @@ class AuthResponseSubscriber {
         self.linkModeLinksStore = linkModeLinksStore
         self.supportLinkMode = supportLinkMode
         self.pairingStore = pairingStore
+        self.eventsClient = eventsClient
+
         subscribeForResponse()
         subscribeForLinkResponse()
     }
@@ -94,12 +99,15 @@ class AuthResponseSubscriber {
     private func subscribeForLinkResponse() {
         linkEnvelopesDispatcher.responseErrorSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionErrorPayload<SessionAuthenticateRequestParams>) in
+                Task { eventsClient.saveMessageEvent(.sessionAuthenticateLinkModeResponseRejectReceived(payload.id)) }
                 guard let error = AuthError(code: payload.error.code) else { return }
                 authResponsePublisherSubject.send((payload.id, .failure(error)))
             }.store(in: &publishers)
 
         linkEnvelopesDispatcher.responseSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove())
             .sink { [unowned self] (payload: ResponseSubscriptionPayload<SessionAuthenticateRequestParams, SessionAuthenticateResponseParams>)  in
+
+                Task(priority: .low) { eventsClient.saveMessageEvent(.sessionAuthenticateLinkModeResponseApproveReceived(payload.id)) }
 
                 _ = getTransportTypeUpgradeIfPossible(peerMetadata: payload.response.responder.metadata, requestId: payload.id)
 

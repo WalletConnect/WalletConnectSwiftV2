@@ -1,7 +1,7 @@
 
 import Foundation
 
-public enum SessionAuthenticateTraceEvents: String, TraceEvent {
+public enum SessionAuthenticateTraceEvents: String, TraceEventItem {
     case signatureVerificationStarted = "signature_verification_started"
     case signatureVerificationSuccess = "signature_verification_success"
     case requestParamsRetrieved = "request_params_retrieved"

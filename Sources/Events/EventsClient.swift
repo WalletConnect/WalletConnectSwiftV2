@@ -2,9 +2,10 @@ import Foundation
 
 public protocol EventsClientProtocol {
     func startTrace(topic: String)
-    func saveEvent(_ event: TraceEvent)
+    func saveTraceEvent(_ event: TraceEventItem)
     func setTopic(_ topic: String)
     func setTelemetryEnabled(_ enabled: Bool)
+    func saveMessageEvent(_ event: MessageEventType)
 }
 
 public class EventsClient: EventsClientProtocol {
@@ -12,17 +13,20 @@ public class EventsClient: EventsClientProtocol {
     private let eventsDispatcher: EventsDispatcher
     private let logger: ConsoleLogging
     private var stateStorage: TelemetryStateStorage
+    private let messageEventsStorage: MessageEventsStorage
 
     init(
         eventsCollector: EventsCollector,
         eventsDispatcher: EventsDispatcher,
         logger: ConsoleLogging,
-        stateStorage: TelemetryStateStorage
+        stateStorage: TelemetryStateStorage,
+        messageEventsStorage: MessageEventsStorage
     ) {
         self.eventsCollector = eventsCollector
         self.eventsDispatcher = eventsDispatcher
         self.logger = logger
         self.stateStorage = stateStorage
+        self.messageEventsStorage = messageEventsStorage
 
         if stateStorage.telemetryEnabled {
             Task { await sendStoredEvents() }
@@ -48,10 +52,15 @@ public class EventsClient: EventsClientProtocol {
     }
 
     // Public method to save event
-    public func saveEvent(_ event: TraceEvent) {
+    public func saveTraceEvent(_ event: TraceEventItem) {
         guard stateStorage.telemetryEnabled else { return }
-        logger.debug("Will store an event: \(event)")
+        logger.debug("Will store a trace event: \(event)")
         eventsCollector.saveEvent(event)
+    }
+
+    public func saveMessageEvent(_ event: MessageEventType) {
+        logger.debug("Will store a message event: \(event)")
+        messageEventsStorage.saveMessageEvent(event)
     }
 
     // Public method to set telemetry enabled or disabled
@@ -66,15 +75,27 @@ public class EventsClient: EventsClientProtocol {
 
     private func sendStoredEvents() async {
         guard stateStorage.telemetryEnabled else { return }
-        let events = eventsCollector.storage.fetchErrorEvents()
-        guard !events.isEmpty else { return }
 
-        logger.debug("Will send events")
+        let traceEvents = eventsCollector.storage.fetchErrorEvents()
+        let messageEvents = messageEventsStorage.fetchMessageEvents()
+
+        guard !traceEvents.isEmpty || !messageEvents.isEmpty else { return }
+
+        var combinedEvents: [AnyCodable] = []
+
+        // Wrap trace events
+        combinedEvents.append(contentsOf: traceEvents.map { AnyCodable($0) })
+
+        // Wrap message events
+        combinedEvents.append(contentsOf: messageEvents.map { AnyCodable($0) })
+
+        logger.debug("Will send combined events")
         do {
-            let success: Bool = try await eventsDispatcher.executeWithRetry(events: events)
+            let success: Bool = try await eventsDispatcher.executeWithRetry(events: combinedEvents)
             if success {
-                logger.debug("Events sent successfully")
+                logger.debug("Combined events sent successfully")
                 self.eventsCollector.storage.clearErrorEvents()
+                self.messageEventsStorage.clearMessageEvents()
             }
         } catch {
             logger.debug("Failed to send events after multiple attempts: \(error)")
@@ -96,12 +117,17 @@ public class MockEventsClient: EventsClientProtocol {
 
     public func setTopic(_ topic: String) {}
 
-    public func saveEvent(_ event: TraceEvent) {
+    public func saveTraceEvent(_ event: TraceEventItem) {
         saveEventCalled = true
     }
 
     public func setTelemetryEnabled(_ enabled: Bool) {
         telemetryEnabled = enabled
     }
+
+    public func saveMessageEvent(_ event: MessageEventType) {
+
+    }
+
 }
 #endif

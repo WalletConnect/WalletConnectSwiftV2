@@ -4,7 +4,7 @@ public class EventsClientFactory {
     static func create(
         projectId: String,
         sdkVersion: String,
-        storage: EventStorage = UserDefaultsEventStorage()
+        storage: EventStorage = UserDefaultsTraceEventStorage()
     ) -> EventsClient {
         let networkingService = NetworkingService(
             projectId: projectId,
@@ -18,7 +18,8 @@ public class EventsClientFactory {
             eventsCollector: eventsCollector,
             eventsDispatcher: eventsDispatcher,
             logger: logger,
-            stateStorage: UserDefaultsTelemetryStateStorage()
+            stateStorage: UserDefaultsTelemetryStateStorage(),
+            messageEventsStorage: UserDefaultsMessageEventsStorage()
         )
     }
 }

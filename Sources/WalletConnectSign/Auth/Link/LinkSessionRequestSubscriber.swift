@@ -8,17 +8,20 @@ class LinkSessionRequestSubscriber {
     private var publishers = [AnyCancellable]()
     private let logger: ConsoleLogging
     private let envelopesDispatcher: LinkEnvelopesDispatcher
+    private let eventsClient: EventsClientProtocol
 
     init(
         sessionRequestsProvider: SessionRequestsProvider,
         sessionStore: WCSessionStorage,
         logger: ConsoleLogging,
-        envelopesDispatcher: LinkEnvelopesDispatcher
+        envelopesDispatcher: LinkEnvelopesDispatcher,
+        eventsClient: EventsClientProtocol
     ) {
         self.sessionRequestsProvider = sessionRequestsProvider
         self.sessionStore = sessionStore
         self.logger = logger
         self.envelopesDispatcher = envelopesDispatcher
+        self.eventsClient = eventsClient
         setupRequestSubscription()
     }
 
@@ -29,6 +32,8 @@ class LinkSessionRequestSubscriber {
     private func setupRequestSubscription() {
         envelopesDispatcher.requestSubscription(on: SessionRequestProtocolMethod().method)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionType.RequestParams>) in
+                Task(priority: .low) { eventsClient.saveMessageEvent(.sessionRequestLinkModeReceived(payload.id)) }
+
                 Task(priority: .high) {
                     onSessionRequest(payload: payload)
                 }

@@ -1,7 +1,7 @@
 
 import Foundation
 
-public enum PairingExecutionTraceEvents: String, TraceEvent {
+public enum PairingExecutionTraceEvents: String, TraceEventItem {
     case pairingUriValidationSuccess = "pairing_uri_validation_success"
     case pairingStarted = "pairing_started"
     case noWssConnection = "no_wss_connection"

@@ -1,12 +1,12 @@
 import Foundation
 
 // Protocol for TraceEvent
-public protocol TraceEvent: CustomStringConvertible {
+public protocol TraceEventItem: CustomStringConvertible {
     var description: String { get }
 }
 
 // Protocol for ErrorEvent
-protocol ErrorEvent: TraceEvent {}
+protocol ErrorEvent: TraceEventItem {}
 
 
 class EventsCollector {
@@ -34,7 +34,7 @@ class EventsCollector {
     }
 
     // Function to save event
-    func saveEvent(_ event: TraceEvent) {
+    func saveEvent(_ event: TraceEventItem) {
         trace.append(event.description)
         if let errorEvent = event as? ErrorEvent {
             saveErrorEvent(errorEvent)
@@ -51,14 +51,14 @@ class EventsCollector {
     // Private function to save error event
     private func saveErrorEvent(_ errorEvent: ErrorEvent) {
         let bundleId = Bundle.main.bundleIdentifier ?? "Unknown"
-        let event = Event(
+        let event = TraceEvent(
             eventId: UUID().uuidString,
             bundleId: bundleId,
             timestamp: Int64(Date().timeIntervalSince1970 * 1000),
-            props: Props(
+            props: TraceEvent.Props(
                 event: "ERROR",
                 type: errorEvent.description,
-                properties: Properties(
+                properties: TraceEvent.Properties(
                     topic: topic,
                     trace: trace
                 )
