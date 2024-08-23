@@ -2,16 +2,16 @@
 import Foundation
 
 protocol EventStorage {
-    func saveErrorEvent(_ event: Event)
-    func fetchErrorEvents() -> [Event]
+    func saveErrorEvent(_ event: TraceEvent)
+    func fetchErrorEvents() -> [TraceEvent]
     func clearErrorEvents()
 }
 
-class UserDefaultsEventStorage: EventStorage {
+class UserDefaultsTraceEventStorage: EventStorage {
     private let errorEventsKey = "com.walletconnect.sdk.errorEvents"
     private let maxEvents = 30
 
-    func saveErrorEvent(_ event: Event) {
+    func saveErrorEvent(_ event: TraceEvent) {
         var existingEvents = fetchErrorEvents()
         existingEvents.append(event)
         // Ensure we keep only the last 30 events
@@ -23,9 +23,9 @@ class UserDefaultsEventStorage: EventStorage {
         }
     }
 
-    func fetchErrorEvents() -> [Event] {
+    func fetchErrorEvents() -> [TraceEvent] {
         if let data = UserDefaults.standard.data(forKey: errorEventsKey),
-           let events = try? JSONDecoder().decode([Event].self, from: data) {
+           let events = try? JSONDecoder().decode([TraceEvent].self, from: data) {
             // Return only the last 30 events
             return Array(events.suffix(maxEvents))
         }
@@ -39,13 +39,13 @@ class UserDefaultsEventStorage: EventStorage {
 
 #if DEBUG
 class MockEventStorage: EventStorage {
-    private(set) var savedEvents: [Event] = []
+    private(set) var savedEvents: [TraceEvent] = []
 
-    func saveErrorEvent(_ event: Event) {
+    func saveErrorEvent(_ event: TraceEvent) {
         savedEvents.append(event)
     }
 
-    func fetchErrorEvents() -> [Event] {
+    func fetchErrorEvents() -> [TraceEvent] {
         return savedEvents
     }
 

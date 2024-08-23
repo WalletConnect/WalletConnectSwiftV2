@@ -17,7 +17,7 @@ class EventsDispatcher {
         self.retryPolicy = retryPolicy
     }
 
-    func executeWithRetry(events: [Event]) async throws -> Bool {
+    func executeWithRetry<T: Encodable>(events: [T]) async throws -> Bool {
         var attempts = 0
         var delay = retryPolicy.initialDelay
 

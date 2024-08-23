@@ -10,19 +10,22 @@ class LinkSessionResponder {
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let sessionRequestsProvider: SessionRequestsProvider
     private let historyService: HistoryService
+    private let eventsClient: EventsClientProtocol
 
     init(
         logger: ConsoleLogging,
         sessionStore: WCSessionStorage,
         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
         sessionRequestsProvider: SessionRequestsProvider,
-        historyService: HistoryService
+        historyService: HistoryService,
+        eventsClient: EventsClientProtocol
     ) {
         self.logger = logger
         self.sessionStore = sessionStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.sessionRequestsProvider = sessionRequestsProvider
         self.historyService = historyService
+        self.eventsClient = eventsClient
     }
 
     func respondSessionRequest(topic: String, requestId: RPCID, response: RPCResult) async throws -> String {
@@ -41,6 +44,7 @@ class LinkSessionResponder {
 
         guard sessionRequestNotExpired(requestId: requestId) else {
             logger.debug("request expired")
+            
             try await linkEnvelopesDispatcher.respondError(
                 topic: topic,
                 requestId: requestId,
@@ -48,6 +52,8 @@ class LinkSessionResponder {
                 reason: SignReasonCode.sessionRequestExpired,
                 envelopeType: .type0
             )
+            Task(priority: .low) { eventsClient.saveMessageEvent(.sessionRequestLinkModeResponseSent(requestId)) }
+
             throw Errors.sessionRequestExpired
         }
 
@@ -58,6 +64,8 @@ class LinkSessionResponder {
             peerUniversalLink: peerUniversalLink,
             envelopeType: .type0
         )
+        Task(priority: .low) { eventsClient.saveMessageEvent(.sessionRequestLinkModeResponseSent(requestId)) }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else {return}
             sessionRequestsProvider.emitRequestIfPending()
