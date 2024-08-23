@@ -8,6 +8,7 @@ class LinkAuthRequestSubscriber {
     private let envelopesDispatcher: LinkEnvelopesDispatcher
     private let verifyClient: VerifyClientProtocol
     private let verifyContextStore: CodableStore<VerifyContext>
+    private let eventsClient: EventsClientProtocol
 
 
     var onRequest: (((request: AuthenticationRequest, context: VerifyContext?)) -> Void)?
@@ -17,13 +18,16 @@ class LinkAuthRequestSubscriber {
         kms: KeyManagementServiceProtocol,
         envelopesDispatcher: LinkEnvelopesDispatcher,
         verifyClient: VerifyClientProtocol,
-        verifyContextStore: CodableStore<VerifyContext>
+        verifyContextStore: CodableStore<VerifyContext>,
+        eventsClient: EventsClientProtocol
     ) {
         self.logger = logger
         self.kms = kms
         self.envelopesDispatcher = envelopesDispatcher
         self.verifyClient = verifyClient
         self.verifyContextStore = verifyContextStore
+        self.eventsClient = eventsClient
+
         subscribeForRequest()
     }
 
@@ -32,6 +36,8 @@ class LinkAuthRequestSubscriber {
         envelopesDispatcher
             .requestSubscription(on: SessionAuthenticatedProtocolMethod.responseApprove().method)
             .sink { [unowned self] (payload: RequestSubscriptionPayload<SessionAuthenticateRequestParams>) in
+
+                Task(priority: .low) { eventsClient.saveMessageEvent(.sessionAuthenticateLinkModeReceived(payload.id)) }
 
                 logger.debug("LinkAuthRequestSubscriber: Received request")
 
