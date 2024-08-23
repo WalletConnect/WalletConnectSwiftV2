@@ -32,3 +32,17 @@ class SocketStatusProvider: SocketStatusProviding {
         }
     }
 }
+
+#if DEBUG
+final class SocketStatusProviderMock: SocketStatusProviding {
+    private var socketConnectionStatusPublisherSubject = PassthroughSubject<SocketConnectionStatus, Never>()
+
+    var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
+        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+    }
+
+    func simulateConnectionStatus(_ status: SocketConnectionStatus) {
+        socketConnectionStatusPublisherSubject.send(status)
+    }
+}
+#endif

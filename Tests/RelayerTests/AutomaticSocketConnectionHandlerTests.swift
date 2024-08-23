@@ -9,27 +9,22 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
     var appStateObserver: AppStateObserverMock!
     var backgroundTaskRegistrar: BackgroundTaskRegistrarMock!
     var subscriptionsTracker: SubscriptionsTrackerMock!
+    var socketStatusProviderMock: SocketStatusProviderMock!
 
     override func setUp() {
         webSocketSession = WebSocketMock()
         networkMonitor = NetworkMonitoringMock()
         appStateObserver = AppStateObserverMock()
-        let webSocket = WebSocketMock()
 
         let defaults = RuntimeKeyValueStorage()
         let logger = ConsoleLoggerMock()
         let keychainStorageMock = DispatcherKeychainStorageMock()
         let clientIdStorage = ClientIdStorage(defaults: defaults, keychain: keychainStorageMock, logger: logger)
 
-
-        let socketAuthenticator = ClientIdAuthenticator(clientIdStorage: clientIdStorage)
-        let relayUrlFactory = RelayUrlFactory(
-            relayHost: "relay.walletconnect.com",
-            projectId: "1012db890cf3cfb0c1cdc929add657ba",
-            socketAuthenticator: socketAuthenticator
-        )
         backgroundTaskRegistrar = BackgroundTaskRegistrarMock()
         subscriptionsTracker = SubscriptionsTrackerMock()
+
+        socketStatusProviderMock = SocketStatusProviderMock()
 
         sut = AutomaticSocketConnectionHandler(
             socket: webSocketSession,
@@ -37,7 +32,8 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
             appStateObserver: appStateObserver,
             backgroundTaskRegistrar: backgroundTaskRegistrar,
             subscriptionsTracker: subscriptionsTracker,
-            logger: ConsoleLoggerMock()
+            logger: logger,
+            socketStatusProvider: socketStatusProviderMock // Use the mock
         )
     }
 
