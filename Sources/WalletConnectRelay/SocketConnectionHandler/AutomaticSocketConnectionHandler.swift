@@ -46,7 +46,7 @@ class AutomaticSocketConnectionHandler {
 
         setUpStateObserving()
         setUpNetworkMonitoring()
-        setUpSocketStatusObserving() // Set up to observe socket status changes
+        setUpSocketStatusObserving()
     }
 
     func connect() {
@@ -77,6 +77,17 @@ class AutomaticSocketConnectionHandler {
             .store(in: &publishers)
     }
 
+    private func handleFailedConnectionAndReconnectIfNeeded() {
+        if reconnectionAttempts < maxImmediateAttempts {
+            reconnectionAttempts += 1
+            logger.debug("Immediate reconnection attempt \(reconnectionAttempts) of \(maxImmediateAttempts)")
+            socket.connect()
+        } else {
+            logger.debug("Max immediate reconnection attempts reached. Switching to periodic reconnection every \(periodicReconnectionInterval) seconds.")
+            startPeriodicReconnectionTimer()
+        }
+    }
+
     private func stopPeriodicReconnectionTimer() {
         reconnectionTimer?.cancel()
         reconnectionTimer = nil
@@ -95,17 +106,6 @@ class AutomaticSocketConnectionHandler {
         }
 
         reconnectionTimer?.resume()
-    }
-
-    private func handleFailedConnectionAndReconnectIfNeeded() {
-        if reconnectionAttempts < maxImmediateAttempts {
-            reconnectionAttempts += 1
-            logger.debug("Immediate reconnection attempt \(reconnectionAttempts) of \(maxImmediateAttempts)")
-            socket.connect()
-        } else {
-            logger.debug("Max immediate reconnection attempts reached. Switching to periodic reconnection every \(periodicReconnectionInterval) seconds.")
-            startPeriodicReconnectionTimer()
-        }
     }
 
     private func setUpStateObserving() {
