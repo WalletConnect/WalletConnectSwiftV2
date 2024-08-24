@@ -50,11 +50,11 @@ public class WalletConnectModalClient {
     
     // MARK: - Private Properties
 
-    private let signClient: SignClientProtocol
+    private let signClient: SignClient
     private let pairingClient: PairingClientProtocol & PairingInteracting & PairingRegisterer
     
     init(
-        signClient: SignClientProtocol,
+        signClient: SignClient,
         pairingClient: PairingClientProtocol & PairingInteracting & PairingRegisterer
     ) {
         self.signClient = signClient
@@ -69,61 +69,15 @@ public class WalletConnectModalClient {
     /// For proposing a session to a wallet.
     /// Function will propose a session on existing pairing or create new one if not specified
     /// Namespaces from WalletConnectModal.config will be used
-    /// - Parameters:
-    ///   - topic: pairing topic
-    public func connect(
-        topic: String?
-    ) async throws -> WalletConnectURI? {
-        if let topic = topic {
-            try pairingClient.validatePairingExistance(topic)
-            try await signClient.connect(
+    public func connect() async throws -> WalletConnectURI {
+            let pairingURI = try await signClient.connect(
                 requiredNamespaces: WalletConnectModal.config.sessionParams.requiredNamespaces,
                 optionalNamespaces: WalletConnectModal.config.sessionParams.optionalNamespaces,
-                sessionProperties: WalletConnectModal.config.sessionParams.sessionProperties,
-                topic: topic
-            )
-            return nil
-        } else {
-            let pairingURI = try await pairingClient.create()
-            try await signClient.connect(
-                requiredNamespaces: WalletConnectModal.config.sessionParams.requiredNamespaces,
-                optionalNamespaces: WalletConnectModal.config.sessionParams.optionalNamespaces,
-                sessionProperties: WalletConnectModal.config.sessionParams.sessionProperties,
-                topic: pairingURI.topic
+                sessionProperties: WalletConnectModal.config.sessionParams.sessionProperties
             )
             return pairingURI
         }
-    }
-    
-    /// For proposing a session to a wallet.
-    /// Function will propose a session on existing pairing.
-    /// - Parameters:
-    ///   - requiredNamespaces: required namespaces for a session
-    ///   - topic: pairing topic
-    public func connect(
-        requiredNamespaces: [String: ProposalNamespace],
-        optionalNamespaces: [String: ProposalNamespace]? = nil,
-        sessionProperties: [String: String]? = nil,
-        topic: String
-    ) async throws {
-        try await signClient.connect(
-            requiredNamespaces: requiredNamespaces,
-            optionalNamespaces: optionalNamespaces,
-            sessionProperties: sessionProperties,
-            topic: topic
-        )
-    }
-    
-    /// Ping method allows to check if peer client is online and is subscribing for given topic
-    ///
-    ///  Should Error:
-    ///  - When the session topic is not found
-    ///
-    /// - Parameters:
-    ///   - topic: Topic of a session
-    public func ping(topic: String) async throws {
-        try await pairingClient.ping(topic: topic)
-    }
+
     
     /// For sending JSON-RPC requests to wallet.
     /// - Parameters:

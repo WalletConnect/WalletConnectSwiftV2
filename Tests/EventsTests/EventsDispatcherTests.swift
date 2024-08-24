@@ -4,7 +4,7 @@ import XCTest
 class EventsDispatcherTests: XCTestCase {
     var mockNetworkingService: MockNetworkingService!
     var eventsDispatcher: EventsDispatcher!
-    let events = [Event(eventId: UUID().uuidString, bundleId: "com.wallet.example", timestamp: Int64(Date().timeIntervalSince1970 * 1000), props: Props(event: "ERROR", type: "test_error", properties: Properties(topic: "test_topic", trace: ["test_trace"])))]
+    let events = [TraceEvent(eventId: UUID().uuidString, bundleId: "com.wallet.example", timestamp: Int64(Date().timeIntervalSince1970 * 1000), props: TraceEvent.Props(event: "ERROR", type: "test_error", properties: TraceEvent.Properties(topic: "test_topic", trace: ["test_trace"])))]
 
     override func setUp() {
         super.setUp()

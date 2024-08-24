@@ -1,7 +1,7 @@
 import Foundation
 
 protocol NetworkingServiceProtocol {
-    func sendEvents(_ events: [Event]) async throws -> Bool
+    func sendEvents<T: Encodable>(_ events: [T]) async throws -> Bool
 }
 
 class NetworkingService: NetworkingServiceProtocol {
@@ -16,7 +16,7 @@ class NetworkingService: NetworkingServiceProtocol {
         self.sdkVersion = sdkVersion
     }
 
-    func sendEvents(_ events: [Event]) async throws -> Bool {
+    func sendEvents<T: Encodable>(_ events: [T]) async throws -> Bool {
         var request = URLRequest(url: apiURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -51,7 +51,7 @@ class MockNetworkingService: NetworkingServiceProtocol {
     var shouldFail = false
     var attemptCount = 0
 
-    func sendEvents(_ events: [Event]) async throws -> Bool {
+    func sendEvents<T>(_ events: [T]) async throws -> Bool where T : Encodable {
         attemptCount += 1
         if shouldFail {
             throw NSError(domain: "MockError", code: -1, userInfo: nil)

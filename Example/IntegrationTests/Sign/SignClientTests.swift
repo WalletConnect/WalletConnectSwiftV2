@@ -110,8 +110,7 @@ final class SignClientTests: XCTestCase {
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -124,8 +123,7 @@ final class SignClientTests: XCTestCase {
         let store = Store()
         let semaphore = DispatchSemaphore(value: 0)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
         try await walletPairingClient.pair(uri: uri)
 
         wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
@@ -164,8 +162,7 @@ final class SignClientTests: XCTestCase {
             sessionDeleteExpectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [sessionDeleteExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -194,8 +191,8 @@ final class SignClientTests: XCTestCase {
             expectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
 
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
@@ -247,8 +244,8 @@ final class SignClientTests: XCTestCase {
             responseExpectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [requestExpectation, responseExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -292,48 +289,10 @@ final class SignClientTests: XCTestCase {
             expectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
-    }
-
-    func testNewSessionOnExistingPairing() async throws {
-        let dappSettlementExpectation = expectation(description: "Dapp settles session")
-        dappSettlementExpectation.expectedFulfillmentCount = 2
-        let walletSettlementExpectation = expectation(description: "Wallet settles session")
-        walletSettlementExpectation.expectedFulfillmentCount = 2
-        let requiredNamespaces = ProposalNamespace.stubRequired()
-        let sessionNamespaces = SessionNamespace.make(toRespond: requiredNamespaces)
-        var initiatedSecondSession = false
-
-        wallet.sessionProposalPublisher.sink { [unowned self] (proposal, _) in
-            Task(priority: .high) {
-                do {
-                    _ = try await wallet.approve(proposalId: proposal.id, namespaces: sessionNamespaces)
-                } catch {
-                    XCTFail("\(error)")
-                }
-            }
-        }.store(in: &publishers)
-        dapp.sessionSettlePublisher.sink { [unowned self] _ in
-            dappSettlementExpectation.fulfill()
-            let pairingTopic = dappPairingClient.getPairings().first!.topic
-            if !initiatedSecondSession {
-                Task(priority: .high) {
-                    _ = try! await dapp.connect(requiredNamespaces: requiredNamespaces, topic: pairingTopic)
-                }
-                initiatedSecondSession = true
-            }
-        }.store(in: &publishers)
-        wallet.sessionSettlePublisher.sink { _ in
-            walletSettlementExpectation.fulfill()
-        }.store(in: &publishers)
-
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
-        try await walletPairingClient.pair(uri: uri)
-        await fulfillment(of: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
     }
 
     func testSuccessfulSessionUpdateNamespaces() async throws {
@@ -358,8 +317,8 @@ final class SignClientTests: XCTestCase {
             XCTAssertEqual(namespace.values.first?.accounts.count, 2)
             expectation.fulfill()
         }.store(in: &publishers)
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
     }
@@ -386,8 +345,8 @@ final class SignClientTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
 
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
@@ -417,8 +376,8 @@ final class SignClientTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
 
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
@@ -445,8 +404,8 @@ final class SignClientTests: XCTestCase {
             }
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
 
         await fulfillment(of: [expectation], timeout: InputConfig.defaultTimeout)
@@ -524,8 +483,7 @@ final class SignClientTests: XCTestCase {
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -593,8 +551,8 @@ final class SignClientTests: XCTestCase {
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -652,8 +610,8 @@ final class SignClientTests: XCTestCase {
             walletSettlementExpectation.fulfill()
         }.store(in: &publishers)
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [dappSettlementExpectation, walletSettlementExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -715,8 +673,8 @@ final class SignClientTests: XCTestCase {
             settlementFailedExpectation.fulfill()
         }
         
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [settlementFailedExpectation], timeout: InputConfig.defaultTimeout)
     }
@@ -781,8 +739,8 @@ final class SignClientTests: XCTestCase {
             settlementFailedExpectation.fulfill()
         }
 
-        let uri = try! await dappPairingClient.create()
-        try await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces, topic: uri.topic)
+        let uri = try! await dapp.connect(requiredNamespaces: requiredNamespaces, optionalNamespaces: optionalNamespaces)
+
         try await walletPairingClient.pair(uri: uri)
         await fulfillment(of: [settlementFailedExpectation], timeout: 1)
     }

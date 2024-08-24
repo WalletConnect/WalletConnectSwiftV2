@@ -1,7 +1,7 @@
 
 import Foundation
 
-public enum SessionApproveExecutionTraceEvents: String, TraceEvent {
+public enum SessionApproveExecutionTraceEvents: String, TraceEventItem {
     case approvingSessionProposal = "approving_session_proposal"
     case sessionNamespacesValidationStarted = "session_namespaces_validation_started"
     case sessionNamespacesValidationSuccess = "session_namespaces_validation_success"

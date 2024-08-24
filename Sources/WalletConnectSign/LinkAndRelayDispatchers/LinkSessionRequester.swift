@@ -5,15 +5,18 @@ final class LinkSessionRequester {
     private let sessionStore: WCSessionStorage
     private let linkEnvelopesDispatcher: LinkEnvelopesDispatcher
     private let logger: ConsoleLogging
+    private let eventsClient: EventsClientProtocol
 
     init(
         sessionStore: WCSessionStorage,
         linkEnvelopesDispatcher: LinkEnvelopesDispatcher,
-        logger: ConsoleLogging
+        logger: ConsoleLogging,
+        eventsClient: EventsClientProtocol
     ) {
         self.sessionStore = sessionStore
         self.linkEnvelopesDispatcher = linkEnvelopesDispatcher
         self.logger = logger
+        self.eventsClient = eventsClient
     }
 
     func request(_ request: Request) async throws -> String? {
@@ -33,6 +36,8 @@ final class LinkSessionRequester {
         let ttl = try request.calculateTtl()
         let protocolMethod = SessionRequestProtocolMethod(ttl: ttl)
         let rpcRequest = RPCRequest(method: protocolMethod.method, params: sessionRequestParams, rpcid: request.id)
-        return try await linkEnvelopesDispatcher.request(topic: session.topic, request: rpcRequest, peerUniversalLink: peerUniversalLink, envelopeType: .type0)
+        let envelope = try await linkEnvelopesDispatcher.request(topic: session.topic, request: rpcRequest, peerUniversalLink: peerUniversalLink, envelopeType: .type0)
+        Task(priority: .low) { eventsClient.saveMessageEvent(.sessionRequestLinkModeSent(request.id)) }
+        return envelope
     }
 }

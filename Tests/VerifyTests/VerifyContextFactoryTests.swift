@@ -49,6 +49,16 @@ class VerifyContextFactoryTests: XCTestCase {
         XCTAssertEqual(contextWithFalseVerification.validation, .scam)
     }
 
+    func testValidOriginAndDomainWithoutScheme() {
+        let context = factory.createVerifyContext(origin: "https://dev.lab.web3modal.com", domain: "dev.lab.web3modal.com", isScam: false, isVerified: nil)
+        XCTAssertEqual(context.validation, .valid)
+    }
+
+    func testInvalidOriginAndDomainWithoutScheme() {
+        let context = factory.createVerifyContext(origin: "https://dev.lab.web3modal.com", domain: "different.com", isScam: false, isVerified: nil)
+        XCTAssertEqual(context.validation, .invalid)
+    }
+
     // tests for createVerifyContextForLinkMode
 
     func testValidUniversalLink() {

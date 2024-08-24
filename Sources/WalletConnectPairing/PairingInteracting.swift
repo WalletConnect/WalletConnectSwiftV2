@@ -9,8 +9,6 @@ public protocol PairingInteracting {
 
     func getPairing(for topic: String) throws -> Pairing
 
-    func ping(topic: String) async throws
-
     func disconnect(topic: String) async throws
 
 #if DEBUG

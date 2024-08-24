@@ -23,7 +23,7 @@ class PairingStateProvider {
     }
 
     private func checkPairingState() {
-        let pairingStateActive = !pairingStorage.getAll().allSatisfy { $0.active || $0.requestReceived }
+        let pairingStateActive = !pairingStorage.getAll().allSatisfy { $0.requestReceived }
 
         if lastPairingState != pairingStateActive {
             pairingStatePublisherSubject.send(pairingStateActive)

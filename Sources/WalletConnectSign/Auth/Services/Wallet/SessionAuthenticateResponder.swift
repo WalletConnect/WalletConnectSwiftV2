@@ -12,6 +12,7 @@ actor SessionAuthenticateResponder {
     private let metadata: AppMetadata
     private let util: ApproveSessionAuthenticateUtil
     private let eventsClient: EventsClientProtocol
+    private let pairingStore: WCPairingStorage
 
     init(
         networkingInteractor: NetworkInteracting,
@@ -22,7 +23,8 @@ actor SessionAuthenticateResponder {
         pairingRegisterer: PairingRegisterer,
         metadata: AppMetadata,
         approveSessionAuthenticateUtil: ApproveSessionAuthenticateUtil,
-        eventsClient: EventsClientProtocol
+        eventsClient: EventsClientProtocol,
+        pairingStore: WCPairingStorage
     ) {
         self.networkingInteractor = networkingInteractor
         self.logger = logger
@@ -33,15 +35,16 @@ actor SessionAuthenticateResponder {
         self.metadata = metadata
         self.util = approveSessionAuthenticateUtil
         self.eventsClient = eventsClient
+        self.pairingStore = pairingStore
     }
 
     func respond(requestId: RPCID, auths: [Cacao]) async throws -> Session? {
-        eventsClient.saveEvent(SessionAuthenticateTraceEvents.signatureVerificationStarted)
+        eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.signatureVerificationStarted)
         do {
             try await util.recoverAndVerifySignature(cacaos: auths)
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.signatureVerificationSuccess)
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.signatureVerificationSuccess)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.signatureVerificationFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.signatureVerificationFailed)
             throw error
         }
 
@@ -50,9 +53,9 @@ actor SessionAuthenticateResponder {
 
         do {
             (sessionAuthenticateRequestParams, pairingTopic) = try util.getsessionAuthenticateRequestParams(requestId: requestId)
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.requestParamsRetrieved)
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.requestParamsRetrieved)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.requestParamsRetrievalFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.requestParamsRetrievalFailed)
             throw error
         }
 
@@ -61,17 +64,17 @@ actor SessionAuthenticateResponder {
 
         do {
             (responseTopic, responseKeys) = try util.generateAgreementKeys(requestParams: sessionAuthenticateRequestParams)
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.agreementKeysGenerated)
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.agreementKeysGenerated)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.agreementKeysGenerationFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.agreementKeysGenerationFailed)
             throw error
         }
 
         do {
             try kms.setAgreementSecret(responseKeys, topic: responseTopic)
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.agreementSecretSet)
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.agreementSecretSet)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.agreementSecretSetFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.agreementSecretSetFailed)
             throw error
         }
 
@@ -85,24 +88,24 @@ actor SessionAuthenticateResponder {
             sessionSelfPubKey = try kms.createX25519KeyPair()
             sessionSelfPubKeyHex = sessionSelfPubKey.hexRepresentation
             sessionKeys = try kms.performKeyAgreement(selfPublicKey: sessionSelfPubKey, peerPublicKey: peerParticipant.publicKey)
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.sessionKeysGenerated)
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.sessionKeysGenerated)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.sessionKeysGenerationFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.sessionKeysGenerationFailed)
             throw error
         }
 
         let sessionTopic = sessionKeys.derivedTopic()
         do {
             try kms.setAgreementSecret(sessionKeys, topic: sessionTopic)
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.sessionSecretSet)
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.sessionSecretSet)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.sessionSecretSetFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.sessionSecretSetFailed)
             throw error
         }
 
         let selfParticipant = Participant(publicKey: sessionSelfPubKeyHex, metadata: metadata)
         let responseParams = SessionAuthenticateResponseParams(responder: selfParticipant, cacaos: auths)
-        eventsClient.saveEvent(SessionAuthenticateTraceEvents.responseParamsCreated)
+        eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.responseParamsCreated)
 
         let response = RPCResponse(id: requestId, result: responseParams)
 
@@ -113,9 +116,12 @@ actor SessionAuthenticateResponder {
                 protocolMethod: SessionAuthenticatedProtocolMethod.responseApprove(),
                 envelopeType: .type1(pubKey: responseKeys.publicKey.rawRepresentation)
             )
-            eventsClient.saveEvent(SessionAuthenticateTraceEvents.responseSent)
+            Task {
+                removePairing(pairingTopic: pairingTopic)
+            }
+            eventsClient.saveTraceEvent(SessionAuthenticateTraceEvents.responseSent)
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.responseSendFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.responseSendFailed)
             throw error
         }
 
@@ -128,24 +134,32 @@ actor SessionAuthenticateResponder {
                 transportType: .relay,
                 verifyContext: util.getVerifyContext(requestId: requestId, domain: sessionAuthenticateRequestParams.requester.metadata.url)
             )
-            pairingRegisterer.activate(
-                pairingTopic: pairingTopic,
-                peerMetadata: sessionAuthenticateRequestParams.requester.metadata
-            )
             verifyContextStore.delete(forKey: requestId.string)
             return session
         } catch {
-            eventsClient.saveEvent(SessionAuthenticateErrorEvents.sessionCreationFailed)
+            eventsClient.saveTraceEvent(SessionAuthenticateErrorEvents.sessionCreationFailed)
             throw error
         }
     }
 
     func respondError(requestId: RPCID) async throws {
+        let pairingTopic = try? util.getHistoryRecord(requestId: requestId).topic
         do {
-            try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+            let _ = try await walletErrorResponder.respondError(AuthError.userRejeted, requestId: requestId)
+            Task {
+                if let pairingTopic = pairingTopic {
+                    removePairing(pairingTopic: pairingTopic)
+                }
+            }
         } catch {
             throw error
         }
         verifyContextStore.delete(forKey: requestId.string)
+    }
+
+    private func removePairing(pairingTopic: String) {
+        pairingStore.delete(topic: pairingTopic)
+        networkingInteractor.unsubscribe(topic: pairingTopic)
+        kms.deleteSymmetricKey(for: pairingTopic)
     }
 }

@@ -14,9 +14,6 @@ let package = Package(
             name: "WalletConnect",
             targets: ["WalletConnectSign"]),
         .library(
-            name: "WalletConnectAuth",
-            targets: ["Auth"]),
-        .library(
             name: "Web3Wallet",
             targets: ["Web3Wallet"]),
         .library(
@@ -54,10 +51,6 @@ let package = Package(
             dependencies: ["WalletConnectPairing", "WalletConnectVerify", "WalletConnectSigner", "Events"],
             path: "Sources/WalletConnectSign",
             resources: [.process("Resources/PrivacyInfo.xcprivacy")]),
-        .target(
-            name: "Auth",
-            dependencies: ["WalletConnectPairing", "WalletConnectSigner", "WalletConnectVerify"],
-            path: "Sources/Auth"),
         .target(
             name: "Web3Wallet",
             dependencies: ["WalletConnectSign", "WalletConnectPush", "WalletConnectVerify"],
