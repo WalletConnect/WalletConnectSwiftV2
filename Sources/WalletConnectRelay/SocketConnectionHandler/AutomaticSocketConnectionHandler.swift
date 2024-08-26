@@ -94,15 +94,18 @@ class AutomaticSocketConnectionHandler {
     }
 
     private func startPeriodicReconnectionTimer() {
-        reconnectionTimer?.cancel() // Cancel any existing timer
+        guard reconnectionTimer == nil else {return}
+
         reconnectionTimer = DispatchSource.makeTimerSource(queue: concurrentQueue)
-        reconnectionTimer?.schedule(deadline: .now(), repeating: periodicReconnectionInterval)
+        let initialDelay: DispatchTime = .now() + periodicReconnectionInterval
+
+        reconnectionTimer?.schedule(deadline: initialDelay, repeating: periodicReconnectionInterval)
 
         reconnectionTimer?.setEventHandler { [unowned self] in
             logger.debug("Periodic reconnection attempt...")
             socket.connect() // Attempt to reconnect
 
-            // The onConnect handler will stop the timer and reset states if connection is successful
+            // The socketConnectionStatusPublisher handler will stop the timer and reset states if connection is successful
         }
 
         reconnectionTimer?.resume()
