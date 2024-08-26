@@ -84,7 +84,7 @@ class AutomaticSocketConnectionHandler {
             socket.connect()
         } else {
             logger.debug("Max immediate reconnection attempts reached. Switching to periodic reconnection every \(periodicReconnectionInterval) seconds.")
-            startPeriodicReconnectionTimer()
+            startPeriodicReconnectionTimerIfNeeded()
         }
     }
 
@@ -93,7 +93,7 @@ class AutomaticSocketConnectionHandler {
         reconnectionTimer = nil
     }
 
-    private func startPeriodicReconnectionTimer() {
+    private func startPeriodicReconnectionTimerIfNeeded() {
         guard reconnectionTimer == nil else {return}
 
         reconnectionTimer = DispatchSource.makeTimerSource(queue: concurrentQueue)
