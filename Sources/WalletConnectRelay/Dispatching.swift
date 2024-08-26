@@ -73,12 +73,18 @@ final class Dispatcher: NSObject, Dispatching {
             return send(string, completion: completion)
         }
 
+        var cancellable: AnyCancellable?
+
         // Always connect when there is a message to be sent
         if !socket.isConnected {
-            socketConnectionHandler.handleInternalConnect()
+            do {
+                try socketConnectionHandler.handleInternalConnect()
+            } catch {
+                cancellable?.cancel()
+                completion(error)
+            }
         }
 
-        var cancellable: AnyCancellable?
         cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
             .filter { $0.0 == .connected && $0.1 == .connected }
             .setFailureType(to: NetworkError.self)
