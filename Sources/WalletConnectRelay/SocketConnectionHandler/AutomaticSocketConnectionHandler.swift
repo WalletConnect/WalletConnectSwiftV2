@@ -156,6 +156,8 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
     func handleInternalConnect() async throws {
         let maxAttempts = maxImmediateAttempts
         var attempts = 0
+        var isResumed = false // Track if continuation has been resumed
+        let requestTimeout = self.requestTimeout // Timeout set at the class level
 
         // Start the connection process immediately if not already connecting
         if !isConnecting {
@@ -177,26 +179,30 @@ extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
             var cancellable: AnyCancellable?
 
             cancellable = connectionStatusPublisher
-                .setFailureType(to: NetworkError.self) // Now set failure type after makeConnectable
+                .setFailureType(to: NetworkError.self) // Set failure type to NetworkError
                 .timeout(.seconds(requestTimeout), scheduler: concurrentQueue, customError: { NetworkError.connectionFailed })
                 .sink(receiveCompletion: { completion in
-                    switch completion {
-                    case .finished:
-                        continuation.resume() // Connection successful
-                    case .failure(let error):
+                    guard !isResumed else { return } // Ensure continuation is only resumed once
+                    isResumed = true
+                    cancellable?.cancel() // Cancel the subscription to prevent further events
+
+                    // Handle only the failure case, as .finished is not expected to be meaningful here
+                    if case .failure(let error) = completion {
                         continuation.resume(throwing: error) // Timeout or connection failure
                     }
-                }, receiveValue: { [weak self] status in
-                    guard let self = self else { return }
-
+                }, receiveValue: { [unowned self] status in
+                    guard !isResumed else { return } // Ensure continuation is only resumed once
                     if status == .connected {
+                        isResumed = true
+                        cancellable?.cancel() // Cancel the subscription to prevent further events
                         continuation.resume() // Successfully connected
                     } else if status == .disconnected {
                         attempts += 1
-                        self.logger.debug("Disconnection observed, incrementing attempts to \(attempts)")
+                        logger.debug("Disconnection observed, incrementing attempts to \(attempts)")
 
                         if attempts >= maxAttempts {
-                            self.logger.debug("Max attempts reached. Failing with connection failed error.")
+                            isResumed = true
+                            cancellable?.cancel() // Cancel the subscription to prevent further events
                             continuation.resume(throwing: NetworkError.connectionFailed)
                         }
                     }
