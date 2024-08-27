@@ -159,7 +159,19 @@ final class ApproveEngine {
 
         do {
             let session: WCSession = try await settleRequestTask
+            eventsClient.saveTraceEvent(SessionApproveExecutionTraceEvents.sessionSettleSuccess)
+            logger.debug("Session settle request has been successfully processed")
+
+            do {
+                _ = try await proposeResponseTask
+                eventsClient.saveTraceEvent(SessionApproveExecutionTraceEvents.responseApproveSent)
+            } catch {
+                eventsClient.saveTraceEvent(ApproveSessionTraceErrorEvents.sessionSettleFailure)
+                throw error
+            }
+
             sessionStore.setSession(session)
+
             Task {
                 removePairing(pairingTopic: pairingTopic)
             }
