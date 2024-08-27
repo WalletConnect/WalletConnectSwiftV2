@@ -340,4 +340,33 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         XCTAssertNil(sut.reconnectionTimer)
         XCTAssertEqual(sut.reconnectionAttempts, 0) // Attempts should reset after success
     }
+
+    func testHandleInternalConnectTimeout() async {
+            // Set a short timeout for testing purposes
+        sut.requestTimeout = 0.001
+            // Start a task to call handleInternalConnect and await its result
+            let handleConnectTask = Task {
+                do {
+                    try await sut.handleInternalConnect()
+                    XCTFail("Expected handleInternalConnect to throw NetworkError.connectionFailed due to timeout")
+                } catch NetworkError.connectionFailed {
+                    // Expected behavior
+                    XCTAssertEqual(sut.reconnectionAttempts, 0) // No reconnection attempts should be recorded for timeout
+                } catch {
+                    XCTFail("Expected NetworkError.connectionFailed due to timeout, but got \(error)")
+                }
+            }
+
+            // Expectation to ensure handleInternalConnect() is observing
+            let startObservingExpectation = XCTestExpectation(description: "Start observing connection status")
+
+            // Allow handleInternalConnect() to start observing
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
+                startObservingExpectation.fulfill()
+            }
+            await fulfillment(of: [startObservingExpectation], timeout: 0.02)
+
+            // No connection simulation to allow timeout to trigger
+            await handleConnectTask.value
+        }
 }
