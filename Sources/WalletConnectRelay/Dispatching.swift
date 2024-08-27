@@ -69,40 +69,27 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
-        guard !socket.isConnected || !networkMonitor.isConnected else {
-            return send(string, completion: completion)
+        // Check if the socket is already connected and ready to send
+        if socket.isConnected && networkMonitor.isConnected {
+            send(string, completion: completion)
+            return
         }
 
-        var cancellable: AnyCancellable?
-
-        // Always connect when there is a message to be sent
-        if !socket.isConnected {
+        // Start the connection process if not already connected
+        Task {
             do {
-                Task { try await  socketConnectionHandler.handleInternalConnect() }
+                // Await the connection handler to establish the connection
+                try await socketConnectionHandler.handleInternalConnect()
+
+                // If successful, send the message
+                send(string, completion: completion)
             } catch {
-                cancellable?.cancel()
+                // If an error occurs during connection, complete with that error
                 completion(error)
             }
         }
-
-        // in progress
-//        cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
-//            .filter { $0.0 == .connected && $0.1 == .connected }
-//            .setFailureType(to: NetworkError.self)
-//            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
-//            .sink(receiveCompletion: { result in
-//                switch result {
-//                case .failure(let error):
-//                    cancellable?.cancel()
-//                    completion(error)
-//                case .finished: break
-//                }
-//            }, receiveValue: { [unowned self] _ in
-//                cancellable?.cancel()
-//                send(string, completion: completion)
-//            })
     }
-    
+
 
     func protectedSend(_ string: String) async throws {
         var isResumed = false
