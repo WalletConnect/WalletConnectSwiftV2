@@ -18,7 +18,7 @@ final class Dispatcher: NSObject, Dispatching {
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
 
-    private let defaultTimeout: Int = 5
+    private let defaultTimeout: Int = 15
     private let relayUrlFactory: RelayUrlFactory
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
@@ -78,28 +78,29 @@ final class Dispatcher: NSObject, Dispatching {
         // Always connect when there is a message to be sent
         if !socket.isConnected {
             do {
-                try socketConnectionHandler.handleInternalConnect()
+                Task { try await  socketConnectionHandler.handleInternalConnect() }
             } catch {
                 cancellable?.cancel()
                 completion(error)
             }
         }
 
-        cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
-            .filter { $0.0 == .connected && $0.1 == .connected }
-            .setFailureType(to: NetworkError.self)
-            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
-            .sink(receiveCompletion: { result in
-                switch result {
-                case .failure(let error):
-                    cancellable?.cancel()
-                    completion(error)
-                case .finished: break
-                }
-            }, receiveValue: { [unowned self] _ in
-                cancellable?.cancel()
-                send(string, completion: completion)
-            })
+        // in progress
+//        cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
+//            .filter { $0.0 == .connected && $0.1 == .connected }
+//            .setFailureType(to: NetworkError.self)
+//            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
+//            .sink(receiveCompletion: { result in
+//                switch result {
+//                case .failure(let error):
+//                    cancellable?.cancel()
+//                    completion(error)
+//                case .finished: break
+//                }
+//            }, receiveValue: { [unowned self] _ in
+//                cancellable?.cancel()
+//                send(string, completion: completion)
+//            })
     }
     
 

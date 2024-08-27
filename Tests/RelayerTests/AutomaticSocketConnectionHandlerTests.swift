@@ -240,4 +240,104 @@ final class AutomaticSocketConnectionHandlerTests: XCTestCase {
         // Check that the periodic reconnection attempt was made
         XCTAssertTrue(webSocketSession.isConnected) // Assume that connection would have been attempted
     }
+
+    func testHandleInternalConnectThrowsAfterThreeDisconnections() async {
+        // Start a task to call handleInternalConnect and await its result
+        let handleConnectTask = Task {
+            do {
+                try await sut.handleInternalConnect()
+                XCTFail("Expected handleInternalConnect to throw NetworkError.connectionFailed after three disconnections")
+            } catch NetworkError.connectionFailed {
+                // Expected behavior
+                XCTAssertEqual(sut.reconnectionAttempts, sut.maxImmediateAttempts)
+            } catch {
+                XCTFail("Expected NetworkError.connectionFailed, but got \(error)")
+            }
+        }
+
+        let startObservingExpectation = XCTestExpectation(description: "Start observing connection status")
+
+        // Allow handleInternalConnect() to start observing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
+            startObservingExpectation.fulfill()
+        }
+        await fulfillment(of: [startObservingExpectation], timeout: 0.02)
+
+        // Simulate three disconnections
+        for _ in 0..<sut.maxImmediateAttempts {
+            socketStatusProviderMock.simulateConnectionStatus(.disconnected)
+        }
+
+        // Wait for the task to complete
+        await handleConnectTask.value
+    }
+
+    func testHandleInternalConnectSuccessWithNoFailures() async {
+        // Start a task to call handleInternalConnect and await its result
+        let handleConnectTask = Task {
+            do {
+                try await sut.handleInternalConnect()
+                // Success expected, do nothing
+            } catch {
+                XCTFail("Expected handleInternalConnect to succeed, but it threw: \(error)")
+            }
+        }
+
+        // Expectation to ensure handleInternalConnect() is observing
+        let startObservingExpectation = XCTestExpectation(description: "Start observing connection status")
+
+        // Allow handleInternalConnect() to start observing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
+            startObservingExpectation.fulfill()
+        }
+        await fulfillment(of: [startObservingExpectation], timeout: 0.02)
+
+        // Simulate a successful connection immediately
+        socketStatusProviderMock.simulateConnectionStatus(.connected)
+
+        // Wait for the task to complete
+        await handleConnectTask.value
+
+        // Verify that the state is as expected after a successful connection
+        XCTAssertFalse(sut.isConnecting)
+        XCTAssertNil(sut.reconnectionTimer)
+        XCTAssertEqual(sut.reconnectionAttempts, 0)
+    }
+
+    func testHandleInternalConnectSuccessAfterFailures() async {
+        // Start a task to call handleInternalConnect and await its result
+        let handleConnectTask = Task {
+            do {
+                try await sut.handleInternalConnect()
+                // Success expected, do nothing
+            } catch {
+                XCTFail("Expected handleInternalConnect to succeed after two disconnections followed by a connection, but it threw: \(error)")
+            }
+        }
+
+        // Expectation to ensure handleInternalConnect() is observing
+        let startObservingExpectation = XCTestExpectation(description: "Start observing connection status")
+
+        // Allow handleInternalConnect() to start observing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
+            startObservingExpectation.fulfill()
+        }
+        await fulfillment(of: [startObservingExpectation], timeout: 0.02)
+
+        // Simulate two disconnections
+        for _ in 0..<2 {
+            socketStatusProviderMock.simulateConnectionStatus(.disconnected)
+        }
+
+        // Simulate a successful connection
+        socketStatusProviderMock.simulateConnectionStatus(.connected)
+
+        // Wait for the task to complete
+        await handleConnectTask.value
+
+        // Verify that the state is as expected after a successful connection
+        XCTAssertFalse(sut.isConnecting)
+        XCTAssertNil(sut.reconnectionTimer)
+        XCTAssertEqual(sut.reconnectionAttempts, 0) // Attempts should reset after success
+    }
 }

@@ -151,9 +151,56 @@ class AutomaticSocketConnectionHandler {
 // MARK: - SocketConnectionHandler
 
 extension AutomaticSocketConnectionHandler: SocketConnectionHandler {
-    func handleInternalConnect() {
-        connect()
+    func handleInternalConnect() async throws {
+        let maxAttempts = maxImmediateAttempts
+        let timeout: TimeInterval = 15
+        var attempts = 0
+
+        // Start the connection process immediately
+        connect() // This will set isConnecting = true and attempt to connect
+
+        // Use Combine publisher to monitor connection status
+        let connectionStatusPublisher = socketStatusProvider.socketConnectionStatusPublisher
+            .share()
+            .makeConnectable()
+
+        let connection = connectionStatusPublisher.connect()
+
+        // Ensure connection is canceled when done
+        defer { connection.cancel() }
+
+        // Use a Combine publisher to monitor disconnection and timeout
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            var cancellable: AnyCancellable?
+
+            cancellable = connectionStatusPublisher.sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    continuation.resume() // Connection successful
+                case .failure(let error):
+                    continuation.resume(throwing: error) // Timeout or connection failure
+                }
+            }, receiveValue: { [weak self] status in
+                guard let self = self else { return }
+
+                if status == .connected {
+                    continuation.resume() // Successfully connected
+                } else if status == .disconnected {
+                    attempts += 1
+                    self.logger.debug("Disconnection observed, incrementing attempts to \(attempts)")
+
+                    if attempts >= maxAttempts {
+                        self.logger.debug("Max attempts reached. Failing with connection failed error.")
+                        continuation.resume(throwing: NetworkError.connectionFailed)
+                    }
+                }
+            })
+
+            // Store cancellable to keep it alive
+            self.publishers.insert(cancellable!)
+        }
     }
+
 
     func handleConnect() throws {
         throw Errors.manualSocketConnectionForbidden

@@ -1,3 +1,4 @@
+
 import Foundation
 
 struct InitEvent: Codable {
