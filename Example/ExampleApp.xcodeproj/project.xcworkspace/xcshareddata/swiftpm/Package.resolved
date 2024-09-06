@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/attaswift/BigInt.git",
         "state": {
           "branch": null,
-          "revision": "793a7fac0bfc318e85994bf6900652e827aef33e",
-          "version": "5.4.1"
+          "revision": "0ed110f7555c34ff468e72e1686e59721f2b0da6",
+          "version": "5.3.0"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "678d442c6f7828def400a70ae15968aef67ef52d",
-          "version": "1.8.3"
+          "revision": "db51c407d3be4a051484a141bf0bff36c43d3b1e",
+          "version": "1.8.0"
         }
       },
       {
@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/mixpanel/mixpanel-swift",
         "state": {
           "branch": "master",
-          "revision": "61ce9b40817466fb1334db1d7a582fbaf616ab4c",
+          "revision": "1ce27d937009d5ecce74dad97d69898ffea49c75",
           "version": null
         }
       },
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "d2ced2d961b34573ebd2ea0567a2f1408e90f0ae",
-          "version": "8.34.0"
+          "revision": "14aa6e47b03b820fd2b338728637570b9e969994",
+          "version": "8.12.0"
         }
       },
       {
