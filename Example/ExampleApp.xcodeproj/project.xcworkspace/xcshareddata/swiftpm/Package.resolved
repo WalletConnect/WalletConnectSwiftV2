@@ -110,6 +110,15 @@
         }
       },
       {
+        "package": "swift-dotenv",
+        "repositoryURL": "https://github.com/thebarndog/swift-dotenv.git",
+        "state": {
+          "branch": null,
+          "revision": "f6e7ca817d35eeccb20b62c87ee75963b01b29dc",
+          "version": "2.0.1"
+        }
+      },
+      {
         "package": "swift-qrcode-generator",
         "repositoryURL": "https://github.com/dagronf/swift-qrcode-generator",
         "state": {

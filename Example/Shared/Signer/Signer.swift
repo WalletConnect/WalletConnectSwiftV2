@@ -24,7 +24,7 @@ final class Signer {
         if let paramsArray = try? request.params.get([AnyCodable].self),
            let firstParam = paramsArray.first?.value as? [String: Any],
            let account = firstParam["from"] as? String {
-            let smartAccountAddress = try await SmartAccount.instance.getAddress()
+            let smartAccountAddress = try await SmartAccount.instance.getClient().getAddress()
             return account.lowercased() == smartAccountAddress.lowercased()
         }
 
@@ -34,7 +34,7 @@ final class Signer {
                 // Typically, the account address is the second parameter for personal_sign and eth_signTypedData
                 if paramsArray.count > 1,
                    let account = paramsArray[1].value as? String {
-                    let smartAccountAddress = try await SmartAccount.instance.getAddress()
+                    let smartAccountAddress = try await SmartAccount.instance.getClient().getAddress()
                     return account.lowercased() == smartAccountAddress.lowercased()
                 }
             }
@@ -65,33 +65,29 @@ final class Signer {
 
 
     private static func signWithSmartAccount(request: Request) async throws -> AnyCodable {
-            switch request.method {
-            case "personal_sign":
-                let params = try request.params.get([String].self)
-                let message = params[0]
-                let signed = try SmartAccount.mockInstance.signMessage(message)
-                return AnyCodable(signed)
+        switch request.method {
+        case "personal_sign":
+            let params = try request.params.get([String].self)
+            let message = params[0]
+            let signed = try await SmartAccount.instance.getClient().signMessage(message)
+            return AnyCodable(signed)
 
-            case "eth_signTypedData":
-                let params = try request.params.get([String].self)
-                let message = params[0]
-                let signed = try SmartAccount.mockInstance.signMessage(message)
-                return AnyCodable(signed)
+        case "eth_signTypedData":
+            let params = try request.params.get([String].self)
+            let message = params[0]
+            let signed = try await SmartAccount.instance.getClient().signMessage(message)
+            return AnyCodable(signed)
 
-            case "eth_sendTransaction":
-                let params = try request.params.get([YttriumWrapper.Transaction].self)
-                let transaction = params[0]
-                let result = try await SmartAccount.mockInstance.sendTransaction(transaction)
-                return AnyCodable(result)
+        case "eth_sendTransaction":
+            let params = try request.params.get([YttriumWrapper.Transaction].self)
+            let transaction = params[0]
+            let result = try await SmartAccount.instance.getClient().sendTransaction(transaction)
+            return AnyCodable(result)
 
-                //        case "wallet_sendCalls":
-                //            let transactions =
-                //            return try await SmartAccount.mockInstance.sendBatchTransaction(<#T##batch: [Transaction]##[Transaction]#>)
-
-            default:
-                throw Signer.Errors.notImplemented
-            }
+        default:
+            throw Signer.Errors.notImplemented
         }
+    }
 }
 
 extension Signer.Errors: LocalizedError {

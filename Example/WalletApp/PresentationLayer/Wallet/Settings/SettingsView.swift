@@ -38,6 +38,20 @@ struct SettingsView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .frame(height: 44.0)
+                    
+                    AsyncButton {
+                        try await sendTransaction()
+                    } label: {
+                        Text("Send Transaction")
+                            .foregroundColor(.green)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .frame(height: 44.0)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.m)
+                            .stroke(Color.green, lineWidth: 1)
+                    )
+                    .padding(.bottom, 24)
 
                     AsyncButton {
                         try await viewModel.logoutPressed()
@@ -62,6 +76,16 @@ struct SettingsView: View {
         .onAppear {
             viewModel.objectWillChange.send()
         }
+    }
+    
+    @discardableResult
+    func sendTransaction() async throws -> String {
+        let client = await SmartAccount.instance.getClient()
+        return try await client.sendTransaction(.init(
+            to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+            value: "0",
+            data: "0x68656c6c6f"
+        ))
     }
 
     func header(title: String) -> some View {

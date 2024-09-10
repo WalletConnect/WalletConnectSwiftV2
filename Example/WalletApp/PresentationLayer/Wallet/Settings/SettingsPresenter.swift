@@ -37,7 +37,7 @@ final class SettingsPresenter: ObservableObject {
     }
 
     private func getSmartAccount() async throws -> String {
-        return try await SmartAccount.instance.getAccount().absoluteString
+        try await SmartAccount.instance.getClient().getAccount().absoluteString
     }
 
     var account: String {

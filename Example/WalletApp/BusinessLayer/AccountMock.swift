@@ -7,10 +7,22 @@ class AccountClientMock: YttriumWrapper.AccountClientProtocol {
     var onSign: OnSign?
     
     var chainId: Int
-
-    required init(entryPoint: String, chainId: Int, onSign: OnSign?) {
+    
+    var ownerAddress: String
+    
+    var entryPoint: String
+    
+    private var config: Yttrium.Config
+    
+    required init(ownerAddress: String, entryPoint: String, chainId: Int, config: Yttrium.Config) {
+        self.ownerAddress = ownerAddress
+        self.entryPoint = entryPoint
         self.chainId = chainId
-        self.onSign = onSign
+        self.config = config
+    }
+    
+    func register(privateKey: String) {
+        
     }
 
     // prepares UserOp
@@ -54,48 +66,61 @@ extension YttriumWrapper.AccountClient {
 }
 
 class SmartAccount {
-    static var mockInstance: AccountClientMock = {
-        guard let config = SmartAccount.config else {
-            fatalError("Error - you must call SmartAccount.configure(entryPoint:chainId:onSign:) before accessing the shared instance.")
-        }
-        return AccountClientMock(
-            entryPoint: config.entryPoint,
-            chainId: config.chainId,
-            onSign: config.onSign
-        )
-    }()
     
-    static var instance: AccountClient = {
-        guard let config = SmartAccount.config else {
-            fatalError("Error - you must call SmartAccount.configure(entryPoint:chainId:onSign:) before accessing the shared instance.")
+    static var instance = SmartAccount()
+    
+    private var client: AccountClient? {
+        didSet {
+            if let _ = client {
+                clientSetContinuation?.resume()
+            }
         }
-        return AccountClient(
-            entryPoint: config.entryPoint,
-            chainId: config.chainId,
-            onSign: config.onSign
-        )
-    }()
-
-    private static var config: Config?
+    }
+    
+    private var clientSetContinuation: CheckedContinuation<Void, Never>?
+    
+    private var config: Config?
 
     private init() {}
+    
+    public func configure(entryPoint: String, chainId: Int) {
+        self.config = Config(
+            entryPoint: entryPoint,
+            chainId: chainId
+        )
+    }
+    
+    public func register(owner: String, privateKey: String) {
+        guard let config = self.config else {
+            fatalError("Error - you must call SmartAccount.configure(entryPoint:chainId:onSign:) before accessing the shared instance.")
+        }
+        assert(owner.count == 40)
+        let client = AccountClient(
+            ownerAddress: owner,
+            entryPoint: config.entryPoint,
+            chainId: config.chainId,
+            config: .local()
+        )
+        client.register(privateKey: privateKey)
+        
+        self.client = client
+    }
+
+
+    public func getClient() async -> AccountClient {
+        if let client = client {
+            return client
+        }
+
+        await withCheckedContinuation { continuation in
+            self.clientSetContinuation = continuation
+        }
+        
+        return client!
+    }
 
     struct Config {
         let entryPoint: String
         let chainId: Int
-        var onSign: OnSign?
-    }
-
-    /// SmartAccount instance config method
-    /// - Parameters:
-    ///   - entryPoint: Entry point
-    ///   - chainId: Chain ID
-    ///   - onSign: Closure for signing messages (optional)
-    static public func configure(
-        entryPoint: String,
-        chainId: Int,
-        onSign: OnSign? = nil
-    ) {
-        SmartAccount.config = Config(entryPoint: entryPoint, chainId: chainId, onSign: onSign)
     }
 }

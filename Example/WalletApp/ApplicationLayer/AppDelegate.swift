@@ -8,7 +8,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        SmartAccount.configure(entryPoint: "", chainId: 11155111)
+        let entryPointAddress = "0x0000000071727De22E5E9d8BAf0edAc6f37da032" // v0.7 on Sepolia
+        let chainId = 11155111 // Sepolia
+        SmartAccount.instance.configure(entryPoint: entryPointAddress, chainId: chainId)
         return true
     }
 
@@ -40,5 +42,4 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) {
         print("Failed to register: \(error)")
     }
-
 }
