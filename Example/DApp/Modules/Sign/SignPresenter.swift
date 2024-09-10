@@ -169,6 +169,13 @@ extension SignPresenter {
             }
             .store(in: &subscriptions)
 
+        Sign.instance.sessionSettlePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                self.getSession()
+            }
+            .store(in: &subscriptions)
+
         Sign.instance.authResponsePublisher
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] response in
@@ -227,7 +234,7 @@ extension SignPresenter {
                         AccountDetails(
                             chain: account.blockchainIdentifier,
                             methods: Array(namespace.methods),
-                            account: account.address
+                            address: account.address
                         )
                     )
                 }

@@ -3,9 +3,7 @@ import AsyncButton
 import Web3ModalUI
 
 struct SettingsView: View {
-
     @EnvironmentObject var viewModel: SettingsPresenter
-
     @State private var copyAlert: Bool = false
 
     var body: some View {
@@ -16,6 +14,7 @@ struct SettingsView: View {
                 Group {
                     header(title: "Account")
                     row(title: "CAIP-10", subtitle: viewModel.account)
+                    row(title: "Smart Account", subtitle: viewModel.smartAccount)
                     row(title: "Private key", subtitle: viewModel.privateKey)
                 }
                 .padding(.horizontal, 20)
@@ -108,10 +107,10 @@ struct SettingsView: View {
     }
 
     func separator() -> some View {
-            Rectangle()
-                .foregroundColor(.Foreground100.opacity(0.05))
-                .frame(maxWidth: .infinity)
-                .frame(height: 1)
-                .padding(.top, 8)
+        Rectangle()
+            .foregroundColor(.Foreground100.opacity(0.05))
+            .frame(maxWidth: .infinity)
+            .frame(height: 1)
+            .padding(.top, 8)
     }
 }

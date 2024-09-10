@@ -40,10 +40,14 @@ let package = Package(
         .library(
             name: "WalletConnectIdentity",
             targets: ["WalletConnectIdentity"]),
+        .library(
+            name: "YttriumWrapper",
+            targets: ["YttriumWrapper"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
-        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1")
+        .package(url: "https://github.com/WalletConnect/QRCode", from: "14.3.1"),
+        .package(path: "../yttrium")
     ],
     targets: [
         .target(
@@ -131,6 +135,13 @@ let package = Package(
                 .copy("Resources/Assets.xcassets"),
                 .process("Resources/PrivacyInfo.xcprivacy"),
             ]
+        ),
+        .target(
+            name: "YttriumWrapper",
+            dependencies: [
+                .productItem(name: "Yttrium", package: "yttrium")
+            ],
+            path: "Sources/YttriumWrapper"
         ),
         .testTarget(
             name: "WalletConnectSignTests",

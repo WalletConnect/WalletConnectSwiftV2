@@ -70,7 +70,7 @@ final class SessionAccountPresenter: ObservableObject {
     }
     
     func copyUri() {
-        UIPasteboard.general.string = sessionAccount.account
+        UIPasteboard.general.string = sessionAccount.address
     }
 }
 
@@ -128,17 +128,17 @@ extension SessionAccountPresenter.Errors: LocalizedError {
 // MARK: - Transaction Stub
 private enum Stub {
     struct Transaction: Codable {
-        let from, to, data, gas: String
+        let from, to, data, gasLimit: String
         let gasPrice, value, nonce: String
     }
     
     static let tx = [Transaction(from: "0x9b2055d370f73ec7d8a03e965129118dc8f5bf83",
                                 to: "0x9b2055d370f73ec7d8a03e965129118dc8f5bf83",
-                                data: "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675",
-                                gas: "0x76c0",
-                                gasPrice: "0x9184e72a000",
-                                value: "0x9184e72a",
-                                nonce: "0x117")]
+                                data: "0x",
+                                gasLimit: "0x5208",
+                                gasPrice: "0x013e3d2ed4",
+                                value: "0x00",
+                                nonce: "0x09")]
     static let eth_signTypedData = """
 {
 "types": {

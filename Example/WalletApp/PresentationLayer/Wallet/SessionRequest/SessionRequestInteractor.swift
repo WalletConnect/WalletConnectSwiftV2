@@ -6,7 +6,7 @@ import WalletConnectRouter
 final class SessionRequestInteractor {
     func respondSessionRequest(sessionRequest: Request, importAccount: ImportAccount) async throws -> Bool {
         do {
-            let result = try Signer.sign(request: sessionRequest, importAccount: importAccount)
+            let result = try await Signer.sign(request: sessionRequest, importAccount: importAccount)
             try await Web3Wallet.instance.respond(
                 topic: sessionRequest.topic,
                 requestId: sessionRequest.id,

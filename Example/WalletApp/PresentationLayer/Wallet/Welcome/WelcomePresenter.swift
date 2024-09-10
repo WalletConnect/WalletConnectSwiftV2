@@ -24,9 +24,9 @@ final class WelcomePresenter: ObservableObject {
     func onImport() {
         guard let account = ImportAccount(input: input)
         else { return input = .empty }
-
         importAccount(account)
     }
+
 }
 
 // MARK: Private functions

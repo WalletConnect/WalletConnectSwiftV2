@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61DAC4AB2C65897800BAF3F8 /* YttriumWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 61DAC4AA2C65897800BAF3F8 /* YttriumWrapper */; };
 		767DC83528997F8E00080FA9 /* EthSendTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767DC83428997F8E00080FA9 /* EthSendTransaction.swift */; };
 		84310D05298BC980000C15B6 /* MainInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84310D04298BC980000C15B6 /* MainInteractor.swift */; };
 		8439CB89293F658E00F2F2E2 /* PushMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8439CB88293F658E00F2F2E2 /* PushMessage.swift */; };
@@ -27,6 +28,7 @@
 		84733CD32C1C2A4B001B2850 /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AEC2502B4D42C100E27A5B /* AlertPresenter.swift */; };
 		84733CD42C1C2C24001B2850 /* ProfilingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B6A372B06697B00162B01 /* ProfilingService.swift */; };
 		84733CD52C1C2CEB001B2850 /* InputConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56EE25D293F56D6004840D1 /* InputConfig.swift */; };
+		84733CDA2C258BDB001B2850 /* AccountMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84733CD92C258BDB001B2850 /* AccountMock.swift */; };
 		847BD1D62989492500076C90 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D12989492500076C90 /* MainViewController.swift */; };
 		847BD1D82989492500076C90 /* MainModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D32989492500076C90 /* MainModule.swift */; };
 		847BD1D92989492500076C90 /* MainPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BD1D42989492500076C90 /* MainPresenter.swift */; };
@@ -406,6 +408,7 @@
 		846E35A32C0065B600E63DF4 /* ConfigPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigPresenter.swift; sourceTree = "<group>"; };
 		846E35A52C0065C100E63DF4 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
 		846E35A72C006C5600E63DF4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		84733CD92C258BDB001B2850 /* AccountMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountMock.swift; sourceTree = "<group>"; };
 		847BD1D12989492500076C90 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		847BD1D32989492500076C90 /* MainModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainModule.swift; sourceTree = "<group>"; };
 		847BD1D42989492500076C90 /* MainPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainPresenter.swift; sourceTree = "<group>"; };
@@ -759,6 +762,7 @@
 				A59D25EE2AB3672700D7EA3A /* AsyncButton in Frameworks */,
 				C5133A78294125CC00A8314C /* Web3 in Frameworks */,
 				C5B2F7052970573D000DBA0E /* SolanaSwift in Frameworks */,
+				61DAC4AB2C65897800BAF3F8 /* YttriumWrapper in Frameworks */,
 				8487A9462A836C3F0003D5AF /* Sentry in Frameworks */,
 				C55D349929630D440004314A /* Web3Wallet in Frameworks */,
 				C56EE255293F569A004840D1 /* Starscream in Frameworks */,
@@ -1426,6 +1430,7 @@
 			isa = PBXGroup;
 			children = (
 				A5D610CC2AB3592F00C20083 /* ListingsSertice */,
+				84733CD92C258BDB001B2850 /* AccountMock.swift */,
 			);
 			path = BusinessLayer;
 			sourceTree = "<group>";
@@ -2054,6 +2059,7 @@
 				C54C248F2AEB1B5600DA4BF6 /* WalletConnectRouter */,
 				84AEC2532B4D43CD00E27A5B /* SwiftMessages */,
 				84F391F92BA87CEB00FDC20A /* Web3ModalUI */,
+				61DAC4AA2C65897800BAF3F8 /* YttriumWrapper */,
 			);
 			productName = ChatWallet;
 			productReference = C56EE21B293F55ED004840D1 /* WalletApp.app */;
@@ -2480,6 +2486,7 @@
 				C5B2F6F729705293000DBA0E /* SessionRequestRouter.swift in Sources */,
 				C56EE24F293F566D004840D1 /* WalletView.swift in Sources */,
 				C55D34B22965FB750004314A /* SessionProposalView.swift in Sources */,
+				84733CDA2C258BDB001B2850 /* AccountMock.swift in Sources */,
 				C56EE248293F566D004840D1 /* ScanQR.swift in Sources */,
 				847BD1EB298A87AB00076C90 /* SubscriptionsViewModel.swift in Sources */,
 				C55D349B2965BC2F0004314A /* TagsView.swift in Sources */,
@@ -3308,6 +3315,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		61DAC4AA2C65897800BAF3F8 /* YttriumWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = YttriumWrapper;
+		};
 		844749FC29B9E6B2005F520B /* WalletConnectNetworking */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WalletConnectNetworking;
