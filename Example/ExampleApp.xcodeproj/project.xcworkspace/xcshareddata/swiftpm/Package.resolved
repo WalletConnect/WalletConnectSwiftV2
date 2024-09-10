@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Atlantis",
+        "repositoryURL": "https://github.com/ProxymanApp/atlantis",
+        "state": {
+          "branch": null,
+          "revision": "5145a7041ec71421d09653db87dcc80c81792004",
+          "version": "1.24.0"
+        }
+      },
+      {
         "package": "BigInt",
         "repositoryURL": "https://github.com/attaswift/BigInt.git",
         "state": {
@@ -62,15 +71,6 @@
           "branch": null,
           "revision": "cd187c632fb812fd93711a9f7e644adb7e5f97f0",
           "version": "0.1.7"
-        }
-      },
-      {
-        "package": "Sentry",
-        "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
-        "state": {
-          "branch": null,
-          "revision": "14aa6e47b03b820fd2b338728637570b9e969994",
-          "version": "8.12.0"
         }
       },
       {
@@ -164,30 +164,12 @@
         }
       },
       {
-        "package": "CoinbaseWalletSDK",
-        "repositoryURL": "https://github.com/WalletConnect/wallet-mobile-sdk",
-        "state": {
-          "branch": null,
-          "revision": "b6dfb7d6b8447c7c5b238a10443a1ac28223f38f",
-          "version": "1.0.0"
-        }
-      },
-      {
         "package": "Web3",
         "repositoryURL": "https://github.com/WalletConnect/Web3.swift",
         "state": {
           "branch": null,
           "revision": "569255adcfff0b37e4cb8004aea29d0e2d6266df",
           "version": "1.0.2"
-        }
-      },
-      {
-        "package": "swift-web3modal",
-        "repositoryURL": "https://github.com/WalletConnect/web3modal-swift",
-        "state": {
-          "branch": "pairing-expiry",
-          "revision": "3088a08a43c490c24f1dfb1b858a67de089feef6",
-          "version": null
         }
       }
     ]
