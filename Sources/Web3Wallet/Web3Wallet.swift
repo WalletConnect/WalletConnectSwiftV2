@@ -17,8 +17,12 @@ public typealias VerifyContext = WalletConnectVerify.VerifyContext
 /// Web3Wallet.configure(metadata: metadata, account: account)
 /// Web3Wallet.instance.getSessions()
 /// ```
+///
+/// - Warning: `Web3Wallet` has been deprecated. Please migrate to `WalletKit` which can be found at [https://github.com/reown-com/reown-swift](https://github.com/reown-com/reown-swift).
+@available(*, deprecated, message: "WalletConnect Inc is now Reown. As part of this transition, we are deprecating a number of repositories/packages across our supported platforms, and transitioning to their equivalents published under the Reown organization. This repository is now considered deprecated and will reach End-of-Life on February 17th 2025. For more details, including migration guides please see: https://docs.reown.com/advanced/walletconnect-deprecations")
 public class Web3Wallet {
-    /// Web3Wallett client instance
+
+    /// Web3Wallet client instance
     public static var instance: Web3WalletClient = {
         guard let config = Web3Wallet.config else {
             fatalError("Error - you must call Web3Wallet.configure(_:) before accessing the shared instance.")
@@ -29,7 +33,7 @@ public class Web3Wallet {
             pushClient: Push.instance
         )
     }()
-    
+
     private static var config: Config?
 
     private init() { }
@@ -38,6 +42,7 @@ public class Web3Wallet {
     /// - Parameters:
     ///   - metadata: App metadata
     ///   - crypto: Auth crypto utils
+    @available(*, deprecated, message: "Web3Wallet.configure has been deprecated. Please migrate to WalletKit.configure.")
     static public func configure(
         metadata: AppMetadata,
         crypto: CryptoProvider,
