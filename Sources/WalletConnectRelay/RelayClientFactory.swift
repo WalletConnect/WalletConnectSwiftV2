@@ -61,10 +61,12 @@ public struct RelayClientFactory {
         if let bundleId = Bundle.main.bundleIdentifier {
             socket.request.addValue(bundleId, forHTTPHeaderField: "Origin")
         }
+        let subscriptionsTracker = SubscriptionsTracker()
 
+        let socketStatusProvider = SocketStatusProvider(socket: socket, logger: logger)
         var socketConnectionHandler: SocketConnectionHandler!
         switch socketConnectionType {
-        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, logger: logger)
+        case .automatic:    socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, subscriptionsTracker: subscriptionsTracker, logger: logger, socketStatusProvider: socketStatusProvider)
         case .manual:       socketConnectionHandler = ManualSocketConnectionHandler(socket: socket, logger: logger)
         }
 
@@ -74,11 +76,12 @@ public struct RelayClientFactory {
             networkMonitor: networkMonitor,
             socket: socket,
             logger: logger,
-            socketConnectionHandler: socketConnectionHandler
+            socketConnectionHandler: socketConnectionHandler,
+            socketStatusProvider: socketStatusProvider
         )
 
         let rpcHistory = RPCHistoryFactory.createForRelay(keyValueStorage: keyValueStorage)
 
-        return RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage)
+        return RelayClient(dispatcher: dispatcher, logger: logger, rpcHistory: rpcHistory, clientIdStorage: clientIdStorage, subscriptionsTracker: subscriptionsTracker)
     }
 }

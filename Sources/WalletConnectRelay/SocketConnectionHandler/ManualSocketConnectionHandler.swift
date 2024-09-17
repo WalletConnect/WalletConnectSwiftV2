@@ -1,7 +1,6 @@
 import Foundation
 
 class ManualSocketConnectionHandler: SocketConnectionHandler {
-
     private let socket: WebSocketConnecting
     private let logger: ConsoleLogging
     private let defaultTimeout: Int = 60
@@ -36,6 +35,11 @@ class ManualSocketConnectionHandler: SocketConnectionHandler {
     func handleDisconnect(closeCode: URLSessionWebSocketTask.CloseCode) throws {
         socket.disconnect()
     }
+
+    func handleInternalConnect() {
+        // No operation
+    }
+
 
     func handleDisconnection() async {
         // No operation

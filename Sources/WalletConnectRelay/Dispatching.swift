@@ -18,15 +18,14 @@ final class Dispatcher: NSObject, Dispatching {
     var socket: WebSocketConnecting
     var socketConnectionHandler: SocketConnectionHandler
 
-    private let defaultTimeout: Int = 5
+    private let defaultTimeout: Int = 15
     private let relayUrlFactory: RelayUrlFactory
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
-
-    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
+    private let socketStatusProvider: SocketStatusProviding
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+        socketStatusProvider.socketConnectionStatusPublisher
     }
 
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
@@ -45,18 +44,18 @@ final class Dispatcher: NSObject, Dispatching {
         networkMonitor: NetworkMonitoring,
         socket: WebSocketConnecting,
         logger: ConsoleLogging,
-        socketConnectionHandler: SocketConnectionHandler
+        socketConnectionHandler: SocketConnectionHandler,
+        socketStatusProvider: SocketStatusProviding
     ) {
         self.socketConnectionHandler = socketConnectionHandler
         self.relayUrlFactory = relayUrlFactory
         self.networkMonitor = networkMonitor
         self.logger = logger
-
         self.socket = socket
+        self.socketStatusProvider = socketStatusProvider
 
         super.init()
         setUpWebSocketSession()
-        setUpSocketConnectionObserving()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -70,28 +69,27 @@ final class Dispatcher: NSObject, Dispatching {
     }
 
     func protectedSend(_ string: String, completion: @escaping (Error?) -> Void) {
-        guard !socket.isConnected || !networkMonitor.isConnected else {
-            return send(string, completion: completion)
+        // Check if the socket is already connected and ready to send
+        if socket.isConnected && networkMonitor.isConnected {
+            send(string, completion: completion)
+            return
         }
 
-        var cancellable: AnyCancellable?
-        cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
-            .filter { $0.0 == .connected && $0.1 == .connected }
-            .setFailureType(to: NetworkError.self)
-            .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
-            .sink(receiveCompletion: { [unowned self] result in
-                switch result {
-                case .failure(let error):
-                    cancellable?.cancel()
-                    completion(error)
-                case .finished: break
-                }
-            }, receiveValue: { [unowned self] _ in
-                cancellable?.cancel()
+        // Start the connection process if not already connected
+        Task {
+            do {
+                // Await the connection handler to establish the connection
+                try await socketConnectionHandler.handleInternalConnect()
+
+                // If successful, send the message
                 send(string, completion: completion)
-            })
+            } catch {
+                // If an error occurs during connection, complete with that error
+                completion(error)
+            }
+        }
     }
-    
+
 
     func protectedSend(_ string: String) async throws {
         var isResumed = false
@@ -128,18 +126,5 @@ extension Dispatcher {
         }
     }
 
-    private func setUpSocketConnectionObserving() {
-        socket.onConnect = { [unowned self] in
-            self.socketConnectionStatusPublisherSubject.send(.connected)
-        }
-        socket.onDisconnect = { [unowned self] error in
-            self.socketConnectionStatusPublisherSubject.send(.disconnected)
-            if error != nil {
-                self.socket.request.url = relayUrlFactory.create()
-            }
-            Task(priority: .high) {
-                await self.socketConnectionHandler.handleDisconnection()
-            }
-        }
-    }
+
 }

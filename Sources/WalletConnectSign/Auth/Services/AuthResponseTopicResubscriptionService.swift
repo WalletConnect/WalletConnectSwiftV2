@@ -30,19 +30,14 @@ class AuthResponseTopicResubscriptionService {
         self.logger = logger
         self.authResponseTopicRecordsStore = authResponseTopicRecordsStore
         cleanExpiredRecordsIfNeeded()
-        setupConnectionSubscriptions()
+        subscribeResponsTopics()
     }
 
-    func setupConnectionSubscriptions() {
-        networkingInteractor.socketConnectionStatusPublisher
-            .sink { [unowned self] status in
-                guard status == .connected else { return }
-                let topics = authResponseTopicRecordsStore.getAll().map{$0.topic}
-                Task(priority: .high) {
-                    try await networkingInteractor.batchSubscribe(topics: topics)
-                }
-            }
-            .store(in: &publishers)
+    func subscribeResponsTopics() {
+        let topics = authResponseTopicRecordsStore.getAll().map{$0.topic}
+        Task(priority: .background) {
+            try await networkingInteractor.batchSubscribe(topics: topics)
+        }
     }
 
     func cleanExpiredRecordsIfNeeded() {
