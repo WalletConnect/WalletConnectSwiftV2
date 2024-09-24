@@ -52,14 +52,16 @@ final class RelayClientEndToEndTests: XCTestCase {
             socketAuthenticator: socketAuthenticator
         )
 
-        let socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, logger: logger)
+        let socketStatusProvider = SocketStatusProvider(socket: socket, logger: logger)
+        let socketConnectionHandler = AutomaticSocketConnectionHandler(socket: socket, subscriptionsTracker: SubscriptionsTracker(), logger: logger, socketStatusProvider: socketStatusProvider)
         let dispatcher = Dispatcher(
             socketFactory: webSocketFactory,
             relayUrlFactory: urlFactory,
             networkMonitor: networkMonitor,
             socket: socket,
             logger: logger,
-            socketConnectionHandler: socketConnectionHandler
+            socketConnectionHandler: socketConnectionHandler,
+            socketStatusProvider: socketStatusProvider
         )
         let keychain = KeychainStorageMock()
         let relayClient = RelayClientFactory.create(

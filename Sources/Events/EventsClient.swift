@@ -14,25 +14,28 @@ public class EventsClient: EventsClientProtocol {
     private let logger: ConsoleLogging
     private var stateStorage: TelemetryStateStorage
     private let messageEventsStorage: MessageEventsStorage
+    private let initEventsStorage: InitEventsStorage
 
     init(
         eventsCollector: EventsCollector,
         eventsDispatcher: EventsDispatcher,
         logger: ConsoleLogging,
         stateStorage: TelemetryStateStorage,
-        messageEventsStorage: MessageEventsStorage
+        messageEventsStorage: MessageEventsStorage,
+        initEventsStorage: InitEventsStorage
     ) {
         self.eventsCollector = eventsCollector
         self.eventsDispatcher = eventsDispatcher
         self.logger = logger
         self.stateStorage = stateStorage
         self.messageEventsStorage = messageEventsStorage
+        self.initEventsStorage = initEventsStorage
 
-        if stateStorage.telemetryEnabled {
-            Task { await sendStoredEvents() }
-        } else {
+        if !stateStorage.telemetryEnabled {
             self.eventsCollector.storage.clearErrorEvents()
         }
+        saveInitEvent()
+        Task { await sendStoredEvents() }
     }
 
     public func setLogging(level: LoggingLevel) {
@@ -63,6 +66,30 @@ public class EventsClient: EventsClientProtocol {
         messageEventsStorage.saveMessageEvent(event)
     }
 
+    public func saveInitEvent() {
+            logger.debug("Will store an init event")
+
+            let bundleId = Bundle.main.bundleIdentifier ?? "Unknown"
+            let clientId = (try? Networking.interactor.getClientId()) ?? "Unknown"
+            let userAgent = EnvironmentInfo.userAgent
+
+            let props = InitEvent.Props(
+                properties: InitEvent.Properties(
+                    clientId: clientId,
+                    userAgent: userAgent
+                )
+            )
+
+            let event = InitEvent(
+                eventId: UUID().uuidString,
+                bundleId: bundleId,
+                timestamp: Int64(Date().timeIntervalSince1970 * 1000),
+                props: props
+            )
+
+            initEventsStorage.saveInitEvent(event)
+        }
+
     // Public method to set telemetry enabled or disabled
     public func setTelemetryEnabled(_ enabled: Bool) {
         stateStorage.telemetryEnabled = enabled
@@ -78,24 +105,26 @@ public class EventsClient: EventsClientProtocol {
 
         let traceEvents = eventsCollector.storage.fetchErrorEvents()
         let messageEvents = messageEventsStorage.fetchMessageEvents()
+        let initEvents = initEventsStorage.fetchInitEvents()
 
-        guard !traceEvents.isEmpty || !messageEvents.isEmpty else { return }
+        guard !traceEvents.isEmpty || !messageEvents.isEmpty || !initEvents.isEmpty else { return }
 
         var combinedEvents: [AnyCodable] = []
 
-        // Wrap trace events
         combinedEvents.append(contentsOf: traceEvents.map { AnyCodable($0) })
 
-        // Wrap message events
         combinedEvents.append(contentsOf: messageEvents.map { AnyCodable($0) })
+
+        combinedEvents.append(contentsOf: initEvents.map { AnyCodable($0) })
 
         logger.debug("Will send combined events")
         do {
             let success: Bool = try await eventsDispatcher.executeWithRetry(events: combinedEvents)
             if success {
                 logger.debug("Combined events sent successfully")
-                self.eventsCollector.storage.clearErrorEvents()
-                self.messageEventsStorage.clearMessageEvents()
+                eventsCollector.storage.clearErrorEvents()
+                messageEventsStorage.clearMessageEvents()
+                initEventsStorage.clearInitEvents()
             }
         } catch {
             logger.debug("Failed to send events after multiple attempts: \(error)")

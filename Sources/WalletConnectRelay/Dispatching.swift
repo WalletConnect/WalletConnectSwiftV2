@@ -22,11 +22,10 @@ final class Dispatcher: NSObject, Dispatching {
     private let relayUrlFactory: RelayUrlFactory
     private let networkMonitor: NetworkMonitoring
     private let logger: ConsoleLogging
-
-    private let socketConnectionStatusPublisherSubject = CurrentValueSubject<SocketConnectionStatus, Never>(.disconnected)
+    private let socketStatusProvider: SocketStatusProviding
 
     var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
-        socketConnectionStatusPublisherSubject.eraseToAnyPublisher()
+        socketStatusProvider.socketConnectionStatusPublisher
     }
 
     var networkConnectionStatusPublisher: AnyPublisher<NetworkConnectionStatus, Never> {
@@ -45,18 +44,18 @@ final class Dispatcher: NSObject, Dispatching {
         networkMonitor: NetworkMonitoring,
         socket: WebSocketConnecting,
         logger: ConsoleLogging,
-        socketConnectionHandler: SocketConnectionHandler
+        socketConnectionHandler: SocketConnectionHandler,
+        socketStatusProvider: SocketStatusProviding
     ) {
         self.socketConnectionHandler = socketConnectionHandler
         self.relayUrlFactory = relayUrlFactory
         self.networkMonitor = networkMonitor
         self.logger = logger
-
         self.socket = socket
+        self.socketStatusProvider = socketStatusProvider
 
         super.init()
         setUpWebSocketSession()
-        setUpSocketConnectionObserving()
     }
 
     func send(_ string: String, completion: @escaping (Error?) -> Void) {
@@ -74,12 +73,17 @@ final class Dispatcher: NSObject, Dispatching {
             return send(string, completion: completion)
         }
 
+        // Always connect when there is a message to be sent
+        if !socket.isConnected {
+            socketConnectionHandler.handleInternalConnect()
+        }
+
         var cancellable: AnyCancellable?
         cancellable = Publishers.CombineLatest(socketConnectionStatusPublisher, networkConnectionStatusPublisher)
             .filter { $0.0 == .connected && $0.1 == .connected }
             .setFailureType(to: NetworkError.self)
             .timeout(.seconds(defaultTimeout), scheduler: concurrentQueue, customError: { .connectionFailed })
-            .sink(receiveCompletion: { [unowned self] result in
+            .sink(receiveCompletion: { result in
                 switch result {
                 case .failure(let error):
                     cancellable?.cancel()
@@ -128,18 +132,5 @@ extension Dispatcher {
         }
     }
 
-    private func setUpSocketConnectionObserving() {
-        socket.onConnect = { [unowned self] in
-            self.socketConnectionStatusPublisherSubject.send(.connected)
-        }
-        socket.onDisconnect = { [unowned self] error in
-            self.socketConnectionStatusPublisherSubject.send(.disconnected)
-            if error != nil {
-                self.socket.request.url = relayUrlFactory.create()
-            }
-            Task(priority: .high) {
-                await self.socketConnectionHandler.handleDisconnection()
-            }
-        }
-    }
+
 }

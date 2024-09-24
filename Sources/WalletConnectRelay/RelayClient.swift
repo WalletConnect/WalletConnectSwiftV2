@@ -20,8 +20,6 @@ public final class RelayClient {
         case subscriptionIdNotFound
     }
 
-    var subscriptions: [String: String] = [:]
-
     public var isSocketConnected: Bool {
         return dispatcher.isSocketConnected
     }
@@ -49,12 +47,14 @@ public final class RelayClient {
     private var requestAcknowledgePublisher: AnyPublisher<RPCID?, Never> {
         requestAcknowledgePublisherSubject.eraseToAnyPublisher()
     }
+    private var publishers = [AnyCancellable]()
 
     private let clientIdStorage: ClientIdStoring
 
     private var dispatcher: Dispatching
     private let rpcHistory: RPCHistory
     private let logger: ConsoleLogging
+    private let subscriptionsTracker: SubscriptionsTracking
 
     private let concurrentQueue = DispatchQueue(label: "com.walletconnect.sdk.relay_client", qos: .utility, attributes: .concurrent)
 
@@ -69,19 +69,34 @@ public final class RelayClient {
         dispatcher: Dispatching,
         logger: ConsoleLogging,
         rpcHistory: RPCHistory,
-        clientIdStorage: ClientIdStoring
+        clientIdStorage: ClientIdStoring,
+        subscriptionsTracker: SubscriptionsTracking
     ) {
         self.logger = logger
         self.dispatcher = dispatcher
         self.rpcHistory = rpcHistory
         self.clientIdStorage = clientIdStorage
+        self.subscriptionsTracker = subscriptionsTracker
         setUpBindings()
+        setupConnectionSubscriptions()
     }
 
     private func setUpBindings() {
         dispatcher.onMessage = { [weak self] payload in
             self?.handlePayloadMessage(payload)
         }
+    }
+
+    private func setupConnectionSubscriptions() {
+        socketConnectionStatusPublisher
+            .sink { [unowned self] status in
+                guard status == .connected else { return }
+                let topics = subscriptionsTracker.getTopics()
+                Task(priority: .high) {
+                    try await batchSubscribe(topics: topics)
+                }
+            }
+            .store(in: &publishers)
     }
 
     public func setLogging(level: LoggingLevel) {
@@ -183,14 +198,13 @@ public final class RelayClient {
     }
 
     public func unsubscribe(topic: String, completion: ((Error?) -> Void)?) {
-        guard let subscriptionId = subscriptions[topic] else {
+        guard let subscriptionId = subscriptionsTracker.getSubscription(for: topic) else {
             completion?(Errors.subscriptionIdNotFound)
             return
         }
         logger.debug("Unsubscribing from topic: \(topic)")
         let rpc = Unsubscribe(params: .init(id: subscriptionId, topic: topic))
-        let request = rpc
-            .asRPCRequest()
+        let request = rpc.asRPCRequest()
         let message = try! request.asJSONEncodedString()
         rpcHistory.deleteAll(forTopic: topic)
         dispatcher.protectedSend(message) { [weak self] error in
@@ -198,9 +212,7 @@ public final class RelayClient {
                 self?.logger.debug("Failed to unsubscribe from topic")
                 completion?(error)
             } else {
-                self?.concurrentQueue.async(flags: .barrier) {
-                    self?.subscriptions[topic] = nil
-                }
+                self?.subscriptionsTracker.removeSubscription(for: topic)
                 completion?(nil)
             }
         }
@@ -213,15 +225,13 @@ public final class RelayClient {
             .filter { $0.0 == requestId }
             .sink { [unowned self] (_, subscriptionIds) in
                 cancellable?.cancel()
-                concurrentQueue.async(flags: .barrier) { [unowned self] in
-                    logger.debug("Subscribed to topics: \(topics)")
-                    guard topics.count == subscriptionIds.count else {
-                        logger.warn("Number of topics in (batch)subscribe does not match number of subscriptions")
-                        return
-                    }
-                    for i in 0..<topics.count {
-                        subscriptions[topics[i]] = subscriptionIds[i]
-                    }
+                logger.debug("Subscribed to topics: \(topics)")
+                guard topics.count == subscriptionIds.count else {
+                    logger.warn("Number of topics in (batch)subscribe does not match number of subscriptions")
+                    return
+                }
+                for i in 0..<topics.count {
+                    subscriptionsTracker.setSubscription(for: topics[i], id: subscriptionIds[i])
                 }
             }
     }

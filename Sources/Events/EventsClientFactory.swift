@@ -19,7 +19,8 @@ public class EventsClientFactory {
             eventsDispatcher: eventsDispatcher,
             logger: logger,
             stateStorage: UserDefaultsTelemetryStateStorage(),
-            messageEventsStorage: UserDefaultsMessageEventsStorage()
+            messageEventsStorage: UserDefaultsMessageEventsStorage(),
+            initEventsStorage: UserDefaultsInitEventsStorage()
         )
     }
 }
