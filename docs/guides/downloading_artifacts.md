@@ -55,7 +55,7 @@ This will return list of artifacts in following format
     ...
 ]
 ```
-Once you find the artifact you are interested in, you really need only `id` and/or `archive_download_url` fields from it, as they are necessary for next step which is dowloading the artifact
+Once you find the artifact you are interested in, you really need only `id` and/or `archive_download_url` fields from it, as they are necessary for next step which is downloading the artifact
 
 You can learn more at https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28#list-artifacts-for-a-repository
 
