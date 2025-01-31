@@ -18,7 +18,7 @@ Please:
 
 <!-- If valid for smoke test on feature add screenshots -->
 
-## Due Dilligence
+## Due Diligence
 
 * [ ] Breaking change
 * [ ] Requires a documentation update
